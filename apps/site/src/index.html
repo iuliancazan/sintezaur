@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sintezaur — platforma de music gear în limba română</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Belt-and-braces cache control. The hashed JS / CSS chunks
+         in this index.html change on every build; serving a stale
+         index.html (CDN / browser cache) ends up requesting a chunk
+         filename that no longer exists → 404 → blank app. The proper
+         fix is server-side (nginx config), but the meta tags catch
+         the case where Cloudflare / Nginx haven't been configured
+         yet. Browsers honour these for the document load even though
+         they don't override CDN edge caches. -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <meta name="description" content="Sintezaur — platforma în limba română pentru sintetizatoare și music gear: Tezaur (catalog), Bazar (anunțuri), Revista (articole), Forum (comunitate)." />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
+</html>
