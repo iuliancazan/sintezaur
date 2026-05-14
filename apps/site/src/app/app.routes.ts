@@ -13,6 +13,12 @@ export const appRoutes: Route[] = [
       import('./home.page').then((m) => m.HomePage),
   },
   {
+    path: 'tezaur',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./tezaur/tezaur-list.page').then((m) => m.TezaurListPage),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/pages/signup.page').then((m) => m.SignupPage),
