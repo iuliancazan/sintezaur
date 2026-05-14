@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { BazarModule } from './bazar/bazar.module';
 import { CommonModule } from './common/common.module';
 import { DbModule } from './db/db.module';
+import { ForumModule } from './forum/forum.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -44,6 +45,7 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
     TezaurModule,
     BazarModule,
     RevistaModule,
+    ForumModule,
     AdminUsersModule,
   ],
   controllers: [AppController],
