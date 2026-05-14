@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-C (`afec011`) — site read pages forum (index + category +
+**Last shipped:** M5-C (`31b5b99`) — site read pages forum (index + category +
 2-level thread render).
 
 **Next up:** **M5-D** — posting + reply + `@mentions` autocomplete. Începe
@@ -83,7 +83,7 @@ cu o rundă interview (5-8 întrebări) per regula spec-first.
 |-----|--------|--------|-------|
 | A   | `dcf95d0` | done | schema: forum_posts + likes + mentions + 3-way subscriptions + badges; 9 categorii seed |
 | B   | `eb57245` | done | backend: 3 services (Categories/Threads/Posts) + 3 controllers (Public/Auth/Mod) |
-| C   | `afec011` | done | site read pages: `/forum` index + `/forum/:category` listă + `/forum/:category/:slug` thread cu 2-level threading + sourceLink pentru system threads |
+| C   | `31b5b99` | done | site read pages: `/forum` index + `/forum/:category` listă + `/forum/:category/:slug` thread cu 2-level threading + sourceLink pentru system threads |
 | D   |  —      | **next** | posting + reply + `@mentions` autocomplete |
 | E   |  —      | pending | subscriptions + likes ("Util") + notification fan-out (`forum_reply_in_subscribed` + `forum_mention` + `revista_reply_to_my_article`) |
 | F   |  —      | pending | badges cron + dashboard editor pentru badge definitions |
