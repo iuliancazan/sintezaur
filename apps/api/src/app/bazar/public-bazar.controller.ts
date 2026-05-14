@@ -11,6 +11,7 @@ import type { Request } from 'express';
 import {
   ListListingsQueryDto,
   QuickListSuggestionQueryDto,
+  RecentlySoldQueryDto,
 } from './bazar.dto';
 import { ListingsService } from './listings.service';
 
@@ -32,6 +33,11 @@ export class PublicBazarController {
     const sug = await this.listings.quickListSuggestion(q.gearId);
     if (!sug) throw new NotFoundException(`gear ${q.gearId} not found`);
     return sug;
+  }
+
+  @Get('recently-sold')
+  async recentlySold(@Query() q: RecentlySoldQueryDto) {
+    return { items: await this.listings.recentlySold(q) };
   }
 
   @Get(':slug')

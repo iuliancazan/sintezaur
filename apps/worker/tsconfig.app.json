@@ -11,5 +11,9 @@
     "moduleResolution": "node"
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/db/tsconfig.lib.json"
+    }
+  ]
 }

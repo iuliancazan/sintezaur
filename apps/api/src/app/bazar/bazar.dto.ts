@@ -255,3 +255,65 @@ export class QuickListSuggestionQueryDto {
   @IsUUID()
   gearId!: string;
 }
+
+/* ============================================================
+   Recently sold
+   ============================================================ */
+
+export class RecentlySoldQueryDto {
+  @IsOptional()
+  @IsUUID()
+  gearId?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  limit?: number;
+}
+
+/* ============================================================
+   Chat
+   ============================================================ */
+
+export class SendChatMessageDto {
+  @IsString()
+  @Length(1, 4000)
+  body!: string;
+}
+
+export class MakeOfferDto {
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(1_000_000)
+  amount!: number;
+
+  @IsEnum(CURRENCIES)
+  currency!: Currency;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
+
+  /** When responding to an earlier offer (counter or accept/reject). */
+  @IsOptional()
+  @IsUUID()
+  repliesToMessageId?: string;
+}
+
+/* ============================================================
+   Transaction reviews
+   ============================================================ */
+
+export class SubmitReviewDto {
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating!: number;
+
+  @IsString()
+  @Length(10, 2000)
+  body!: string;
+}

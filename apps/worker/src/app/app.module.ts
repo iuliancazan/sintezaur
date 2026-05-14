@@ -1,8 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import {
+  DATABASE,
+  DATABASE_POOL,
+  createDatabase,
+  createPool,
+  type SintezaurDb,
+} from '@sintezaur/db';
+import type { Pool } from 'pg';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ListingCleanupJob } from './jobs/listing-cleanup.job';
+import { ListingExpiringSoonJob } from './jobs/listing-expiring-soon.job';
+import { ListingExpiryJob } from './jobs/listing-expiry.job';
+import { PgBossService } from './jobs/pg-boss.service';
 
 @Module({
   imports: [
@@ -18,6 +30,26 @@ import { AppService } from './app.service';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: DATABASE_POOL,
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService): Pool => {
+        const connectionString = cfg.getOrThrow<string>('DATABASE_URL');
+        const max = Number(cfg.get('DATABASE_POOL_MAX') ?? 4);
+        return createPool({ connectionString, max });
+      },
+    },
+    {
+      provide: DATABASE,
+      inject: [DATABASE_POOL],
+      useFactory: (pool: Pool): SintezaurDb => createDatabase(pool),
+    },
+    ListingExpiryJob,
+    ListingExpiringSoonJob,
+    ListingCleanupJob,
+    PgBossService,
+  ],
 })
 export class AppModule {}

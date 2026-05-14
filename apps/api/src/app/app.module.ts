@@ -11,6 +11,8 @@ import { BazarModule } from './bazar/bazar.module';
 import { CommonModule } from './common/common.module';
 import { DbModule } from './db/db.module';
 import { HealthModule } from './health/health.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 
 @Module({
@@ -33,6 +35,8 @@ import { TezaurModule } from './tezaur/tezaur.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     DbModule,
     CommonModule,
+    RealtimeModule,
+    NotificationsModule,
     HealthModule,
     AuthModule,
     TezaurModule,

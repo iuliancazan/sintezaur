@@ -17,7 +17,7 @@ async function bootstrap() {
   const port = Number.parseInt(process.env.WORKER_PORT ?? '3001', 10);
   await app.listen(port);
   Logger.log(
-    `🛠  Sintezaur worker is running on port ${port} (no jobs registered yet)`,
+    `🛠  Sintezaur worker is running on port ${port} (pg-boss crons registered)`,
   );
 }
 

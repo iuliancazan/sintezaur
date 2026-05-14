@@ -6,6 +6,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import * as path from 'node:path';
 import { AppModule } from './app/app.module';
+import { RealtimeGateway } from './app/realtime/realtime.gateway';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -51,6 +52,11 @@ async function bootstrap() {
 
   const port = Number.parseInt(process.env.API_PORT ?? '3000', 10);
   await app.listen(port);
+  // Attach Socket.io to the already-listening HTTP server. The gateway
+  // owns its own io.Server (no @WebSocketGateway decorator) so it can
+  // share the JWT cookie middleware with HTTP without duplicate adapters.
+  const realtime = app.get(RealtimeGateway);
+  realtime.attach(app.getHttpServer());
 }
 
 bootstrap();

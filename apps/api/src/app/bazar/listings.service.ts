@@ -29,6 +29,8 @@ import type {
   ListListingsQueryDto,
   UpdateListingDto,
 } from './bazar.dto';
+import { SavedSearchService } from './saved-search.service';
+import { WatchService } from './watch.service';
 
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 60;
@@ -97,6 +99,8 @@ export class ListingsService {
     @Inject(DATABASE) private readonly db: SintezaurDb,
     private readonly storage: StorageService,
     private readonly audit: AuditLogService,
+    private readonly savedSearch: SavedSearchService,
+    private readonly watch: WatchService,
   ) {}
 
   /* ============================================================
@@ -152,6 +156,28 @@ export class ListingsService {
         expiresAt,
       })
       .returning({ id: listings.id, slug: listings.slug });
+
+    // Fan out saved-search matches asynchronously — never block the
+    // 201 response on the evaluator.
+    void this.savedSearch
+      .evaluateForListing({
+        id: row.id,
+        slug: row.slug,
+        sellerId,
+        gearId: dto.gearId ?? null,
+        title: dto.title,
+        price: dto.price.toString(),
+        currency: dto.currency,
+        condition: dto.condition,
+        kind: dto.kind,
+        delivery: dto.delivery,
+        location: dto.location,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `saved-search evaluator failed for ${row.id}: ${(err as Error).message}`,
+        ),
+      );
 
     return row;
   }
@@ -212,14 +238,50 @@ export class ListingsService {
       .where(eq(listings.id, id));
 
     // Log price change separately so the price-drop notification trigger
-    // in Faza C can read it. We never mutate listing_price_history; we
-    // only insert.
+    // can read it. We never mutate listing_price_history; we only insert.
     if (priceChanged) {
+      const newPrice = dto.price!.toString();
+      const currency = dto.currency ?? existing.currency;
       await this.db.insert(listingPriceHistory).values({
         listingId: id,
         oldPrice: existing.price,
-        newPrice: dto.price!.toString(),
+        newPrice,
+        currency,
+      });
+      if (Number(newPrice) < Number(existing.price)) {
+        void this.watch.fanoutPriceDrop(
+          id,
+          existing.sellerId,
+          existing.price,
+          newPrice,
+          currency,
+          { slug: existing.slug, title: dto.title ?? existing.title },
+        );
+      }
+    }
+
+    // Re-evaluate saved searches when match-relevant fields changed.
+    const matchRelevantChanged =
+      dto.price !== undefined ||
+      dto.currency !== undefined ||
+      dto.condition !== undefined ||
+      dto.kind !== undefined ||
+      dto.delivery !== undefined ||
+      dto.location !== undefined ||
+      dto.title !== undefined;
+    if (matchRelevantChanged && existing.status === 'active') {
+      void this.savedSearch.evaluateForListing({
+        id,
+        slug: existing.slug,
+        sellerId: existing.sellerId,
+        gearId: existing.gearId,
+        title: dto.title ?? existing.title,
+        price: (dto.price?.toString() ?? existing.price) as string,
         currency: dto.currency ?? existing.currency,
+        condition: dto.condition ?? existing.condition,
+        kind: dto.kind ?? existing.kind,
+        delivery: dto.delivery ?? existing.delivery,
+        location: dto.location ?? existing.location,
       });
     }
 
@@ -656,6 +718,92 @@ export class ListingsService {
       },
       isWatched,
     };
+  }
+
+  /* ============================================================
+     Recently sold (spec §8.2 — feeds price suggestions + Tezaur)
+     ============================================================ */
+
+  async recentlySold(params: {
+    gearId?: string;
+    limit?: number;
+  }): Promise<PublicListingListItem[]> {
+    const limit = Math.min(params.limit ?? 12, 60);
+    const conditions = [eq(listings.status, 'sold'), isNull(listings.removedAt)];
+    if (params.gearId) conditions.push(eq(listings.gearId, params.gearId));
+    const rows = await this.db
+      .select({
+        id: listings.id,
+        slug: listings.slug,
+        title: listings.title,
+        brand: gear.brand,
+        model: gear.model,
+        gearId: listings.gearId,
+        gearSlug: gear.slug,
+        price: listings.price,
+        currency: listings.currency,
+        condition: listings.condition,
+        kind: listings.kind,
+        delivery: listings.delivery,
+        acceptsOffers: listings.acceptsOffers,
+        location: listings.location,
+        status: listings.status,
+        createdAt: listings.createdAt,
+        soldAt: listings.soldAt,
+        expiresAt: listings.expiresAt,
+        refreshedAt: listings.refreshedAt,
+        sellerId: listings.sellerId,
+        sellerUsername: users.username,
+        sellerAvgRating: userReviewAggregate.avgRating,
+        sellerReviewCount: userReviewAggregate.reviewCount,
+        sellerTransactionCount: userReviewAggregate.transactionCount,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${listingPhotos}
+          WHERE ${listingPhotos.listingId} = ${listings.id}
+            AND ${listingPhotos.variant} = 'landscape_4x3_medium'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(listings)
+      .leftJoin(gear, eq(gear.id, listings.gearId))
+      .innerJoin(users, eq(users.id, listings.sellerId))
+      .leftJoin(
+        userReviewAggregate,
+        eq(userReviewAggregate.userId, listings.sellerId),
+      )
+      .where(and(...conditions))
+      .orderBy(sql`${listings.soldAt} DESC NULLS LAST`)
+      .limit(limit);
+
+    return rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      title: r.title,
+      brand: r.brand,
+      model: r.model,
+      gearId: r.gearId,
+      gearSlug: r.gearSlug,
+      price: r.price,
+      currency: r.currency,
+      condition: r.condition,
+      kind: r.kind,
+      delivery: r.delivery,
+      acceptsOffers: r.acceptsOffers,
+      location: r.location,
+      thumb: r.thumb,
+      status: r.status,
+      createdAt: r.createdAt,
+      expiresAt: r.expiresAt,
+      refreshedAt: r.refreshedAt,
+      seller: {
+        id: r.sellerId,
+        username: r.sellerUsername,
+        avgRating: r.sellerAvgRating,
+        reviewCount: r.sellerReviewCount ?? 0,
+        transactionCount: r.sellerTransactionCount ?? 0,
+      },
+    }));
   }
 
   /* ============================================================
