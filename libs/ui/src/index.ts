@@ -50,3 +50,7 @@ export {
   type SzNavLink,
   type SzTopbarUser,
 } from './lib/components/topbar.component';
+export {
+  SzEditorComponent,
+  type SzEditorChange,
+} from './lib/components/editor.component';

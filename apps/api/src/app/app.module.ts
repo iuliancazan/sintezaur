@@ -7,6 +7,8 @@ import { JwtAuthGuard, RolesGuard } from '@sintezaur/auth';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BazarModule } from './bazar/bazar.module';
+import { CommonModule } from './common/common.module';
 import { DbModule } from './db/db.module';
 import { HealthModule } from './health/health.module';
 import { TezaurModule } from './tezaur/tezaur.module';
@@ -30,9 +32,11 @@ import { TezaurModule } from './tezaur/tezaur.module';
      */
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     DbModule,
+    CommonModule,
     HealthModule,
     AuthModule,
     TezaurModule,
+    BazarModule,
   ],
   controllers: [AppController],
   providers: [

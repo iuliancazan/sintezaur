@@ -22,8 +22,8 @@ import {
 import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
 import { and, asc, desc, eq, ilike, isNull, sql } from 'drizzle-orm';
 import type { Request } from 'express';
-import { AuditLogService } from './audit-log.service';
-import { StorageService, type ProcessedUpload } from './storage.service';
+import { AuditLogService } from '../common/audit-log.service';
+import { StorageService, type ProcessedUpload } from '../common/storage.service';
 import type {
   CreateGearDto,
   CreateGearFamilyDto,

@@ -27,7 +27,7 @@ import {
 import type { Request } from 'express';
 import { TezaurService } from './tezaur.service';
 import { GearReviewService } from './gear-review.service';
-import { StorageService } from './storage.service';
+import { StorageService } from '../common/storage.service';
 import type {
   CreateGearDto,
   CreateGearFamilyDto,

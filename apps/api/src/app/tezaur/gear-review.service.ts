@@ -14,7 +14,7 @@ import {
 } from '@sintezaur/db';
 import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 import type { Request } from 'express';
-import { AuditLogService } from './audit-log.service';
+import { AuditLogService } from '../common/audit-log.service';
 import type {
   CreateGearReviewDto,
   UpdateGearReviewDto,

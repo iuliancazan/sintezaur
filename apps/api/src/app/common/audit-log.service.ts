@@ -2,7 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DATABASE, type SintezaurDb, auditLog } from '@sintezaur/db';
 import type { Request } from 'express';
 
+/**
+ * App-side audit action vocabulary. Mirrors the values in the
+ * `audit_log_action` Drizzle enum, narrowed to what's currently wired.
+ * New actions land both here and in the DB enum (via a migration).
+ */
 export type AuditAction =
+  // Tezaur
   | 'create_gear'
   | 'edit_gear'
   | 'soft_delete_gear'
@@ -10,7 +16,13 @@ export type AuditAction =
   | 'create_gear_family'
   | 'edit_gear_family'
   | 'set_canonical_thread'
-  | 'hide_gear_review';
+  | 'hide_gear_review'
+  // Bazar — listing moderation actions
+  | 'remove_listing'
+  | 'ban_user'
+  | 'unban_user'
+  | 'hide_transaction_review'
+  | 'resolve_content_report';
 
 interface RecordOptions {
   actorId: string;
