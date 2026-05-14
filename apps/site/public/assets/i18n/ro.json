@@ -724,5 +724,48 @@
       "publish_error": "Publicarea a eșuat.",
       "load_error": "Articolul nu a putut fi încărcat."
     }
+  },
+  "forum": {
+    "page_eyebrow": "Forum · Comunitate",
+    "page_title": "Forum",
+    "page_lede": "Întrebări despre echipament, sfaturi de producție, recomandări — discuții libere între producători români.",
+    "system_section": "Automate",
+    "badge_auto": "auto",
+    "badge_admin": "admin",
+    "load_error": "Conținutul nu a putut fi încărcat.",
+    "no_threads": "Nu există încă thread-uri în această categorie.",
+    "no_replies": "Niciun răspuns încă. Fii primul!",
+    "crumb_root": "Forum",
+    "results_count": "{{shown}} thread-uri din {{total}}",
+    "pagination": {
+      "page_of": "Pagina {{page}} / {{total}}"
+    },
+    "replies_short": "răsp.",
+    "posts_count": "postări",
+    "pinned": "Fixat",
+    "locked": "Blocat",
+    "deleted_user": "[utilizator șters]",
+    "edited": "editat",
+    "hidden_post": "[Postare ascunsă de moderator]",
+    "expand_all": "Extinde toate",
+    "collapse_all": "Restrânge toate",
+    "show_n_replies": "Afișează cele {{n}} răspunsuri",
+    "hide_replies": "Ascunde răspunsurile",
+    "in_reply_to": "în răspuns la @{{username}} — Postare #{{numbering}}",
+    "coming_soon": "Disponibil curând",
+    "action": {
+      "reply": "Răspunde",
+      "like": "Util"
+    },
+    "source": {
+      "article": "Articol original",
+      "gear": "Echipament asociat"
+    },
+    "time": {
+      "now": "acum",
+      "minutes": "acum {{n}} min",
+      "hours": "acum {{n}} h",
+      "days": "acum {{n}} zile"
+    }
   }
 }

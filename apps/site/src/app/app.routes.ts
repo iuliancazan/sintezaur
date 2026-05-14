@@ -80,6 +80,23 @@ export const appRoutes: Route[] = [
       import('./revista/author-profile.page').then((m) => m.AuthorProfilePage),
   },
   {
+    path: 'forum',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./forum/forum-list.page').then((m) => m.ForumListPage),
+  },
+  {
+    path: 'forum/:category',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./forum/forum-category.page').then((m) => m.ForumCategoryPage),
+  },
+  {
+    path: 'forum/:category/:slug',
+    loadComponent: () =>
+      import('./forum/forum-thread.page').then((m) => m.ForumThreadPage),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/pages/signup.page').then((m) => m.SignupPage),

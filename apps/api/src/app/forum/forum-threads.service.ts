@@ -8,10 +8,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import {
+  articles,
   DATABASE,
   forumCategories,
   forumPosts,
   forumThreads,
+  gear,
   users,
   type ForumThread,
   type SintezaurDb,
@@ -200,14 +202,26 @@ export class ForumThreadsService {
 
   async findBySlug(slug: string): Promise<{
     thread: ForumThread;
-    category: { id: string; slug: string; name: string; kind: 'user' | 'system' };
+    category: {
+      id: string;
+      key: string;
+      slug: string;
+      name: string;
+      kind: 'user' | 'system';
+    };
     author: { id: string; username: string; fullName: string } | null;
+    sourceLink: {
+      type: 'article' | 'gear';
+      slug: string;
+      title: string;
+    } | null;
   }> {
     const [row] = await this.db
       .select({
         thread: forumThreads,
         category: {
           id: forumCategories.id,
+          key: forumCategories.key,
           slug: forumCategories.slug,
           name: forumCategories.name,
           kind: forumCategories.kind,
@@ -227,6 +241,36 @@ export class ForumThreadsService {
     if (!row || row.thread.deletedAt) {
       throw new NotFoundException(`thread "${slug}" not found`);
     }
+
+    let sourceLink: {
+      type: 'article' | 'gear';
+      slug: string;
+      title: string;
+    } | null = null;
+    if (row.category.kind === 'system') {
+      if (row.category.key === 'discutii_articole') {
+        const [art] = await this.db
+          .select({ slug: articles.slug, title: articles.title })
+          .from(articles)
+          .where(eq(articles.threadId, row.thread.id))
+          .limit(1);
+        if (art) sourceLink = { type: 'article', slug: art.slug, title: art.title };
+      } else if (row.category.key === 'discutii_echipamente') {
+        const [g] = await this.db
+          .select({ slug: gear.slug, brand: gear.brand, model: gear.model })
+          .from(gear)
+          .where(eq(gear.canonicalThreadId, row.thread.id))
+          .limit(1);
+        if (g) {
+          sourceLink = {
+            type: 'gear',
+            slug: g.slug,
+            title: `${g.brand} ${g.model}`,
+          };
+        }
+      }
+    }
+
     return {
       thread: row.thread,
       category: row.category,
@@ -237,6 +281,7 @@ export class ForumThreadsService {
             fullName: row.authorFullName as string,
           }
         : null,
+      sourceLink,
     };
   }
 
