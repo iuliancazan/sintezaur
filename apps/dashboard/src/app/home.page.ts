@@ -1,28 +1,36 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TPipe } from './i18n/t.pipe';
 import { AuthService } from './auth/auth.service';
 
-/**
- * M1 dashboard landing — confirms the staff session and surfaces a
- * logout. Real admin modules (gear, users, content, moderation)
- * land in M2/M3/M5.
- */
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [TPipe],
+  imports: [TPipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="home">
       <h1>{{ 'dashboard.home.title' | t }}</h1>
-      <p class="muted">{{ 'dashboard.home.subtitle' | t }}</p>
-
       @if (auth.currentUser(); as user) {
         <p class="who">
           {{ 'dashboard.home.logged_in_as' | t: { email: user.email, role: user.role } }}
         </p>
       }
+
+      <nav class="modules">
+        <a class="module" routerLink="/tezaur">
+          <span class="module__name">Tezaur</span>
+          <span class="module__desc">Catalog gear · 109 entries · admin CRUD</span>
+        </a>
+        <span class="module is-disabled">
+          <span class="module__name">Useri</span>
+          <span class="module__desc">Land în M2.5 (promovare roluri, blocaje)</span>
+        </span>
+        <span class="module is-disabled">
+          <span class="module__name">Audit log</span>
+          <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>
+        </span>
+      </nav>
 
       <button class="logout" (click)="logout()">
         {{ 'dashboard.home.logout' | t }}
@@ -32,33 +40,69 @@ import { AuthService } from './auth/auth.service';
   styles: [
     `
       .home {
-        max-width: 720px;
+        max-width: 960px;
         margin: 0 auto;
         padding: 48px var(--gutter-x);
       }
       h1 {
         font-family: var(--font-display);
-        font-size: clamp(28px, 5vw, 40px);
-        margin: 0 0 8px;
+        font-size: clamp(28px, 5vw, 48px);
+        text-transform: uppercase;
+        margin: 0 0 12px;
         color: var(--fg);
-      }
-      .muted {
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 13px;
-        margin: 0 0 32px;
       }
       .who {
         background: var(--bg-card);
         border: var(--grid-line) solid var(--line);
-        padding: 16px;
+        padding: 14px 16px;
         font-family: var(--font-mono);
-        font-size: 13px;
+        font-size: 12px;
         color: var(--fg);
         margin: 0 0 32px;
+        letter-spacing: 0.06em;
+      }
+      .modules {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .module {
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: border-color 0.15s, background 0.15s;
+        min-height: auto;
+        min-width: auto;
+        align-items: stretch;
+        justify-content: flex-start;
+      }
+      .module:hover:not(.is-disabled) {
+        background: var(--bg-card);
+        border-color: var(--accent);
+      }
+      .module.is-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .module__name {
+        font-family: var(--font-display);
+        font-size: 24px;
+        text-transform: uppercase;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .module__desc {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--fg-muted);
+        letter-spacing: 0.06em;
       }
       .logout {
-        padding: 14px 24px;
+        padding: 12px 22px;
         background: transparent;
         color: var(--fg);
         border: 1px solid var(--line-strong);
