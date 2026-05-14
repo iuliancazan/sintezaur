@@ -110,6 +110,16 @@ export const forumThreads = pgTable(
     lockedAt: timestamp('locked_at', { withTimezone: true }),
     deletedAt: timestamp('deleted_at', { withTimezone: true }),
 
+    /**
+     * Slot 1-3 for pinned threads per category (spec §8.4 — max 3 per
+     * category). NULL when not pinned. The (category_id, pin_position)
+     * unique partial index enforces "no two threads share a slot".
+     */
+    pinPosition: integer('pin_position'),
+
+    /** First post (OP) — set on thread create; populated by M5-B. */
+    firstPostId: uuid('first_post_id'),
+
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -126,6 +136,9 @@ export const forumThreads = pgTable(
       t.lastPostAt,
     ),
     index('forum_threads_author_idx').on(t.authorId),
+    uniqueIndex('forum_threads_category_pin_slot_unique')
+      .on(t.categoryId, t.pinPosition)
+      .where(sql`${t.pinPosition} IS NOT NULL`),
   ],
 );
 export type ForumThread = typeof forumThreads.$inferSelect;

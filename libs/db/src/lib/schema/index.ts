@@ -35,3 +35,6 @@ export * from './notifications';
 
 // Revista (M4)
 export * from './articles';
+
+// Forum (M5)
+export * from './forum';

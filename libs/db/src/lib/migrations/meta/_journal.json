@@ -50,6 +50,13 @@
       "when": 1778793458759,
       "tag": "0008_followed_categories",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778797057721,
+      "tag": "0009_forum_schema",
+      "breakpoints": true
     }
   ]
 }

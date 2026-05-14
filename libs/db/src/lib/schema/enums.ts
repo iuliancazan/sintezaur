@@ -291,6 +291,33 @@ export type ForumCategoryKind =
   (typeof forumCategoryKindEnum.enumValues)[number];
 
 /**
+ * Forum post lifecycle per spec §8.4 ("first-post approval queue").
+ * `approved` is the steady state; `pending` means the first-post queue
+ * is holding the row from public view; `rejected` is the mod outcome
+ * (the row stays for audit but never surfaces).
+ */
+export const forumPostStatusEnum = pgEnum('forum_post_status', [
+  'approved',
+  'pending',
+  'rejected',
+]);
+export type ForumPostStatus =
+  (typeof forumPostStatusEnum.enumValues)[number];
+
+/**
+ * Forum subscription level per spec §7.5. One value per (user × target).
+ * `watching` = every reply notifies; `tracking` = daily digest; etc.
+ */
+export const forumSubscriptionLevelEnum = pgEnum('forum_subscription_level', [
+  'watching',
+  'tracking',
+  'mentioned_only',
+  'muted',
+]);
+export type ForumSubscriptionLevel =
+  (typeof forumSubscriptionLevelEnum.enumValues)[number];
+
+/**
  * Saved-search target section per spec §8.2. MVP populates only
  * `bazar`; reserved for future Tezaur/Forum saved searches.
  */

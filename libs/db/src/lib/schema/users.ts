@@ -77,6 +77,17 @@ export const users = pgTable(
     socialSoundcloud: text('social_soundcloud'),
     socialBandcamp: text('social_bandcamp'),
 
+    /**
+     * Forum first-post approval gate (spec §8.4). New users start with
+     * `post_approval_required = true`; after N approved posts AND M days
+     * since signup, the service flips it false. Thresholds via config
+     * (FORUM_APPROVAL_MIN_POSTS / FORUM_APPROVAL_MIN_DAYS); default 1 / 0.
+     */
+    postApprovalRequired: boolean('post_approval_required')
+      .notNull()
+      .default(true),
+    approvedPostCount: integer('approved_post_count').notNull().default(0),
+
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),
