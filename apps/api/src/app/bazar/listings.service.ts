@@ -721,6 +721,147 @@ export class ListingsService {
   }
 
   /* ============================================================
+     Admin listing list — sees ALL rows incl. removed/draft
+     ============================================================ */
+
+  async listForAdmin(opts: {
+    status?: string;
+    q?: string;
+    sellerUsername?: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{
+    items: (PublicListingListItem & { removedAt: Date | null })[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const page = opts.page ?? 1;
+    const pageSize = Math.min(opts.pageSize ?? 50, 200);
+    const offset = (page - 1) * pageSize;
+
+    const conds = [];
+    if (opts.status) conds.push(eq(listings.status, opts.status as any));
+    if (opts.q && opts.q.trim().length >= 2) {
+      const term = opts.q.trim();
+      conds.push(sql`(
+        ${listings.title} ILIKE ${'%' + term + '%'}
+        OR ${listings.slug} ILIKE ${'%' + term + '%'}
+      )`);
+    }
+    if (opts.sellerUsername) {
+      conds.push(ilike(users.username, `%${opts.sellerUsername}%`));
+    }
+
+    const whereClause = conds.length > 0 ? and(...conds) : undefined;
+
+    const rows = await this.db
+      .select({
+        id: listings.id,
+        slug: listings.slug,
+        title: listings.title,
+        brand: gear.brand,
+        model: gear.model,
+        gearId: listings.gearId,
+        gearSlug: gear.slug,
+        price: listings.price,
+        currency: listings.currency,
+        condition: listings.condition,
+        kind: listings.kind,
+        delivery: listings.delivery,
+        acceptsOffers: listings.acceptsOffers,
+        location: listings.location,
+        status: listings.status,
+        createdAt: listings.createdAt,
+        expiresAt: listings.expiresAt,
+        refreshedAt: listings.refreshedAt,
+        removedAt: listings.removedAt,
+        sellerId: listings.sellerId,
+        sellerUsername: users.username,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${listingPhotos}
+          WHERE ${listingPhotos.listingId} = ${listings.id}
+            AND ${listingPhotos.variant} = 'square_thumb'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(listings)
+      .leftJoin(gear, eq(gear.id, listings.gearId))
+      .innerJoin(users, eq(users.id, listings.sellerId))
+      .where(whereClause as any)
+      .orderBy(desc(listings.createdAt))
+      .limit(pageSize)
+      .offset(offset);
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(listings)
+      .innerJoin(users, eq(users.id, listings.sellerId))
+      .where(whereClause as any);
+
+    return {
+      items: rows.map((r) => ({
+        id: r.id,
+        slug: r.slug,
+        title: r.title,
+        brand: r.brand,
+        model: r.model,
+        gearId: r.gearId,
+        gearSlug: r.gearSlug,
+        price: r.price,
+        currency: r.currency,
+        condition: r.condition,
+        kind: r.kind,
+        delivery: r.delivery,
+        acceptsOffers: r.acceptsOffers,
+        location: r.location,
+        thumb: r.thumb,
+        status: r.status,
+        createdAt: r.createdAt,
+        expiresAt: r.expiresAt,
+        refreshedAt: r.refreshedAt,
+        removedAt: r.removedAt,
+        seller: {
+          id: r.sellerId,
+          username: r.sellerUsername,
+          avgRating: null,
+          reviewCount: 0,
+          transactionCount: 0,
+        },
+      })),
+      page,
+      pageSize,
+      totalCount: count,
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
+    };
+  }
+
+  async modUnremove(
+    actorId: string,
+    id: string,
+    req?: Request,
+  ): Promise<void> {
+    await this.db
+      .update(listings)
+      .set({
+        status: 'active',
+        removedAt: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(listings.id, id));
+    await this.audit.record({
+      actorId,
+      action: 'remove_listing',
+      targetType: 'listing',
+      targetId: id,
+      details: { action: 'unremove' },
+      req,
+    });
+  }
+
+  /* ============================================================
      My listings (own dashboard)
      ============================================================ */
 

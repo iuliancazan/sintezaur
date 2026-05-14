@@ -26,6 +26,12 @@ export const appRoutes: Route[] = [
       import('./tezaur/tezaur-edit.page').then((m) => m.TezaurAdminEditPage),
   },
   {
+    path: 'bazar',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./bazar/bazar-admin.page').then((m) => m.BazarAdminPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

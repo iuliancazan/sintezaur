@@ -20,7 +20,11 @@ import { AuthService } from './auth/auth.service';
       <nav class="modules">
         <a class="module" routerLink="/tezaur">
           <span class="module__name">Tezaur</span>
-          <span class="module__desc">Catalog gear · 109 entries · admin CRUD</span>
+          <span class="module__desc">Catalog gear · admin CRUD</span>
+        </a>
+        <a class="module" routerLink="/bazar">
+          <span class="module__name">Bazar</span>
+          <span class="module__desc">Moderare anunțuri · elimină / restaurează</span>
         </a>
         <span class="module is-disabled">
           <span class="module__name">Useri</span>
