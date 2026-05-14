@@ -4,10 +4,197 @@
     "tagline": "Platforma în limba română pentru sintetizatoare și music gear",
     "loading": "Se încarcă...",
     "section": {
+      "home": "Acasă",
       "tezaur": "Tezaur",
       "bazar": "Bazar",
-      "revista": "Revista",
+      "revista": "Revistă",
       "forum": "Forum"
+    },
+    "nav": {
+      "aria": "Navigație principală",
+      "search": "Caută",
+      "notifications": "Notificări",
+      "theme": "Schimbă tema",
+      "theme_auto": "Automat",
+      "theme_light": "Luminos",
+      "theme_dark": "Întunecat"
+    },
+    "actions": {
+      "signup_short": "Înregistrare",
+      "login_short": "Conectează-te",
+      "account_short": "Cont"
+    }
+  },
+  "footer": {
+    "tagline": "Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.",
+    "col_platform": "Platformă",
+    "col_about": "Sintezaur",
+    "col_social": "Social",
+    "about": "Despre",
+    "contact": "Contact",
+    "terms": "Termeni",
+    "privacy": "Confidențialitate",
+    "rss": "RSS",
+    "copy": "© {{year}} Sintezaur · Construit la București",
+    "locale_ro": "RO",
+    "locale_en": "EN — în lucru"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "Bun venit",
+      "title_line_1": "Caută gear.",
+      "title_line_2": "Vinde gear.",
+      "title_line_3": "Discută gear.",
+      "lede": "Catalogul complet de sintetizatoare, drum machines și module Eurorack — cu preț de piață, recenzii și o comunitate de producători din România. Cont gratuit, mereu.",
+      "cta_explore": "Explorează Tezaurul",
+      "cta_signup": "Creează cont"
+    },
+    "sections": {
+      "tezaur_eyebrow": "Tezaur · Catalog",
+      "tezaur_title": "Catalogul",
+      "tezaur_cta": "Vezi pagina"
+    }
+  },
+  "tezaur": {
+    "page_eyebrow": "Tezaur · Enciclopedia gear-ului",
+    "page_title": "Tezaur",
+    "page_lede": "Catalogul complet de sintetizatoare, drum machines, samplere și sequencere — fiecare cu istoric, specs, recenzii și prețuri de piață. Curat și verificat de comunitate.",
+    "stats": {
+      "pieces": "Piese",
+      "brands": "Branduri",
+      "categories": "Categorii"
+    },
+    "search_placeholder": "Caută gear, brand, an…",
+    "sort": {
+      "label": "Sortează",
+      "popular": "Cele mai populare",
+      "alpha": "Alfabetic",
+      "newest": "Cele mai noi",
+      "discussed": "Cele mai discutate",
+      "year_asc": "An lansare ↑",
+      "year_desc": "An lansare ↓"
+    },
+    "view": {
+      "grid": "Grid",
+      "list": "Listă"
+    },
+    "filters": {
+      "active_label": "Filtre active",
+      "clear_all": "Curăță toate ×",
+      "category": "Categorie",
+      "type": "Tip",
+      "brand": "Brand",
+      "year_released": "An lansare",
+      "status": "Status",
+      "in_production": "În producție",
+      "discontinued": "Discontinuat",
+      "no_results": "Nicio piesă nu corespunde filtrelor active."
+    },
+    "card": {
+      "owners": "{{count}} dețin",
+      "year_unknown": "—"
+    },
+    "results_count": "{{shown}} rezultate din {{total}}",
+    "pagination": {
+      "page_of": "Pagina {{page}} / {{total}}",
+      "show_count": "Afișează {{shown}} din {{total}}"
+    },
+    "detail": {
+      "back_to_list": "Înapoi la Tezaur",
+      "breadcrumb_root": "Tezaur",
+      "tabs": {
+        "details": "Detalii",
+        "specs": "Specs",
+        "price": "Preț",
+        "reviews": "Recenzii",
+        "listings": "Listări",
+        "forum": "Forum"
+      },
+      "stats": {
+        "year_released": "An lansare",
+        "polyphony": "Polifonie",
+        "owners": "Dețin pe Sintezaur",
+        "wishlist": "Pe wishlist",
+        "threads": "Threaduri",
+        "listings": "Listări"
+      },
+      "collection": {
+        "label": "Adaugă în colecție",
+        "placeholder": "Marchează ca...",
+        "owned": "Deținut",
+        "wishlist": "Lista de dorințe",
+        "wanted": "Caut activ",
+        "used_to_own": "Am avut",
+        "loaned_out": "Împrumutat"
+      },
+      "ctas": {
+        "sell": "Vinde pe Bazar",
+        "buy_from": "Cumpără de la... ↓"
+      },
+      "family": {
+        "section_title": "Familia",
+        "predecessor": "Predecesor",
+        "current": "Acest model",
+        "successor": "Succesor"
+      },
+      "specs_section": {
+        "general": "General",
+        "synthesis": "Sinteză",
+        "memory": "Memorie & Conectivitate",
+        "resources": "Resurse externe"
+      },
+      "price_section": {
+        "title": "Evoluție preț",
+        "avg_90d": "Preț mediu — 90 zile",
+        "recent_sales": "Vânzări recente",
+        "empty": "Date de preț disponibile după primele tranzacții pe Bazar (M3)."
+      },
+      "reviews_section": {
+        "title_count": "{{count}} recenzii",
+        "average": "Medie",
+        "write_review": "Scrie o recenzie",
+        "submit": "Trimite recenzia",
+        "rating_label": "Notă (1-5)",
+        "body_label": "Recenzia ta",
+        "body_placeholder": "Descrie experiența ta cu acest gear...",
+        "helpful": "{{count}} utili",
+        "empty": "Fii primul care scrie o recenzie despre acest gear."
+      },
+      "listings_section": {
+        "active_count": "{{count}} listinguri active",
+        "all_on_bazar": "Toate pe Bazar →",
+        "empty": "Bazar deschide în curând. Vei vedea aici listările active pentru acest gear."
+      },
+      "forum_section": {
+        "title": "Discuții pe forum",
+        "new_thread": "Începe un thread nou",
+        "canonical_badge": "Discuție canonică",
+        "canonical_locked": "închis · doar moderare poate adăuga",
+        "replies": "{{count}} răspunsuri",
+        "empty": "Forumul deschide în curând. Vei vedea aici discuțiile despre acest gear."
+      },
+      "sidebar": {
+        "stats_title": "Statistici Sintezaur",
+        "family_title": "Familia",
+        "watch_title": "Urmărește acest gear",
+        "watch_body": "Primești notificări la listinguri & price drops",
+        "buy_title": "Cumpără",
+        "affiliate_note": "* Sintezaur poate primi comision afiliat. Linkurile sunt actualizate săptămânal."
+      }
+    },
+    "admin": {
+      "list_title": "Tezaur — administrare",
+      "new_gear": "Adaugă gear",
+      "filter_placeholder": "Caută după brand sau model…",
+      "table": {
+        "brand": "Brand",
+        "model": "Model",
+        "category": "Categorie",
+        "year": "An",
+        "status": "Status",
+        "owners": "Dețin",
+        "actions": "Acțiuni"
+      }
     }
   },
   "auth": {

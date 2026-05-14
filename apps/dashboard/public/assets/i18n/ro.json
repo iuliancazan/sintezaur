@@ -1,7 +1,20 @@
 {
   "app": {
     "name": "Sintezaur Admin",
-    "loading": "Se încarcă..."
+    "loading": "Se încarcă...",
+    "nav": {
+      "aria": "Navigație admin",
+      "theme": "Schimbă tema",
+      "theme_auto": "Automat",
+      "theme_light": "Luminos",
+      "theme_dark": "Întunecat",
+      "tezaur": "Tezaur",
+      "users": "Useri",
+      "audit": "Audit"
+    },
+    "actions": {
+      "logout_short": "Ieși"
+    }
   },
   "auth": {
     "login": {

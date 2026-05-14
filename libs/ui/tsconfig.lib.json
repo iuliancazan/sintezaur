@@ -4,6 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "declaration": true,
     "declarationMap": true,
+    "composite": true,
+    "tsBuildInfoFile": "../../node_modules/.cache/tsc-build/ui.tsbuildinfo",
     "inlineSources": true,
     "types": []
   },

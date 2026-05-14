@@ -12,7 +12,7 @@ import {
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import Aura from '@primeuix/themes/aura';
+import { SintezaurPreset, provideSintezaurIcons } from '@sintezaur/ui';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
@@ -29,10 +29,14 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {
-        preset: Aura,
-        options: { darkModeSelector: '.dark', cssLayer: false },
+        preset: SintezaurPreset,
+        options: {
+          darkModeSelector: '[data-theme="dark"]',
+          cssLayer: false,
+        },
       },
     }),
+    provideSintezaurIcons(),
     provideAppInitializer(async () => {
       const i18n = inject(I18nService);
       const auth = inject(AuthService);

@@ -1,13 +1,15 @@
 /* ============================================================
-   SINTEZAUR — design tokens (subset)
+   SINTEZAUR — design tokens (M2 v2-neutral)
    ============================================================
-   Sourced from docs/design-imports/2026-05-14-v01/styles.css.
-   This file ships only the tokens (CSS custom properties + base
-   reset) — the full screen-specific component styles arrive in M2
-   alongside the design integration work.
+   Source: docs/design-imports/2026-05-14-v01/styles.v2-neutral.css
+   Variant: NEUTRAL DARK + WARM CREAM LIGHT.
 
    Apps consume via:
      @use '../../../libs/ui/src/lib/tokens/tokens.css';
+
+   Atomic components in libs/ui consume ONLY var(--token) — never
+   hardcoded hex. To re-skin Sintezaur, swap the values below; no
+   component rewrites needed.
 */
 
 :root {
@@ -22,33 +24,34 @@
   --gutter-y: clamp(28px, 5vw, 56px);
   --radius: 2px;
 
-  /* Accent — gold/amber by default (semantic to "aur") */
+  /* Accent — gold/amber (semantic to "aur") */
   --accent: #ebb023;
   --accent-2: #f08a1b;
   --accent-fg: #0b0905;
 
-  /* Grid line */
+  /* Grid line width */
   --grid-line: 1px;
 }
 
-/* ---- DARK (default) — slate + ambient gold ---- */
+/* ---- DARK (default) — neutral cool greys + ambient gold dots ---- */
 :root,
-[data-theme='dark'] {
-  --bg: oklch(0.165 0.008 255);
-  --bg-elev: oklch(0.205 0.009 255);
-  --bg-card: oklch(0.235 0.010 250);
-  --bg-card-2: oklch(0.275 0.011 250);
-  --line: oklch(0.325 0.018 85);
-  --line-strong: oklch(0.46 0.030 85);
-  --fg: oklch(0.95 0.015 85);
-  --fg-muted: oklch(0.66 0.012 85);
-  --fg-subtle: oklch(0.46 0.010 85);
-  --grid-dots: oklch(0.78 0.16 80 / 0.20);
-  --shadow: 0 1px 0 oklch(1 0 0 / 0.025) inset;
+:root[data-theme='dark'] {
+  --bg: #0a0a0b;
+  --bg-elev: #131314;
+  --bg-card: #181819;
+  --bg-card-2: #1f1f20;
+  --line: #2a2a2c;
+  --line-strong: #3e3e40;
+  --fg: #edecea;
+  --fg-muted: #8e8d8a;
+  --fg-subtle: #5c5b58;
+  --grid-dots: rgba(235, 176, 35, 0.16);
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
+  --logo-filter: invert(1) brightness(1.05);
 }
 
-/* ---- LIGHT ---- */
-[data-theme='light'] {
+/* ---- LIGHT — warm cream ---- */
+:root[data-theme='light'] {
   --bg: #f3eedd;
   --bg-elev: #ebe5cf;
   --bg-card: #faf6e8;
@@ -60,7 +63,13 @@
   --fg-subtle: #948a6c;
   --grid-dots: rgba(60, 50, 20, 0.16);
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.04) inset;
+  --logo-filter: none;
+  --accent-fg: #0b0905;
 }
+
+/* ============================================================
+   reset
+   ============================================================ */
 
 *,
 *::before,
@@ -89,7 +98,8 @@ a {
   text-decoration: none;
 }
 input,
-textarea {
+textarea,
+select {
   font: inherit;
   color: inherit;
 }
@@ -112,11 +122,9 @@ body {
   line-height: 1.5;
   color: var(--fg);
   background: var(--bg);
-  background-image:
-    radial-gradient(ellipse 100% 60% at 50% 100%, oklch(0.78 0.16 80 / 0.045), transparent 65%),
-    radial-gradient(circle at 1px 1px, var(--grid-dots) 1px, transparent 0);
-  background-size: 100% 100%, 24px 24px;
-  background-attachment: fixed, scroll;
+  background-image: radial-gradient(circle at 1px 1px, var(--grid-dots) 1px, transparent 0);
+  background-size: 24px 24px;
+  background-position: 0 0;
   min-height: 100vh;
   transition:
     background-color 0.25s ease,
@@ -126,4 +134,130 @@ body {
 ::selection {
   background: var(--accent);
   color: var(--accent-fg);
+}
+
+/* ============================================================
+   shared layout primitives (.shell, .block, .crosses)
+   These appear on >5 pages — promoted to tokens.css to avoid
+   re-declaring on every component.
+   ============================================================ */
+
+.shell {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--gutter-x);
+  position: relative;
+}
+
+.block {
+  position: relative;
+  background: var(--bg-elev);
+  border: var(--grid-line) solid var(--line);
+  margin-bottom: 24px;
+}
+.block + .block {
+  margin-top: 0;
+}
+.block__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px clamp(20px, 3vw, 36px) 18px;
+  border-bottom: var(--grid-line) dashed var(--line);
+  flex-wrap: wrap;
+}
+.block__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(36px, 6vw, 78px);
+  line-height: 0.9;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin: 0;
+}
+.block__title .dot {
+  color: var(--accent);
+}
+.block__sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg-muted);
+}
+.block__sub::before {
+  content: '* ';
+  color: var(--accent);
+}
+.block__body {
+  padding: 24px clamp(20px, 3vw, 36px) 28px;
+}
+.block__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: var(--grid-line) solid var(--line-strong);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fg);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.block__cta:hover {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+.block__cta::after {
+  content: '→';
+  display: inline-block;
+  transition: transform 0.15s ease;
+}
+.block__cta:hover::after {
+  transform: translateX(2px);
+}
+
+/* Corner crosshair markers — applied to .block, .hero, .pulse, etc. */
+.crosses {
+  position: relative;
+}
+.crosses::before,
+.crosses::after,
+.crosses > .crosses-tl,
+.crosses > .crosses-tr {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--line-strong), var(--line-strong)),
+    linear-gradient(var(--line-strong), var(--line-strong));
+  background-size:
+    10px 1px,
+    1px 10px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.crosses::before {
+  left: -5px;
+  top: -5px;
+}
+.crosses::after {
+  right: -5px;
+  top: -5px;
+}
+.crosses > .crosses-tl {
+  left: -5px;
+  bottom: -5px;
+}
+.crosses > .crosses-tr {
+  right: -5px;
+  bottom: -5px;
 }

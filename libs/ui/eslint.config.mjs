@@ -12,7 +12,7 @@ export default [
         'error',
         {
           type: 'attribute',
-          prefix: 'sintezaur',
+          prefix: 'sz',
           style: 'camelCase',
         },
       ],
@@ -20,10 +20,27 @@ export default [
         'error',
         {
           type: 'element',
-          prefix: 'sintezaur',
+          prefix: 'sz',
           style: 'kebab-case',
         },
       ],
+    },
+  },
+  {
+    files: ['**/*.json'],
+    rules: {
+      '@nx/dependency-checks': [
+        'error',
+        {
+          ignoredFiles: [
+            '{projectRoot}/eslint.config.{js,cjs,mjs,ts,cts,mts}',
+            '{projectRoot}/**/*.spec.{ts,tsx}',
+          ],
+        },
+      ],
+    },
+    languageOptions: {
+      parser: await import('jsonc-eslint-parser'),
     },
   },
   {
