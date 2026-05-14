@@ -26,10 +26,14 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Bazar</span>
           <span class="module__desc">Moderare anunțuri · elimină / restaurează</span>
         </a>
-        <span class="module is-disabled">
+        <a class="module" routerLink="/revista">
+          <span class="module__name">Revista</span>
+          <span class="module__desc">Moderare articole · status + dezarhivare</span>
+        </a>
+        <a class="module" routerLink="/useri">
           <span class="module__name">Useri</span>
-          <span class="module__desc">Land în M2.5 (promovare roluri, blocaje)</span>
-        </span>
+          <span class="module__desc">Roluri · grant editor / curator / moderator</span>
+        </a>
         <span class="module is-disabled">
           <span class="module__name">Audit log</span>
           <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>

@@ -22,7 +22,10 @@ export type AuditAction =
   | 'ban_user'
   | 'unban_user'
   | 'hide_transaction_review'
-  | 'resolve_content_report';
+  | 'resolve_content_report'
+  // Auth — role management
+  | 'promote_user'
+  | 'demote_user';
 
 interface RecordOptions {
   actorId: string;

@@ -32,6 +32,18 @@ export const appRoutes: Route[] = [
       import('./bazar/bazar-admin.page').then((m) => m.BazarAdminPage),
   },
   {
+    path: 'revista',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./revista/revista-admin.page').then((m) => m.RevistaAdminPage),
+  },
+  {
+    path: 'useri',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./users/users-admin.page').then((m) => m.UsersAdminPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

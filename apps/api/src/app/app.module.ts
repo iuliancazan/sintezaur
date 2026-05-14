@@ -15,6 +15,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
+import { AdminUsersModule } from './admin-users/admin-users.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TezaurModule } from './tezaur/tezaur.module';
     TezaurModule,
     BazarModule,
     RevistaModule,
+    AdminUsersModule,
   ],
   controllers: [AppController],
   providers: [
