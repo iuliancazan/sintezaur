@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { and, isNull, sql } from 'drizzle-orm';
+import { and, isNull, or, sql } from 'drizzle-orm';
 import {
   createDatabase,
   createPool,
@@ -58,29 +58,51 @@ async function main() {
   const db = createDatabase(pool);
 
   try {
-    // Case-insensitive lookup so re-running with a slightly different
-    // casing doesn't insert a duplicate that the lower() index would
-    // then reject.
-    const [existing] = await db
+    // Case-insensitive lookup on BOTH email and username — re-running
+    // with a different email but a derived/explicit username that
+    // collides with an unrelated existing user (e.g. someone who signed
+    // up through the public form) would otherwise hit the unique index
+    // at INSERT time with an opaque 23505. Bail early with a clear
+    // message instead.
+    const conflicts = await db
       .select({
         id: users.id,
         email: users.email,
+        username: users.username,
         role: users.role,
       })
       .from(users)
       .where(
         and(
           isNull(users.deletedAt),
-          sql`lower(${users.email}) = ${email}`,
+          or(
+            sql`lower(${users.email}) = ${email}`,
+            sql`lower(${users.username}) = ${username}`,
+          ),
         ),
-      )
-      .limit(1);
+      );
 
-    if (existing) {
+    const emailMatch = conflicts.find((u) => u.email.toLowerCase() === email);
+    if (emailMatch) {
       console.log(
-        `[create-first-admin] User ${existing.email} already exists (role=${existing.role}). No changes made.`,
+        `[create-first-admin] User ${emailMatch.email} already exists (role=${emailMatch.role}). No changes made.`,
       );
       return;
+    }
+    const usernameMatch = conflicts.find(
+      (u) => u.username.toLowerCase() === username,
+    );
+    if (usernameMatch) {
+      console.error(
+        `[create-first-admin] Cannot create admin "${email}": username "${username}" is already taken by ${usernameMatch.email} (role=${usernameMatch.role}).`,
+      );
+      console.error(
+        `[create-first-admin] Set FIRST_ADMIN_USERNAME in .env to a different value, or promote the existing user manually:`,
+      );
+      console.error(
+        `  psql "$DATABASE_URL" -c "UPDATE users SET role='admin', email_verified=true WHERE username='${usernameMatch.username}';"`,
+      );
+      process.exit(1);
     }
 
     const passwordHash = await bcrypt.hash(password, cost);
