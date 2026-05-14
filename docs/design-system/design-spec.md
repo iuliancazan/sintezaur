@@ -1,8 +1,12 @@
-# Sintezaur — Design Specification
+# Sintezaur — Design Specification (v1, REFERENCE-ONLY)
 
-> **Drag-drop this file into Claude Design / Open Design (or any LLM-powered design tool) when generating screens for Sintezaur.** It is the complete brief: brand, principles, design system tokens, component library, and page-by-page IA.
+> ⚠️ **DEPRECATED for design generation.** This file proved too dense for LLM design tools — they lose detail mid-generation and produce messy output.
 >
-> **Version:** 0.1 · **Date:** 2026-05-14 · **Companion:** `docs/spec/spec.md` (functional spec — *what* it does) and `docs/brainstorming/Design References - Modern Editorial Sites.md` (research).
+> **For design generation, use the slimmer pair:** `design-brief.md` (brand & token constraints, ~150 lines) + `pages.md` (page content only, ~400 lines). Prompt pattern in `design-brief.md` last section.
+>
+> **This file remains as a reference** for design system rationale, component library notes, and detailed page descriptions if a deeper dive is ever needed. Tokens here are SUPERSEDED by `design-brief.md` (which has WCAG-AA-verified light mode contrast — this file's earlier light mode tokens were under-tuned).
+>
+> **Version:** 0.1 (deprecated 2026-05-14) · **Date:** 2026-05-14 · **Companion:** `docs/spec/spec.md` (functional spec — *what* it does) and `docs/brainstorming/Design References - Modern Editorial Sites.md` (research).
 
 ---
 
