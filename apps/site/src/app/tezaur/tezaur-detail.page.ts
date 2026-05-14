@@ -324,16 +324,16 @@ interface ReviewsResponse {
                         </div>
                       </div>
                       <div class="td-reviews__bars">
-                        @for (star of [5,4,3,2,1]; track star) {
+                        @for (star of ratingStars; track star) {
                           <div class="td-reviews__bar">
                             <span>{{ star }} ★</span>
                             <span class="track">
                               <span
                                 class="fill"
-                                [style.width.%]="barPercent(r.aggregate.ratingBreakdown[$any(star)], r.aggregate.count)"
+                                [style.width.%]="barPercent(r.aggregate.ratingBreakdown[star], r.aggregate.count)"
                               ></span>
                             </span>
-                            <span>{{ r.aggregate.ratingBreakdown[$any(star)] }}</span>
+                            <span>{{ r.aggregate.ratingBreakdown[star] }}</span>
                           </div>
                         }
                       </div>
@@ -1102,6 +1102,7 @@ export class TezaurDetailPage {
 
   readonly statusFlags = USER_GEAR_STATUS_FLAGS;
   readonly tabKeys = TAB_KEYS;
+  readonly ratingStars: (1 | 2 | 3 | 4 | 5)[] = [5, 4, 3, 2, 1];
 
   readonly detail = signal<TezaurDetail | null>(null);
   readonly notFound = signal(false);
