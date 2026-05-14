@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TR-808 vs TR-8S — diferență audibilă? · Tezaur — Forum — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.forum.css" />
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="07 Forum — thread detail (TR-808 vs TR-8S)">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 11l8-4M8 13l8 4"/></symbol>
+      <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v5"/></symbol>
+      <symbol id="i-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 7h6v6H5z M7 13c0 2-1 4-3 4 M13 7h6v6h-6z M15 13c0 2-1 4-3 4" stroke-linecap="square"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
+      <symbol id="i-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link is-active" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <a class="icon-btn" href="Forum - Cauta.html" aria-label="Caută"><svg><use href="#i-search"/></svg></a>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Forum.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Forum
+      </a>
+      <span class="sep">/</span>
+      <a href="Forum - Tezaur Intrebari.html">Tezaur — Întrebări</a>
+      <span class="sep">/</span>
+      <span class="cur">Thread #4821</span>
+    </nav>
+
+    <!-- STICKY THREAD BAR -->
+    <div class="ft-sticky">
+      <a class="ft-sticky__back" href="Forum - Tezaur Intrebari.html" aria-label="Înapoi"><svg><use href="#i-back"/></svg></a>
+      <div class="ft-sticky__title">TR-808 vs TR-8S — chiar e o diferență audibilă în 2026?</div>
+      <span class="ft-sticky__cat">Tezaur — Întrebări</span>
+      <span class="ft-sticky__progress" id="ft-progress">1 / 143</span>
+    </div>
+
+    <div class="ft-main">
+
+      <!-- LEFT: posts -->
+      <div>
+
+        <!-- OP POST -->
+        <article class="ft-op crosses" id="post-1">
+          <span class="crosses-tl"></span><span class="crosses-tr"></span>
+
+          <header class="ft-op__head">
+            <div class="ft-op__avatar">VB</div>
+            <div class="ft-op__author">
+              <div class="nm">
+                Vlad Băleanu
+                <span class="at">@vlad.b</span>
+                <span class="fr-trust is-veteran">Veteran · 4 ani</span>
+              </div>
+              <div class="meta">Postare <span class="acc">#1</span> · 13.05.2026, 09:42 · București · 1 248 vizualizări</div>
+            </div>
+            <div class="ft-thread-controls">
+              <div class="ft-bulk-toggle" role="group" aria-label="Sub-răspunsuri">
+                <button type="button" id="expand-all" class="ft-bulk-toggle__btn">Extinde toate</button>
+                <span class="ft-bulk-toggle__sep" aria-hidden="true"></span>
+                <button type="button" id="collapse-all" class="ft-bulk-toggle__btn">Restrânge toate</button>
+              </div>
+              <button class="fr-sub-pill is-on" id="sub-pill" type="button">
+                <span class="fr-sub-pill__ico">★</span>
+                <span class="fr-sub-pill__label">Watching</span>
+              </button>
+            </div>
+          </header>
+
+          <div class="ft-op__body">
+            <h1 class="ft-op__title">TR-808 vs TR-8S — chiar e o diferență audibilă în 2026?</h1>
+
+            <div class="ft-op__tags">
+              <a class="fr-gear-chip" href="Tezaur - Roland Juno-60.html">
+                <span class="fr-gear-chip__photo"><span class="gear-fill" data-gear="tr-808"></span></span>
+                Roland TR-808
+              </a>
+              <a class="fr-gear-chip" href="#">
+                <span class="fr-gear-chip__photo"><span class="gear-fill" data-gear="tr-909"></span></span>
+                Roland TR-8S
+              </a>
+              <span class="fr-tag">analog-vs-digital</span>
+              <span class="fr-tag">abx-test</span>
+              <span class="fr-tag">drum-machine</span>
+              <span class="fr-tag">monitoring</span>
+            </div>
+
+            <div class="ft-prose">
+              <p>Săptămâna trecută am împrumutat un TR-808 original de la un prieten producător din Cluj (serial 8xx, complet stock, fără mod-uri MIDI sau service recent) și l-am pus față în față cu TR-8S-ul meu în studio. Vroiam să verific cât din mitul „808-ul original sună altfel” mai e valid în 2026, când TR-8S-ul rulează ACB v2.5 cu modelarea revizuită din 2024.</p>
+
+              <p>Setup-ul de test: <strong>ABX double-blind</strong> cu 6 piese diferite, Sennheiser HD600 + Apollo Twin la 24bit/96kHz. Frate la trigger care nu știa care e care. 8 patternuri identice programate pe ambele.</p>
+
+              <p>Ce am observat:</p>
+              <ul>
+                <li><strong>Kick lung cu decay max</strong> — 808-ul original are armonice impare suplimentare pe primii 80ms, foarte slabe (-32dB față de fundamental) dar audibile peste un sistem PA mare. TR-8S le redă aproape identic dacă pui Decay la 95% și Tune pe 0.</li>
+                <li><strong>Cowbell</strong> — identice. Nu le-am putut deosebi nici cu Frequency Analyzer.</li>
+                <li><strong>Snare</strong> — aici e diferență mai mare. TR-8S sună mai „curat”, 808 are noise floor de 65hz aproape constant. Pe master final probabil dispare.</li>
+                <li><strong>Hat-uri</strong> — 80% identice. Diferența pe Open Hat e că 808 are decay non-liniar (curve, nu drept).</li>
+              </ul>
+
+              <p>Concluzia mea preliminară e că <code>TR-8S e suficient</code> pentru 95% din situații, dar pentru sound design experimental și record-uri care vor să sune <em>vintage și murdar</em>, 808-ul real încă are ceva ce nu e în model.</p>
+
+              <p>Atașez referință — fragment din test, kick-ul de la 0:08:</p>
+
+              <!-- Embed mock -->
+              <a class="ft-embed" href="#">
+                <div class="ft-embed__media">
+                  <span class="ft-embed__play"><svg><use href="#i-play"/></svg></span>
+                </div>
+                <div class="ft-embed__body">
+                  <span class="ft-embed__platform">SoundCloud · privat</span>
+                  <h4 class="ft-embed__title">TR-808 vs TR-8S — kick test ABX (0:32)</h4>
+                  <span class="ft-embed__sub">vlad.b · uploaded acum 2 ore · 142 plays</span>
+                </div>
+              </a>
+
+              <p>Cine a mai făcut comparația asta? Mai ales pe sistem mare la club / festival — acolo se aud diferențele de fază?</p>
+            </div>
+          </div>
+
+          <div class="ft-engage">
+            <button class="ft-engage__btn is-on" data-util>
+              <svg><use href="#i-heart"/></svg>
+              <span class="num">86</span>
+              <span>Util</span>
+            </button>
+            <button class="ft-engage__btn">
+              <svg><use href="#i-reply"/></svg>
+              <span class="num">142</span>
+              <span>Răspunsuri</span>
+            </button>
+            <button class="ft-engage__btn">
+              <svg><use href="#i-share"/></svg>
+              <span>Distribuie</span>
+            </button>
+            <div class="ft-engage__spacer"></div>
+            <button class="ft-engage__btn">
+              <svg><use href="#i-more"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- REPLIES -->
+        <header class="ft-replies-head">
+          <h2>Răspunsuri <span class="num">/ 142</span></h2>
+          <span class="sub">Cronologic · flat · fără nesting</span>
+        </header>
+
+        <div class="ft-replies" id="ft-replies"></div>
+
+        <!-- PAGINATION -->
+        <nav class="fr-pag" aria-label="Pagini">
+          <span>Postări 1–12 din 143 · pagina <strong style="color:var(--fg)">1</strong> din 12</span>
+          <div class="fr-pag__nums">
+            <span class="fr-pag__num is-disabled">‹</span>
+            <a class="fr-pag__num is-active" href="#">1</a>
+            <a class="fr-pag__num" href="#">2</a>
+            <a class="fr-pag__num" href="#">3</a>
+            <span class="fr-pag__num is-ellipsis">…</span>
+            <a class="fr-pag__num" href="#">12</a>
+            <a class="fr-pag__num" href="#">›</a>
+          </div>
+        </nav>
+
+        <!-- STICKY REPLY BOX -->
+        <div class="ft-replybox">
+          <div class="ft-replybox__avatar">EU</div>
+          <input class="ft-replybox__input" type="text" placeholder="Scrie un răspuns la thread… (Ctrl+Enter publică, Esc anulează)" />
+          <button class="ft-replybox__cta">Răspunde</button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: sidebar -->
+      <aside class="ft-side">
+
+        <!-- gear card -->
+        <div class="ft-side__block">
+          <header class="ft-side__head">Gear discutat</header>
+          <div class="ft-side-gear">
+            <div class="ft-side-gear__media"><span class="gear-fill" data-gear="tr-808"></span></div>
+            <div>
+              <div class="ft-side-gear__brand">Roland · 1980</div>
+              <div class="ft-side-gear__model">TR-808</div>
+            </div>
+          </div>
+          <div class="ft-side-gear">
+            <div class="ft-side-gear__media"><span class="gear-fill" data-gear="tr-909"></span></div>
+            <div>
+              <div class="ft-side-gear__brand">Roland · 2017</div>
+              <div class="ft-side-gear__model">TR-8S</div>
+            </div>
+          </div>
+          <a class="ft-side-gear__link" href="Tezaur - Roland Juno-60.html">Pagina Tezaur completă →</a>
+        </div>
+
+        <!-- people in thread -->
+        <div class="ft-side__block">
+          <header class="ft-side__head">Cei mai activi</header>
+          <div class="ft-side__body">
+            <div class="ft-people">
+              <div class="ft-people__row"><span class="avatar">VB</span><div><div class="nm">vlad.b</div><div class="at">OP · @vlad.b</div></div><span class="ct">12</span></div>
+              <div class="ft-people__row"><span class="avatar">RS</span><div><div class="nm">rares.s</div><div class="at">Veteran</div></div><span class="ct">9</span></div>
+              <div class="ft-people__row"><span class="avatar">MM</span><div><div class="nm">mihaela_m</div><div class="at">Regular</div></div><span class="ct">6</span></div>
+              <div class="ft-people__row"><span class="avatar">TB</span><div><div class="nm">tudor.b</div><div class="at">Regular</div></div><span class="ct">5</span></div>
+              <div class="ft-people__row"><span class="avatar">AB</span><div><div class="nm">andrei.b</div><div class="at">Veteran</div></div><span class="ct">4</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- related threads -->
+        <div class="ft-side__block">
+          <header class="ft-side__head">Threaduri legate</header>
+          <div class="ft-rel-list">
+            <a href="#">
+              <span class="ttl">TR-909 clone-uri în 2026 — Behringer RD-9, Riemann TR-909 sau original?</span>
+              <span class="meta"><b>34</b> răspunsuri · 2 zile</span>
+            </a>
+            <a href="#">
+              <span class="ttl">ACB vs ABM vs sampling — cum decide Roland modelarea?</span>
+              <span class="meta"><b>21</b> răspunsuri · 1 săptămână</span>
+            </a>
+            <a href="#">
+              <span class="ttl">Cum scoți noise floor 65Hz din TR-808 fără să strici tone-ul?</span>
+              <span class="meta"><b>18</b> răspunsuri · 3 săptămâni</span>
+            </a>
+            <a href="#">
+              <span class="ttl">Compararea analog vs digital pe sistem PA mare — opinii?</span>
+              <span class="meta"><b>52</b> răspunsuri · 1 lună</span>
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- floating jump-to-newest -->
+  <button class="ft-jump" id="ft-jump" type="button">
+    <svg width="12" height="12"><use href="#i-arrow-down"/></svg>
+    Sari la cel mai nou · #143
+  </button>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col"><h4>// Platformă</h4><ul><li><a href="Tezaur.html">Tezaur</a></li><li><a href="Bazar.html">Bazar</a></li><li><a href="Revista.html">Revistă</a></li><li><a href="Forum.html">Forum</a></li></ul></div>
+        <div class="foot__col"><h4>// Sintezaur</h4><ul><li><a href="#">Despre</a></li><li><a href="#">Contact</a></li><li><a href="#">Termeni</a></li><li><a href="#">Confidențialitate</a></li></ul></div>
+        <div class="foot__col"><h4>// Social</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">Bandcamp</a></li><li><a href="#">SoundCloud</a></li></ul></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale"><span class="is-active">RO</span><span>EN — în lucru</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // theme
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // sub pill cycle
+    (function () {
+      const states = [
+        { lbl: "Watching", ico: "★", on: true  },
+        { lbl: "Tracking", ico: "◐", on: false },
+        { lbl: "Doar @menționat", ico: "@", on: false },
+        { lbl: "Muted", ico: "✕", on: false },
+      ];
+      let i = 0;
+      const el = document.getElementById('sub-pill');
+      if (!el) return;
+      el.addEventListener('click', () => {
+        i = (i + 1) % states.length;
+        const s = states[i];
+        el.querySelector('.fr-sub-pill__ico').textContent = s.ico;
+        el.querySelector('.fr-sub-pill__label').textContent = s.lbl;
+        el.classList.toggle('is-on', s.on);
+      });
+    })();
+
+    // ===== Replies data =====
+    const REPLIES = [
+      {
+        n: 2,
+        author: { init: "RS", name: "Rareș Sandu", at: "rares.s", trust: "veteran", trustLabel: "Veteran" },
+        time: "13.05.2026, 10:18 · acum 6 ore", edited: "editat acum 5h",
+        parent: null,
+        body: `<p>Test serios, mulțumesc că ai postat ABX-ul. Eu am făcut același experiment în 2023 pe TR-09 (boutique) vs 808 original — concluzia era similară. Diferența pe noise floor e cea mai greu de modelat exact.</p>
+               <p>Doar o observație: <strong>nu ai menționat ce voltaj era pe 808</strong>. Eu am observat că 808-urile vechi cu PSU original (cap-uri în PSU îmbătrânite) au noise/drift suplimentar față de cele cu PSU re-cap-uit. Poate de acolo vine diferența de noise floor pe care o auzi?</p>`,
+        util: 24, isOn: true, children: 0,
+      },
+      {
+        n: 3,
+        author: { init: "VB", name: "Vlad Băleanu", at: "vlad.b", trust: "veteran", trustLabel: "OP" },
+        time: "13.05.2026, 10:34 · acum 6 ore",
+        parent: { at: "rares.s", n: 2, preview: "Doar o observație: nu ai menționat ce voltaj era pe 808. Eu am observat că 808-urile vechi cu PSU original (cap-uri în PSU îmbătrânite) au noise/drift suplimentar față de cele cu PSU re-cap-uit." },
+        body: `<p>@rares.s — punctul valid. PSU-ul era original, fără service. Voi întreba prietenul dacă pot încerca cu un PSU re-cap-uit. Bănuiesc că dacă elimini noise floor de 65Hz, diferența se reduce drastic.</p>`,
+        util: 12, children: 0,
+      },
+      {
+        n: 4,
+        author: { init: "MM", name: "Mihaela M.", at: "mihaela_m", trust: "regular", trustLabel: "Regular" },
+        time: "13.05.2026, 11:02 · acum 5 ore",
+        parent: null,
+        body: `<p>Pe sistem PA mare diferențele sunt evidente — sunt mixer la 3 cluburi în București și am ambele într-un setup hybrid. Diferența cea mai mare nu e pe armonice, e pe <strong>tranzient</strong>: 808-ul are un atac mai „moale”, ceva ce nu prinde un sample.</p>
+               <p>Dar trebuie să fii sincer: 95% din audiență nu o să simtă asta vs un master bun pe TR-8S. Eu folosesc TR-8S live, 808 doar la studio session-uri cu vinyl print.</p>
+               <p>Vezi și acest video pe care l-am făcut anul trecut la Control:</p>`,
+        embed: { platform: "YouTube", title: "Mihaela @ Control · 808 + TR-8S hybrid live (full set)", sub: "youtube.com · 4 800 views" },
+        util: 41, children: 7, childrenPreview: "vlad.b, rares.s, tudor.b și 4 alții",
+      },
+      {
+        n: 5,
+        author: { init: "TB", name: "Tudor Bârsan", at: "tudor.b", trust: "regular", trustLabel: "Regular" },
+        time: "13.05.2026, 11:46 · acum 4 ore",
+        parent: { at: "mihaela_m", n: 4, preview: "Diferența cea mai mare nu e pe armonice, e pe tranzient: 808-ul are un atac mai „moale”, ceva ce nu prinde un sample." },
+        body: `<p>+1 pe tranzient. Cea mai bună soluție pe care am găsit-o pentru TR-8S e să adaugi un <code>Soft Clip</code> blând pe canalul kick (Saturn 2, drive ~15%, mix 60%) — recreează acel „roll-off” de atac al 808-ului original.</p>`,
+        util: 18, children: 0,
+      },
+      {
+        n: 6,
+        hidden: true,
+        author: { init: "??", name: "[user blocat]", at: "[ascuns]", trust: "regular" },
+        time: "13.05.2026, 12:10",
+      },
+      {
+        n: 7,
+        author: { init: "AB", name: "Andrei Buzea", at: "andrei.b", trust: "veteran", trustLabel: "Veteran" },
+        time: "13.05.2026, 13:08 · acum 3 ore",
+        parent: null,
+        body: `<p>Dezacord parțial cu „TR-8S suficient pentru 95%”. Depinde foarte tare de <em>contextul de productie</em>:</p>
+               <ul>
+                 <li>Pentru house/techno modern unde kick-ul e procesat oricum cu sidechain, transient shaper și saturare → DA, TR-8S e perfect.</li>
+                 <li>Pentru hip-hop instrumental, ambient sau experimental unde kick-ul e <strong>expus</strong> → diferența contează.</li>
+                 <li>Pentru vinyl mastering — diferența se aude clar după lacquer cutting. Cap-urile inductive ale console-urilor analogice „mușcă” diferit pe 808 real.</li>
+               </ul>
+               <p>Am Juno-60 + 808 în studio, ambele după service. Pentru proiectul curent (lo-fi hip-hop EP) folosesc doar 808-ul. Pentru DJ set-uri merg cu TR-8S.</p>`,
+        util: 32, children: 12, childrenPreview: "vlad.b, mihaela_m și 8 alții",
+      },
+      {
+        n: 8,
+        author: { init: "GO", name: "George O.", at: "george.o", trust: "regular", trustLabel: "New" },
+        time: "13.05.2026, 14:22 · acum 2 ore",
+        parent: null,
+        body: `<p>Întrebare naivă — pentru cineva care nu are buget de 808 real (cca 12-15 000 RON acum), care e cea mai bună <em>alternativă</em>? Behringer RD-8 sau să mă duc direct pe TR-8S second-hand?</p>`,
+        util: 6, children: 4, childrenPreview: "rares.s, tudor.b, andrei.b și 1 altul",
+      },
+      {
+        n: 9,
+        author: { init: "RS", name: "Rareș Sandu", at: "rares.s", trust: "veteran", trustLabel: "Veteran" },
+        time: "13.05.2026, 14:48 · acum 2 ore",
+        parent: { at: "george.o", n: 8, preview: "care e cea mai bună alternativă? Behringer RD-8 sau să mă duc direct pe TR-8S second-hand?" },
+        body: `<p>@george.o — TR-8S second-hand fără îndoială. Se găsește la 2 500–3 000 RON pe Bazar, are toate sound-urile Roland (808, 909, 707, 727, etc) și firmware-ul ACB v2.5 e foarte aproape de original. RD-8 are alte beneficii (cu adevărat analog) dar sunt mod-uri care contează doar dacă vrei să intri în patching CV.</p>`,
+        util: 14, children: 0,
+      },
+      {
+        n: 10,
+        author: { init: "LC", name: "Laur Constantinescu", at: "laur.c", trust: "regular", trustLabel: "Regular" },
+        time: "13.05.2026, 15:30 · acum 1 oră",
+        parent: null,
+        body: `<p>Ar fi interesant să facem un blind test pe forum — postezi 4 fișiere fără să spui care e care, vedem cât de tare ne descurcăm.</p>`,
+        util: 21, children: 3,
+      },
+    ];
+
+    function trustHtml(a) {
+      if (!a.trust) return '';
+      return `<span class="fr-trust is-${a.trust}">${a.trustLabel || a.trust}</span>`;
+    }
+
+    function embedHtml(e) {
+      if (!e) return '';
+      return `<a class="ft-embed" href="#">
+        <div class="ft-embed__media"><span class="ft-embed__play">▶</span></div>
+        <div class="ft-embed__body">
+          <span class="ft-embed__platform">${e.platform}</span>
+          <h4 class="ft-embed__title">${e.title}</h4>
+          <span class="ft-embed__sub">${e.sub}</span>
+        </div>
+      </a>`;
+    }
+
+    function postHtml(p) {
+      if (p.hidden) {
+        return `
+        <div class="ft-post" id="post-${p.n}" style="padding-top:8px;padding-bottom:8px">
+          <div class="ft-post__rail"></div>
+          <div class="ft-post__main">
+            <div class="ft-hidden">
+              <span>[ Postare #${p.n} ascunsă — utilizator blocat de tine ]</span>
+              <button type="button">Afișează oricum</button>
+            </div>
+          </div>
+        </div>`;
+      }
+      const parent = p.parent ? `
+        <a class="ft-quote-ref" data-toggle-parent="${p.n}" href="#post-${p.parent.n}">
+          <span>În răspuns la <span class="at">@${p.parent.at}</span> — Postare <span class="pn">#${p.parent.n}</span></span>
+          <span class="pv">Vezi preview</span>
+        </a>
+        <div class="ft-quote-preview" id="preview-${p.n}">
+          <span class="by">@${p.parent.at} a scris în #${p.parent.n}:</span>
+          ${p.parent.preview}
+        </div>` : '';
+      const defaultExpanded = p.children > 0 && p.children <= 5;
+      const children = p.children ? `
+        <button class="ft-children-toggle${defaultExpanded ? ' is-open' : ''}" data-toggle-children="${p.n}" type="button">
+          <span class="arrow">▸</span>
+          <span class="ft-children-toggle__label" data-open="Ascunde cele ${p.children} răspunsuri" data-closed="Afișează cele ${p.children} răspunsuri">${defaultExpanded ? `Ascunde cele ${p.children} răspunsuri` : `Afișează cele ${p.children} răspunsuri`}</span>
+          <span class="ft-children-toggle__preview">${p.childrenPreview || ''}</span>
+        </button>
+        <div class="ft-children${defaultExpanded ? ' is-open' : ''}" id="children-${p.n}"${defaultExpanded ? ' data-prefill="1"' : ''}></div>` : '';
+      return `
+      <article class="ft-post" id="post-${p.n}">
+        <div class="ft-post__rail">
+          <div class="ft-post__avatar">${p.author.init}</div>
+          <span class="ft-post__num">#${p.n}</span>
+        </div>
+        <div class="ft-post__main">
+          ${parent}
+          <header class="ft-post__head">
+            <span class="nm">${p.author.name}</span>
+            <span class="at">@${p.author.at}</span>
+            ${trustHtml(p.author)}
+            <span class="time">${p.time}${p.edited ? `<span class="edited">${p.edited}</span>` : ''}</span>
+          </header>
+          <div class="ft-prose">${p.body}${embedHtml(p.embed)}</div>
+          <div class="ft-actions">
+            <button class="ft-actions__btn ${p.isOn ? 'is-on' : ''}" data-util>
+              <svg><use href="#i-heart"/></svg>
+              <span class="ft-actions__count">${p.util}</span>
+              <span>Util</span>
+            </button>
+            <button class="ft-actions__btn">
+              <svg><use href="#i-reply"/></svg>
+              <span>Răspunde</span>
+            </button>
+            <button class="ft-actions__btn">
+              <svg><use href="#i-quote"/></svg>
+              <span>Cită</span>
+            </button>
+            <button class="ft-actions__btn" style="margin-left:auto">
+              <svg><use href="#i-more"/></svg>
+            </button>
+          </div>
+          ${children}
+        </div>
+      </article>`;
+    }
+
+    document.getElementById('ft-replies').innerHTML = REPLIES.map(postHtml).join('');
+
+    // gear illustrations
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // parent-preview toggle
+    document.querySelectorAll('[data-toggle-parent]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const n = a.dataset.toggleParent;
+        const pv = document.getElementById('preview-' + n);
+        const open = pv.classList.toggle('is-open');
+        a.querySelector('.pv').textContent = open ? 'Ascunde' : 'Vezi preview';
+      });
+    });
+
+    // children expand — pulls some sample inline children
+    const CHILDREN = {
+      4: [
+        { n: "4.1", author: { init: "VB", name: "vlad.b" }, body: "<p>+1, înregistrarea de la Control e o bună referință. Care e mixer-ul?</p>", time: "13.05 · 11:20" },
+        { n: "4.2", author: { init: "MM", name: "mihaela_m" }, body: "<p>@vlad.b — Allen&amp;Heath Xone:96, kick direct in channel 1, fără EQ pe el.</p>", time: "13.05 · 11:34" },
+        { n: "4.3", author: { init: "RS", name: "rares.s" }, body: "<p>Allen&amp;Heath ftw. Dar tot zic că pe instrumental fără sidechain, 808-ul e altceva.</p>", time: "13.05 · 11:48" },
+      ],
+      7: [
+        { n: "7.1", author: { init: "VB", name: "vlad.b" }, body: "<p>Andrei — exact așa văd și eu. La trap și hip-hop nu există substitut.</p>", time: "13.05 · 13:42" },
+        { n: "7.2", author: { init: "AB", name: "andrei.b" }, body: "<p>@vlad.b dacă vrei să auzi diferența pe vinyl, pot să-ți trimit un test pressing pe care l-am făcut la Berlin anul trecut.</p>", time: "13.05 · 13:58" },
+      ],
+      8: [
+        { n: "8.1", author: { init: "TB", name: "tudor.b" }, body: "<p>TR-8S, 100%. RD-8 are caracter analog dar nu replicheze cabinet-ul Roland.</p>", time: "13.05 · 14:34" },
+        { n: "8.2", author: { init: "AB", name: "andrei.b" }, body: "<p>+TR-8S. Plus că ai și 909, 707 în aceeași cutie.</p>", time: "13.05 · 14:40" },
+      ],
+      10: [
+        { n: "10.1", author: { init: "VB", name: "vlad.b" }, body: "<p>Bună idee — o pun la cale weekend-ul ăsta. Cine vrea să facă „panel-ul de juriu”?</p>", time: "13.05 · 15:42" },
+        { n: "10.2", author: { init: "MM", name: "mihaela_m" }, body: "<p>Eu! Și pot să aduc și un Linn LM-1 ca dummy comparativ.</p>", time: "13.05 · 15:51" },
+        { n: "10.3", author: { init: "AB", name: "andrei.b" }, body: "<p>Count me in. Putem face și RD-8 ca un al patrulea termen.</p>", time: "13.05 · 16:04" },
+      ],
+    };
+
+    function renderChildren(n, c) {
+      if (c.dataset.loaded) return;
+      const kids = CHILDREN[n] || [];
+      c.innerHTML = kids.map(k => `
+        <article class="ft-post" id="post-${k.n}">
+          <div class="ft-post__rail">
+            <div class="ft-post__avatar">${k.author.init}</div>
+            <span class="ft-post__num">#${k.n}</span>
+          </div>
+          <div class="ft-post__main">
+            <header class="ft-post__head">
+              <span class="nm">${k.author.name}</span>
+              <span class="at">@${k.author.name}</span>
+              <span class="time">${k.time}</span>
+            </header>
+            <div class="ft-prose">${k.body}</div>
+            <div class="ft-actions">
+              <button class="ft-actions__btn"><svg><use href="#i-heart"/></svg><span>Util</span></button>
+              <button class="ft-actions__btn"><svg><use href="#i-reply"/></svg><span>Răspunde</span></button>
+            </div>
+          </div>
+        </article>
+      `).join('');
+      c.dataset.loaded = '1';
+    }
+
+    function setChildrenState(btn, c, open) {
+      c.classList.toggle('is-open', open);
+      btn.classList.toggle('is-open', open);
+      const lbl = btn.querySelector('.ft-children-toggle__label');
+      if (lbl) lbl.textContent = open ? lbl.dataset.open : lbl.dataset.closed;
+      if (open) renderChildren(btn.dataset.toggleChildren, c);
+    }
+
+    // Prefill any children groups that default to expanded (≤5 sub-replies)
+    document.querySelectorAll('.ft-children[data-prefill]').forEach(c => {
+      renderChildren(c.id.replace('children-', ''), c);
+    });
+
+    document.querySelectorAll('[data-toggle-children]').forEach(b => {
+      b.addEventListener('click', () => {
+        const n = b.dataset.toggleChildren;
+        const c = document.getElementById('children-' + n);
+        setChildrenState(b, c, !c.classList.contains('is-open'));
+      });
+    });
+
+    // Bulk expand / collapse (header buttons)
+    function bulkSet(open) {
+      document.querySelectorAll('[data-toggle-children]').forEach(b => {
+        const c = document.getElementById('children-' + b.dataset.toggleChildren);
+        setChildrenState(b, c, open);
+      });
+    }
+    document.getElementById('expand-all').addEventListener('click', () => bulkSet(true));
+    document.getElementById('collapse-all').addEventListener('click', () => bulkSet(false));
+
+    // Util toggle
+    document.querySelectorAll('[data-util]').forEach(b => {
+      b.addEventListener('click', e => {
+        e.preventDefault();
+        const c = b.querySelector('.num, .ft-actions__count');
+        const isOn = b.classList.toggle('is-on');
+        const cur = parseInt(c.textContent, 10) || 0;
+        c.textContent = isOn ? cur + 1 : Math.max(0, cur - 1);
+      });
+    });
+
+    // Floating jump-to-newest — visible after user scrolls > 600px
+    const jump = document.getElementById('ft-jump');
+    const progress = document.getElementById('ft-progress');
+    window.addEventListener('scroll', () => {
+      const y = window.scrollY;
+      jump.classList.toggle('is-visible', y > 600);
+      // mock progress counter
+      const posts = document.querySelectorAll('.ft-post, .ft-op');
+      let topMost = 1;
+      posts.forEach(p => {
+        const r = p.getBoundingClientRect();
+        if (r.top < 200) topMost = Math.max(topMost, parseInt(p.id.replace('post-','')) || 1);
+      });
+      progress.textContent = topMost + ' / 143';
+    }, { passive: true });
+    jump.addEventListener('click', () => {
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tezaur — Întrebări · Forum — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.forum.css" />
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="06 Forum — category list (Tezaur)">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"><path d="M12 3l4 4-1 5 4 4-3 1-3-3-3 6-1-1 1-6-3-3 1-3 4-4z"/></symbol>
+      <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 4h12v17l-6-4-6 4V4z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link is-active" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <a class="icon-btn" href="Forum - Cauta.html" aria-label="Caută"><svg><use href="#i-search"/></svg></a>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Forum.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Înapoi la Forum
+      </a>
+      <span class="sep">·</span>
+      <a href="Forum.html">Forum</a>
+      <span class="sep">/</span>
+      <span class="cur">Tezaur — Întrebări</span>
+    </nav>
+
+    <!-- CATEGORY STRIP -->
+    <section class="fl-cat-strip crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="fl-cat-strip__num">01<span class="dot">.</span></div>
+      <div class="fl-cat-strip__body">
+        <p class="fl-cat-strip__kicker">Categorie · gear Q&amp;A · canonic via Tezaur</p>
+        <h1 class="fl-cat-strip__title">Tezaur<br/>Întrebări</h1>
+        <p class="fl-cat-strip__desc">
+          Întrebări concrete despre un sintetizator, drum machine, sampler sau modular din enciclopedie.
+          Setup, troubleshooting, comparații, recomandări — fiecare thread se leagă de un gear specific.
+          Răspunsurile bune migrează ca Q&amp;A canonic pe pagina aparatului.
+        </p>
+      </div>
+      <div class="fl-cat-strip__meta">
+        <div class="fl-cat-stat">
+          <span class="v">487</span>
+          <span class="k">threaduri</span>
+        </div>
+        <button class="fr-sub-pill is-on" id="sub-pill" type="button">
+          <span class="fr-sub-pill__ico">★</span>
+          <span class="fr-sub-pill__label">Watching</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ACTION ROW -->
+    <div class="fl-actions">
+      <a class="fl-actions__primary" href="Forum - Nou.html">Începe un thread nou</a>
+      <div class="fl-sort-tabs">
+        <a href="#" class="is-active">Activitate recentă</a>
+        <a href="#">Cele mai noi</a>
+        <a href="#">Cele mai răspunse</a>
+        <a href="#">Necitite <span class="num">12</span></a>
+      </div>
+    </div>
+
+    <!-- PINNED -->
+    <section class="fl-pinned">
+      <header class="fl-pinned__head">
+        <svg><use href="#i-pin"/></svg>
+        Anunț · pinned de moderatori (2)
+      </header>
+
+      <a class="fl-row" href="Forum - Thread TR-808.html" style="display:grid">
+        <div class="fl-row__pin"><svg><use href="#i-pin"/></svg></div>
+        <div class="fl-row__body">
+          <div class="fl-row__title-line">
+            <h3 class="fl-row__title">Citește înainte să postezi — etichetă, format, MODs vs DAW vs Hardware</h3>
+            <span class="fl-row__badge">Anunț</span>
+          </div>
+          <p class="fl-row__snippet">Reguli scurte despre cum formulezi o întrebare ca să primești răspunsuri rapide. Include lista de informații pe care le ceri întotdeauna la troubleshooting (firmware, voltaj, OS, condiții).</p>
+          <div class="fl-row__tags">
+            <span class="fr-tag">regulament</span>
+            <span class="fr-tag">help-format</span>
+            <span class="fr-tag">faq</span>
+          </div>
+        </div>
+        <div class="fl-row__activity">
+          <div class="by-row">
+            <span class="avatar">MD</span>
+            <span><strong>mod.danut</strong> <span class="acc">· mod</span></span>
+          </div>
+          <span class="last">acum 2 zile · 218 vizualizări</span>
+        </div>
+        <div class="fl-row__replies">
+          <span class="v">28</span>
+          <span class="k">răspunsuri</span>
+          <span class="util">142</span>
+        </div>
+      </a>
+
+      <a class="fl-row" href="Forum - Thread TR-808.html" style="display:grid">
+        <div class="fl-row__pin"><svg><use href="#i-pin"/></svg></div>
+        <div class="fl-row__body">
+          <div class="fl-row__title-line">
+            <h3 class="fl-row__title">Lista cu service-uri sintetizatoare verificate de comunitate (RO + diaspora)</h3>
+            <span class="fl-row__badge">Anunț</span>
+          </div>
+          <p class="fl-row__snippet">Bogdan Mihai în București, Răzvan în Cluj, Studio 9 în Iași. Adăugați în comentarii cu adresă, contact și tipurile de aparate la care lucrează. Update lunar.</p>
+          <div class="fl-row__tags">
+            <span class="fr-tag">service</span>
+            <span class="fr-tag">reparații</span>
+            <span class="fr-tag">romania</span>
+          </div>
+        </div>
+        <div class="fl-row__activity">
+          <div class="by-row">
+            <span class="avatar">MD</span>
+            <span><strong>mod.danut</strong> <span class="acc">· mod</span></span>
+          </div>
+          <span class="last">acum 6 zile · 1 240 vizualizări</span>
+        </div>
+        <div class="fl-row__replies">
+          <span class="v">76</span>
+          <span class="k">răspunsuri</span>
+          <span class="util">312</span>
+        </div>
+      </a>
+    </section>
+
+    <!-- THREAD LIST -->
+    <div class="fl-list" id="thread-list"></div>
+
+    <!-- PAGINATION -->
+    <nav class="fr-pag" aria-label="Pagini">
+      <span>Pagina <strong style="color:var(--fg)">1</strong> din 21 · 487 threaduri în Tezaur — Întrebări</span>
+      <div class="fr-pag__nums">
+        <span class="fr-pag__num is-disabled">‹</span>
+        <a class="fr-pag__num is-active" href="#">1</a>
+        <a class="fr-pag__num" href="#">2</a>
+        <a class="fr-pag__num" href="#">3</a>
+        <a class="fr-pag__num" href="#">4</a>
+        <span class="fr-pag__num is-ellipsis">…</span>
+        <a class="fr-pag__num" href="#">21</a>
+        <a class="fr-pag__num" href="#">›</a>
+      </div>
+    </nav>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col"><h4>// Platformă</h4><ul><li><a href="Tezaur.html">Tezaur</a></li><li><a href="Bazar.html">Bazar</a></li><li><a href="Revista.html">Revistă</a></li><li><a href="Forum.html">Forum</a></li></ul></div>
+        <div class="foot__col"><h4>// Sintezaur</h4><ul><li><a href="#">Despre</a></li><li><a href="#">Contact</a></li><li><a href="#">Termeni</a></li><li><a href="#">Confidențialitate</a></li></ul></div>
+        <div class="foot__col"><h4>// Social</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">Bandcamp</a></li><li><a href="#">SoundCloud</a></li></ul></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale"><span class="is-active">RO</span><span>EN — în lucru</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // theme
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // subscribe pill cycle
+    (function () {
+      const states = [
+        { lbl: "Watching",   ico: "★", on: true  },
+        { lbl: "Tracking",   ico: "◐", on: false },
+        { lbl: "Doar @menționat", ico: "@", on: false },
+        { lbl: "Muted",      ico: "✕", on: false },
+      ];
+      let i = 0;
+      const el = document.getElementById('sub-pill');
+      el.addEventListener('click', () => {
+        i = (i + 1) % states.length;
+        const s = states[i];
+        el.querySelector('.fr-sub-pill__ico').textContent = s.ico;
+        el.querySelector('.fr-sub-pill__label').textContent = s.lbl;
+        el.classList.toggle('is-on', s.on);
+      });
+    })();
+
+    // thread data
+    const THREADS = [
+      {
+        unread: true, hot: true,
+        title: "TR-808 vs TR-8S — chiar e o diferență audibilă în 2026?",
+        snippet: "Am ascultat ABX cu 6 piese diferite, headphones Sennheiser HD600 + interfață Apollo Twin. Iată ce am observat: pe kick-uri lungi cu decay max, 808-ul original are armonice impare suplimentare pe primii 80ms...",
+        gear: [{ key: "tr-808", brand: "Roland", name: "TR-808" }, { key: "tr-909", brand: "Roland", name: "TR-8S" }],
+        tags: ["analog-vs-digital", "abx-test", "drum-machine"],
+        by: { init: "VB", name: "vlad.b" },
+        last: { by: "rares.s", time: "acum 8 min" },
+        replies: 142, util: 86,
+      },
+      {
+        unread: true,
+        title: "Clock drift între Digitakt II și OP-1 după ~30 min — există fix pentru asta?",
+        snippet: "MIDI clock OUT de pe Digitakt → OP-1 prin cablu MIDI 30cm. După cca 30 minute de play, OP-1-ul începe să rămână în urmă cu 2-3ms și crește. Am încercat firmware 1.51 și 1.52A, același rezultat.",
+        gear: [{ key: "digitakt-ii", brand: "Elektron", name: "Digitakt II" }, { key: "op-1-field", brand: "TE", name: "OP-1 Field" }],
+        tags: ["midi-clock", "drift", "sync"],
+        by: { init: "RS", name: "rares.s" },
+        last: { by: "tudor.b", time: "acum 14 min" },
+        replies: 68, util: 41,
+      },
+      {
+        hot: true, solved: true,
+        title: "Primul rack 84HP — ce module sunt obligatorii și ce să las pe mai târziu?",
+        snippet: "Bugetul e ~6000 RON pentru tot, am deja Make Noise 0-Coast și o tastatură Arturia KeyStep. Vreau să fac primul case de Eurorack — caut un VCO calitate-preț, un filter, un VCA dublu și un sequencer simplu.",
+        gear: [{ key: "0-coast", brand: "Make Noise", name: "0-Coast" }],
+        tags: ["primul-rack", "buget-6k", "case-84hp"],
+        by: { init: "AN", name: "anaaaa" },
+        last: { by: "mihaela_m", time: "acum 22 min" },
+        replies: 87, util: 132,
+      },
+      {
+        title: "Juno-60 după service — slidere noi, dar pătru voci au tracking diferit. Calibrare DCO?",
+        snippet: "Tocmai am primit înapoi Juno-60 de la atelier (martie 2026, set complet de slidere Mouser). Pe sunet pad lung observ că vocile 1, 3 nu se acordează perfect cu 2, 4 — diferență cca 5-8 cenți. Ce e procedura?",
+        gear: [{ key: "juno-60", brand: "Roland", name: "Juno-60" }],
+        tags: ["calibrare", "dco", "tuning"],
+        by: { init: "AB", name: "andrei.b" },
+        last: { by: "bogdan.s", time: "acum 38 min" },
+        replies: 23, util: 31,
+      },
+      {
+        title: "Cel mai bun preamp pentru vocale lo-fi sub 2000 RON?",
+        snippet: "Caut un preamp single-channel pentru voce — gen distorsiune subtilă, caracter „de cameră”. Am încercat Klark Teknik 1073 mini și mi se pare prea curat. Cineva cu experiență Warm Audio WA12 sau Heritage HA-73?",
+        gear: [],
+        tags: ["preamp", "vocale", "lo-fi", "sub-2k"],
+        by: { init: "MM", name: "mihaela_m" },
+        last: { by: "vlad.b", time: "acum 52 min" },
+        replies: 52, util: 27,
+      },
+      {
+        title: "MS-20 mini — patch cable management pentru live? Cum o faceți voi?",
+        snippet: "Pe scenă cu MS-20 plin de patch-uri arată ca un cuib de cabluri. Caut un sistem ordonat — culori pe destinație, etichete, lungimi standard. Idei? Brand-uri de patch cables din care merită cumpărate seturi?",
+        gear: [{ key: "ms-20", brand: "Korg", name: "MS-20 mini" }],
+        tags: ["live", "patch-cables", "workflow"],
+        by: { init: "TB", name: "tudor.b" },
+        last: { by: "anaaaa", time: "acum 1 oră" },
+        replies: 19, util: 14,
+      },
+      {
+        title: "Prophet-6 desktop sau Take 5 pentru pads polifonice — fără să mă uit la preț?",
+        snippet: "Compar Prophet-6 cu Take 5 pe sound design pads. Take 5 e clar mai ieftin și are 5 voci în loc de 6, dar cum se traduce asta în sunet final? Cineva cu ambele în studio?",
+        gear: [{ key: "prophet-6", brand: "Sequential", name: "Prophet-6" }, { key: "take-5", brand: "Sequential", name: "Take 5" }],
+        tags: ["polifonie", "pads", "comparație"],
+        by: { init: "RC", name: "radu.c" },
+        last: { by: "andrei.b", time: "acum 2 ore" },
+        replies: 41, util: 22,
+      },
+      {
+        unread: true,
+        title: "MicroFreak — cum scapi de aliasing pe wavetable la note înalte?",
+        snippet: "Wavetable engine sună uimitor pe note medii (C3-C5) dar peste C5 încep să apară armonice metalice care îmi rup mix-ul. Filtru low-pass nu rezolvă complet — par să vină de la sample rate. Există un trick?",
+        gear: [{ key: "microfreak", brand: "Arturia", name: "MicroFreak" }],
+        tags: ["aliasing", "wavetable", "high-notes"],
+        by: { init: "LC", name: "laur.c" },
+        last: { by: "rares.s", time: "acum 3 ore" },
+        replies: 11, util: 8,
+      },
+      {
+        title: "Volca FM Mk1 — cum încarci patches custom prin SysEx fără să crashezi unitate?",
+        snippet: "Folosesc MIDI-OX pe Mac (M1, Sonoma 14.5). Trimit SysEx încărcate dintr-un DX7 vechi → Volca prin TRS adapter. Funcționează 4-5 patches apoi unit-ul îngheață și trebuie să fac power cycle.",
+        gear: [{ key: "volca-fm", brand: "Korg", name: "Volca FM" }, { key: "dx7", brand: "Yamaha", name: "DX7" }],
+        tags: ["sysex", "patches", "mac", "midi-ox"],
+        by: { init: "GO", name: "george.o" },
+        last: { by: "tudor.b", time: "acum 5 ore" },
+        replies: 7, util: 4,
+      },
+      {
+        solved: true,
+        title: "Subsequent 37 + pedal de sustain → CV out pentru extern. E posibil?",
+        snippet: "Vreau să folosesc pedala sustain de pe Subsequent 37 ca un trigger CV pentru un envelope dintr-un Eurorack extern. Există jack-uri pentru asta sau trebuie un Expert Sleepers ES-8?",
+        gear: [{ key: "subsequent-37", brand: "Moog", name: "Subsequent 37" }],
+        tags: ["cv", "sustain", "expansion"],
+        by: { init: "BS", name: "bogdan.s" },
+        last: { by: "andrei.b", time: "acum 8 ore" },
+        replies: 16, util: 19,
+      },
+      {
+        title: "Octatrack MKII vs Digitakt II pentru sample mangling live — care?",
+        snippet: "Performance live cu un set bazat pe sample mangling complex (timestretch, scrub, retrigger pe note înalte). Care e mai capabil pe scenă fără să-ți spargă creierul? Vreau învățare ~3 luni.",
+        gear: [{ key: "octatrack-mk2", brand: "Elektron", name: "Octatrack MKII" }, { key: "digitakt-ii", brand: "Elektron", name: "Digitakt II" }],
+        tags: ["sample-mangling", "live", "elektron"],
+        by: { init: "IL", name: "iulian.l" },
+        last: { by: "mihaela_m", time: "acum 11 ore" },
+        replies: 34, util: 28,
+      },
+      {
+        title: "Recomandări de stație de lipit pentru DIY Eurorack — sub 800 RON?",
+        snippet: "Vreau să încep DIY Eurorack — primul proiect: un Music Thing Radio Music. Am nevoie de o stație decentă cu reglaj temperatura, vârfuri schimbabile. T12 clone de pe AliExpress sau direct Hakko entry?",
+        gear: [],
+        tags: ["diy", "tools", "soldering"],
+        by: { init: "DM", name: "dragoș.m" },
+        last: { by: "rares.s", time: "ieri · 22:14" },
+        replies: 28, util: 17,
+      },
+    ];
+
+    function tagsHtml(t) {
+      const gear = (t.gear || []).map(g => `
+        <span class="fr-gear-chip" role="link" tabindex="0">
+          <span class="fr-gear-chip__photo"><span class="gear-fill" data-gear="${g.key}"></span></span>
+          ${g.brand} ${g.name}
+        </span>`).join('');
+      const free = (t.tags || []).map(x => `<span class="fr-tag">${x}</span>`).join('');
+      return gear + free;
+    }
+
+    function rowHtml(t) {
+      const badges = [];
+      if (t.solved) badges.push('<span class="fl-row__badge is-solved">✓ Rezolvat</span>');
+      if (t.hot)    badges.push('<span class="fl-row__badge is-hot">Hot</span>');
+      return `
+      <a class="fl-row ${t.unread ? 'is-unread' : ''}" href="Forum - Thread TR-808.html">
+        <div class="fl-row__pin" style="visibility:hidden"></div>
+        <div class="fl-row__body">
+          <div class="fl-row__title-line">
+            <h3 class="fl-row__title">${t.title}</h3>
+            ${badges.join('')}
+          </div>
+          <p class="fl-row__snippet">${t.snippet}</p>
+          <div class="fl-row__tags">${tagsHtml(t)}</div>
+        </div>
+        <div class="fl-row__activity">
+          <div class="by-row">
+            <span class="avatar">${t.by.init}</span>
+            <span><strong>@${t.by.name}</strong> a pornit</span>
+          </div>
+          <span class="last">ultimul · <strong style="color:var(--fg)">@${t.last.by}</strong> · ${t.last.time}</span>
+        </div>
+        <div class="fl-row__replies">
+          <span class="v">${t.replies}</span>
+          <span class="k">răspunsuri</span>
+          <span class="util">${t.util}</span>
+        </div>
+      </a>`;
+    }
+
+    document.getElementById('thread-list').innerHTML = THREADS.map(rowHtml).join('');
+
+    // inject gear illustrations
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+  </script>
+</body>
+</html>

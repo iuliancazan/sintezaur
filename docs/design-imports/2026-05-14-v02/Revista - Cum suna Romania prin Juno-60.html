@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cum sună România prin Juno-60 — Revistă — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="07 Revista — article (Khidja)">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link is-active" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Revista.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Înapoi la Revistă
+      </a>
+      <span class="sep">·</span>
+      <a href="Revista.html">Revistă</a>
+      <span class="sep">/</span>
+      <a href="#">Interviuri</a>
+      <span class="sep">/</span>
+      <span class="cur">Cum sună România prin Juno-60</span>
+    </nav>
+
+    <!-- COVER -->
+    <section class="ad-cover crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="gear-fill" data-gear="juno-60">
+        <img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="Khidja în studio cu Juno-60" onerror="this.remove()" />
+      </div>
+      <div class="ad-cover__cap">
+        <span><span style="color:var(--accent)">Foto · </span>Khidja în studio · București, aprilie 2026</span>
+        <span>© Andrei Mihalache · pentru Sintezaur</span>
+      </div>
+    </section>
+
+    <!-- HEAD -->
+    <header class="ad-head crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <span class="ad-head__pillar">Interviu · Featured</span>
+      <h1 class="ad-head__title">Cum sună<br/>România prin<br/>Juno-60<span class="dot">.</span></h1>
+      <p class="ad-head__deck">
+        Portret cu <strong>Khidja</strong> și colecția lor de polifonice analogice. O conversație despre
+        tuning instabil, despre Bucureștiul de noapte și despre de ce un Juno reparat de mâna a treia
+        poate fi cel mai bun preț pe care o să-l plătești vreodată pentru un sunet.
+      </p>
+      <div class="ad-head__byline">
+        <div class="author">
+          <span class="avatar">AM</span>
+          <div class="meta">
+            <span class="nm">Andrei Mihalache</span>
+            <span class="role">Editor-șef Revistă · 38 articole</span>
+          </div>
+        </div>
+        <div class="pipe">
+          <span>14 Mai 2026</span>
+          <span>12 min citire</span>
+          <span>2 847 cuvinte</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN: body + rail -->
+    <div class="ad-main">
+
+      <article class="ad-body">
+
+        <p class="lede">
+          La etajul doi al unei case interbelice din Cotroceni, două Juno-uri stau spate-n spate pe
+          aceeași masă de stejar. Unul din 1982, primul an de producție. Celălalt, un Juno-106 din 1984
+          — cel cu MIDI, cel pe care toată lumea îl rupea. <strong>Khidja</strong> — Florentin și Andrei —
+          le-au cumpărat la un an distanță, pe Reverb, ambele cu service făcut la Berlin. Astăzi sunt
+          centrul a tot ce iese din studio.
+        </p>
+
+        <p>
+          <span class="dropcap">A</span>m ajuns la ei pe la șase după-amiază, când lumina cădea exact peste
+          un perete de 70 de CD-uri cu fond galben — Pet Shop Boys, Joe Meek, Tony Allen, Ata Kak.
+          „Astea sunt jumătate din motivul pentru care am cumpărat Juno-ul," spune Andrei. „Cealaltă
+          jumătate e că pluginele nu rezolvă niciodată chorus-ul." Florentin pornește unitatea din '82,
+          apasă pe taste, lasă filtrul să se deschidă lent. Nimic nu e modulat — și totuși camera devine
+          mai mare.
+        </p>
+
+        <p>
+          Khidja există ca duo de aproximativ cincisprezece ani. Au lansat pe Malka Tuti, pe ESP Institute,
+          pe Cititon. Au făcut DJ-set-uri lungi de patru ore în club-uri din Tel Aviv, Tbilisi, Berlin și
+          mai ales acasă, la Guesthouse și Macaz. Și au scris, treptat, una dintre cele mai recognoscibile
+          semnături sonore din scena est-europeană contemporană: percuții lente, sintetizatoare lăsate să
+          respire, voci tăiate, momente lungi în care nu se întâmplă mai nimic — și brusc se întâmplă tot.
+        </p>
+
+        <h2>Întâi a fost un DX7. Apoi a venit Juno-ul</h2>
+
+        <p>
+          „Primul nostru sintetizator a fost un DX7 Mk1 cumpărat la Cluj în 2010, două sute de euro," spune
+          Florentin. „Era exact ce ne trebuia atunci — bell-uri, basuri FM, sunete metalice. Dar după șase
+          luni am realizat că nu avea ce voiam pentru pads. Polifonic, analog, cald. Atunci am început să
+          caut un Juno." Au cumpărat un Juno-106 prin '12 — la 800 de euro, din Germania, cu vocile reparate.
+        </p>
+
+        <p>
+          Juno-60 a venit zece ani mai târziu, în 2022. „Eram în Berlin pentru două săptămâni și am intrat
+          la <em>Schneider's Laden</em>. Aveau unul la raft, recent service-uit. L-am cumpărat în ziua aia,
+          fără să gândesc. 2 100 de euro. Astăzi probabil costă 2 800."
+        </p>
+
+        <a class="ad-gear-inline" href="Tezaur - Roland Juno-60.html">
+          <div class="mini"><div class="gear-fill" data-gear="juno-60"><img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="" onerror="this.remove()" /></div></div>
+          <div class="mid">
+            <span class="lbl">// Gear menționat</span>
+            <span class="tt">Roland Juno-60</span>
+            <span class="meta">1982 · 6 voci · 87 persoane dețin pe Sintezaur</span>
+          </div>
+          <span class="arr">→</span>
+        </a>
+
+        <p>
+          Florentin tocmai a salvat un patch nou pe poziția 47. Sunetul e un pad larg, cu detuning subtil
+          pe DCO și chorus-ul Mode II pornit la maxim. „E pentru un track la care lucrez de patru luni.
+          Sample-ul ăsta îl țineam din 2019, dar n-am știut ce să fac cu el până luna asta."
+        </p>
+
+        <blockquote class="pullquote">
+          Plug-in-urile sunt aproape, dar nu sunt acolo. Sunetul ăla nu îl mai face nimeni — și nici nu o
+          să-l mai facă vreodată. E o întâlnire între componente care nu mai există.
+          <cite>— Florentin, Khidja</cite>
+        </blockquote>
+
+        <h2>Despre tuning instabil și despre proprietate</h2>
+
+        <p>
+          „Juno-60 nu se dezacordează — asta e diferența mare față de Prophet sau Polysix," spune Andrei.
+          „Are DCO-uri, oscilatoare controlate digital. Sunetul rămâne analog, dar tuning-ul e perfect, mereu.
+          Asta a fost revoluția lui Roland în '82, asta e motivul pentru care toată lumea l-a cumpărat — și
+          asta e motivul pentru care încă ne uităm la el ca la un instrument de live."
+        </p>
+
+        <p>
+          Întreb dacă au modificat ceva la unitate. Florentin râde. „Nu e instrumentul nostru. Adică, da, e
+          al nostru — dar a trecut prin patru oameni înainte. Toți au lăsat ceva pe el. Slidere refăcute,
+          un transformator nou, un mod MIDI adăugat în '15. Noi suntem doar paznicii lui de la 2022 încoace.
+          La un moment dat o să-l vindem unui copil de 19 ani care vrea exact aceste pads și o să fie corect."
+        </p>
+
+        <figure>
+          <div class="ad-fig-wrap">
+            <div class="gear-fill" data-gear="prophet-6">
+              <img class="gear-fill__photo" src="https://i.ytimg.com/vi/m65rAfsjllw/maxresdefault.jpg" alt="Studio Khidja — masa cu Prophet-6 și Juno" onerror="this.remove()" />
+            </div>
+          </div>
+          <figcaption>Masa de lucru — Prophet-6 desktop în prim plan, Juno-60 în background, masa de mixaj un Soundcraft Series 200B cumpărat în 2018 la 500 EUR.</figcaption>
+        </figure>
+
+        <p>
+          Asta e o atitudine pe care o întâlnesc des când vorbesc cu producători români din generația lor.
+          Instrumentele sunt scumpe, dar nu sunt sacre. Trec prin mâini. Se repară. Se vând când nu mai e
+          nevoie de ele. Există un fel de circulație onestă pe care scena americană sau cea germană o pierd,
+          paradoxal, exact pentru că au mai mulți bani. La București, un Juno-60 e un Juno-60, nu un object
+          de muzeu.
+        </p>
+
+        <h2>Setup-ul actual și ce se aude pe noile lansări</h2>
+
+        <p>
+          Camera de control nu e mare — aproximativ 14 metri pătrați. Sunt acolo: cele două Juno, un
+          Prophet-6 desktop cumpărat anul trecut, un DX7 II FD pe care l-au păstrat ca artifact (rar
+          îl folosesc), o cutie Eurorack mică de 84HP cu module Mutable, un Soundcraft de mixaj din anii
+          '80, două perechi de monitoare Genelec 8030 și un Tannoy ascuns sub o pătură pentru moments
+          când vor low-end real.
+        </p>
+
+        <p>
+          Computerul rulează Ableton Live 12. „Folosim Live ca tape machine, în principal. Înregistrăm
+          în el, dar nu prea programăm în el. Sintezele se fac pe hardware, toate. Pluginele intră doar la
+          mix și la mastering — Soundtoys, FabFilter, FF Decapitator când e nevoie de saturație serioasă."
+        </p>
+
+        <h3>Pe ce lucrează acum</h3>
+
+        <p>
+          Un album nou pentru Malka Tuti, planificat pentru toamna 2026. Nouă piese, jumătate scrise. „E
+          mai lent decât tot ce am făcut până acum. Tempouri sub 100. Mai multă voce — am început să cântăm
+          noi pe câteva piese, ceea ce nu am mai făcut niciodată." Vorbim despre influențe: Caetano Veloso,
+          un album obscur Bulgarian Voices Angelite din '88, demo-urile lui Beverly Glenn-Copeland.
+        </p>
+
+        <a class="ad-gear-inline" href="#">
+          <div class="mini"><div class="gear-fill" data-gear="prophet-6"><img class="gear-fill__photo" src="https://i.ytimg.com/vi/m65rAfsjllw/maxresdefault.jpg" alt="" onerror="this.remove()" /></div></div>
+          <div class="mid">
+            <span class="lbl">// Gear menționat</span>
+            <span class="tt">Sequential Prophet-6 Desktop</span>
+            <span class="meta">2015 · 6 voci · 34 persoane dețin pe Sintezaur</span>
+          </div>
+          <span class="arr">→</span>
+        </a>
+
+        <p>
+          „Prophet-6-ul l-am cumpărat pentru piesa asta nouă pe care încercăm să o facem din 2023," spune
+          Andrei. „Aveam nevoie de un poly cu envelope-uri mai rapide decât Juno-ul, cu mai mult <em>punch</em>.
+          Prophet-ul face exact asta. Dar e politicos. Juno-ul e răbdător, Juno-ul cântă singur dacă îl lași.
+          Prophet-ul vrea să fie programat."
+        </p>
+
+        <h2>Despre piață și despre nostalgie sănătoasă</h2>
+
+        <p>
+          Întreb ce cred despre creșterea prețurilor la vintage analog în ultimii cinci ani. „E nasoală,"
+          răspunde Florentin imediat. „Sincer. Acum un copil de 22 de ani nu poate cumpăra un Juno-60. În
+          2012 puteai. Asta înseamnă că o estetică sonoră se închide într-o pătură demografică tot mai mică,
+          ceea ce e exact opusul a ce ar trebui să facă instrumentele."
+        </p>
+
+        <p>
+          „Există însă alternative bune," continuă Andrei. „Behringer face acum clone serioase — Pro-1, Model D,
+          Poly D. Roland are seria Boutique, miniaturi digitale ale clasicilor. Korg face Volca-uri care
+          sună grozav pentru cât plătești. Generația tânără are opțiuni — nu sunt vintage, dar fac muzică
+          bună cu ele. Ceea ce e <strong>cel mai important lucru</strong>."
+        </p>
+
+        <blockquote class="pullquote">
+          Nu instrumentul face muzica. Instrumentul îți permite muzica. Diferența asta o învățăm târziu —
+          dar o învățăm.
+          <cite>— Andrei, Khidja</cite>
+        </blockquote>
+
+        <p>
+          Lumina a dispărut de mult, e aproape nouă seara. Florentin pune un track nou pe care îl mixează —
+          basurile sunt din Juno-106, lead-ul e din Prophet, pad-urile sunt din Juno-60 cu chorus II. La
+          minutul patru intră o voce românească, neașteptată, foarte joasă, aproape vorbită. „E sora lui,"
+          îmi spune Florentin. „A venit luna trecută. Am înregistrat-o jumătate de oră, asta a ieșit. Nu
+          știam că o să iasă piesa asta."
+        </p>
+
+        <p>
+          La plecare, le mulțumesc pentru timp. „Mai vino," spune Andrei. „Săptămâna viitoare ajunge un OB-6
+          de la Berlin. Vrem să-l auzi în spațiul ăsta înainte să decidem dacă îl ținem sau îl trimitem
+          mai departe."
+        </p>
+
+        <p style="color:var(--fg-muted); font-family:var(--font-mono); font-size:12px; letter-spacing:0.08em; padding-top:24px; border-top:1px dashed var(--line);">
+          — Khidja lansează un nou album în octombrie 2026 pe Malka Tuti. Pot fi urmăriți pe
+          <a href="#" style="color:var(--accent); border-bottom:1px solid var(--accent)">Bandcamp</a>,
+          <a href="#" style="color:var(--accent); border-bottom:1px solid var(--accent)">Instagram</a> și
+          ocazional în club-urile din Capitală.
+        </p>
+
+        <!-- TAGS -->
+        <div class="ad-tags">
+          <span class="ad-tags__label">// Tag-uri</span>
+          <a class="ad-tag" href="#">Roland Juno-60</a>
+          <a class="ad-tag" href="#">Khidja</a>
+          <a class="ad-tag" href="#">Interviu</a>
+          <a class="ad-tag" href="#">Polifonic analog</a>
+          <a class="ad-tag" href="#">Studio București</a>
+          <a class="ad-tag" href="#">Malka Tuti</a>
+          <a class="ad-tag" href="#">Producători români</a>
+        </div>
+
+        <!-- ENGAGE -->
+        <div class="ad-engage">
+          <div class="ad-engage__cell is-accent">
+            <span class="v">2 418</span>
+            <span class="k">Citiri</span>
+          </div>
+          <div class="ad-engage__cell">
+            <span class="v">142</span>
+            <span class="k">♥ Apreciază</span>
+          </div>
+          <div class="ad-engage__cell">
+            <span class="v">38</span>
+            <span class="k">Comentarii</span>
+          </div>
+          <div class="ad-engage__cell">
+            <span class="v">86</span>
+            <span class="k">Distribuie</span>
+          </div>
+        </div>
+
+        <!-- AUTHOR BIO -->
+        <div class="ad-author-card">
+          <span class="avatar">AM</span>
+          <div class="bio">
+            <span class="nm">Andrei Mihalache</span>
+            <span class="role">Editor-șef Revistă · 38 articole · Sintezaur din 2024</span>
+            <span class="desc">
+              Scrie despre electronic music tech românesc din 2015. Înainte de Sintezaur, a contribuit
+              la Stilete, Resident Advisor și Decoded Magazine. Locuiește în București și nu deține
+              niciun Juno.
+            </span>
+          </div>
+          <a class="follow" href="#">+ Urmărește</a>
+        </div>
+
+        <!-- COMMENTS -->
+        <div class="ad-comments">
+          <header class="ad-comments__head">
+            <h3>38 Comentarii<span style="color:var(--accent)">.</span></h3>
+            <span style="font-family:var(--font-mono); font-size:11px; letter-spacing:0.12em; color:var(--fg-muted); text-transform:uppercase">Sortare · Cele mai apreciate</span>
+          </header>
+
+          <div class="ad-comments__write">
+            <span class="avatar">TU</span>
+            <div class="col">
+              <textarea placeholder="Scrie un comentariu… Markdown ok. Fii prietenos."></textarea>
+              <div class="row">
+                <span class="hint">// Comentariile pe Sintezaur sunt moderate ușor — fără spam, fără atacuri personale</span>
+                <button type="button">Publică →</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ad-comment">
+            <span class="avatar">VP</span>
+            <div class="body">
+              <div class="row1">
+                <span class="nm">@vladpetre</span>
+                <span class="badge">Deține Juno-60</span>
+                <span>· acum 4 ore</span>
+              </div>
+              <p class="txt">
+                Articol grozav. Eu am cumpărat un Juno-60 acum doi ani, exact din motivele de care vorbește
+                Florentin — pad-urile pluginelor nu rezolvau. Diferența mare însă e că pe ăla mi-l vând
+                anul viitor. Nu pot să țin trei polifonice și nu am sens economic să o fac. Are dreptate
+                Andrei când spune că trecem instrumentele prin mâini.
+              </p>
+              <div class="actions">
+                <a href="#">♥ 24</a>
+                <a href="#">Răspunde</a>
+                <a href="#">Citează</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="ad-comment">
+            <span class="avatar">MD</span>
+            <div class="body">
+              <div class="row1">
+                <span class="nm">@maria.d</span>
+                <span>· acum 8 ore</span>
+              </div>
+              <p class="txt">
+                Mulțumesc pentru context — eu sunt din generația tânără care nu poate cumpăra un Juno-60 și
+                lucrez cu Boutique JU-06A. Sună bine pentru ce fac, dar e altceva. Articolul ăsta mă face
+                să nu mai am complexe, totuși. Faceți muzică cu ce aveți.
+              </p>
+              <div class="actions">
+                <a href="#">♥ 18</a>
+                <a href="#">Răspunde</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="ad-comment">
+            <span class="avatar">RS</span>
+            <div class="body">
+              <div class="row1">
+                <span class="nm">@rares.s</span>
+                <span>· acum 11 ore</span>
+              </div>
+              <p class="txt">
+                Florentin & Andrei — vă rog faceți un workshop. Mulți dintre noi ar plăti pentru două ore
+                de patch-building pe Juno. Serios. Sintezaur — puteți organiza?
+              </p>
+              <div class="actions">
+                <a href="#">♥ 31</a>
+                <a href="#">Răspunde</a>
+              </div>
+            </div>
+          </div>
+
+          <a class="block__cta" href="#" style="display:inline-flex; margin-top:18px;">Vezi toate 38 comentarii</a>
+        </div>
+
+      </article>
+
+      <!-- RAIL -->
+      <aside class="ad-rail">
+        <div>
+          <div class="ad-rail__progress"></div>
+          <span class="ad-rail__label">// Progres · 32% · ~8 min rămase</span>
+        </div>
+
+        <div class="ad-rail__tools">
+          <a class="ad-rail__tool" href="#"><span class="ico">♥</span>Salvează</a>
+          <a class="ad-rail__tool is-on" href="#"><span class="ico">A+</span>Mărime text</a>
+          <a class="ad-rail__tool" href="#"><span class="ico">▶</span>Ascultă (8:42)</a>
+          <a class="ad-rail__tool" href="#"><span class="ico">↗</span>Distribuie</a>
+          <a class="ad-rail__tool" href="#"><span class="ico">⎙</span>Print / PDF</a>
+        </div>
+
+        <div class="ad-rail__toc">
+          <header class="ad-rail__toc-head">Cuprins</header>
+          <ol>
+            <li>Intro · La Cotroceni</li>
+            <li class="is-current">Întâi a fost un DX7. Apoi a venit Juno-ul</li>
+            <li>Despre tuning și proprietate</li>
+            <li>Setup-ul actual</li>
+            <li>Pe ce lucrează acum</li>
+            <li>Piață și nostalgie sănătoasă</li>
+          </ol>
+        </div>
+      </aside>
+    </div>
+
+    <!-- RELATED -->
+    <header class="ad-related-head">
+      <h3>Continuă să citești<span style="color:var(--accent)">.</span></h3>
+      <span class="sub">Mai multe din Revistă · selecție editorială</span>
+    </header>
+
+    <div class="rev-grid" id="related-grid" style="margin-bottom: var(--gutter-y)"></div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidențialitate</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // Related articles
+    const RELATED = [
+      { pillar: "Recenzie", title: "Behringer Pro-1 — clona Pro-One ajunge sub 400 €. Merită hype-ul?", excerpt: "Trei săptămâni cu Pro-1 în setup. Diferențele față de original sunt acolo.", author: "Radu Popescu", initials: "RP", date: "12 mai", read: "8 min", gear: "pro-1", photo: "https://cdn.mos.cms.futurecdn.net/Kf8saVxuLCi9ZDaTZVypj4.jpg" },
+      { pillar: "Ghid", title: "Cum cumperi un Juno-60 din 2026 fără să te frigi", excerpt: "Cinci capcane comune, trei locuri sigure, un atelier de service în România.", author: "Andrei Mihalache", initials: "AM", date: "08 mai", read: "10 min", gear: "juno-60", photo: "https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" },
+      { pillar: "Deep-dive", title: "De ce sună Yamaha CS-80 diferit. Și de ce nimic nu îl recreează cu adevărat", excerpt: "Anatomia unei legende — analog discrete, polifonic-aftertouch, ribbon controller.", author: "Andrei Mihalache", initials: "AM", date: "01 mai", read: "18 min", gear: "cs-80" }
+    ];
+
+    function articleMedia(a) {
+      const img = a.photo ? `<img class="gear-fill__photo" src="${a.photo}" alt="${a.title}" loading="lazy" onerror="this.remove()" />` : '';
+      return `<div class="rev-card__media"><div class="gear-fill" data-gear="${a.gear}">${img}</div></div>`;
+    }
+
+    document.getElementById('related-grid').innerHTML = RELATED.map(a => `
+      <a class="rev-card" href="#">
+        ${articleMedia(a)}
+        <div class="rev-card__body">
+          <span class="rev-card__pill">// ${a.pillar}</span>
+          <h3 class="rev-card__title">${a.title}</h3>
+          <p class="rev-card__excerpt">${a.excerpt}</p>
+          <div class="rev-card__byline">
+            <span class="avatar" style="width:24px;height:24px;font-size:10px">${a.initials}</span>
+            <span>${a.author}</span>
+            <span style="opacity:.5">·</span>
+            <span>${a.date} · ${a.read}</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    // Inject gear SVGs
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // Live reading progress
+    (function () {
+      const progress = document.querySelector('.ad-rail__progress');
+      const label = document.querySelector('.ad-rail__label');
+      const article = document.querySelector('.ad-body');
+      if (!progress || !article) return;
+      function update() {
+        const rect = article.getBoundingClientRect();
+        const total = rect.height;
+        const seen = Math.min(Math.max(-rect.top + window.innerHeight * 0.5, 0), total);
+        const pct = Math.round((seen / total) * 100);
+        progress.style.setProperty('--w', pct + '%');
+        progress.querySelector('::after');
+        progress.innerHTML = `<span style="position:absolute; left:0; top:0; bottom:0; width:${pct}%; background:var(--accent);"></span>`;
+        const rem = Math.max(1, Math.round(12 - 12 * pct / 100));
+        label.textContent = `// Progres · ${pct}% · ~${rem} min rămase`;
+      }
+      window.addEventListener('scroll', update, { passive: true });
+      update();
+    })();
+  </script>
+</body>
+</html>

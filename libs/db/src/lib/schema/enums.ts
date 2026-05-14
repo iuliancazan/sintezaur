@@ -249,3 +249,161 @@ export const savedSearchTargetEnum = pgEnum('saved_search_target', [
 ]);
 export type SavedSearchTarget =
   (typeof savedSearchTargetEnum.enumValues)[number];
+
+/* ============================================================
+   M3 — Bazar enums (spec §8.2)
+   ============================================================ */
+
+/**
+ * Lifecycle states for a listing. `active` listings are visible in
+ * `/bazar`; `expired` rows stay visible for 30 days with a grey badge
+ * (per §8.2) and then flip to `removed` via the daily cron + `removed_at`.
+ */
+export const listingStatusEnum = pgEnum('listing_status', [
+  'draft',
+  'active',
+  'sold',
+  'expired',
+  'removed',
+]);
+export type ListingStatus = (typeof listingStatusEnum.enumValues)[number];
+
+/**
+ * Condition tiers per spec §8.2. `mint` requires a ≥50-char
+ * justification at submit time (enforced in DTO, not schema).
+ */
+export const listingConditionEnum = pgEnum('listing_condition', [
+  'new',
+  'mint',
+  'very_good',
+  'good',
+  'fair',
+  'for_parts',
+]);
+export type ListingCondition =
+  (typeof listingConditionEnum.enumValues)[number];
+
+/** Sell / trade / sell_or_trade per spec §8.2. */
+export const listingKindEnum = pgEnum('listing_kind', [
+  'sell',
+  'trade',
+  'sell_or_trade',
+]);
+export type ListingKind = (typeof listingKindEnum.enumValues)[number];
+
+/** Delivery options per spec §8.2. */
+export const listingDeliveryEnum = pgEnum('listing_delivery', [
+  'pickup_only',
+  'shipping_only',
+  'both',
+]);
+export type ListingDelivery =
+  (typeof listingDeliveryEnum.enumValues)[number];
+
+/** RO shipping carriers per spec §8.2. */
+export const shippingCarrierEnum = pgEnum('shipping_carrier', [
+  'sameday',
+  'cargus',
+  'fan_courier',
+  'dpd',
+  'gls',
+  'posta_romana',
+]);
+export type ShippingCarrier =
+  (typeof shippingCarrierEnum.enumValues)[number];
+
+/**
+ * Chat message kinds per spec §8.2. Text is the default; offer kinds
+ * carry the structured-offer payload (amount/currency/expires).
+ * `transaction_confirmed` is a system message inserted when the
+ * second party clicks "Confirmă tranzacția".
+ */
+export const messageKindEnum = pgEnum('message_kind', [
+  'text',
+  'offer',
+  'counter_offer',
+  'offer_accepted',
+  'offer_rejected',
+  'transaction_confirmed',
+  'system',
+]);
+export type MessageKind = (typeof messageKindEnum.enumValues)[number];
+
+/**
+ * Transaction lifecycle per spec §8.2. A pending transaction exists
+ * the moment the first party clicks "Confirmă tranzacția"; it flips
+ * to `confirmed` when the second clicks. `disputed` is post-MVP but
+ * the enum value is reserved so a future dispute flow doesn't need
+ * a migration.
+ */
+export const transactionStatusEnum = pgEnum('transaction_status', [
+  'pending',
+  'confirmed',
+  'disputed',
+  'cancelled',
+]);
+export type TransactionStatus =
+  (typeof transactionStatusEnum.enumValues)[number];
+
+/**
+ * Saved-search notification cadence per spec §8.2. Evaluator queues
+ * an instant notification for `instant`, accumulates a digest for
+ * `daily_digest`, skips entirely for `off`.
+ */
+export const savedSearchNotifyModeEnum = pgEnum(
+  'saved_search_notify_mode',
+  ['instant', 'daily_digest', 'off'],
+);
+export type SavedSearchNotifyMode =
+  (typeof savedSearchNotifyModeEnum.enumValues)[number];
+
+/**
+ * Notification kinds per spec §7.5. One enum value per trigger so a
+ * dashboard can filter / aggregate cleanly. New triggers land here
+ * (add the enum value + the wiring; schema stays put).
+ */
+export const notificationKindEnum = pgEnum('notification_kind', [
+  // Bazar
+  'bazar_new_message',
+  'bazar_new_offer',
+  'bazar_counter_offer',
+  'bazar_offer_accepted',
+  'bazar_offer_rejected',
+  'bazar_price_drop_watched',
+  'bazar_saved_search_match',
+  'bazar_listing_expiring',
+  'bazar_transaction_confirmed_by_other',
+  'bazar_review_submitted_on_me',
+  // Tezaur
+  'tezaur_review_on_my_gear',
+  // Revista (M4)
+  'revista_article_in_followed_category',
+  'revista_reply_to_my_article',
+  // Forum (M5)
+  'forum_reply_in_subscribed',
+  'forum_mention',
+  'forum_badge_earned',
+  'forum_mod_action_on_my_content',
+  'forum_report_resolved',
+  // Cross-cutting
+  'admin_announcement',
+]);
+export type NotificationKind =
+  (typeof notificationKindEnum.enumValues)[number];
+
+/** Delivery channel for a single notification row. */
+export const notificationChannelEnum = pgEnum('notification_channel', [
+  'in_app',
+  'email',
+  'both',
+]);
+export type NotificationChannel =
+  (typeof notificationChannelEnum.enumValues)[number];
+
+/** Notification preference per (user × kind × channel) row. */
+export const notificationPreferenceModeEnum = pgEnum(
+  'notification_preference_mode',
+  ['off', 'on', 'digest'],
+);
+export type NotificationPreferenceMode =
+  (typeof notificationPreferenceModeEnum.enumValues)[number];

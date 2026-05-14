@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thread nou în Tezaur — Întrebări · Forum — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.forum.css" />
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="08 Forum — new thread composer">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M10 13a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 11a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><rect x="3" y="4" width="18" height="16"/><circle cx="9" cy="10" r="1.5"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></symbol>
+      <symbol id="i-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 7h5v6H7l-1 4V7zM14 7h5v6h-4l-1 4V7z"/></symbol>
+      <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link is-active" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <a class="icon-btn" href="Forum - Cauta.html" aria-label="Caută"><svg><use href="#i-search"/></svg></a>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Forum.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Forum
+      </a>
+      <span class="sep">/</span>
+      <a href="Forum - Tezaur Intrebari.html">Tezaur — Întrebări</a>
+      <span class="sep">/</span>
+      <span class="cur">Thread nou</span>
+    </nav>
+
+    <div class="fn-shell">
+
+      <!-- LEFT: form -->
+      <form class="fn-form crosses" onsubmit="event.preventDefault();">
+        <span class="crosses-tl"></span><span class="crosses-tr"></span>
+
+        <header class="fn-form__head">
+          <p class="fn-form__kicker">Postezi în <span class="acc">Tezaur — Întrebări</span> · vizibil pentru 4 280 membri</p>
+          <h1 class="fn-form__title">Thread nou</h1>
+        </header>
+
+        <div class="fn-form__body">
+
+          <!-- TITLE -->
+          <div class="fn-field">
+            <label class="fn-field__label" for="title">Titlu <span class="req">*</span> — concret, conține numele aparatului</label>
+            <input id="title" class="fn-input-title" type="text" maxlength="120"
+                   placeholder="Ex: Juno-60 după service — voci diferite la tracking. Calibrare DCO?" />
+            <div class="fn-input-title-meta">
+              <span>Bun titlu: brand + model + problemă concretă</span>
+              <span><b id="title-count">0</b> / 120 caractere</span>
+            </div>
+          </div>
+
+          <!-- BODY EDITOR -->
+          <div class="fn-field">
+            <label class="fn-field__label">Conținut <span class="req">*</span> — descrie setup-ul și ce ai încercat deja</label>
+            <div class="fn-editor">
+              <div class="fn-editor__toolbar">
+                <button type="button" class="fn-editor__btn bold" title="Bold (⌘B)">B</button>
+                <button type="button" class="fn-editor__btn ital" title="Italic (⌘I)">i</button>
+                <button type="button" class="fn-editor__btn under" title="Underline">U</button>
+                <span class="fn-editor__sep"></span>
+                <button type="button" class="fn-editor__btn" title="Heading">H</button>
+                <button type="button" class="fn-editor__btn" title="Listă"><svg><use href="#i-list"/></svg></button>
+                <button type="button" class="fn-editor__btn" title="Citat"><svg><use href="#i-quote"/></svg></button>
+                <button type="button" class="fn-editor__btn" title="Cod"><svg><use href="#i-code"/></svg></button>
+                <span class="fn-editor__sep"></span>
+                <button type="button" class="fn-editor__btn" title="Link"><svg><use href="#i-link"/></svg></button>
+                <button type="button" class="fn-editor__btn" title="Imagine"><svg><use href="#i-image"/></svg></button>
+                <button type="button" class="fn-editor__btn" title="Embed (YouTube / SoundCloud)"><svg><use href="#i-play"/></svg></button>
+                <button type="button" class="fn-editor__expand">⤢ Expandează</button>
+              </div>
+              <div id="editor" class="fn-editor__area" contenteditable="true"
+                   data-placeholder="Descrie problema clar. Include: firmware-ul aparatului, OS-ul (dacă e MIDI/USB), ce ai încercat și ce nu a mers. Embeds: lipește URL YouTube / SoundCloud / Bandcamp (max 3)…"></div>
+              <div class="fn-editor__foot">
+                <span class="lbl">
+                  <span>Markdown · <b>suportat</b></span>
+                  <span>Mențiuni · <b>@user</b></span>
+                  <span>Embeds · <b>0 / 3</b></span>
+                </span>
+                <span><b id="word-count">0</b> cuvinte · <b id="char-count">0</b> caractere</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- GEAR TAG PICKER -->
+          <div class="fn-field">
+            <label class="fn-field__label">Gear discutat — autocomplete din Tezaur (max 3)</label>
+            <p class="fn-field__hint">Selectează aparatele relevante. Thread-ul va apărea în pagina Q&amp;A a fiecăruia.</p>
+
+            <div class="fn-tag-input" id="gear-input">
+              <a class="fr-gear-chip" href="#">
+                <span class="fr-gear-chip__photo"><span class="gear-fill" data-gear="juno-60"></span></span>
+                Roland Juno-60
+              </a>
+              <input type="text" placeholder="Tastează: juno, tb-303, microfreak..." value="prophet" />
+            </div>
+
+            <!-- autocomplete shown statically -->
+            <div class="fn-autocomp">
+              <div class="fn-autocomp__hd">Sugestii pentru „prophet” · 4 rezultate · Tezaur catalog</div>
+              <div class="fn-autocomp__item is-hl">
+                <span class="mini"><span class="gear-fill" data-gear="prophet-6"></span></span>
+                <span class="nm"><span class="b">Sequential Prophet-6</span><span class="m">Polifonic analog · 2015</span></span>
+                <span class="key">⏎ ADAUGĂ</span>
+              </div>
+              <div class="fn-autocomp__item">
+                <span class="mini"><span class="gear-fill" data-gear="prophet-5"></span></span>
+                <span class="nm"><span class="b">Sequential Prophet-5 Rev 4</span><span class="m">Polifonic analog · 2020</span></span>
+                <span class="key">↓</span>
+              </div>
+              <div class="fn-autocomp__item">
+                <span class="mini"><span class="gear-fill" data-gear="take-5"></span></span>
+                <span class="nm"><span class="b">Sequential Take 5</span><span class="m">Polifonic analog · 2021</span></span>
+                <span class="key">↓</span>
+              </div>
+              <div class="fn-autocomp__item">
+                <span class="mini"><span class="gear-fill" data-gear="generic-poly"></span></span>
+                <span class="nm"><span class="b">Behringer Pro-800</span><span class="m">Clonă Prophet-600 · 2024</span></span>
+                <span class="key">↓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- FREE TAGS -->
+          <div class="fn-field">
+            <label class="fn-field__label">Etichete libere — max 5, lowercase, fără spații</label>
+            <div class="fn-tag-input">
+              <span class="fr-tag">calibrare</span>
+              <span class="fr-tag">dco</span>
+              <span class="fr-tag">tuning</span>
+              <input type="text" placeholder="Adaugă etichetă și apasă Enter..." />
+            </div>
+          </div>
+
+          <!-- TOGGLES -->
+          <div class="fn-field">
+            <div class="fn-toggle is-on" data-toggle>
+              <div class="fn-toggle__sw"></div>
+              <div class="fn-toggle__label">
+                <span class="b">Subscrie automat la thread</span>
+                <span class="s">Vei primi notificare la fiecare răspuns nou. Poți schimba mai târziu.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fn-field">
+            <div class="fn-toggle" data-toggle>
+              <div class="fn-toggle__sw"></div>
+              <div class="fn-toggle__label">
+                <span class="b">Trimite o copie pe email</span>
+                <span class="s">Primești thread-ul + primele 5 răspunsuri pe email-ul tău (andrei.b@example.ro).</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="fn-actions">
+          <button type="button" class="ghost">Anulează</button>
+          <button type="button" class="sec">Previzualizare</button>
+          <button type="submit" class="pri">Publică</button>
+        </div>
+      </form>
+
+      <!-- RIGHT SIDEBAR -->
+      <aside class="fn-side">
+
+        <div class="fn-side__block">
+          <header class="fn-side__head">Cum scrii un thread bun</header>
+          <div class="fn-side__body">
+            <ul class="fn-side__list">
+              <li><span class="n">01</span><span><b>Numele aparatului în titlu</b> — ca să găsească alții thread-ul mai târziu.</span></li>
+              <li><span class="n">02</span><span><b>Firmware + serial</b> — esențial la troubleshooting. Roland, Elektron, Korg au revizii diferite.</span></li>
+              <li><span class="n">03</span><span><b>Ce ai încercat deja</b> — scutește răspunsurile „ai încercat să-l restartezi?”.</span></li>
+              <li><span class="n">04</span><span><b>Atașează audio</b> — un YouTube unlisted sau SoundCloud privat ajută mai mult decât 500 cuvinte.</span></li>
+              <li><span class="n">05</span><span><b>Tag-uiește gear-ul corect</b> — răspunsurile vor migra ca Q&amp;A pe pagina lui.</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="fn-side__block">
+          <header class="fn-side__head">Threaduri similare găsite</header>
+          <div class="fn-similar">
+            <a href="Forum - Thread TR-808.html">
+              <span class="ttl">Juno-60 service — tuning după 2 ani de stat</span>
+              <span class="meta">14 răspunsuri · 1 lună · 4 ★ útil</span>
+            </a>
+            <a href="Forum - Thread TR-808.html">
+              <span class="ttl">DCO tracking pe Juno-106 — cum calibrezi voci individuale?</span>
+              <span class="meta">22 răspunsuri · 3 luni · 8 ★ útil</span>
+            </a>
+            <a href="Forum - Thread TR-808.html">
+              <span class="ttl">Service complet la Bogdan Mihai — experiență?</span>
+              <span class="meta">31 răspunsuri · 5 luni · 12 ★ útil</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="fn-side__block">
+          <header class="fn-side__head">Reguli pe scurt</header>
+          <div class="fn-side__body" style="font-family:var(--font-mono); font-size:11px; line-height:1.7; letter-spacing:0.04em; color:var(--fg-muted);">
+            <p style="margin:0 0 8px;">· Niciun listing comercial (folosește <a href="Bazar.html" style="color:var(--accent)">Bazar</a>)</p>
+            <p style="margin:0 0 8px;">· Fără personal attacks, fără gatekeeping</p>
+            <p style="margin:0 0 8px;">· Editarea e permisă 30 min după publicare</p>
+            <p style="margin:0;">· Threaduri OT mută moderatorii în categoria potrivită</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col"><h4>// Platformă</h4><ul><li><a href="Tezaur.html">Tezaur</a></li><li><a href="Bazar.html">Bazar</a></li><li><a href="Revista.html">Revistă</a></li><li><a href="Forum.html">Forum</a></li></ul></div>
+        <div class="foot__col"><h4>// Sintezaur</h4><ul><li><a href="#">Despre</a></li><li><a href="#">Contact</a></li><li><a href="#">Termeni</a></li><li><a href="#">Confidențialitate</a></li></ul></div>
+        <div class="foot__col"><h4>// Social</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">Bandcamp</a></li><li><a href="#">SoundCloud</a></li></ul></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale"><span class="is-active">RO</span><span>EN — în lucru</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // Inject gear illustrations
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // Title char count
+    const t = document.getElementById('title');
+    const tc = document.getElementById('title-count');
+    t.addEventListener('input', () => tc.textContent = t.value.length);
+
+    // Editor word/char count
+    const ed = document.getElementById('editor');
+    const wc = document.getElementById('word-count');
+    const cc = document.getElementById('char-count');
+    ed.addEventListener('input', () => {
+      const text = ed.innerText || '';
+      cc.textContent = text.length;
+      wc.textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+    });
+    // Seed sample text
+    ed.innerHTML = `<p>Tocmai am primit Juno-60 înapoi de la atelier (martie 2026, service complet la Bogdan Mihai — set de slidere Mouser, condensatori re-makați).</p><p>Pe un sound pad lung observ că <b>vocile 1, 3 nu se acordează perfect cu 2, 4</b> — diferență cca 5–8 cenți, măsurat cu un strobotuner. E vizibilă mai ales pe sus (peste C5).</p><p>Pe service-sheet scrie că a calibrat voci, dar nu sunt sigur că procedura completă a fost făcută.</p><p>Întrebare: care e procedura corectă de calibrare DCO pe Juno-60? Am găsit service manual-ul, dar pașii nu sunt clari fără echipament specializat — am doar strobotuner și multimetru.</p>`;
+    ed.dispatchEvent(new Event('input'));
+
+    // Toggle switches
+    document.querySelectorAll('[data-toggle]').forEach(t => {
+      t.addEventListener('click', () => t.classList.toggle('is-on'));
+    });
+
+    // Toolbar buttons toggle visual state (no-op edits)
+    document.querySelectorAll('.fn-editor__btn').forEach(b => {
+      b.addEventListener('click', () => b.classList.toggle('is-active'));
+    });
+
+    // Autocomplete item click — just visual
+    document.querySelectorAll('.fn-autocomp__item').forEach(i => {
+      i.addEventListener('click', () => {
+        document.querySelectorAll('.fn-autocomp__item').forEach(x => x.classList.remove('is-hl'));
+        i.classList.add('is-hl');
+      });
+    });
+  </script>
+</body>
+</html>

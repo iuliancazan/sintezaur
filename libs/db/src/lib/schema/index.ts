@@ -26,3 +26,9 @@ export * from './user-gear-status';
 export * from './cross-cutting';
 export * from './foundation-bazar';
 export * from './foundation-forum';
+
+// Bazar (M3)
+export * from './listings';
+export * from './messaging';
+export * from './transactions';
+export * from './notifications';

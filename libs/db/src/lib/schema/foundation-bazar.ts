@@ -9,7 +9,11 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { displayCurrencyEnum, savedSearchTargetEnum } from './enums';
+import {
+  displayCurrencyEnum,
+  savedSearchNotifyModeEnum,
+  savedSearchTargetEnum,
+} from './enums';
 import { users } from './users';
 
 /* ============================================================
@@ -71,8 +75,15 @@ export const savedSearches = pgTable(
     /** Frozen search-params snapshot — see service for the shape. */
     query: jsonb('query').notNull().default(sql`'{}'::jsonb`),
 
+    /** spec §8.2: instant / daily_digest / off. */
+    notifyMode: savedSearchNotifyModeEnum('notify_mode')
+      .notNull()
+      .default('instant'),
+
     /** Last time the evaluator ran for this search. */
     lastEvaluatedAt: timestamp('last_evaluated_at', { withTimezone: true }),
+    /** Last time the user got a notification from this search. */
+    lastNotifiedAt: timestamp('last_notified_at', { withTimezone: true }),
 
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()

@@ -15,6 +15,13 @@
       "when": 1778773655885,
       "tag": "0002_tezaur_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778783193380,
+      "tag": "0004_bazar_schema",
+      "breakpoints": true
     }
   ]
 }
