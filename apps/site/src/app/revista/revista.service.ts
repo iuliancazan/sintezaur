@@ -240,6 +240,36 @@ export class RevistaService {
   imageUrl(relativePath: string): string {
     return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
   }
+
+  /* ============ follow toggles (M4-F) ============ */
+
+  listFollows(): Promise<ArticleCategoryLiteral[]> {
+    return firstValueFrom(
+      this.http.get<ArticleCategoryLiteral[]>(
+        `${this.base}/me/revista/follows`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  follow(category: ArticleCategoryLiteral): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/revista/follows/${category}`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  unfollow(category: ArticleCategoryLiteral): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/revista/follows/${category}`,
+        { withCredentials: true },
+      ),
+    );
+  }
 }
 
 export interface CreateArticlePayload {

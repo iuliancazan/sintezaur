@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AdminRevistaController } from './admin-revista.controller';
 import { ArticlesService } from './articles.service';
 import { EditorRevistaController } from './editor-revista.controller';
+import { RevistaFollowsController } from './follows.controller';
+import { RevistaFollowsService } from './follows.service';
 import {
   PublicAuthorController,
   PublicRevistaController,
@@ -17,8 +19,9 @@ import {
     PublicAuthorController,
     EditorRevistaController,
     AdminRevistaController,
+    RevistaFollowsController,
   ],
-  providers: [ArticlesService],
+  providers: [ArticlesService, RevistaFollowsService],
   exports: [ArticlesService],
 })
 export class RevistaModule {}

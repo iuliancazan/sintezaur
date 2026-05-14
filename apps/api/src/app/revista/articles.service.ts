@@ -24,7 +24,9 @@ import {
 import { slugFromParts, uniqueSlug } from '@sintezaur/shared';
 import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import type { Request } from 'express';
+import { NotificationsService } from '../notifications/notifications.service';
 import { StorageService } from '../common/storage.service';
+import { RevistaFollowsService } from './follows.service';
 import type {
   CreateArticleDto,
   ListArticlesQueryDto,
@@ -77,6 +79,8 @@ export class ArticlesService {
   constructor(
     @Inject(DATABASE) private readonly db: SintezaurDb,
     private readonly storage: StorageService,
+    private readonly follows: RevistaFollowsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /* ============================================================
@@ -220,7 +224,47 @@ export class ArticlesService {
       })
       .where(eq(articles.id, id));
 
+    void this.notifyCategoryFollowers(existing, actorId).catch((err) =>
+      this.logger.warn(
+        `revista publish fan-out failed: ${(err as Error).message}`,
+      ),
+    );
+
     return { slug: existing.slug, threadId };
+  }
+
+  /**
+   * Spec §7.5 — "Article published in a category I follow". Posts
+   * one `revista_article_in_followed_category` per follower; the author
+   * is excluded; NotificationsService handles dedup + preferences.
+   */
+  private async notifyCategoryFollowers(
+    article: Article,
+    authorId: string,
+  ): Promise<void> {
+    const followers = await this.follows.followersOf(article.category);
+    if (followers.length === 0) return;
+    const payload = {
+      articleId: article.id,
+      slug: article.slug,
+      title: article.title,
+      category: article.category,
+    };
+    await Promise.all(
+      followers
+        .filter((recipientId) => recipientId !== authorId)
+        .map((recipientId) =>
+          this.notifications.post({
+            recipientId,
+            kind: 'revista_article_in_followed_category',
+            dedupKey: `revista_article:${article.id}:${recipientId}`,
+            targetType: 'article',
+            targetId: article.id,
+            actorId: authorId,
+            payload,
+          }),
+        ),
+    );
   }
 
   async unpublish(

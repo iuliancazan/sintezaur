@@ -180,3 +180,36 @@ export const articleImages = pgTable(
 );
 export type ArticleImage = typeof articleImages.$inferSelect;
 export type NewArticleImage = typeof articleImages.$inferInsert;
+
+/* ============================================================
+   user_followed_categories — per spec §7.5 ("Article published in
+   a category I follow"). One row per (user × revista category).
+
+   Kept minimal: the publish fan-out reads followers by category and
+   posts `revista_article_in_followed_category` to each. No nesting,
+   no per-channel knobs here — those live in `notification_preferences`.
+   ============================================================ */
+export const userFollowedCategories = pgTable(
+  'user_followed_categories',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    category: articleCategoryEnum('category').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('user_followed_categories_user_category_unique').on(
+      t.userId,
+      t.category,
+    ),
+    index('user_followed_categories_category_idx').on(t.category),
+  ],
+);
+export type UserFollowedCategory =
+  typeof userFollowedCategories.$inferSelect;
+export type NewUserFollowedCategory =
+  typeof userFollowedCategories.$inferInsert;

@@ -96,6 +96,29 @@ const PAGE_SIZE = 12;
         }
       </nav>
 
+      <!-- FOLLOW STRIP (per-category toggle for logged-in users) -->
+      @if (category() !== null && auth.currentUser()) {
+        <div class="rv-follow">
+          <span class="rv-follow__label">
+            <sz-icon name="bell" [size]="14" />
+            {{ 'revista.follow.prompt' | t: { category: catLabel(category()!) } }}
+          </span>
+          <button
+            type="button"
+            class="rv-follow__btn"
+            [class.is-on]="isFollowed(category()!)"
+            [disabled]="followBusy()"
+            (click)="toggleFollow(category()!)"
+          >
+            @if (isFollowed(category()!)) {
+              ★ {{ 'revista.follow.unfollow' | t }}
+            } @else {
+              ☆ {{ 'revista.follow.follow' | t }}
+            }
+          </button>
+        </div>
+      }
+
       <!-- GRID -->
       @if (response(); as r) {
         <div class="rv-results">
@@ -330,6 +353,43 @@ const PAGE_SIZE = 12;
         border-color: var(--accent);
       }
 
+      .rv-follow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 14px;
+        margin: 0 0 12px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        flex-wrap: wrap;
+      }
+      .rv-follow__label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--fg-muted);
+      }
+      .rv-follow__label sz-icon { color: var(--accent); }
+      .rv-follow__btn {
+        padding: 6px 12px;
+        background: transparent;
+        border: 1px solid var(--line-strong);
+        color: var(--fg);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .rv-follow__btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+      .rv-follow__btn.is-on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+      .rv-follow__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
       .rv-results {
         display: flex;
         justify-content: space-between;
@@ -498,6 +558,9 @@ export class RevistaListPage {
   readonly response = signal<ArticleListResponse | null>(null);
   readonly loading = signal(false);
 
+  readonly followedCategories = signal<Set<ArticleCategoryLiteral>>(new Set());
+  readonly followBusy = signal(false);
+
   readonly canEdit = computed(() => {
     const u = this.auth.currentUser();
     if (!u) return false;
@@ -535,6 +598,42 @@ export class RevistaListPage {
       this.page.set(Number(params.get('page') ?? '1') || 1);
       void this.fetch();
     });
+    if (this.auth.currentUser()) void this.loadFollows();
+  }
+
+  isFollowed(cat: ArticleCategoryLiteral): boolean {
+    return this.followedCategories().has(cat);
+  }
+
+  catLabel(cat: ArticleCategoryLiteral): string {
+    return this.i18n.t('revista.cat.' + cat);
+  }
+
+  async toggleFollow(cat: ArticleCategoryLiteral): Promise<void> {
+    if (this.followBusy()) return;
+    this.followBusy.set(true);
+    const wasFollowed = this.isFollowed(cat);
+    try {
+      if (wasFollowed) await this.revista.unfollow(cat);
+      else await this.revista.follow(cat);
+      const next = new Set(this.followedCategories());
+      if (wasFollowed) next.delete(cat);
+      else next.add(cat);
+      this.followedCategories.set(next);
+    } catch (err) {
+      console.error('[revista] follow toggle failed', err);
+    } finally {
+      this.followBusy.set(false);
+    }
+  }
+
+  private async loadFollows(): Promise<void> {
+    try {
+      const list = await this.revista.listFollows();
+      this.followedCategories.set(new Set(list));
+    } catch (err) {
+      console.error('[revista] load follows failed', err);
+    }
   }
 
   onSearchInput(value: string): void {

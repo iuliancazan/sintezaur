@@ -661,6 +661,11 @@
     },
     "no_results": "Niciun articol nu corespunde căutării.",
     "views": "vizualizări",
+    "follow": {
+      "prompt": "Primește notificare la fiecare articol nou din {{category}}.",
+      "follow": "Urmărește",
+      "unfollow": "Nu mai urmări"
+    },
     "back_to_list": "Înapoi la Revista",
     "edit": "Editează",
     "not_found": "Articolul căutat nu există.",
