@@ -721,6 +721,81 @@ export class ListingsService {
   }
 
   /* ============================================================
+     My listings (own dashboard)
+     ============================================================ */
+
+  async listOwn(
+    sellerId: string,
+    opts: { status?: string; limit?: number } = {},
+  ): Promise<PublicListingListItem[]> {
+    const limit = Math.min(opts.limit ?? 60, 200);
+    const conds = [eq(listings.sellerId, sellerId), isNull(listings.removedAt)];
+    if (opts.status) conds.push(eq(listings.status, opts.status as any));
+    const rows = await this.db
+      .select({
+        id: listings.id,
+        slug: listings.slug,
+        title: listings.title,
+        brand: gear.brand,
+        model: gear.model,
+        gearId: listings.gearId,
+        gearSlug: gear.slug,
+        price: listings.price,
+        currency: listings.currency,
+        condition: listings.condition,
+        kind: listings.kind,
+        delivery: listings.delivery,
+        acceptsOffers: listings.acceptsOffers,
+        location: listings.location,
+        status: listings.status,
+        createdAt: listings.createdAt,
+        expiresAt: listings.expiresAt,
+        refreshedAt: listings.refreshedAt,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${listingPhotos}
+          WHERE ${listingPhotos.listingId} = ${listings.id}
+            AND ${listingPhotos.variant} = 'landscape_4x3_medium'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(listings)
+      .leftJoin(gear, eq(gear.id, listings.gearId))
+      .where(and(...conds))
+      .orderBy(desc(listings.createdAt))
+      .limit(limit);
+
+    return rows.map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      title: r.title,
+      brand: r.brand,
+      model: r.model,
+      gearId: r.gearId,
+      gearSlug: r.gearSlug,
+      price: r.price,
+      currency: r.currency,
+      condition: r.condition,
+      kind: r.kind,
+      delivery: r.delivery,
+      acceptsOffers: r.acceptsOffers,
+      location: r.location,
+      thumb: r.thumb,
+      status: r.status,
+      createdAt: r.createdAt,
+      expiresAt: r.expiresAt,
+      refreshedAt: r.refreshedAt,
+      seller: {
+        id: sellerId,
+        username: '',
+        avgRating: null,
+        reviewCount: 0,
+        transactionCount: 0,
+      },
+    }));
+  }
+
+  /* ============================================================
      Recently sold (spec §8.2 — feeds price suggestions + Tezaur)
      ============================================================ */
 

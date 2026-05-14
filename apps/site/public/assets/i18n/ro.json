@@ -314,7 +314,9 @@
       "password": "Parolă",
       "email": "Email",
       "logout": "Ieși din cont",
-      "messages": "Mesaje"
+      "messages": "Mesaje",
+      "my_listings": "Anunțurile mele",
+      "my_watches": "Anunțuri salvate"
     },
     "logged_in_as": "Conectat ca {{email}}",
     "back_to_account": "← Înapoi la cont"
@@ -565,5 +567,30 @@
       "cancel": "Renunță",
       "error": "Recenzia nu a putut fi trimisă. Reîncearcă."
     }
+  },
+  "my_listings": {
+    "title": "Anunțurile mele",
+    "new_listing": "Anunț nou",
+    "filter_label": "Filtre",
+    "filter": {
+      "all": "Toate",
+      "active": "Active",
+      "sold": "Vândute",
+      "expired": "Expirate",
+      "draft": "Schițe"
+    },
+    "edit": "Editează",
+    "refresh": "Reîmprospătează",
+    "refreshing": "...",
+    "refresh_error": "Reîmprospătarea a eșuat. Verifică plafonul de 30 de zile.",
+    "expires_on": "expiră {{date}}",
+    "empty": "Nu ai anunțuri în această secțiune încă."
+  },
+  "my_watches": {
+    "title": "Anunțuri salvate",
+    "lede": "Anunțuri pe care le-ai marcat cu ♥. Vei primi notificări la scăderi de preț și schimbări de status.",
+    "empty": "Nu ai salvat niciun anunț. Apasă pe ♥ pe pagina de detaliu ca să primești notificări.",
+    "unwatch": "Elimină ♥",
+    "unwatching": "..."
   }
 }

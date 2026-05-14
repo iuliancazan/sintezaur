@@ -187,6 +187,20 @@ export interface TransactionReviewDto {
   updatedAt: string;
 }
 
+export interface WatchedListingRow {
+  listingId: string;
+  slug: string;
+  title: string;
+  price: string;
+  currency: DisplayCurrencyLiteral;
+  status: ListingStatusLiteral;
+  location: string;
+  condition: ListingConditionLiteral;
+  createdAt: string;
+  watchedAt: string;
+  thumb: string | null;
+}
+
 export interface QuickListSuggestion {
   gear: {
     id: string;
@@ -510,6 +524,35 @@ export class BazarService {
         { rating, body },
         { withCredentials: true },
       ),
+    );
+  }
+
+  listOwn(status?: ListingStatusLiteral): Promise<BazarListItem[]> {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    return firstValueFrom(
+      this.http.get<BazarListItem[]>(`${this.base}/me/bazar/listings`, {
+        params,
+        withCredentials: true,
+      }),
+    );
+  }
+
+  refreshOwn(listingId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/bazar/listings/${listingId}/refresh`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  listWatches(): Promise<WatchedListingRow[]> {
+    return firstValueFrom(
+      this.http.get<WatchedListingRow[]>(`${this.base}/me/bazar/watches`, {
+        withCredentials: true,
+      }),
     );
   }
 

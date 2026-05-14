@@ -29,6 +29,12 @@ import { AuthService } from '../auth/auth.service';
         <a routerLink="/cont/mesaje" class="account__link">
           {{ 'account.menu.messages' | t }}
         </a>
+        <a routerLink="/cont/anunturi" class="account__link">
+          {{ 'account.menu.my_listings' | t }}
+        </a>
+        <a routerLink="/cont/salvate" class="account__link">
+          {{ 'account.menu.my_watches' | t }}
+        </a>
         <a routerLink="/cont/parola" class="account__link">
           {{ 'account.menu.password' | t }}
         </a>

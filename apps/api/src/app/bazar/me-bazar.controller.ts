@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -53,6 +54,14 @@ export class MeBazarController {
   ) {}
 
   /* ============ listings ============ */
+
+  @Get('listings')
+  listOwn(
+    @CurrentUser() user: AuthenticatedUser,
+    @Query('status') status?: string,
+  ) {
+    return this.listings.listOwn(user.sub, { status });
+  }
 
   @Post('listings')
   create(

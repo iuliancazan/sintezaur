@@ -117,6 +117,16 @@ export const appRoutes: Route[] = [
             (m) => m.MessagesThreadPage,
           ),
       },
+      {
+        path: 'anunturi',
+        loadComponent: () =>
+          import('./account/my-listings.page').then((m) => m.MyListingsPage),
+      },
+      {
+        path: 'salvate',
+        loadComponent: () =>
+          import('./account/my-watches.page').then((m) => m.MyWatchesPage),
+      },
     ],
   },
 ];
