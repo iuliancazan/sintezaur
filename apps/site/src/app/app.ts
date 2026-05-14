@@ -3,13 +3,17 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
+  signal,
 } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
+import { NotificationsPanelComponent } from './notifications/notifications-panel.component';
+import { NotificationsService } from './notifications/notifications.service';
 
 /**
  * Root shell — sticky topbar + router outlet + footer. The topbar is
@@ -27,6 +31,7 @@ import { TPipe } from './i18n/t.pipe';
     RouterLink,
     SzTopbarComponent,
     TPipe,
+    NotificationsPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -36,6 +41,9 @@ import { TPipe } from './i18n/t.pipe';
       [links]="navLinks()"
       [navAriaLabel]="navAriaLabel()"
       [user]="topbarUser()"
+      [showBell]="auth.isLoggedIn()"
+      [bellBadge]="notifications.unread()"
+      (bellClick)="toggleNotifications()"
       [loginHref]="'/login'"
       [signupHref]="'/signup'"
       [accountHref]="'/cont'"
@@ -49,6 +57,10 @@ import { TPipe } from './i18n/t.pipe';
       [themeLightLabel]="themeLightLabel()"
       [themeDarkLabel]="themeDarkLabel()"
     />
+
+    @if (notificationsOpen()) {
+      <app-notifications-panel (closed)="notificationsOpen.set(false)" />
+    }
 
     <router-outlet />
 
@@ -215,8 +227,28 @@ import { TPipe } from './i18n/t.pipe';
   ],
 })
 export class App {
-  private readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
+  readonly notifications = inject(NotificationsService);
   private readonly i18n = inject(I18nService);
+
+  readonly notificationsOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.auth.isLoggedIn()) {
+        this.notifications.startPolling();
+      } else {
+        this.notifications.stopPolling();
+        this.notificationsOpen.set(false);
+      }
+    });
+  }
+
+  toggleNotifications(): void {
+    const next = !this.notificationsOpen();
+    this.notificationsOpen.set(next);
+    if (next) void this.notifications.loadList();
+  }
 
   readonly copyYear = new Date().getFullYear();
   readonly logoSrc = '/assets/brand/logo-white.png';

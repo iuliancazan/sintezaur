@@ -615,5 +615,23 @@
     },
     "created": "Creat: {{date}}",
     "last_notified": "Ultima alertă: {{date}}"
+  },
+  "notifications": {
+    "title": "Notificări",
+    "mark_all_read": "Marcă toate citite",
+    "empty": "Nu ai notificări noi.",
+    "kind": {
+      "bazar_new_message": "Mesaj nou pe \"{{title}}\"",
+      "bazar_new_offer": "Ofertă nouă pe \"{{title}}\"",
+      "bazar_counter_offer": "Contraofertă pe \"{{title}}\"",
+      "bazar_offer_accepted": "Oferta ta a fost acceptată pe \"{{title}}\"",
+      "bazar_offer_rejected": "Oferta ta a fost refuzată pe \"{{title}}\"",
+      "bazar_price_drop_watched": "Preț redus la \"{{title}}\": {{oldPrice}} → {{newPrice}}",
+      "bazar_saved_search_match": "Anunț nou pentru căutarea \"{{name}}\"",
+      "bazar_listing_expiring": "\"{{title}}\" expiră în {{bucket}}",
+      "bazar_transaction_confirmed_by_other": "Tranzacție confirmată pe \"{{title}}\"",
+      "bazar_review_submitted_on_me": "Ai primit o recenzie ({{rating}}★)",
+      "generic": "Notificare nouă"
+    }
   }
 }

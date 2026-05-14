@@ -85,12 +85,17 @@ export interface SzTopbarUser {
 
           @if (showBell) {
             <button
-              class="sz-icon-btn"
+              class="sz-icon-btn sz-bell-btn"
               type="button"
               [attr.aria-label]="bellAriaLabel"
               (click)="bellClick.emit()"
             >
               <sz-icon name="bell" />
+              @if (bellBadge > 0) {
+                <span class="sz-bell-badge">
+                  {{ bellBadge > 99 ? '99+' : bellBadge }}
+                </span>
+              }
             </button>
           }
 
@@ -254,6 +259,24 @@ export interface SzTopbarUser {
         border-color: var(--line);
         background: var(--bg-elev);
       }
+      .sz-bell-btn { position: relative; }
+      .sz-bell-badge {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        min-width: 16px;
+        height: 16px;
+        padding: 0 4px;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--bg);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 700;
+        display: inline-grid;
+        place-items: center;
+        line-height: 1;
+      }
 
       .sz-theme-toggle {
         display: inline-flex;
@@ -352,6 +375,7 @@ export class SzTopbarComponent {
 
   @Input() searchAriaLabel = 'Search';
   @Input() bellAriaLabel = 'Notifications';
+  @Input() bellBadge = 0;
   @Input() themeAriaLabel = 'Theme';
   @Input() themeAutoLabel = 'Auto';
   @Input() themeLightLabel = 'Light';
