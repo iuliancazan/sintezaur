@@ -69,6 +69,67 @@ export interface RecentlySoldResponse {
   items: BazarListItem[];
 }
 
+export interface BazarListingDetail {
+  listing: {
+    id: string;
+    slug: string;
+    sellerId: string;
+    gearId: string | null;
+    rawMake: string | null;
+    rawModel: string | null;
+    rawYear: number | null;
+    title: string;
+    description: Record<string, unknown>;
+    descriptionHtml: string;
+    price: string;
+    currency: DisplayCurrencyLiteral;
+    condition: ListingConditionLiteral;
+    conditionNote: string | null;
+    kind: ListingKindLiteral;
+    lookingFor: string | null;
+    delivery: ListingDeliveryLiteral;
+    shippingCost: string | null;
+    shippingCarriers: string[];
+    acceptsOffers: boolean;
+    location: string;
+    contactPhone: string | null;
+    status: ListingStatusLiteral;
+    viewCount: number;
+    expiresAt: string | null;
+    refreshedAt: string | null;
+    removedAt: string | null;
+    soldAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  photos: {
+    id: string;
+    sourceId: string;
+    variant: string;
+    path: string;
+    width: number;
+    height: number;
+    position: number;
+  }[];
+  gear: {
+    id: string;
+    slug: string;
+    brand: string;
+    model: string;
+    category: string;
+  } | null;
+  seller: {
+    id: string;
+    username: string;
+    fullName: string;
+    avgRating: string | null;
+    reviewCount: number;
+    transactionCount: number;
+    createdAt: string;
+  };
+  isWatched: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class BazarService {
   private readonly http = inject(HttpClient);
@@ -87,6 +148,46 @@ export class BazarService {
     }
     return firstValueFrom(
       this.http.get<BazarListResponse>(`${this.base}/bazar`, { params }),
+    );
+  }
+
+  detail(slug: string): Promise<BazarListingDetail> {
+    return firstValueFrom(
+      this.http.get<BazarListingDetail>(`${this.base}/bazar/${slug}`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  watch(listingId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/bazar/listings/${listingId}/watch`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  unwatch(listingId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/bazar/listings/${listingId}/watch`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  startThread(
+    listingId: string,
+    body: string,
+  ): Promise<{ thread: { id: string }; message: { id: string } }> {
+    return firstValueFrom(
+      this.http.post<{ thread: { id: string }; message: { id: string } }>(
+        `${this.base}/me/bazar/listings/${listingId}/threads/messages`,
+        { body },
+        { withCredentials: true },
+      ),
     );
   }
 

@@ -376,6 +376,42 @@
     "pagination": {
       "page_of": "Pagina {{page}} / {{total}}",
       "show_count": "Afișează {{shown}} din {{total}}"
+    },
+    "detail": {
+      "back_to_list": "Înapoi la Bazar",
+      "breadcrumb_root": "Bazar",
+      "no_photos": "Fără fotografii",
+      "posted_on": "Publicat {{date}}",
+      "views": "vizualizări",
+      "edit": "Editează",
+      "watch": "Salvează ♥",
+      "watching": "Salvat ♥",
+      "report": "Raportează",
+      "offers_welcome": "Acceptă oferte",
+      "description": "Descriere",
+      "looking_for": "Caut în schimb",
+      "condition_note": "Notă stare (mint)",
+      "delivery": "Livrare",
+      "shipping_cost": "Cost livrare",
+      "shipping_carriers": "Curieri acceptați",
+      "seller": "Vânzător",
+      "tx_count": "{{count}} tranzacții",
+      "member_since": "Membru din {{date}}",
+      "send_message": "Trimite mesaj",
+      "sending": "Se trimite...",
+      "message_sent": "Mesaj trimis cu succes.",
+      "message_placeholder": "Salut, {{brand}} pare interesant. Mai este disponibil?",
+      "message_error": "Mesajul nu a putut fi trimis. Reîncearcă.",
+      "go_to_inbox": "Vezi conversațiile",
+      "login_to_message": "Conectează-te ca să trimiți mesaj →",
+      "linked_gear": "În catalog Tezaur",
+      "view_tezaur": "Vezi în Tezaur",
+      "recently_sold": "Vândute recent",
+      "status_sold": "Vândut · Acest anunț este închis.",
+      "status_expired": "Expirat · Anunțul nu mai este vizibil în listare.",
+      "status_removed": "Eliminat · Anunțul a fost retras.",
+      "status_draft": "Schiță · Doar tu vezi acest anunț.",
+      "not_found": "Anunțul căutat nu există sau a fost eliminat."
     }
   }
 }

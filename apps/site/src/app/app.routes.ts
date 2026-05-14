@@ -35,6 +35,11 @@ export const appRoutes: Route[] = [
       import('./bazar/bazar-list.page').then((m) => m.BazarListPage),
   },
   {
+    path: 'bazar/:slug',
+    loadComponent: () =>
+      import('./bazar/bazar-detail.page').then((m) => m.BazarDetailPage),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/pages/signup.page').then((m) => m.SignupPage),
