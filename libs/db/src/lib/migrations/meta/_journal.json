@@ -29,6 +29,13 @@
       "when": 1778786499656,
       "tag": "0005_user_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778791729458,
+      "tag": "0006_revista_schema",
+      "breakpoints": true
     }
   ]
 }

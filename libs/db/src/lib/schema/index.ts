@@ -32,3 +32,6 @@ export * from './listings';
 export * from './messaging';
 export * from './transactions';
 export * from './notifications';
+
+// Revista (M4)
+export * from './articles';

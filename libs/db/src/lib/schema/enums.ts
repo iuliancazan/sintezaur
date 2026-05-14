@@ -248,6 +248,48 @@ export type AuditLogAction = (typeof auditLogActionEnum.enumValues)[number];
 export const localeEnum = pgEnum('locale', ['ro', 'en']);
 export type Locale = (typeof localeEnum.enumValues)[number];
 
+/* ============================================================
+   M4 — Revista enums (spec §8.3)
+   ============================================================ */
+
+/**
+ * Article lifecycle. `draft` is editor-only; `published` is the only
+ * status visible to anonymous traffic; `archived` is soft-removed but
+ * editor-recoverable (per §7.11).
+ */
+export const articleStatusEnum = pgEnum('article_status', [
+  'draft',
+  'published',
+  'archived',
+]);
+export type ArticleStatus = (typeof articleStatusEnum.enumValues)[number];
+
+/**
+ * Six content pillars per spec §8.3. All ship in MVP.
+ */
+export const articleCategoryEnum = pgEnum('article_category', [
+  'reviews',
+  'tutorials',
+  'news',
+  'interviews',
+  'buying_guides',
+  'hardware_deep_dives',
+]);
+export type ArticleCategory =
+  (typeof articleCategoryEnum.enumValues)[number];
+
+/**
+ * Forum category kind per spec §8.4. `user` = community-visible;
+ * `system` = auto-managed (article discussion, canonical gear
+ * threads, admin announcements).
+ */
+export const forumCategoryKindEnum = pgEnum('forum_category_kind', [
+  'user',
+  'system',
+]);
+export type ForumCategoryKind =
+  (typeof forumCategoryKindEnum.enumValues)[number];
+
 /**
  * Saved-search target section per spec §8.2. MVP populates only
  * `bazar`; reserved for future Tezaur/Forum saved searches.
