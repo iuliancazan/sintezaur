@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { RealtimeClientService } from '../realtime/realtime-client.service';
 
 export type NotificationKindLiteral =
   | 'bazar_new_message'
@@ -45,20 +46,31 @@ export interface NotificationRow {
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
   private readonly http = inject(HttpClient);
+  private readonly realtime = inject(RealtimeClientService);
   private readonly base = environment.apiBaseUrl;
 
   readonly unread = signal<number>(0);
   readonly items = signal<NotificationRow[]>([]);
   readonly loading = signal(false);
 
+  /**
+   * 5-minute fallback poll. With WS push the unread counter stays
+   * fresh in real time; this only catches the edge case where the
+   * socket couldn't connect (network blip, offline tab refocus).
+   */
+  private static readonly FALLBACK_POLL_MS = 5 * 60_000;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    this.realtime.notification$.subscribe((row) => this.onPush(row));
+  }
 
   startPolling(): void {
     if (this.pollTimer) return;
     void this.refreshUnreadCount();
     this.pollTimer = setInterval(
       () => void this.refreshUnreadCount(),
-      60_000,
+      NotificationsService.FALLBACK_POLL_MS,
     );
   }
 
@@ -69,6 +81,18 @@ export class NotificationsService {
     }
     this.unread.set(0);
     this.items.set([]);
+  }
+
+  private onPush(row: NotificationRow): void {
+    // Bump the unread counter (always) + prepend to the cached list
+    // if the bell panel has been opened at least once. Dedup by id.
+    if (this.items().some((r) => r.id === row.id)) return;
+    if (this.items().length > 0) {
+      this.items.update((rows) => [row, ...rows].slice(0, 30));
+    }
+    if (!row.readAt) {
+      this.unread.update((n) => n + 1);
+    }
   }
 
   async refreshUnreadCount(): Promise<void> {

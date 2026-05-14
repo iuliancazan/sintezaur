@@ -3,12 +3,14 @@ import {
   AfterViewChecked,
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   ViewChild,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { formatPrice } from '@sintezaur/shared';
@@ -22,6 +24,7 @@ import {
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
+import { RealtimeClientService } from '../realtime/realtime-client.service';
 
 @Component({
   selector: 'app-messages-thread-page',
@@ -794,6 +797,8 @@ export class MessagesThreadPage implements AfterViewChecked {
   readonly bazar = inject(BazarService);
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly realtime = inject(RealtimeClientService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly view = signal<ThreadView | null>(null);
   readonly loading = signal(true);
@@ -922,11 +927,79 @@ export class MessagesThreadPage implements AfterViewChecked {
   @ViewChild('scroller') private scroller?: ElementRef<HTMLElement>;
   private shouldScroll = false;
 
+  private currentThreadId: string | null = null;
+
   constructor() {
     this.route.paramMap.subscribe((p) => {
       const id = p.get('threadId');
-      if (id) void this.load(id);
+      if (id) {
+        if (this.currentThreadId && this.currentThreadId !== id) {
+          this.realtime.leaveThread(this.currentThreadId);
+        }
+        this.currentThreadId = id;
+        this.realtime.joinThread(id);
+        void this.load(id);
+      }
     });
+
+    this.realtime.chatMessage$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((msg) => this.onIncomingMessage(msg));
+
+    this.realtime.transactionConfirmed$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((tx) => this.onTransactionConfirmed(tx));
+
+    this.destroyRef.onDestroy(() => {
+      if (this.currentThreadId) {
+        this.realtime.leaveThread(this.currentThreadId);
+      }
+    });
+  }
+
+  private onIncomingMessage(msg: ChatMessage): void {
+    const v = this.view();
+    if (!v || msg.threadId !== v.thread.id) return;
+    this.appendMessage(msg);
+  }
+
+  /**
+   * Idempotent append used by both the WS push and the HTTP-response
+   * append paths. Dedups by `id` so a self-broadcast doesn't double
+   * the message after the user's own send completes.
+   */
+  private appendMessage(msg: ChatMessage): void {
+    this.view.update((current) => {
+      if (!current) return current;
+      if (current.messages.some((m) => m.id === msg.id)) return current;
+      const nextThread =
+        msg.kind === 'counter_offer'
+          ? {
+              ...current.thread,
+              offerRoundCount: current.thread.offerRoundCount + 1,
+            }
+          : current.thread;
+      return {
+        ...current,
+        thread: nextThread,
+        messages: [...current.messages, msg],
+      };
+    });
+    this.shouldScroll = true;
+  }
+
+  private onTransactionConfirmed(tx: TransactionDto): void {
+    const v = this.view();
+    if (!v || tx.threadId !== v.thread.id) return;
+    this.transaction.set(tx);
+    if (tx.status === 'confirmed' && v.listing.status !== 'sold') {
+      // refresh thread so listing.status flips + tx_confirmed system msg
+      // (if not already delivered) lands canonically.
+      void this.bazar.readThread(v.thread.id).then((fresh) => {
+        this.view.set(fresh);
+        this.shouldScroll = true;
+      });
+    }
   }
 
   ngAfterViewChecked(): void {
@@ -1031,10 +1104,7 @@ export class MessagesThreadPage implements AfterViewChecked {
     this.sendError.set(null);
     try {
       const res = await this.bazar.sendMessage(v.thread.id, body);
-      this.view.update((current) => {
-        if (!current) return current;
-        return { ...current, messages: [...current.messages, res.message] };
-      });
+      this.appendMessage(res.message);
       this.composeBody = '';
       this.shouldScroll = true;
     } catch (err) {
@@ -1084,20 +1154,7 @@ export class MessagesThreadPage implements AfterViewChecked {
         note: this.offerNote.trim() || undefined,
         repliesToMessageId: this.counterTargetId() ?? undefined,
       });
-      this.view.update((current) => {
-        if (!current) return current;
-        const isCounter = this.counterTargetId() !== null;
-        return {
-          ...current,
-          thread: {
-            ...current.thread,
-            offerRoundCount: isCounter
-              ? current.thread.offerRoundCount + 1
-              : current.thread.offerRoundCount,
-          },
-          messages: [...current.messages, res.message],
-        };
-      });
+      this.appendMessage(res.message);
       this.cancelOfferCompose();
       this.shouldScroll = true;
     } catch (err) {
@@ -1115,10 +1172,7 @@ export class MessagesThreadPage implements AfterViewChecked {
     this.sendError.set(null);
     try {
       const res = await this.bazar.acceptOffer(v.thread.id, offerId);
-      this.view.update((current) => {
-        if (!current) return current;
-        return { ...current, messages: [...current.messages, res.message] };
-      });
+      this.appendMessage(res.message);
       this.shouldScroll = true;
     } catch (err) {
       console.error('[bazar] offer accept failed', err);
@@ -1135,10 +1189,7 @@ export class MessagesThreadPage implements AfterViewChecked {
     this.sendError.set(null);
     try {
       const res = await this.bazar.rejectOffer(v.thread.id, offerId);
-      this.view.update((current) => {
-        if (!current) return current;
-        return { ...current, messages: [...current.messages, res.message] };
-      });
+      this.appendMessage(res.message);
       this.shouldScroll = true;
     } catch (err) {
       console.error('[bazar] offer reject failed', err);
