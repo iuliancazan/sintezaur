@@ -58,7 +58,7 @@ export class StorageService {
   static readonly MAX_INPUT_BYTES = 10 * 1024 * 1024;
 
   async processImage(
-    scope: 'gear' | 'listing',
+    scope: 'gear' | 'listing' | 'article',
     entityId: string,
     file: Express.Multer.File,
   ): Promise<ProcessedUpload> {
@@ -88,7 +88,7 @@ export class StorageService {
   }
 
   async deleteSource(
-    scope: 'gear' | 'listing',
+    scope: 'gear' | 'listing' | 'article',
     entityId: string,
     sourceId: string,
     variants: ImageVariantLiteral[],
@@ -155,7 +155,7 @@ export class StorageService {
   }
 
   private relativePath(
-    scope: 'gear' | 'listing',
+    scope: 'gear' | 'listing' | 'article',
     entityId: string,
     sourceId: string,
     variant: ImageVariantLiteral,

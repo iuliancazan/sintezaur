@@ -69,6 +69,14 @@ export const users = pgTable(
       .notNull()
       .default(false),
 
+    /** Public profile (visible on /autor/:username and gear-review cards). */
+    bio: text('bio'),
+    avatarUrl: text('avatar_url'),
+    websiteUrl: text('website_url'),
+    socialInstagram: text('social_instagram'),
+    socialSoundcloud: text('social_soundcloud'),
+    socialBandcamp: text('social_bandcamp'),
+
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

@@ -13,6 +13,7 @@ import { DbModule } from './db/db.module';
 import { HealthModule } from './health/health.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
+import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { TezaurModule } from './tezaur/tezaur.module';
     AuthModule,
     TezaurModule,
     BazarModule,
+    RevistaModule,
   ],
   controllers: [AppController],
   providers: [
