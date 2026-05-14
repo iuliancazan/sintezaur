@@ -105,6 +105,30 @@ export interface PostsResponse {
   totalReplies: number;
 }
 
+export interface CreateThreadPayload {
+  categoryId: string;
+  title: string;
+  body: Record<string, unknown>;
+  bodyHtml: string;
+}
+
+export interface CreateReplyPayload {
+  parentPostId?: string | null;
+  body: Record<string, unknown>;
+  bodyHtml: string;
+}
+
+export interface UpdatePostPayload {
+  body: Record<string, unknown>;
+  bodyHtml: string;
+}
+
+export interface MentionUser {
+  id: string;
+  username: string;
+  fullName: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ForumService {
   private readonly http = inject(HttpClient);
@@ -151,6 +175,55 @@ export class ForumService {
         `${this.base}/forum/threads/${slug}/posts`,
         { params },
       ),
+    );
+  }
+
+  /* ============ writes (M5-D) ============ */
+
+  createThread(payload: CreateThreadPayload): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/forum/threads`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  createReply(threadId: string, payload: CreateReplyPayload): Promise<PostListItem> {
+    return firstValueFrom(
+      this.http.post<PostListItem>(
+        `${this.base}/forum/threads/${threadId}/posts`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  updatePost(postId: string, patch: UpdatePostPayload): Promise<PostListItem> {
+    return firstValueFrom(
+      this.http.patch<PostListItem>(
+        `${this.base}/forum/posts/${postId}`,
+        patch,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deletePost(postId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${this.base}/forum/posts/${postId}`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  searchMentions(query: string): Promise<MentionUser[]> {
+    return firstValueFrom(
+      this.http.get<MentionUser[]>(`${this.base}/forum/mention-search`, {
+        params: { q: query },
+        withCredentials: true,
+      }),
     );
   }
 }

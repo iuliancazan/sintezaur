@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
 import { ForumService, ThreadListResponse } from './forum.service';
@@ -29,10 +30,22 @@ const PAGE_SIZE = 25;
       @if (response(); as r) {
         <section class="fc-header crosses">
           <span class="crosses-tl"></span><span class="crosses-tr"></span>
-          <h1 class="fc-header__title">{{ r.category.name }}</h1>
-          @if (r.category.description) {
-            <p class="fc-header__desc">{{ r.category.description }}</p>
-          }
+          <div class="fc-header__row">
+            <div>
+              <h1 class="fc-header__title">{{ r.category.name }}</h1>
+              @if (r.category.description) {
+                <p class="fc-header__desc">{{ r.category.description }}</p>
+              }
+            </div>
+            @if (canCompose(r)) {
+              <a
+                class="fc-header__cta"
+                [routerLink]="['/forum', r.category.slug, 'nou']"
+              >
+                + {{ 'forum.compose.new_thread' | t }}
+              </a>
+            }
+          </div>
         </section>
 
         <div class="fc-results">
@@ -150,6 +163,26 @@ const PAGE_SIZE = 25;
         max-width: 60ch;
         margin: 0;
       }
+      .fc-header__row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .fc-header__cta {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        padding: 10px 16px;
+        background: var(--accent);
+        color: var(--accent-fg);
+        border: 1px solid var(--accent);
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .fc-header__cta:hover { filter: brightness(1.1); }
 
       .fc-results {
         display: flex;
@@ -272,9 +305,14 @@ const PAGE_SIZE = 25;
 })
 export class ForumCategoryPage {
   readonly i18n = inject(I18nService);
+  readonly auth = inject(AuthService);
   private readonly forum = inject(ForumService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+
+  canCompose(r: ThreadListResponse): boolean {
+    return r.category.kind === 'user' && !!this.auth.currentUser();
+  }
 
   readonly response = signal<ThreadListResponse | null>(null);
   readonly loading = signal(true);

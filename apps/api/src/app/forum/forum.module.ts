@@ -3,6 +3,7 @@ import { AuthForumController } from './auth-forum.controller';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumPostsService } from './forum-posts.service';
 import { ForumThreadsService } from './forum-threads.service';
+import { ForumUsersService } from './forum-users.service';
 import { ModForumController } from './mod-forum.controller';
 import { PublicForumController } from './public-forum.controller';
 
@@ -22,6 +23,7 @@ import { PublicForumController } from './public-forum.controller';
     ForumCategoriesService,
     ForumThreadsService,
     ForumPostsService,
+    ForumUsersService,
   ],
   exports: [
     ForumCategoriesService,

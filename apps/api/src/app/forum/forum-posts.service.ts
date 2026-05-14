@@ -10,13 +10,28 @@ import {
 import { ConfigService } from '@nestjs/config';
 import {
   DATABASE,
+  forumPostMentions,
   forumPosts,
   forumThreads,
   users,
   type ForumPost,
   type SintezaurDb,
 } from '@sintezaur/db';
-import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
+
+/** UUID v4 regex used to extract mention IDs from cached bodyHtml. */
+const MENTION_ID_RE =
+  /data-user-id="([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"/gi;
+
+function parseMentionIds(bodyHtml: string): string[] {
+  const ids = new Set<string>();
+  let m: RegExpExecArray | null;
+  MENTION_ID_RE.lastIndex = 0;
+  while ((m = MENTION_ID_RE.exec(bodyHtml)) !== null) {
+    ids.add(m[1].toLowerCase());
+  }
+  return [...ids];
+}
 
 export interface CreatePostInput {
   threadId: string;
@@ -110,6 +125,8 @@ export class ForumPostsService {
       })
       .returning();
 
+    await this.syncMentions(post.id, actorId, input.bodyHtml);
+
     if (status === 'approved') {
       await this.bumpThreadCountersOnApprovedInsert(input.threadId);
       await this.bumpApprovedPostCount(actorId);
@@ -139,6 +156,8 @@ export class ForumPostsService {
         status,
       })
       .returning();
+
+    await this.syncMentions(post.id, actorId, bodyHtml);
 
     if (status === 'approved') {
       await this.bumpThreadCountersOnApprovedInsert(threadId);
@@ -181,7 +200,49 @@ export class ForumPostsService {
       })
       .where(eq(forumPosts.id, postId))
       .returning();
+    await this.syncMentions(postId, post.authorId, input.bodyHtml);
     return updated;
+  }
+
+  /* ============================================================
+     Mentions — parse `data-user-id="<uuid>"` from cached bodyHtml,
+     validate against users table (drop deleted / non-existent),
+     drop self-mentions, then re-sync the join table. Idempotent so
+     edits re-sync safely.
+     ============================================================ */
+
+  private async syncMentions(
+    postId: string,
+    authorId: string | null,
+    bodyHtml: string,
+  ): Promise<void> {
+    await this.db
+      .delete(forumPostMentions)
+      .where(eq(forumPostMentions.postId, postId));
+
+    const rawIds = parseMentionIds(bodyHtml).filter((id) => id !== authorId);
+    if (rawIds.length === 0) return;
+
+    const real = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(
+        and(
+          inArray(users.id, rawIds),
+          isNull(users.deletedAt),
+        ),
+      );
+    if (real.length === 0) return;
+
+    await this.db
+      .insert(forumPostMentions)
+      .values(
+        real.map((r) => ({
+          postId,
+          mentionedUserId: r.id,
+        })),
+      )
+      .onConflictDoNothing();
   }
 
   /* ============================================================

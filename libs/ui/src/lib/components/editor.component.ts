@@ -14,12 +14,24 @@ import {
 import { Editor, type Content, type JSONContent } from '@tiptap/core';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
+import Mention from '@tiptap/extension-mention';
 import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
 import StarterKit from '@tiptap/starter-kit';
+import type { SuggestionProps } from '@tiptap/suggestion';
 import { SzIconComponent } from '../icons/icon.component';
 
 export type SzEditorImageUploader = (file: File) => Promise<string>;
+
+export interface SzEditorMentionItem {
+  id: string;
+  username: string;
+  fullName: string;
+}
+
+export type SzEditorMentionSuggest = (
+  query: string,
+) => Promise<SzEditorMentionItem[]>;
 
 export interface SzEditorChange {
   json: JSONContent;
@@ -265,6 +277,56 @@ export interface SzEditorChange {
         font-size: 13px;
         border: 1px solid var(--line);
       }
+      .sz-editor__host .ProseMirror .sz-mention,
+      .sz-mention {
+        color: var(--accent);
+        background: color-mix(in oklab, var(--accent) 14%, transparent);
+        padding: 1px 4px;
+        border-radius: 2px;
+        font-weight: 500;
+      }
+
+      .sz-mention-popup {
+        position: absolute;
+        z-index: 200;
+        margin: 0;
+        padding: 4px 0;
+        list-style: none;
+        background: var(--bg-elev);
+        border: 1px solid var(--line-strong);
+        min-width: 220px;
+        max-width: 320px;
+        max-height: 240px;
+        overflow-y: auto;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        font-family: var(--font-ui);
+      }
+      .sz-mention-popup__item {
+        padding: 8px 12px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .sz-mention-popup__item:hover,
+      .sz-mention-popup__item.is-selected {
+        background: color-mix(in oklab, var(--accent) 18%, var(--bg-elev));
+      }
+      .sz-mention-popup__username {
+        color: var(--accent);
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .sz-mention-popup__full {
+        color: var(--fg-muted);
+        font-size: 12px;
+      }
+      .sz-mention-popup__empty {
+        padding: 10px 14px;
+        color: var(--fg-subtle);
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
     `,
   ],
 })
@@ -287,6 +349,12 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
    * File, returns the absolute URL to insert into the document.
    */
   @Input() imageUploader: SzEditorImageUploader | null = null;
+  /**
+   * When set, enables `@mention` autocomplete. The callback is invoked
+   * with the in-progress query (text after the `@`) and should return
+   * up to ~8 candidate users. M5-D uses this for forum mentions.
+   */
+  @Input() mentionSuggest: SzEditorMentionSuggest | null = null;
 
   @Output() valueChange = new EventEmitter<SzEditorChange>();
 
@@ -333,6 +401,9 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
         }) as never,
       );
     }
+    if (this.mentionSuggest) {
+      extensions.push(this.buildMentionExtension() as never);
+    }
     this.editor = new Editor({
       element: this.hostRef.nativeElement,
       extensions,
@@ -348,6 +419,7 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.hideMentionPopup();
     this.editor?.destroy();
   }
 
@@ -453,5 +525,178 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
       blockquote: editor.isActive('blockquote'),
       link: editor.isActive('link'),
     };
+  }
+
+  /* ============================================================
+     Mention extension — uses @tiptap/extension-mention's built-in
+     `@tiptap/suggestion` plumbing with a custom renderer. The popup
+     is a plain absolutely-positioned `<ul>` to keep us off tippy.js
+     (saves ~7 KB and avoids React/Vue ports). Serialized HTML uses
+     `data-user-id="<uuid>"` so the backend can parse mentions out
+     of the cached bodyHtml without trusting client-supplied IDs.
+     ============================================================ */
+
+  private mentionPopup: HTMLUListElement | null = null;
+  private mentionItems: SzEditorMentionItem[] = [];
+  private mentionSelected = 0;
+  private mentionProps: SuggestionProps<SzEditorMentionItem, unknown> | null =
+    null;
+  private mentionQueryTok = 0;
+
+  private buildMentionExtension() {
+    const suggest = this.mentionSuggest!;
+    return Mention.configure({
+      HTMLAttributes: { class: 'sz-mention' },
+      renderHTML: ({ options, node }) => {
+        const id = node.attrs['id'] as string;
+        const label = (node.attrs['label'] as string) ?? id;
+        return [
+          'span',
+          {
+            ...options.HTMLAttributes,
+            'data-user-id': id,
+            'data-type': 'mention',
+          },
+          `@${label}`,
+        ];
+      },
+      suggestion: {
+        char: '@',
+        allowSpaces: false,
+        items: async ({ query }: { query: string }) => {
+          if (query.length < 2) return [];
+          const tok = ++this.mentionQueryTok;
+          const list = await suggest(query);
+          if (tok !== this.mentionQueryTok) return [];
+          return list;
+        },
+        render: () => {
+          return {
+            onStart: (props) => {
+              this.mentionProps = props as SuggestionProps<
+                SzEditorMentionItem,
+                unknown
+              >;
+              this.mentionItems = props.items as SzEditorMentionItem[];
+              this.mentionSelected = 0;
+              this.showMentionPopup();
+            },
+            onUpdate: (props) => {
+              this.mentionProps = props as SuggestionProps<
+                SzEditorMentionItem,
+                unknown
+              >;
+              this.mentionItems = props.items as SzEditorMentionItem[];
+              this.mentionSelected = 0;
+              this.renderMentionItems();
+              this.positionMentionPopup();
+            },
+            onKeyDown: (props) => {
+              const ev = props.event;
+              if (ev.key === 'ArrowDown') {
+                ev.preventDefault();
+                this.mentionSelected =
+                  (this.mentionSelected + 1) %
+                  Math.max(1, this.mentionItems.length);
+                this.renderMentionItems();
+                return true;
+              }
+              if (ev.key === 'ArrowUp') {
+                ev.preventDefault();
+                this.mentionSelected =
+                  (this.mentionSelected - 1 + this.mentionItems.length) %
+                  Math.max(1, this.mentionItems.length);
+                this.renderMentionItems();
+                return true;
+              }
+              if (ev.key === 'Enter' || ev.key === 'Tab') {
+                if (this.mentionItems.length === 0) return false;
+                ev.preventDefault();
+                this.commitMention(this.mentionItems[this.mentionSelected]);
+                return true;
+              }
+              if (ev.key === 'Escape') {
+                this.hideMentionPopup();
+                return true;
+              }
+              return false;
+            },
+            onExit: () => {
+              this.hideMentionPopup();
+            },
+          };
+        },
+      },
+    });
+  }
+
+  private showMentionPopup(): void {
+    if (this.mentionPopup) return;
+    const ul = document.createElement('ul');
+    ul.className = 'sz-mention-popup';
+    document.body.appendChild(ul);
+    this.mentionPopup = ul;
+    this.renderMentionItems();
+    this.positionMentionPopup();
+  }
+
+  private hideMentionPopup(): void {
+    this.mentionPopup?.remove();
+    this.mentionPopup = null;
+    this.mentionItems = [];
+    this.mentionProps = null;
+  }
+
+  private renderMentionItems(): void {
+    if (!this.mentionPopup) return;
+    this.mentionPopup.innerHTML = '';
+    if (this.mentionItems.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'sz-mention-popup__empty';
+      li.textContent = 'Niciun utilizator.';
+      this.mentionPopup.appendChild(li);
+      return;
+    }
+    this.mentionItems.forEach((item, i) => {
+      const li = document.createElement('li');
+      li.className = 'sz-mention-popup__item';
+      if (i === this.mentionSelected) li.classList.add('is-selected');
+      const username = document.createElement('span');
+      username.className = 'sz-mention-popup__username';
+      username.textContent = `@${item.username}`;
+      const full = document.createElement('span');
+      full.className = 'sz-mention-popup__full';
+      full.textContent = item.fullName ?? '';
+      li.appendChild(username);
+      li.appendChild(full);
+      li.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        this.commitMention(item);
+      });
+      this.mentionPopup!.appendChild(li);
+    });
+  }
+
+  private positionMentionPopup(): void {
+    if (!this.mentionPopup || !this.mentionProps) return;
+    const rect = this.mentionProps.clientRect?.();
+    if (!rect) return;
+    const popupHeight = this.mentionPopup.offsetHeight || 200;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top =
+      spaceBelow < popupHeight + 12
+        ? rect.top + window.scrollY - popupHeight - 6
+        : rect.bottom + window.scrollY + 6;
+    this.mentionPopup.style.top = `${top}px`;
+    this.mentionPopup.style.left = `${rect.left + window.scrollX}px`;
+  }
+
+  private commitMention(item: SzEditorMentionItem): void {
+    if (!this.mentionProps) return;
+    this.mentionProps.command({
+      id: item.id,
+      label: item.username,
+    });
+    this.hideMentionPopup();
   }
 }

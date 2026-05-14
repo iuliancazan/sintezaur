@@ -54,4 +54,6 @@ export {
   SzEditorComponent,
   type SzEditorChange,
   type SzEditorImageUploader,
+  type SzEditorMentionItem,
+  type SzEditorMentionSuggest,
 } from './lib/components/editor.component';

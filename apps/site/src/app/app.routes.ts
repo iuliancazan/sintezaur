@@ -92,6 +92,13 @@ export const appRoutes: Route[] = [
       import('./forum/forum-category.page').then((m) => m.ForumCategoryPage),
   },
   {
+    path: 'forum/:category/nou',
+    pathMatch: 'full',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./forum/forum-form.page').then((m) => m.ForumFormPage),
+  },
+  {
     path: 'forum/:category/:slug',
     loadComponent: () =>
       import('./forum/forum-thread.page').then((m) => m.ForumThreadPage),

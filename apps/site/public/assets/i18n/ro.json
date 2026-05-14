@@ -755,8 +755,38 @@
     "coming_soon": "Disponibil curând",
     "action": {
       "reply": "Răspunde",
-      "like": "Util"
+      "like": "Util",
+      "edit": "Editează",
+      "delete": "Șterge"
     },
+    "compose": {
+      "new_thread": "Thread nou",
+      "new_thread_lede": "Pornește o discuție în această categorie.",
+      "title_label": "Titlu",
+      "title_placeholder": "Despre ce vrei să discuți?",
+      "title_hint": "Între 4 și 200 de caractere.",
+      "body_label": "Mesaj",
+      "body_placeholder": "Scrie aici. Folosește @ pentru a menționa pe cineva.",
+      "body_hint": "Marcaje rich-text + imagini + YouTube prin butoanele din toolbar. Max 3 embed-uri.",
+      "reply_placeholder": "Răspunsul tău. Folosește @ pentru mențiuni.",
+      "general_reply_cta": "Adaugă un răspuns la thread",
+      "general_reply_title": "Răspuns nou",
+      "reply_to": "Răspunzi la @{{username}}",
+      "cancel": "Renunță",
+      "publish": "Publică thread",
+      "send": "Trimite",
+      "save_edit": "Salvează",
+      "submitting": "Se trimite...",
+      "submit_error": "Trimiterea a eșuat. Verifică datele și reîncearcă."
+    },
+    "pending_badge": "în așteptare moderare",
+    "pending_toast": "Postarea ta a fost trimisă pentru moderare.",
+    "posted_ok": "Postare publicată.",
+    "edited_ok": "Postare editată.",
+    "deleted_ok": "Postare ștearsă.",
+    "confirm_delete": "Sigur ștergi această postare?",
+    "locked_notice": "Thread-ul este blocat. Nu se pot adăuga răspunsuri noi.",
+    "login_to_reply": "Loghează-te ca să răspunzi.",
     "source": {
       "article": "Articol original",
       "gear": "Echipament asociat"

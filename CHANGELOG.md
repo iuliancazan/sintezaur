@@ -9,6 +9,20 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### Forum (M5)
 
+#### M5-D — Forum posting + `@mentions` (HEAD)
+- `/forum/:category/nou` — pagină nouă pentru thread nou (`authGuard`), titlu + SzEditor rich, validare 4–200 caractere titlu + min 4 caractere body.
+- Buton „+ Thread nou" pe pagina categoriei (doar user kind + utilizator autentificat).
+- Inline reply editor pe thread page — click pe „Răspunde" pe oricare post deschide un editor sub el cu `parentPostId` setat.
+- General reply editor jos de tot pe thread page — colapsat default, click expandează, fără `parentPostId` (devine top-level reply).
+- Editare propriei postări în fereastra de 30 min (configurable via `FORUM_EDIT_WINDOW_MINUTES`); moderatori pot edita oricând.
+- Ștergere propriei postări (soft delete, exclude OP).
+- `@mention` autocomplete prin `@tiptap/extension-mention` integrat în `SzEditor` cu input nou `mentionSuggest`. Dropdown custom (fără tippy.js), keyboard nav (↑/↓ + Enter/Tab), poziționare auto.
+- Backend `GET /api/forum/mention-search?q=` (auth-only) cu max 8 rezultate.
+- Backend extrage mențiuni server-side din `bodyHtml` (regex pe `data-user-id`), validează vs `users` table și populează `forum_post_mentions` atomic în `createOp` / `createReply` / `update`.
+- Pending state UI: postările cu `status: 'pending'` (first-post approval queue) apar optimist pentru autor cu badge galben „în așteptare moderare" + toast informativ.
+- Locked thread state: când thread-ul e locked, formularul general dispare cu notice „Thread blocat".
+- Logged-out users văd CTA „Loghează-te ca să răspunzi" în loc de form.
+
 #### M5-C — Forum site read pages (`31b5b99`)
 - Adăugat `/forum` index cu 9 categorii (6 user + 3 system în secțiune separată).
 - Adăugat `/forum/:category` listă thread-uri cu pinned-first + paginație 25/page.

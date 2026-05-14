@@ -2,12 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -18,6 +20,7 @@ import {
 import { CreateReplyDto, CreateThreadDto, UpdatePostDto } from './forum.dto';
 import { ForumPostsService } from './forum-posts.service';
 import { ForumThreadsService } from './forum-threads.service';
+import { ForumUsersService } from './forum-users.service';
 
 const MOD_ROLES = new Set(['moderator', 'admin', 'superadmin']);
 
@@ -39,7 +42,13 @@ export class AuthForumController {
   constructor(
     private readonly threads: ForumThreadsService,
     private readonly posts: ForumPostsService,
+    private readonly forumUsers: ForumUsersService,
   ) {}
+
+  @Get('mention-search')
+  searchMentions(@Query('q') q?: string) {
+    return this.forumUsers.searchForMention(q ?? '');
+  }
 
   @Post('threads')
   createThread(
