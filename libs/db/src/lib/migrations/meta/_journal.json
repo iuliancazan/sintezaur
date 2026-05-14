@@ -8,6 +8,13 @@
       "when": 1778760195627,
       "tag": "0000_broad_mister_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778773655885,
+      "tag": "0002_tezaur_schema",
+      "breakpoints": true
     }
   ]
 }

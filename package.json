@@ -16,6 +16,7 @@
     "migrate": "tsx tools/scripts/migrate.ts",
     "migrate:generate": "drizzle-kit generate",
     "seed:admin": "tsx tools/scripts/create-first-admin.ts",
+    "seed:tezaur": "tsx tools/scripts/seed-tezaur.ts",
     "seed:dev": "tsx tools/scripts/guards/dev-only.ts && tsx tools/scripts/seed-dev.ts",
     "lint": "nx run-many --target=lint",
     "test": "nx run-many --target=test",
