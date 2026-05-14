@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### Forum (M5)
 
-#### M5-D — Forum posting + `@mentions` (HEAD)
+#### M5-D — Forum posting + `@mentions` (`b204883`)
 - `/forum/:category/nou` — pagină nouă pentru thread nou (`authGuard`), titlu + SzEditor rich, validare 4–200 caractere titlu + min 4 caractere body.
 - Buton „+ Thread nou" pe pagina categoriei (doar user kind + utilizator autentificat).
 - Inline reply editor pe thread page — click pe „Răspunde" pe oricare post deschide un editor sub el cu `parentPostId` setat.

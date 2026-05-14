@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-D (HEAD) — posting + reply + `@mentions` + edit window +
+**Last shipped:** M5-D (`b204883`) — posting + reply + `@mentions` + edit window +
 pending state UI.
 
 **Next up:** **M5-E** — subscriptions + likes ("Util") + notification fan-out
@@ -85,7 +85,7 @@ pending state UI.
 | A   | `dcf95d0` | done | schema: forum_posts + likes + mentions + 3-way subscriptions + badges; 9 categorii seed |
 | B   | `eb57245` | done | backend: 3 services (Categories/Threads/Posts) + 3 controllers (Public/Auth/Mod) |
 | C   | `31b5b99` | done | site read pages: `/forum` index + `/forum/:category` listă + `/forum/:category/:slug` thread cu 2-level threading + sourceLink pentru system threads |
-| D   | HEAD    | done | posting (new thread page + inline reply + general reply + edit window + delete) + `@mention` autocomplete (server parsing) + pending state UI + mention-search endpoint |
+| D   | `b204883` | done | posting (new thread page + inline reply + general reply + edit window + delete) + `@mention` autocomplete (server parsing) + pending state UI + mention-search endpoint |
 | E   |  —      | **next** | subscriptions + likes ("Util") + notification fan-out (`forum_reply_in_subscribed` + `forum_mention` + `revista_reply_to_my_article`) |
 | F   |  —      | pending | badges cron + dashboard editor pentru badge definitions |
 | G   |  —      | pending | moderation tools inline + `content_report` queue în dashboard |
