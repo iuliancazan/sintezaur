@@ -401,6 +401,50 @@ export class BazarService {
     );
   }
 
+  makeOffer(
+    threadId: string,
+    payload: {
+      amount: number;
+      currency: DisplayCurrencyLiteral;
+      note?: string;
+      repliesToMessageId?: string;
+    },
+  ): Promise<{ message: ChatMessage }> {
+    return firstValueFrom(
+      this.http.post<{ thread: { id: string }; message: ChatMessage }>(
+        `${this.base}/me/bazar/threads/${threadId}/offers`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  acceptOffer(
+    threadId: string,
+    offerId: string,
+  ): Promise<{ message: ChatMessage }> {
+    return firstValueFrom(
+      this.http.post<{ message: ChatMessage }>(
+        `${this.base}/me/bazar/threads/${threadId}/offers/${offerId}/accept`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  rejectOffer(
+    threadId: string,
+    offerId: string,
+  ): Promise<{ message: ChatMessage }> {
+    return firstValueFrom(
+      this.http.post<{ message: ChatMessage }>(
+        `${this.base}/me/bazar/threads/${threadId}/offers/${offerId}/reject`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
   recentlySold(query: { gearId?: string; limit?: number } = {}): Promise<RecentlySoldResponse> {
     let params = new HttpParams();
     if (query.gearId) params = params.set('gearId', query.gearId);

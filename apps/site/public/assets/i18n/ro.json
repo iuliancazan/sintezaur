@@ -514,6 +514,31 @@
     "system": {
       "tx_confirmed": "Tranzacție confirmată",
       "offer_placeholder": "(ofertă structurată — UI urmează)"
+    },
+    "tab_message": "Mesaj",
+    "tab_offer": "Ofertă",
+    "tab_counter": "Contraofertă",
+    "offer": {
+      "kind_offer": "Ofertă",
+      "kind_counter": "Contraofertă",
+      "amount_label": "Sumă",
+      "currency_label": "Valută",
+      "note_placeholder": "Mesaj opțional (motivează prețul, condiții...)",
+      "send": "Trimite ofertă",
+      "send_counter": "Trimite contraoferta",
+      "cancel": "Anulează",
+      "accept": "Acceptă",
+      "reject": "Refuză",
+      "counter": "Contraofertă",
+      "accepted_system": "Ofertă acceptată — finalizați tranzacția prin \"Confirmă tranzacția\".",
+      "rejected_system": "Ofertă refuzată",
+      "resolved_accepted": "✓ Acceptată",
+      "resolved_rejected": "Refuzată",
+      "resolved_countered": "Contraofertă trimisă",
+      "counter_hint": "Runda {{rounds}}/5 de contraofertă.",
+      "cap_reached": "Ai atins plafonul de 5 runde de contraofertă pe acest fir.",
+      "send_error": "Oferta nu a putut fi trimisă.",
+      "action_error": "Acțiunea pe ofertă a eșuat. Reîncearcă."
     }
   }
 }

@@ -93,10 +93,117 @@ import { TPipe } from '../i18n/t.pipe';
                   <time>{{ formatTime(m.createdAt) }}</time>
                 </div>
               }
-              @default {
-                <!-- E4b: offer / counter_offer / accepted / rejected -->
-                <div class="thr-sys is-pending">
-                  {{ 'thread.system.offer_placeholder' | t }} ·
+              @case ('offer') {
+                <div
+                  class="thr-offer"
+                  [class.is-mine]="m.senderId === me()"
+                >
+                  <div class="thr-offer__head">
+                    <span class="thr-offer__kind">
+                      {{ 'thread.offer.kind_offer' | t }}
+                    </span>
+                    <time>{{ formatTime(m.createdAt) }}</time>
+                  </div>
+                  <div class="thr-offer__amount">
+                    {{ formatPrice(m.offerAmount!, m.offerCurrency!) }}
+                  </div>
+                  @if (m.body) {
+                    <p class="thr-offer__note">{{ m.body }}</p>
+                  }
+                  @if (offerResolution(m.id); as r) {
+                    <div class="thr-offer__resolved is-{{ r.kind }}">
+                      {{ 'thread.offer.resolved_' + r.kind | t }}
+                    </div>
+                  } @else if (m.senderId !== me()) {
+                    <div class="thr-offer__actions">
+                      <button
+                        type="button"
+                        class="thr-offer__btn is-accept"
+                        [disabled]="offerActionId() === m.id"
+                        (click)="acceptOffer(m.id)"
+                      >
+                        {{ 'thread.offer.accept' | t }}
+                      </button>
+                      <button
+                        type="button"
+                        class="thr-offer__btn"
+                        [disabled]="offerActionId() === m.id"
+                        (click)="rejectOffer(m.id)"
+                      >
+                        {{ 'thread.offer.reject' | t }}
+                      </button>
+                      <button
+                        type="button"
+                        class="thr-offer__btn"
+                        [disabled]="offerActionId() === m.id || atOfferCap()"
+                        (click)="openCounterFor(m)"
+                      >
+                        {{ 'thread.offer.counter' | t }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+              @case ('counter_offer') {
+                <div
+                  class="thr-offer"
+                  [class.is-mine]="m.senderId === me()"
+                >
+                  <div class="thr-offer__head">
+                    <span class="thr-offer__kind">
+                      {{ 'thread.offer.kind_counter' | t }}
+                    </span>
+                    <time>{{ formatTime(m.createdAt) }}</time>
+                  </div>
+                  <div class="thr-offer__amount">
+                    {{ formatPrice(m.offerAmount!, m.offerCurrency!) }}
+                  </div>
+                  @if (m.body) {
+                    <p class="thr-offer__note">{{ m.body }}</p>
+                  }
+                  @if (offerResolution(m.id); as r) {
+                    <div class="thr-offer__resolved is-{{ r.kind }}">
+                      {{ 'thread.offer.resolved_' + r.kind | t }}
+                    </div>
+                  } @else if (m.senderId !== me()) {
+                    <div class="thr-offer__actions">
+                      <button
+                        type="button"
+                        class="thr-offer__btn is-accept"
+                        [disabled]="offerActionId() === m.id"
+                        (click)="acceptOffer(m.id)"
+                      >
+                        {{ 'thread.offer.accept' | t }}
+                      </button>
+                      <button
+                        type="button"
+                        class="thr-offer__btn"
+                        [disabled]="offerActionId() === m.id"
+                        (click)="rejectOffer(m.id)"
+                      >
+                        {{ 'thread.offer.reject' | t }}
+                      </button>
+                      <button
+                        type="button"
+                        class="thr-offer__btn"
+                        [disabled]="offerActionId() === m.id || atOfferCap()"
+                        (click)="openCounterFor(m)"
+                      >
+                        {{ 'thread.offer.counter' | t }}
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+              @case ('offer_accepted') {
+                <div class="thr-sys is-success">
+                  ✓ {{ 'thread.offer.accepted_system' | t }} ·
+                  <time>{{ formatTime(m.createdAt) }}</time>
+                </div>
+              }
+              @case ('offer_rejected') {
+                <div class="thr-sys">
+                  {{ 'thread.offer.rejected_system' | t }} ·
                   <time>{{ formatTime(m.createdAt) }}</time>
                 </div>
               }
@@ -106,24 +213,111 @@ import { TPipe } from '../i18n/t.pipe';
 
         @if (v.listing.status === 'active') {
           <footer class="thr__compose">
+            <div class="thr__tabs">
+              <button
+                type="button"
+                [class.is-active]="composeMode() === 'text'"
+                (click)="composeMode.set('text')"
+              >
+                {{ 'thread.tab_message' | t }}
+              </button>
+              @if (canMakeOffer()) {
+                <button
+                  type="button"
+                  [class.is-active]="composeMode() === 'offer'"
+                  (click)="openOfferCompose()"
+                  [disabled]="atOfferCap()"
+                >
+                  {{
+                    (counterTargetId() ? 'thread.tab_counter' : 'thread.tab_offer') | t
+                  }}
+                </button>
+              }
+            </div>
+
             @if (sendError()) {
               <p class="thr__err">{{ sendError() }}</p>
             }
-            <textarea
-              [(ngModel)]="composeBody"
-              [placeholder]="i18n.t('thread.compose_placeholder')"
-              rows="2"
-              (keydown.control.enter)="send()"
-              (keydown.meta.enter)="send()"
-            ></textarea>
-            <button
-              type="button"
-              class="thr__send"
-              [disabled]="!composeBody.trim() || sending()"
-              (click)="send()"
-            >
-              {{ (sending() ? 'thread.sending' : 'thread.send') | t }}
-            </button>
+
+            @if (composeMode() === 'text') {
+              <textarea
+                [(ngModel)]="composeBody"
+                [placeholder]="i18n.t('thread.compose_placeholder')"
+                rows="2"
+                (keydown.control.enter)="send()"
+                (keydown.meta.enter)="send()"
+              ></textarea>
+              <button
+                type="button"
+                class="thr__send"
+                [disabled]="!composeBody.trim() || sending()"
+                (click)="send()"
+              >
+                {{ (sending() ? 'thread.sending' : 'thread.send') | t }}
+              </button>
+            } @else {
+              <div class="thr__offer-form">
+                <div class="thr__offer-fields">
+                  <label>
+                    <span>{{ 'thread.offer.amount_label' | t }}</span>
+                    <input
+                      type="number"
+                      [(ngModel)]="offerAmount"
+                      min="0"
+                      step="1"
+                      max="1000000"
+                    />
+                  </label>
+                  <label>
+                    <span>{{ 'thread.offer.currency_label' | t }}</span>
+                    <select [(ngModel)]="offerCurrency">
+                      <option value="ron">RON</option>
+                      <option value="eur">EUR</option>
+                    </select>
+                  </label>
+                </div>
+                <textarea
+                  [(ngModel)]="offerNote"
+                  rows="2"
+                  [placeholder]="i18n.t('thread.offer.note_placeholder')"
+                ></textarea>
+                @if (counterTargetId()) {
+                  <p class="thr__offer-hint">
+                    {{
+                      'thread.offer.counter_hint'
+                        | t: { rounds: v.thread.offerRoundCount + 1 }
+                    }}
+                  </p>
+                } @else if (atOfferCap()) {
+                  <p class="thr__offer-hint is-warn">
+                    {{ 'thread.offer.cap_reached' | t }}
+                  </p>
+                }
+                <div class="thr__offer-actions">
+                  <button
+                    type="button"
+                    class="thr__cancel"
+                    (click)="cancelOfferCompose()"
+                  >
+                    {{ 'thread.offer.cancel' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="thr__send"
+                    [disabled]="!offerAmount || sending() || atOfferCap()"
+                    (click)="sendOffer()"
+                  >
+                    {{
+                      (sending()
+                        ? 'thread.sending'
+                        : counterTargetId()
+                          ? 'thread.offer.send_counter'
+                          : 'thread.offer.send') | t
+                    }}
+                  </button>
+                </div>
+              </div>
+            }
           </footer>
         } @else {
           <footer class="thr__locked">
@@ -243,6 +437,142 @@ import { TPipe } from '../i18n/t.pipe';
       .thr-sys.is-success { color: var(--accent); border-color: var(--accent); }
       .thr-sys.is-pending { opacity: 0.6; }
 
+      .thr-offer {
+        max-width: 360px;
+        align-self: flex-start;
+        padding: 14px 16px;
+        background: var(--bg);
+        border: 2px solid var(--accent);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .thr-offer.is-mine { align-self: flex-end; }
+      .thr-offer__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .thr-offer__head time { color: var(--fg-subtle); }
+      .thr-offer__amount {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 26px;
+        line-height: 1;
+      }
+      .thr-offer__note { margin: 0; font-size: 13px; line-height: 1.5; }
+      .thr-offer__actions { display: flex; gap: 6px; flex-wrap: wrap; }
+      .thr-offer__btn {
+        flex: 1;
+        padding: 8px 12px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line-strong);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        cursor: pointer;
+        color: var(--fg);
+      }
+      .thr-offer__btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+      .thr-offer__btn.is-accept {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+      }
+      .thr-offer__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+      .thr-offer__resolved {
+        padding: 6px 10px;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-align: center;
+        background: var(--bg-elev);
+      }
+      .thr-offer__resolved.is-accepted { color: var(--accent); }
+      .thr-offer__resolved.is-rejected { color: var(--fg-muted); }
+
+      .thr__tabs {
+        grid-column: 1 / -1;
+        display: inline-flex;
+        gap: 0;
+      }
+      .thr__tabs button {
+        padding: 8px 14px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-bottom: 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--fg-muted);
+        cursor: pointer;
+      }
+      .thr__tabs button + button { border-left: 0; }
+      .thr__tabs button.is-active {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+      }
+      .thr__tabs button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+      .thr__offer-form {
+        grid-column: 1 / -1;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid var(--accent);
+        background: color-mix(in oklab, var(--accent) 4%, var(--bg-elev));
+      }
+      .thr__offer-fields { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+      .thr__offer-form label { display: flex; flex-direction: column; gap: 4px; }
+      .thr__offer-form label span {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--fg-muted);
+      }
+      .thr__offer-form input,
+      .thr__offer-form select,
+      .thr__offer-form textarea {
+        padding: 8px 10px;
+        background: var(--bg);
+        border: 1px solid var(--line-strong);
+        font-family: var(--font-ui);
+        font-size: 14px;
+        color: var(--fg);
+      }
+      .thr__offer-form textarea { resize: vertical; }
+      .thr__offer-hint {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--fg-muted);
+      }
+      .thr__offer-hint.is-warn { color: #c0392b; }
+      .thr__offer-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .thr__cancel {
+        padding: 10px 14px;
+        background: transparent;
+        border: 1px solid var(--line-strong);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        color: var(--fg-muted);
+      }
+      .thr__cancel:hover { color: var(--fg); }
+
       .thr__compose {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -320,6 +650,16 @@ export class MessagesThreadPage implements AfterViewChecked {
   readonly sending = signal(false);
   readonly sendError = signal<string | null>(null);
 
+  readonly composeMode = signal<'text' | 'offer'>('text');
+  readonly counterTargetId = signal<string | null>(null);
+  offerAmount: number | null = null;
+  offerCurrency: 'ron' | 'eur' = 'ron';
+  offerNote = '';
+  readonly offerActionId = signal<string | null>(null);
+
+  /** spec §8.2: counter chain capped at 5 rounds. */
+  readonly MAX_OFFER_ROUNDS = 5;
+
   readonly formatPrice = formatPrice;
 
   readonly me = computed(() => this.auth.currentUser()?.id ?? null);
@@ -328,6 +668,38 @@ export class MessagesThreadPage implements AfterViewChecked {
     if (!v) return '';
     return v.listing.sellerId === this.me() ? 'Cumpărător' : 'Vânzător';
   });
+
+  readonly canMakeOffer = computed(() => {
+    const v = this.view();
+    return !!(v && v.listing.acceptsOffers && v.listing.status === 'active');
+  });
+
+  readonly atOfferCap = computed(() => {
+    const v = this.view();
+    return !!(v && v.thread.offerRoundCount >= this.MAX_OFFER_ROUNDS);
+  });
+
+  /**
+   * Maps every offer / counter_offer message id → the message that
+   * resolves it (kind = offer_accepted | offer_rejected | counter_offer
+   * targeting it via repliesToMessageId).
+   */
+  readonly offerResolution = (offerId: string) => {
+    const msgs = this.view()?.messages ?? [];
+    const resolver = msgs.find(
+      (m) =>
+        m.repliesToMessageId === offerId &&
+        (m.kind === 'offer_accepted' ||
+          m.kind === 'offer_rejected' ||
+          m.kind === 'counter_offer'),
+    );
+    if (!resolver) return null;
+    if (resolver.kind === 'offer_accepted')
+      return { kind: 'accepted' } as const;
+    if (resolver.kind === 'offer_rejected')
+      return { kind: 'rejected' } as const;
+    return { kind: 'countered' } as const;
+  };
 
   @ViewChild('scroller') private scroller?: ElementRef<HTMLElement>;
   private shouldScroll = false;
@@ -383,6 +755,109 @@ export class MessagesThreadPage implements AfterViewChecked {
       this.sendError.set(this.i18n.t('thread.send_error'));
     } finally {
       this.sending.set(false);
+    }
+  }
+
+  openOfferCompose(): void {
+    if (this.atOfferCap()) return;
+    this.composeMode.set('offer');
+    // Pre-fill amount from listing price the first time.
+    if (this.offerAmount === null) {
+      const v = this.view();
+      if (v) {
+        this.offerAmount = Number(v.listing.price);
+        this.offerCurrency = v.listing.currency;
+      }
+    }
+  }
+
+  openCounterFor(target: ChatMessage): void {
+    this.counterTargetId.set(target.id);
+    this.composeMode.set('offer');
+    this.offerAmount = target.offerAmount ? Number(target.offerAmount) : null;
+    this.offerCurrency = (target.offerCurrency ?? 'ron') as 'ron' | 'eur';
+    this.offerNote = '';
+  }
+
+  cancelOfferCompose(): void {
+    this.composeMode.set('text');
+    this.counterTargetId.set(null);
+    this.offerNote = '';
+  }
+
+  async sendOffer(): Promise<void> {
+    const v = this.view();
+    if (!v || !this.offerAmount || this.sending() || this.atOfferCap()) return;
+    this.sending.set(true);
+    this.sendError.set(null);
+    try {
+      const res = await this.bazar.makeOffer(v.thread.id, {
+        amount: Number(this.offerAmount),
+        currency: this.offerCurrency,
+        note: this.offerNote.trim() || undefined,
+        repliesToMessageId: this.counterTargetId() ?? undefined,
+      });
+      this.view.update((current) => {
+        if (!current) return current;
+        const isCounter = this.counterTargetId() !== null;
+        return {
+          ...current,
+          thread: {
+            ...current.thread,
+            offerRoundCount: isCounter
+              ? current.thread.offerRoundCount + 1
+              : current.thread.offerRoundCount,
+          },
+          messages: [...current.messages, res.message],
+        };
+      });
+      this.cancelOfferCompose();
+      this.shouldScroll = true;
+    } catch (err) {
+      console.error('[bazar] offer send failed', err);
+      this.sendError.set(this.i18n.t('thread.offer.send_error'));
+    } finally {
+      this.sending.set(false);
+    }
+  }
+
+  async acceptOffer(offerId: string): Promise<void> {
+    const v = this.view();
+    if (!v) return;
+    this.offerActionId.set(offerId);
+    this.sendError.set(null);
+    try {
+      const res = await this.bazar.acceptOffer(v.thread.id, offerId);
+      this.view.update((current) => {
+        if (!current) return current;
+        return { ...current, messages: [...current.messages, res.message] };
+      });
+      this.shouldScroll = true;
+    } catch (err) {
+      console.error('[bazar] offer accept failed', err);
+      this.sendError.set(this.i18n.t('thread.offer.action_error'));
+    } finally {
+      this.offerActionId.set(null);
+    }
+  }
+
+  async rejectOffer(offerId: string): Promise<void> {
+    const v = this.view();
+    if (!v) return;
+    this.offerActionId.set(offerId);
+    this.sendError.set(null);
+    try {
+      const res = await this.bazar.rejectOffer(v.thread.id, offerId);
+      this.view.update((current) => {
+        if (!current) return current;
+        return { ...current, messages: [...current.messages, res.message] };
+      });
+      this.shouldScroll = true;
+    } catch (err) {
+      console.error('[bazar] offer reject failed', err);
+      this.sendError.set(this.i18n.t('thread.offer.action_error'));
+    } finally {
+      this.offerActionId.set(null);
     }
   }
 
