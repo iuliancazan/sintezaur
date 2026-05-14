@@ -316,5 +316,66 @@
       "logout": "Ieși din cont"
     },
     "logged_in_as": "Conectat ca {{email}}"
+  },
+  "bazar": {
+    "page_eyebrow": "Bazar · Marketplace muzical",
+    "page_title": "Bazar",
+    "page_lede": "Cumpără, vinde sau fă schimb de echipament muzical cu alți pasionați din România. Anunțuri verificate, comunicare directă, recenzii bilaterale după tranzacție.",
+    "search_placeholder": "Caută gear, brand, oraș…",
+    "list_new": "Listează gear",
+    "stats": {
+      "listings": "Anunțuri active",
+      "categories": "Categorii",
+      "cities": "Țară"
+    },
+    "sort": {
+      "label": "Sortează",
+      "newest": "Cele mai noi",
+      "price_asc": "Preț crescător",
+      "price_desc": "Preț descrescător",
+      "expiring_soon": "Expiră curând",
+      "most_viewed": "Cele mai vizionate"
+    },
+    "filters": {
+      "heading": "Filtre",
+      "active_label": "Filtre active",
+      "clear_all": "Curăță toate ×",
+      "condition": "Stare",
+      "kind": "Tip ofertă",
+      "delivery": "Livrare",
+      "price": "Preț",
+      "price_min": "Min",
+      "price_max": "Max",
+      "location": "Oraș / Județ",
+      "location_placeholder": "ex. București",
+      "category": "Categorie",
+      "no_results": "Niciun anunț nu corespunde filtrelor active."
+    },
+    "condition": {
+      "new": "Sigilat / nou",
+      "mint": "Ca nou (mint)",
+      "very_good": "Foarte bună",
+      "good": "Bună",
+      "fair": "Acceptabilă",
+      "for_parts": "Pentru piese"
+    },
+    "kind": {
+      "sell": "Vânzare",
+      "trade": "Schimb",
+      "sell_or_trade": "Vânzare / Schimb"
+    },
+    "delivery": {
+      "pickup_only": "Doar predare personală",
+      "shipping_only": "Doar prin curier",
+      "both": "Predare sau curier"
+    },
+    "card": {
+      "accepts_offers": "Acceptă oferte"
+    },
+    "results_count": "{{shown}} rezultate din {{total}}",
+    "pagination": {
+      "page_of": "Pagina {{page}} / {{total}}",
+      "show_count": "Afișează {{shown}} din {{total}}"
+    }
   }
 }

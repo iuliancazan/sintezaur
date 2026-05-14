@@ -29,6 +29,12 @@ export const appRoutes: Route[] = [
       import('./tezaur/tezaur-detail.page').then((m) => m.TezaurDetailPage),
   },
   {
+    path: 'bazar',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./bazar/bazar-list.page').then((m) => m.BazarListPage),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/pages/signup.page').then((m) => m.SignupPage),
