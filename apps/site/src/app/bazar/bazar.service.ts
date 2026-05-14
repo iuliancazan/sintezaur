@@ -69,6 +69,49 @@ export interface RecentlySoldResponse {
   items: BazarListItem[];
 }
 
+export interface ListingPayload {
+  gearId?: string;
+  rawMake?: string;
+  rawModel?: string;
+  rawYear?: number;
+  title: string;
+  description: Record<string, unknown>;
+  descriptionHtml?: string;
+  price: number;
+  currency: DisplayCurrencyLiteral;
+  condition: ListingConditionLiteral;
+  conditionNote?: string;
+  kind: ListingKindLiteral;
+  lookingFor?: string;
+  delivery: ListingDeliveryLiteral;
+  shippingCost?: number;
+  shippingCarriers?: string[];
+  acceptsOffers: boolean;
+  location: string;
+  contactPhone?: string;
+}
+
+export interface QuickListSuggestion {
+  gear: {
+    id: string;
+    slug: string;
+    brand: string;
+    model: string;
+    category: string;
+  };
+  suggestedTitle: string;
+  suggestedConditions: string[];
+  priceStats: {
+    currency: 'ron' | 'eur';
+    avg: number | null;
+    median: number | null;
+    low: number | null;
+    high: number | null;
+    soldCount: number;
+    activeCount: number;
+  };
+}
+
 export interface BazarListingDetail {
   listing: {
     id: string;
@@ -173,6 +216,81 @@ export class BazarService {
     return firstValueFrom(
       this.http.delete<void>(
         `${this.base}/me/bazar/listings/${listingId}/watch`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  quickList(gearId: string): Promise<QuickListSuggestion> {
+    return firstValueFrom(
+      this.http.get<QuickListSuggestion>(`${this.base}/bazar/quick-list`, {
+        params: new HttpParams().set('gearId', gearId),
+        withCredentials: true,
+      }),
+    );
+  }
+
+  create(payload: ListingPayload): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/me/bazar/listings`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  updateOwn(
+    listingId: string,
+    patch: Partial<ListingPayload>,
+  ): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.patch<{ id: string; slug: string }>(
+        `${this.base}/me/bazar/listings/${listingId}`,
+        patch,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  removeOwn(listingId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/bazar/listings/${listingId}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  uploadPhoto(
+    listingId: string,
+    file: File,
+  ): Promise<{ sourceId: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return firstValueFrom(
+      this.http.post<{ sourceId: string }>(
+        `${this.base}/me/bazar/listings/${listingId}/photos`,
+        form,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  removePhoto(listingId: string, sourceId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/bazar/listings/${listingId}/photos/${sourceId}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  reorderPhotos(listingId: string, order: string[]): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/bazar/listings/${listingId}/photos/reorder`,
+        { order },
         { withCredentials: true },
       ),
     );

@@ -35,6 +35,18 @@ export const appRoutes: Route[] = [
       import('./bazar/bazar-list.page').then((m) => m.BazarListPage),
   },
   {
+    path: 'bazar/nou',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./bazar/bazar-form.page').then((m) => m.BazarFormPage),
+  },
+  {
+    path: 'bazar/:slug/editare',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./bazar/bazar-form.page').then((m) => m.BazarFormPage),
+  },
+  {
     path: 'bazar/:slug',
     loadComponent: () =>
       import('./bazar/bazar-detail.page').then((m) => m.BazarDetailPage),

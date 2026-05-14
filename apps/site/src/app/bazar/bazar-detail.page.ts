@@ -8,10 +8,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  formatPrice,
-  type ShippingCarrierLiteral,
-} from '@sintezaur/shared';
+import { formatPrice } from '@sintezaur/shared';
 import {
   SzAvatarComponent,
   SzBadgeComponent,
