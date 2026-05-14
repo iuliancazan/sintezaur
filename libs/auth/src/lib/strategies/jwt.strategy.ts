@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import {
   DATABASE,
+  userRoles,
   users,
   type SintezaurDb,
   type UserRole,
@@ -17,19 +18,19 @@ export const REFRESH_COOKIE_NAME = 'sintezaur_refresh';
 
 /**
  * Shape of `req.user` after a successful JWT validation. Kept small
- * (id + role); anything else needed by a handler should come from a
+ * (id + roles[]); anything else needed by a handler should come from a
  * dedicated query or a higher-level service.
  */
 export interface AuthenticatedUser {
   sub: string;
-  role: UserRole;
+  roles: UserRole[];
 }
 
 /**
  * JWT strategy with an explicit DB re-query in `validate`. Trusting the
- * `role` claim from the JWT payload would mean role demotions or soft
- * deletes only take effect once the access token expires (up to 15min).
- * The per-request hit is fine at our scale and worth the safety.
+ * `roles` claim from the JWT payload would mean role grants/revokes or
+ * soft deletes only take effect once the access token expires (up to
+ * 15min). The per-request hit is fine at our scale and worth the safety.
  *
  * Token is pulled from the `sintezaur_access` HttpOnly cookie (spec §7.1:
  * "tokens in HttpOnly cookies"). Bearer-header fallback is intentionally
@@ -53,11 +54,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(payload: AccessTokenPayload): Promise<AuthenticatedUser> {
     const [user] = await this.db
-      .select({
-        id: users.id,
-        role: users.role,
-        deletedAt: users.deletedAt,
-      })
+      .select({ id: users.id, deletedAt: users.deletedAt })
       .from(users)
       .where(eq(users.id, payload.sub))
       .limit(1);
@@ -65,6 +62,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user || user.deletedAt) {
       throw new UnauthorizedException();
     }
-    return { sub: user.id, role: user.role };
+    const roleRows = await this.db
+      .select({ role: userRoles.role })
+      .from(userRoles)
+      .where(eq(userRoles.userId, user.id));
+    return { sub: user.id, roles: roleRows.map((r) => r.role) };
   }
 }

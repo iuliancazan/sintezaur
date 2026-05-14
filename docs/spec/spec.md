@@ -146,13 +146,30 @@ Anonymous can read everything; account required to post. Categories curated to f
 
 ### 7.2 Roles & Permissions
 
-| Role      | Capabilities                                                                                  |
-| --------- | --------------------------------------------------------------------------------------------- |
-| guest     | Read all public content (Tezaur, Bazar, Revista, Forum).                                       |
-| user      | Above + post in Forum, list in Bazar, write gear reviews, comment on articles, donate, like posts, save searches, watch listings, mark gear (owned/wishlist/etc.), block other users, report content. |
-| editor    | Above + draft, edit, publish articles in Revista. Assignable by admin.                         |
-| moderator | Above + moderate Forum (lock, hide, temp-ban, pin threads), moderate Bazar listings and gear reviews, resolve content reports. |
-| admin     | All of the above + permanent ban, manage roles, edit Tezaur entries (including toggling canonical thread per gear), system configuration, grant badges manually, manage currency rates, view audit log. |
+Roles are **additive and multi-valued**: a single user can hold any combination (e.g. `editor` + `curator`). Storage is a join table `user_roles (user_id, role, granted_at, granted_by)` rather than a column on `users`. `guest` is implicit (no row; an unauthenticated request).
+
+| Role         | Scope                                                                                          | Where they work                                |
+| ------------ | ---------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| guest        | Read all public content (Tezaur, Bazar, Revista, Forum).                                       | Site (anonymous).                              |
+| user         | Above + post in Forum, list in Bazar, write gear reviews, comment on articles, donate, like posts, save searches, watch listings, mark gear (owned/wishlist/etc.), block other users, report content. Default for every signup. | Site.                          |
+| contributor  | Above + add new gear entries in Tezaur and edit **only their own** submissions.                | Site (inline Tezaur create/edit on own items). |
+| curator      | Above + edit/delete **any** Tezaur entry (gear, families, relationships, canonical-thread toggle). Discogs-style database editors. | Site (inline Tezaur edit). NOT dashboard. |
+| editor       | Above + draft, edit, publish, archive Revista articles. Cannot edit other editors' articles unless they also hold `admin`. | Site (inline Tiptap editor on `/revista`). NOT dashboard. |
+| moderator    | Above + Forum moderation (lock thread, hide post, temp-ban, pin) + Bazar moderation (remove listing, hide gear review, resolve content reports). Quasi-admin minus Revista and Tezaur catalog editing. | Site (inline moderation buttons). NOT dashboard. A dedicated moderator dashboard may land post-MVP if surface area grows. |
+| admin        | Above + full dashboard access, user management, system configuration, badge grants, currency rates, audit log viewer, content report queue. **Cannot** grant or revoke `admin` / `superadmin` — only `superadmin` can. | Dashboard.                                     |
+| superadmin   | Above + grant/revoke `admin` and `superadmin` roles. Bootstrapped via `seed:superadmin` (one row at install). Technically can be multiple, but only one is created at install — additional superadmins are granted manually by an existing superadmin. | Dashboard.                                     |
+
+**Promotion paths:**
+- `user → contributor` — **automatic** after 100 published Forum posts (revoked automatically if the count drops below threshold via moderation).
+- `contributor → curator` — manual by admin.
+- `user → editor` — manual by admin (Revista grant).
+- `user → moderator` — manual by admin.
+- `* → admin` — manual by **superadmin only**.
+- `* → superadmin` — manual by **superadmin only**.
+
+**Dashboard gate:** only `admin` and `superadmin` may log into `/dashboard`. All other roles do their privileged work inline on the public site.
+
+**Trust level** (`unverified` … `trusted_seller`, per §7.4) is **orthogonal** to roles — never confused with them.
 
 ### 7.3 Internationalization Strategy
 
@@ -280,12 +297,12 @@ Trust badges visible on Forum profile + Bazar listing card derive from `trust_le
 
 ### 7.10 Audit Log
 
-All privileged actions (admin, moderator, editor) are logged for traceability — investigations, dispute resolution, regret recovery.
+All privileged actions (superadmin, admin, moderator, curator, contributor, editor) are logged for traceability — investigations, dispute resolution, regret recovery. Auto-promotions (`user → contributor` at 100 forum posts, or its reverse) are also logged with `actor_id = NULL` (system).
 
 Schema: `audit_log (id, actor_id, action, target_type, target_id, payload jsonb, ip_address inet, user_agent text, created_at)`.
 
 **Action enum** (extensible):
-- User: `user.role_changed`, `user.banned`, `user.unbanned`, `user.deleted`, `user.merged`, `user.email_changed`, `user.trust_level_changed`
+- User: `user.role_granted`, `user.role_revoked`, `user.banned`, `user.unbanned`, `user.deleted`, `user.merged`, `user.email_changed`, `user.trust_level_changed`
 - Tezaur: `gear.created`, `gear.updated`, `gear.deleted`, `gear.published`, `gear.canonical_thread_toggled`
 - Bazar: `listing.removed_by_admin`, `listing.unremoved`, `transaction.reversed`
 - Forum: `post.hidden`, `post.unhidden`, `thread.locked`, `thread.unlocked`, `thread.pinned`, `thread.deleted`
@@ -779,9 +796,10 @@ Hybrid: **60% utility, 30% culture, 10% community-driven**.
 
 #### Editor role
 
-- Internal staff: editor by default.
-- Admin can grant editor role to community members.
-- Editors can draft, edit, publish, archive their own articles. Cannot edit other editors' work without admin role.
+- Internal staff: hold `editor` by default.
+- Admin can grant `editor` to community members.
+- Editors can draft, edit, publish, archive their own articles. Cannot edit other editors' work unless they also hold `admin`.
+- Editors work **inline on the public site** (Tiptap composer on `/revista`), not in the dashboard.
 
 #### Article fields
 
@@ -883,8 +901,9 @@ Filters: category (multi-select), author, tag, gear tag, date range. Sort: relev
 
 #### Moderation
 
-- **Moderator:** lock thread, hide post (soft delete with reason), warn user, temp-ban, approve queued posts, pin threads.
-- **Admin:** same + permanent ban, manage moderators, manage badges.
+- **Moderator:** lock thread, hide post (soft delete with reason), warn user, temp-ban, approve queued posts, pin threads. Acts via inline buttons on the public site (not dashboard).
+- **Admin:** same + permanent ban, grant/revoke `moderator`, manage badges (via dashboard).
+- **Superadmin:** same as admin + grant/revoke `admin` and `superadmin`.
 - **Reporting:** any user can report any content via generic `content_report` (per §8.2). Unified queue in dashboard.
 - (Post-MVP) AI-assisted first-pass triage.
 
@@ -904,7 +923,8 @@ Forum applies the global `user_block` table (per §8.2). When viewing a thread:
 ### Core entities
 
 **Identity & access:**
-- `user` — auth, profile, roles, notification preferences. v0.3 columns: `phone_e164`★, `phone_verified_at`★, `id_verified_at`★, `trust_level` enum★, `display_currency` enum★, `subscription_tier` enum★, `deleted_at`★
+- `user` — auth, profile, notification preferences. v0.3 columns: `phone_e164`★, `phone_verified_at`★, `id_verified_at`★, `trust_level` enum★, `display_currency` enum★, `subscription_tier` enum★, `deleted_at`★. Roles live in `user_role`★ (see below), not on this row.
+- `user_role`★ — `(user_id, role, granted_at, granted_by)`; PK `(user_id, role)`. Multi-valued; replaces the legacy single-column `users.role`.
 - `user_email_history`★ — `(user_id, old_email, new_email, changed_at, ip_address)`
 - `user_block`★ — `(blocker_id, blocked_id, created_at, reason nullable)`
 - `user_badge` — awarded objective badges

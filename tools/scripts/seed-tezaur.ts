@@ -12,8 +12,9 @@ import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
  * `docs/brainstorming/Seed List - Tezaur Gear Catalog v1.md`.
  *
  * Idempotent: matches on (brand, model) — re-running updates existing
- * rows in place rather than duplicating. Reads the FIRST_ADMIN_EMAIL
- * to attribute `created_by` (falls back to NULL when no admin yet).
+ * rows in place rather than duplicating. Reads SUPERADMIN_EMAIL
+ * (FIRST_ADMIN_EMAIL accepted as fallback) to attribute `created_by`
+ * (falls back to NULL when no admin yet).
  *
  * Run with:
  *   pnpm seed:tezaur
@@ -180,7 +181,8 @@ async function main(): Promise<void> {
 
   // Resolve admin actor for created_by attribution.
   let actorId: string | null = null;
-  const adminEmail = process.env.FIRST_ADMIN_EMAIL;
+  const adminEmail =
+    process.env.SUPERADMIN_EMAIL ?? process.env.FIRST_ADMIN_EMAIL;
   if (adminEmail) {
     const [admin] = await db
       .select({ id: users.id })

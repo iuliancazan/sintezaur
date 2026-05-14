@@ -4,6 +4,7 @@ import {
   index,
   integer,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -39,7 +40,6 @@ export const users = pgTable(
     username: text('username').notNull(),
     fullName: text('full_name').notNull(),
 
-    role: userRoleEnum('role').notNull().default('user'),
     trustLevel: trustLevelEnum('trust_level').notNull().default('unverified'),
     displayCurrency: displayCurrencyEnum('display_currency')
       .notNull()
@@ -92,10 +92,43 @@ export const users = pgTable(
     uniqueIndex('users_username_unique')
       .on(t.username)
       .where(sql`${t.deletedAt} IS NULL`),
-    index('users_role_idx').on(t.role),
     index('users_trust_level_idx').on(t.trustLevel),
   ],
 );
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
+
+/**
+ * Multi-valued role assignments per spec §7.2. A user holds any
+ * combination of roles (e.g. `editor` + `curator`). `guest` is implicit
+ * (no row) — never persisted here. Demotions take effect immediately
+ * because `RolesGuard` re-reads this table on every authorized request.
+ *
+ * `granted_by` is NULL for system-initiated grants (e.g. auto-promotion
+ * to `contributor` at 100 forum posts) and for the bootstrap superadmin
+ * row created by the seed script.
+ */
+export const userRoles = pgTable(
+  'user_roles',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: userRoleEnum('role').notNull(),
+    grantedAt: timestamp('granted_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    /** Admin/superadmin who granted this role; NULL for system/auto grants. */
+    grantedBy: uuid('granted_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.role] }),
+    index('user_roles_role_idx').on(t.role),
+  ],
+);
+
+export type UserRoleRow = typeof userRoles.$inferSelect;
+export type NewUserRoleRow = typeof userRoles.$inferInsert;

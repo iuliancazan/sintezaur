@@ -11,14 +11,14 @@ import { and, eq, gt, isNull } from 'drizzle-orm';
 import { createHash, randomBytes } from 'node:crypto';
 
 /**
- * JWT access token payload. Kept small: `sub` + `role`. `role` is
- * re-fetched on every request via `JwtStrategy.validate` so role
- * changes / soft deletes take effect immediately rather than waiting
- * for the access token to expire.
+ * JWT access token payload. Kept small: `sub` + `roles[]`. Roles are
+ * re-fetched on every request via `JwtStrategy.validate` so grant /
+ * revoke / soft-delete takes effect immediately rather than waiting
+ * for the access token to expire. Multi-valued per spec §7.2.
  */
 export interface AccessTokenPayload {
   sub: string;
-  role: UserRole;
+  roles: UserRole[];
 }
 
 export interface IssuedTokens {
@@ -62,11 +62,11 @@ export class TokenService {
 
   async issueTokens(
     userId: string,
-    role: UserRole,
+    roles: UserRole[],
     meta?: { ip?: string | null; userAgent?: string | null },
   ): Promise<IssuedTokens> {
     const accessToken = await this.jwt.signAsync(
-      { sub: userId, role } satisfies AccessTokenPayload,
+      { sub: userId, roles } satisfies AccessTokenPayload,
       { expiresIn: this.accessTtlSeconds },
     );
     const refreshToken = randomBytes(48).toString('base64url');

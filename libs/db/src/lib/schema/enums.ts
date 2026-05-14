@@ -1,17 +1,27 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
 /**
- * Sintezaur role hierarchy per spec §7.2. `guest` is implicit (no row;
- * an unauthenticated request). Promotion path:
- *   user → editor (Revista grant by admin)
- *   user → moderator (Bazar + Forum mod, by admin)
- *   anything → admin (manually, never self-grant)
+ * Sintezaur role enum per spec §7.2. `guest` is implicit (no row; an
+ * unauthenticated request). Roles are **multi-valued** — stored in the
+ * `user_roles` join table, not as a column on `users`. A single user
+ * may hold any combination (e.g. `editor` + `curator`).
+ *
+ * Promotion paths:
+ *   user → contributor       auto, at 100 published Forum posts (revocable)
+ *   contributor → curator    manual, by admin
+ *   user → editor            manual, by admin (Revista grant)
+ *   user → moderator         manual, by admin
+ *   * → admin                **superadmin only**
+ *   * → superadmin           **superadmin only** (bootstrapped at install)
  */
 export const userRoleEnum = pgEnum('user_role', [
   'user',
+  'contributor',
+  'curator',
   'editor',
   'moderator',
   'admin',
+  'superadmin',
 ]);
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
 

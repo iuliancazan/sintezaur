@@ -35,7 +35,7 @@ libs/
   db/           Drizzle schema + client factory
   shared/       FE/BE-shared DTOs + helpers (no backend-only imports)
   ui/           Shared Angular components (selector prefix: sintezaur-)
-tools/scripts/  Operator scripts: migrate, seed-dev, create-first-admin
+tools/scripts/  Operator scripts: migrate, seed-dev, create-superadmin
 docs/           Spec, planning, devops references
 design-imports/ Claude Design / Open Design HTML/JSX drops (manual flow)
 ```
@@ -70,7 +70,7 @@ pnpm build      # Nx run-many build for api, worker, site, dashboard
 | ---------------------- | --------------------------------------------------------- |
 | `pnpm migrate`         | Preflight SQL → drizzle migrations → postflight SQL.      |
 | `pnpm migrate:generate`| Diff schema → write a new drizzle migration.              |
-| `pnpm seed:admin`      | Bootstrap first admin (lands fully in M1).                |
+| `pnpm seed:superadmin` | Bootstrap the superadmin user + grant admin/superadmin (idempotent). |
 | `pnpm seed:dev`        | Idempotent dev seed. Guarded against prod DBs.            |
 | `pnpm scrub`           | Wipe dist + tsc-build cache + Nx cache.                   |
 

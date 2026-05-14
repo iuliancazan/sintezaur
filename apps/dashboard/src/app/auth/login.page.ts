@@ -9,7 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
 import { AuthService } from './auth.service';
-import { DASHBOARD_ROLES } from './auth.types';
+import { DASHBOARD_ROLES, hasAnyRole } from './auth.types';
 
 @Component({
   selector: 'app-login-page',
@@ -158,7 +158,7 @@ export class LoginPage {
         this.form.value.email!.trim().toLowerCase(),
         this.form.value.password!,
       );
-      if (!DASHBOARD_ROLES.includes(user.role)) {
+      if (!hasAnyRole(user, DASHBOARD_ROLES)) {
         await this.auth.logout();
         this.formError.set(this.i18n.t('auth.errors.not_staff'));
         return;

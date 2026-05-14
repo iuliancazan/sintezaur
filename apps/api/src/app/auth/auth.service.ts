@@ -12,9 +12,11 @@ import {
   DATABASE,
   emailVerificationTokens,
   passwordResetTokens,
+  userRoles,
   users,
   type SintezaurDb,
   type User,
+  type UserRole,
 } from '@sintezaur/db';
 import {
   PasswordService,
@@ -40,7 +42,10 @@ export interface AuthUserPublic {
   email: string;
   username: string;
   fullName: string;
-  role: User['role'];
+  /** Multi-valued per spec §7.2. Empty array = a `user`-only client
+   *  (no extra capabilities). `guest` is never serialized — guests
+   *  don't have an `AuthUserPublic` at all. */
+  roles: UserRole[];
   trustLevel: User['trustLevel'];
   displayCurrency: User['displayCurrency'];
   subscriptionTier: User['subscriptionTier'];
@@ -230,8 +235,9 @@ export class AuthService {
       })
       .where(eq(users.id, row.id));
 
-    const tokens = await this.tokens.issueTokens(row.id, row.role, meta);
-    return { tokens, user: toPublic(row) };
+    const roles = await this.fetchRoles(row.id);
+    const tokens = await this.tokens.issueTokens(row.id, roles, meta);
+    return { tokens, user: toPublic(row, roles) };
   }
 
   async refresh(
@@ -248,9 +254,10 @@ export class AuthService {
       .limit(1);
     if (!row) throw new UnauthorizedException();
 
-    const issued = await this.tokens.issueTokens(row.id, row.role, meta);
+    const roles = await this.fetchRoles(row.id);
+    const issued = await this.tokens.issueTokens(row.id, roles, meta);
     await this.tokens.revokeById(found.id, issued.refreshTokenId);
-    return { tokens: issued, user: toPublic(row) };
+    return { tokens: issued, user: toPublic(row, roles) };
   }
 
   async logout(presentedToken: string | undefined): Promise<void> {
@@ -352,7 +359,8 @@ export class AuthService {
       .where(and(eq(users.id, userId), isNull(users.deletedAt)))
       .limit(1);
     if (!row) throw new NotFoundException();
-    return toPublic(row);
+    const roles = await this.fetchRoles(row.id);
+    return toPublic(row, roles);
   }
 
   async changePassword(
@@ -382,7 +390,8 @@ export class AuthService {
       })
       .where(eq(users.id, row.id));
     await this.tokens.revokeAllForUser(row.id);
-    return toPublic({ ...row, passwordHash: newHash });
+    const roles = await this.fetchRoles(row.id);
+    return toPublic({ ...row, passwordHash: newHash }, roles);
   }
 
   /**
@@ -445,6 +454,14 @@ export class AuthService {
   // Internals
   // ────────────────────────────────────────────────────────────────────
 
+  private async fetchRoles(userId: string): Promise<UserRole[]> {
+    const rows = await this.db
+      .select({ role: userRoles.role })
+      .from(userRoles)
+      .where(eq(userRoles.userId, userId));
+    return rows.map((r) => r.role);
+  }
+
   private async findByEmailLower(email: string): Promise<User | null> {
     const [row] = await this.db
       .select()
@@ -492,13 +509,13 @@ function dummyHash(): string {
   return '$2a$12$0000000000000000000000.0000000000000000000000000000000000';
 }
 
-function toPublic(row: User): AuthUserPublic {
+function toPublic(row: User, roles: UserRole[]): AuthUserPublic {
   return {
     id: row.id,
     email: row.email,
     username: row.username,
     fullName: row.fullName,
-    role: row.role,
+    roles,
     trustLevel: row.trustLevel,
     displayCurrency: row.displayCurrency,
     subscriptionTier: row.subscriptionTier,

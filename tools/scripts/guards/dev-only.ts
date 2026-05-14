@@ -9,7 +9,7 @@ import 'dotenv/config';
  *
  * Scripts that MUST run on prod don't get this guard:
  *   - `pnpm migrate`    (Coolify pre-deployment hook)
- *   - `pnpm seed:admin` (idempotent first-admin bootstrap on prod)
+ *   - `pnpm seed:superadmin` (idempotent superadmin bootstrap on prod)
  */
 
 const url = process.env.DATABASE_URL ?? '';

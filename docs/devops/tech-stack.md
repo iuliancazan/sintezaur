@@ -32,7 +32,7 @@ pinned:  pnpm@10.33.2 (via packageManager field in package.json)
   "dashboard":        "CI=true nx serve dashboard",
   "migrate":          "tsx tools/scripts/migrate.ts",
   "migrate:generate": "drizzle-kit generate",
-  "seed:admin":       "tsx tools/scripts/create-first-admin.ts",
+  "seed:superadmin":  "tsx tools/scripts/create-superadmin.ts",
   "seed:dev":         "tsx tools/scripts/guards/dev-only.ts && tsx tools/scripts/seed-dev.ts",
   "lint":             "nx run-many --target=lint",
   "test":             "nx run-many --target=test",

@@ -21,7 +21,7 @@ import { ListingsService } from './listings.service';
 
 @Controller('admin/bazar')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@RolesAllowed('moderator', 'admin')
+@RolesAllowed('moderator', 'admin', 'superadmin')
 export class AdminBazarController {
   constructor(private readonly listings: ListingsService) {}
 

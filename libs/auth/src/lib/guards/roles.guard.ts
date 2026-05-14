@@ -8,6 +8,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import {
   DATABASE,
+  userRoles,
   users,
   type SintezaurDb,
   type UserRole,
@@ -18,9 +19,10 @@ import type { AuthenticatedUser } from '../strategies/jwt.strategy';
 
 /**
  * Use after `JwtAuthGuard`. Reads the `@RolesAllowed(...)` metadata on
- * the handler (or class), re-fetches the user's current role from the
- * DB (so demotions take immediate effect), and 403s if the role is not
- * in the allowed set. If no `@RolesAllowed(...)` is set, the guard passes.
+ * the handler (or class), re-fetches the user's current role set from
+ * the DB (so grants/revokes take immediate effect), and 403s if the
+ * intersection with `allowed` is empty. If no `@RolesAllowed(...)` is
+ * set, the guard passes. Spec §7.2 — roles are multi-valued.
  */
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -43,12 +45,19 @@ export class RolesGuard implements CanActivate {
     if (!userId) throw new ForbiddenException();
 
     const [row] = await this.db
-      .select({ role: users.role, deletedAt: users.deletedAt })
+      .select({ deletedAt: users.deletedAt })
       .from(users)
       .where(eq(users.id, userId))
       .limit(1);
-
-    if (!row || row.deletedAt || !allowed.includes(row.role)) {
+    if (!row || row.deletedAt) {
+      throw new ForbiddenException('Insufficient role');
+    }
+    const rolesHeld = await this.db
+      .select({ role: userRoles.role })
+      .from(userRoles)
+      .where(eq(userRoles.userId, userId));
+    const has = new Set(rolesHeld.map((r) => r.role));
+    if (!allowed.some((r) => has.has(r))) {
       throw new ForbiddenException('Insufficient role');
     }
     return true;

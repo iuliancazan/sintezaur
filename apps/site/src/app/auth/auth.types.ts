@@ -4,7 +4,14 @@
  * server-only deps. When @sintezaur/shared lands DTOs (M2), this can
  * be re-exported from there.
  */
-export type UserRole = 'user' | 'editor' | 'moderator' | 'admin';
+export type UserRole =
+  | 'user'
+  | 'contributor'
+  | 'curator'
+  | 'editor'
+  | 'moderator'
+  | 'admin'
+  | 'superadmin';
 export type TrustLevel =
   | 'unverified'
   | 'email_verified'
@@ -19,11 +26,21 @@ export interface AuthUser {
   email: string;
   username: string;
   fullName: string;
-  role: UserRole;
+  /** Multi-valued per spec §7.2. */
+  roles: UserRole[];
   trustLevel: TrustLevel;
   displayCurrency: DisplayCurrency;
   subscriptionTier: SubscriptionTier;
   emailVerified: boolean;
   mustChangePassword: boolean;
   createdAt: string;
+}
+
+/** Does this user hold at least one of the requested roles? */
+export function hasAnyRole(
+  user: Pick<AuthUser, 'roles'> | null | undefined,
+  allowed: ReadonlyArray<UserRole>,
+): boolean {
+  if (!user) return false;
+  return allowed.some((r) => user.roles.includes(r));
 }

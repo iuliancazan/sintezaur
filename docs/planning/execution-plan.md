@@ -88,7 +88,7 @@ Empty Nx monorepo identical in shape to Mudee, deployable on Hetzner + Coolify. 
 - [ ] Dockerfile per app (api/site/dashboard) — same multi-stage pattern as Mudee, with `pnpm migrate &&` in API CMD
 - [ ] `nginx.conf` for site/dashboard (SPA fallback + `/healthz`)
 - [ ] `tools/scripts/migrate.ts` — orchestrator (preflight → drizzle → postflight)
-- [ ] `tools/scripts/create-first-admin.ts`
+- [ ] `tools/scripts/create-superadmin.ts`
 - [ ] `tools/scripts/seed-dev.ts` (no-op stub)
 - [ ] Git repo initialized, `.gitignore`, `README.md`
 - [ ] First admin's GitHub repo connected to Coolify
@@ -105,7 +105,7 @@ Empty Nx monorepo identical in shape to Mudee, deployable on Hetzner + Coolify. 
 - Health controller: `GET /api/health` returns `{ status, timestamp }` — **NO DB check** (Mudee lesson: avoid DB-coupled health for Coolify restart loops)
 - Drizzle config + empty `schema/index.ts`
 - Migration orchestrator that runs preflight → drizzle → postflight in order
-- `.env.example` complete (DATABASE_URL, JWT secrets, COOKIE_*, SMTP_*, FIRST_ADMIN_*, etc.)
+- `.env.example` complete (DATABASE_URL, JWT secrets, COOKIE_*, SMTP_*, SUPERADMIN_*, etc.)
 
 ### Frontend work
 - Angular `site` (Analog SSR): root component renders "Hello Sintezaur"

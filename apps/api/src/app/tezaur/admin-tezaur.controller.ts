@@ -40,16 +40,23 @@ import type {
 } from './tezaur.dto';
 
 /**
- * Admin + editor surface for Tezaur. Mounted at `/api/admin/tezaur/...`
- * so the public surface (`/api/tezaur/...`) stays cleanly separated and
- * we can throttle / log them differently later.
+ * Catalog-editor surface for Tezaur. Mounted at `/api/admin/tezaur/...`
+ * (the path is a legacy convention — `curator` doesn't enter the
+ * dashboard; the dashboard UI for these endpoints lives only for
+ * `admin`/`superadmin`). Public read surface is `/api/tezaur/...`.
  *
- * Role gating: `editor` can edit catalog entries (Tezaur is editorial
- * spine per spec §6.1); `admin` can also soft-delete / restore.
+ * Role gating per spec §7.2:
+ *   - `curator` (or higher) edits catalog entries
+ *   - `admin`/`superadmin` can also soft-delete / restore
+ *   - `moderator`/`admin`/`superadmin` can mod-hide gear reviews
+ *
+ * `contributor` (auto-granted at 100 forum posts) gets create + edit-own
+ * lands later — needs an ownership check in the service layer that
+ * isn't wired yet.
  */
 @Controller('admin/tezaur')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@RolesAllowed('editor', 'admin')
+@RolesAllowed('curator', 'admin', 'superadmin')
 export class AdminTezaurController {
   constructor(
     private readonly tezaur: TezaurService,
@@ -77,7 +84,7 @@ export class AdminTezaurController {
   }
 
   @Delete('gear/:id')
-  @RolesAllowed('admin')
+  @RolesAllowed('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   async softDeleteGear(
     @Param('id', ParseUUIDPipe) id: string,
@@ -88,7 +95,7 @@ export class AdminTezaurController {
   }
 
   @Post('gear/:id/restore')
-  @RolesAllowed('admin')
+  @RolesAllowed('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   async restoreGear(
     @Param('id', ParseUUIDPipe) id: string,
@@ -216,7 +223,7 @@ export class AdminTezaurController {
 
   /* mod-hide review */
   @Post('reviews/:reviewId/hide')
-  @RolesAllowed('moderator', 'admin')
+  @RolesAllowed('moderator', 'admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   async hideReview(
     @Param('reviewId', ParseUUIDPipe) reviewId: string,

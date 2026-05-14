@@ -13,7 +13,7 @@ import { AuthService } from './auth/auth.service';
       <h1>{{ 'dashboard.home.title' | t }}</h1>
       @if (auth.currentUser(); as user) {
         <p class="who">
-          {{ 'dashboard.home.logged_in_as' | t: { email: user.email, role: user.role } }}
+          {{ 'dashboard.home.logged_in_as' | t: { email: user.email, role: user.roles.join(', ') } }}
         </p>
       }
 

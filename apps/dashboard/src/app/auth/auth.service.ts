@@ -3,7 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { DASHBOARD_ROLES, type AuthUser } from './auth.types';
+import { DASHBOARD_ROLES, hasAnyRole, type AuthUser } from './auth.types';
 
 interface MeResponse {
   user: AuthUser;
@@ -29,10 +29,7 @@ export class AuthService {
 
   readonly currentUser = this._currentUser.asReadonly();
   readonly isLoggedIn = computed(() => this._currentUser() !== null);
-  readonly isStaff = computed(() => {
-    const u = this._currentUser();
-    return !!u && DASHBOARD_ROLES.includes(u.role);
-  });
+  readonly isStaff = computed(() => hasAnyRole(this._currentUser(), DASHBOARD_ROLES));
 
   async loadCurrentUser(): Promise<void> {
     const result = await firstValueFrom(
