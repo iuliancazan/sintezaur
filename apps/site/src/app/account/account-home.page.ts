@@ -35,6 +35,9 @@ import { AuthService } from '../auth/auth.service';
         <a routerLink="/cont/salvate" class="account__link">
           {{ 'account.menu.my_watches' | t }}
         </a>
+        <a routerLink="/cont/cautari-salvate" class="account__link">
+          {{ 'account.menu.saved_searches' | t }}
+        </a>
         <a routerLink="/cont/parola" class="account__link">
           {{ 'account.menu.password' | t }}
         </a>

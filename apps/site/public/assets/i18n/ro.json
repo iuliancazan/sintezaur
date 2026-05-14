@@ -316,7 +316,8 @@
       "logout": "Ieși din cont",
       "messages": "Mesaje",
       "my_listings": "Anunțurile mele",
-      "my_watches": "Anunțuri salvate"
+      "my_watches": "Anunțuri salvate",
+      "saved_searches": "Căutări salvate"
     },
     "logged_in_as": "Conectat ca {{email}}",
     "back_to_account": "← Înapoi la cont"
@@ -353,7 +354,11 @@
       "location": "Oraș / Județ",
       "location_placeholder": "ex. București",
       "category": "Categorie",
-      "no_results": "Niciun anunț nu corespunde filtrelor active."
+      "no_results": "Niciun anunț nu corespunde filtrelor active.",
+      "save_search": "☆ Salvează căutarea",
+      "saved_ok": "Salvată",
+      "save_cap_reached": "Ai atins plafonul de 50 de căutări salvate.",
+      "save_error": "Salvarea a eșuat. Reîncearcă."
     },
     "condition": {
       "new": "Sigilat / nou",
@@ -592,5 +597,23 @@
     "empty": "Nu ai salvat niciun anunț. Apasă pe ♥ pe pagina de detaliu ca să primești notificări.",
     "unwatch": "Elimină ♥",
     "unwatching": "..."
+  },
+  "saved_searches": {
+    "title": "Căutări salvate",
+    "lede": "Setează notificări pentru combinații de filtre pe Bazar. Maxim 50.",
+    "empty": "Nu ai căutări salvate. Apasă \"Salvează căutarea\" pe /bazar după ce filtrezi rezultatele.",
+    "rename": "Redenumește",
+    "run": "Caută",
+    "delete": "Șterge",
+    "delete_confirm": "Sigur vrei să ștergi această căutare?",
+    "no_filters": "(fără filtre)",
+    "notify_label": "Notificări",
+    "mode": {
+      "instant": "Instant",
+      "daily_digest": "Rezumat zilnic",
+      "off": "Oprit"
+    },
+    "created": "Creat: {{date}}",
+    "last_notified": "Ultima alertă: {{date}}"
   }
 }

@@ -26,6 +26,7 @@ import {
 import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
+import { AuthService } from '../auth/auth.service';
 import { BazarService, type BazarListResponse } from './bazar.service';
 
 const PAGE_SIZE = 24;
@@ -114,6 +115,20 @@ const PAGE_SIZE = 24;
           <button class="bz-chip__clear" type="button" (click)="clearAll()">
             {{ 'bazar.filters.clear_all' | t }}
           </button>
+          @if (auth.isLoggedIn()) {
+            <button
+              type="button"
+              class="bz-chip__save"
+              [disabled]="saving()"
+              (click)="saveCurrentSearch()"
+            >
+              @if (savedJustNow()) {
+                ✓ {{ 'bazar.filters.saved_ok' | t }}
+              } @else {
+                ☆ {{ 'bazar.filters.save_search' | t }}
+              }
+            </button>
+          }
         </div>
       }
 
@@ -569,6 +584,19 @@ const PAGE_SIZE = 24;
         min-width: auto;
       }
       .bz-chip__clear:hover { color: var(--accent); }
+      .bz-chip__save {
+        color: var(--accent);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        font-size: 10px;
+        min-height: auto;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        padding: 0 8px;
+      }
+      .bz-chip__save:hover { text-decoration: underline; }
+      .bz-chip__save:disabled { opacity: 0.5; cursor: wait; }
 
       .bz-main {
         display: grid;
@@ -875,6 +903,7 @@ const PAGE_SIZE = 24;
 export class BazarListPage {
   readonly i18n = inject(I18nService);
   readonly bazar = inject(BazarService);
+  readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -900,6 +929,9 @@ export class BazarListPage {
 
   readonly response = signal<BazarListResponse | null>(null);
   readonly loading = signal(false);
+
+  readonly saving = signal(false);
+  readonly savedJustNow = signal(false);
 
   // Derived sets for O(1) lookup in template
   readonly conditionSet = computed(() => new Set(this.conditionsSig()));
@@ -1116,6 +1148,52 @@ export class BazarListPage {
     this.location.set('');
     this.page.set(1);
     this.syncUrl();
+  }
+
+  async saveCurrentSearch(): Promise<void> {
+    if (this.saving()) return;
+    this.saving.set(true);
+    this.savedJustNow.set(false);
+    try {
+      const name = this.suggestedName();
+      const query = this.snapshotQuery();
+      await this.bazar.createSavedSearch({ name, query });
+      this.savedJustNow.set(true);
+      setTimeout(() => this.savedJustNow.set(false), 2500);
+    } catch (err: unknown) {
+      console.error('[bazar] save search failed', err);
+      const status = (err as { status?: number })?.status;
+      if (status === 409) {
+        window.alert(this.i18n.t('bazar.filters.save_cap_reached'));
+      } else {
+        window.alert(this.i18n.t('bazar.filters.save_error'));
+      }
+    } finally {
+      this.saving.set(false);
+    }
+  }
+
+  private suggestedName(): string {
+    const parts: string[] = [];
+    if (this.qText()) parts.push(`"${this.qText()}"`);
+    if (this.category()) parts.push(this.categoryLabel(this.category()!));
+    if (this.location()) parts.push(this.location());
+    if (parts.length === 0) parts.push(`Căutare ${new Date().toLocaleDateString('ro-RO')}`);
+    return parts.join(' · ').slice(0, 80);
+  }
+
+  private snapshotQuery(): Record<string, unknown> {
+    return {
+      q: this.qText() || undefined,
+      category: this.category() ?? undefined,
+      conditions: this.conditionsSig().length ? this.conditionsSig() : undefined,
+      kinds: this.kindsSig().length ? this.kindsSig() : undefined,
+      deliveries: this.deliveriesSig().length ? this.deliveriesSig() : undefined,
+      priceMin: this.priceMin() ?? undefined,
+      priceMax: this.priceMax() ?? undefined,
+      currency: this.currency() ?? undefined,
+      location: this.location() || undefined,
+    };
   }
 
   goToPage(n: number): void {

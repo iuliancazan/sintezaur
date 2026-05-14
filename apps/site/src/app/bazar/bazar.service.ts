@@ -187,6 +187,19 @@ export interface TransactionReviewDto {
   updatedAt: string;
 }
 
+export interface SavedSearchRow {
+  id: string;
+  userId: string;
+  target: 'bazar' | 'tezaur' | 'forum';
+  name: string;
+  query: Record<string, unknown>;
+  notifyMode: 'instant' | 'daily_digest' | 'off';
+  lastEvaluatedAt: string | null;
+  lastNotifiedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface WatchedListingRow {
   listingId: string;
   slug: string;
@@ -543,6 +556,54 @@ export class BazarService {
       this.http.post<void>(
         `${this.base}/me/bazar/listings/${listingId}/refresh`,
         {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  listSavedSearches(): Promise<SavedSearchRow[]> {
+    return firstValueFrom(
+      this.http.get<SavedSearchRow[]>(`${this.base}/me/bazar/saved-searches`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  createSavedSearch(payload: {
+    name: string;
+    query: Record<string, unknown>;
+    notifyMode?: 'instant' | 'daily_digest' | 'off';
+  }): Promise<SavedSearchRow> {
+    return firstValueFrom(
+      this.http.post<SavedSearchRow>(
+        `${this.base}/me/bazar/saved-searches`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  updateSavedSearch(
+    id: string,
+    patch: {
+      name?: string;
+      query?: Record<string, unknown>;
+      notifyMode?: 'instant' | 'daily_digest' | 'off';
+    },
+  ): Promise<SavedSearchRow> {
+    return firstValueFrom(
+      this.http.patch<SavedSearchRow>(
+        `${this.base}/me/bazar/saved-searches/${id}`,
+        patch,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteSavedSearch(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/bazar/saved-searches/${id}`,
         { withCredentials: true },
       ),
     );

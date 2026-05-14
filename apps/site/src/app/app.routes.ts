@@ -127,6 +127,13 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/my-watches.page').then((m) => m.MyWatchesPage),
       },
+      {
+        path: 'cautari-salvate',
+        loadComponent: () =>
+          import('./account/saved-searches.page').then(
+            (m) => m.SavedSearchesPage,
+          ),
+      },
     ],
   },
 ];
