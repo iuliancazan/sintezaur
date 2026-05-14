@@ -155,6 +155,38 @@ export interface ThreadView {
   messages: ChatMessage[];
 }
 
+export interface TransactionDto {
+  id: string;
+  listingId: string;
+  threadId: string;
+  sellerId: string;
+  buyerId: string;
+  status: 'pending' | 'confirmed' | 'disputed' | 'cancelled';
+  finalPrice: string;
+  currency: DisplayCurrencyLiteral;
+  acceptedOfferMessageId: string | null;
+  sellerConfirmedAt: string | null;
+  buyerConfirmedAt: string | null;
+  confirmedAt: string | null;
+  cancelledAt: string | null;
+  cancelReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransactionReviewDto {
+  id: string;
+  transactionId: string;
+  reviewerId: string;
+  revieweeId: string;
+  rating: number;
+  body: string;
+  hiddenAt: string | null;
+  hiddenReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface QuickListSuggestion {
   gear: {
     id: string;
@@ -440,6 +472,42 @@ export class BazarService {
       this.http.post<{ message: ChatMessage }>(
         `${this.base}/me/bazar/threads/${threadId}/offers/${offerId}/reject`,
         {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  confirmTransaction(threadId: string): Promise<{
+    transaction: TransactionDto;
+    confirmed: boolean;
+  }> {
+    return firstValueFrom(
+      this.http.post<{ transaction: TransactionDto; confirmed: boolean }>(
+        `${this.base}/me/bazar/threads/${threadId}/confirm-transaction`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  getTransaction(threadId: string): Promise<TransactionDto | null> {
+    return firstValueFrom(
+      this.http.get<TransactionDto | null>(
+        `${this.base}/me/bazar/threads/${threadId}/transaction`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  submitReview(
+    transactionId: string,
+    rating: number,
+    body: string,
+  ): Promise<TransactionReviewDto> {
+    return firstValueFrom(
+      this.http.post<TransactionReviewDto>(
+        `${this.base}/me/bazar/transactions/${transactionId}/review`,
+        { rating, body },
         { withCredentials: true },
       ),
     );

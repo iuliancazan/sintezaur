@@ -18,6 +18,7 @@ import {
   BazarService,
   type ChatMessage,
   type ThreadView,
+  type TransactionDto,
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
@@ -210,6 +211,83 @@ import { TPipe } from '../i18n/t.pipe';
             }
           }
         </section>
+
+        @if (txBanner(); as banner) {
+          <div class="thr__tx-banner" [class]="'is-' + banner.tone">
+            <div class="thr__tx-banner-body">
+              <strong>{{ banner.title }}</strong>
+              <p>{{ banner.detail }}</p>
+            </div>
+            @if (banner.action === 'confirm') {
+              <button
+                type="button"
+                class="thr__tx-cta"
+                [disabled]="txPending()"
+                (click)="confirmTransaction()"
+              >
+                {{
+                  (txPending()
+                    ? 'thread.tx.confirming'
+                    : 'thread.tx.confirm_button') | t
+                }}
+              </button>
+            } @else if (banner.action === 'review' && !reviewSubmitted()) {
+              <button
+                type="button"
+                class="thr__tx-cta"
+                (click)="openReview()"
+              >
+                {{ 'thread.tx.review_button' | t }}
+              </button>
+            }
+          </div>
+        }
+
+        @if (reviewing()) {
+          <div class="thr__review">
+            <h3>{{ 'thread.review.title' | t }}</h3>
+            <div class="thr__review-stars">
+              @for (n of [1, 2, 3, 4, 5]; track n) {
+                <button
+                  type="button"
+                  class="thr__star"
+                  [class.is-active]="n <= reviewRating()"
+                  (click)="reviewRating.set(n)"
+                  [attr.aria-label]="i18n.t('thread.review.rate', { n })"
+                >
+                  ★
+                </button>
+              }
+            </div>
+            <textarea
+              [(ngModel)]="reviewBody"
+              rows="4"
+              [placeholder]="i18n.t('thread.review.body_placeholder')"
+              minlength="10"
+              maxlength="2000"
+            ></textarea>
+            @if (reviewError()) {
+              <p class="thr__err">{{ reviewError() }}</p>
+            }
+            <div class="thr__review-actions">
+              <button type="button" class="thr__cancel" (click)="cancelReview()">
+                {{ 'thread.review.cancel' | t }}
+              </button>
+              <button
+                type="button"
+                class="thr__send"
+                [disabled]="!canSubmitReview() || reviewPending()"
+                (click)="submitReview()"
+              >
+                {{
+                  (reviewPending()
+                    ? 'thread.review.submitting'
+                    : 'thread.review.submit') | t
+                }}
+              </button>
+            </div>
+          </div>
+        }
 
         @if (v.listing.status === 'active') {
           <footer class="thr__compose">
@@ -573,6 +651,81 @@ import { TPipe } from '../i18n/t.pipe';
       }
       .thr__cancel:hover { color: var(--fg); }
 
+      .thr__tx-banner {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        padding: 14px 18px;
+        margin: 12px 0;
+        border: 1px solid var(--line-strong);
+      }
+      .thr__tx-banner.is-info { background: var(--bg-elev); }
+      .thr__tx-banner.is-warn { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, var(--bg-elev)); }
+      .thr__tx-banner.is-success { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 14%, var(--bg-elev)); }
+      .thr__tx-banner-body { flex: 1; }
+      .thr__tx-banner strong {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .thr__tx-banner p { margin: 4px 0 0; font-size: 13px; color: var(--fg); }
+      .thr__tx-cta {
+        padding: 10px 18px;
+        background: var(--accent);
+        color: var(--bg);
+        border: 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        cursor: pointer;
+        min-height: 40px;
+      }
+      .thr__tx-cta:disabled { opacity: 0.55; cursor: not-allowed; }
+
+      .thr__review {
+        margin: 12px 0;
+        padding: 16px 18px;
+        border: 1px solid var(--accent);
+        background: var(--bg-elev);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .thr__review h3 {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .thr__review-stars { display: inline-flex; gap: 6px; }
+      .thr__star {
+        background: none;
+        border: 0;
+        font-size: 30px;
+        line-height: 1;
+        color: var(--fg-subtle);
+        cursor: pointer;
+        padding: 4px;
+        min-width: 38px;
+      }
+      .thr__star.is-active { color: var(--accent); }
+      .thr__review textarea {
+        padding: 10px 12px;
+        background: var(--bg);
+        border: 1px solid var(--line-strong);
+        font-family: var(--font-ui);
+        font-size: 14px;
+        color: var(--fg);
+        resize: vertical;
+      }
+      .thr__review-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
       .thr__compose {
         display: grid;
         grid-template-columns: 1fr auto;
@@ -660,6 +813,16 @@ export class MessagesThreadPage implements AfterViewChecked {
   /** spec §8.2: counter chain capped at 5 rounds. */
   readonly MAX_OFFER_ROUNDS = 5;
 
+  readonly transaction = signal<TransactionDto | null>(null);
+  readonly txPending = signal(false);
+
+  readonly reviewing = signal(false);
+  readonly reviewRating = signal(5);
+  reviewBody = '';
+  readonly reviewPending = signal(false);
+  readonly reviewError = signal<string | null>(null);
+  readonly reviewSubmitted = signal(false);
+
   readonly formatPrice = formatPrice;
 
   readonly me = computed(() => this.auth.currentUser()?.id ?? null);
@@ -701,6 +864,61 @@ export class MessagesThreadPage implements AfterViewChecked {
     return { kind: 'countered' } as const;
   };
 
+  readonly txBanner = computed(() => {
+    const v = this.view();
+    const tx = this.transaction();
+    const me = this.me();
+    if (!v || !me) return null;
+    if (tx?.status === 'confirmed') {
+      if (this.reviewSubmitted()) {
+        return {
+          tone: 'success',
+          title: this.i18n.t('thread.tx.banner_review_done_title'),
+          detail: this.i18n.t('thread.tx.banner_review_done_detail'),
+          action: null,
+        } as const;
+      }
+      return {
+        tone: 'success',
+        title: this.i18n.t('thread.tx.banner_confirmed_title'),
+        detail: this.i18n.t('thread.tx.banner_confirmed_detail'),
+        action: 'review',
+      } as const;
+    }
+    if (tx?.status === 'pending') {
+      const myStamp =
+        me === tx.sellerId ? tx.sellerConfirmedAt : tx.buyerConfirmedAt;
+      if (myStamp) {
+        return {
+          tone: 'info',
+          title: this.i18n.t('thread.tx.banner_waiting_other_title'),
+          detail: this.i18n.t('thread.tx.banner_waiting_other_detail'),
+          action: null,
+        } as const;
+      }
+      return {
+        tone: 'warn',
+        title: this.i18n.t('thread.tx.banner_other_confirmed_title'),
+        detail: this.i18n.t('thread.tx.banner_other_confirmed_detail'),
+        action: 'confirm',
+      } as const;
+    }
+    // No transaction yet — prompt only if listing is still active.
+    if (v.listing.status === 'active') {
+      return {
+        tone: 'info',
+        title: this.i18n.t('thread.tx.banner_idle_title'),
+        detail: this.i18n.t('thread.tx.banner_idle_detail'),
+        action: 'confirm',
+      } as const;
+    }
+    return null;
+  });
+
+  readonly canSubmitReview = computed(
+    () => this.reviewBody.trim().length >= 10 && this.reviewRating() >= 1,
+  );
+
   @ViewChild('scroller') private scroller?: ElementRef<HTMLElement>;
   private shouldScroll = false;
 
@@ -722,16 +940,85 @@ export class MessagesThreadPage implements AfterViewChecked {
   private async load(threadId: string): Promise<void> {
     this.loading.set(true);
     this.notFound.set(false);
+    this.reviewing.set(false);
+    this.reviewSubmitted.set(false);
     try {
       const v = await this.bazar.readThread(threadId);
       this.view.set(v);
       this.shouldScroll = true;
+      try {
+        const tx = await this.bazar.getTransaction(threadId);
+        this.transaction.set(tx);
+      } catch {
+        this.transaction.set(null);
+      }
     } catch (err) {
       console.error('[bazar] thread load failed', err);
       this.notFound.set(true);
       this.view.set(null);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async confirmTransaction(): Promise<void> {
+    const v = this.view();
+    if (!v || this.txPending()) return;
+    this.txPending.set(true);
+    try {
+      const res = await this.bazar.confirmTransaction(v.thread.id);
+      this.transaction.set(res.transaction);
+      // Re-fetch thread so the system message + listing.status flip show up.
+      const refreshed = await this.bazar.readThread(v.thread.id);
+      this.view.set(refreshed);
+      this.shouldScroll = true;
+    } catch (err) {
+      console.error('[bazar] confirm tx failed', err);
+      this.sendError.set(this.i18n.t('thread.tx.confirm_error'));
+    } finally {
+      this.txPending.set(false);
+    }
+  }
+
+  openReview(): void {
+    this.reviewing.set(true);
+    this.reviewError.set(null);
+  }
+
+  cancelReview(): void {
+    this.reviewing.set(false);
+    this.reviewError.set(null);
+    this.reviewBody = '';
+    this.reviewRating.set(5);
+  }
+
+  async submitReview(): Promise<void> {
+    const tx = this.transaction();
+    if (!tx || !this.canSubmitReview() || this.reviewPending()) return;
+    this.reviewPending.set(true);
+    this.reviewError.set(null);
+    try {
+      await this.bazar.submitReview(
+        tx.id,
+        this.reviewRating(),
+        this.reviewBody.trim(),
+      );
+      this.reviewSubmitted.set(true);
+      this.reviewing.set(false);
+      this.reviewBody = '';
+      this.reviewRating.set(5);
+    } catch (err: unknown) {
+      console.error('[bazar] review submit failed', err);
+      // The backend throws 409 if you've already submitted on this side.
+      const status = (err as { status?: number })?.status;
+      if (status === 409) {
+        this.reviewSubmitted.set(true);
+        this.reviewing.set(false);
+      } else {
+        this.reviewError.set(this.i18n.t('thread.review.error'));
+      }
+    } finally {
+      this.reviewPending.set(false);
     }
   }
 

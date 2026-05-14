@@ -539,6 +539,31 @@
       "cap_reached": "Ai atins plafonul de 5 runde de contraofertă pe acest fir.",
       "send_error": "Oferta nu a putut fi trimisă.",
       "action_error": "Acțiunea pe ofertă a eșuat. Reîncearcă."
+    },
+    "tx": {
+      "banner_idle_title": "Confirmă tranzacția",
+      "banner_idle_detail": "După ce v-ați înțeles, apăsați ambii pe \"Confirmă tranzacția\" pentru a închide vânzarea și a deschide fereastra de recenzii.",
+      "banner_waiting_other_title": "Ai confirmat — aștepți cealaltă parte",
+      "banner_waiting_other_detail": "Vei primi o notificare imediat ce cealaltă parte confirmă.",
+      "banner_other_confirmed_title": "Cealaltă parte a confirmat",
+      "banner_other_confirmed_detail": "Confirmă și tu ca să marcăm anunțul ca vândut.",
+      "banner_confirmed_title": "Tranzacție confirmată",
+      "banner_confirmed_detail": "Lasă o recenzie pentru cealaltă parte (30 zile).",
+      "banner_review_done_title": "✓ Mulțumim pentru recenzie",
+      "banner_review_done_detail": "Recenzia ta a fost înregistrată și va apărea pe profilul celuilalt utilizator.",
+      "confirm_button": "Confirmă tranzacția",
+      "confirming": "Se confirmă...",
+      "review_button": "Scrie recenzie",
+      "confirm_error": "Confirmarea a eșuat. Reîncearcă."
+    },
+    "review": {
+      "title": "Cum a decurs tranzacția?",
+      "rate": "Acordă {{n}} stele",
+      "body_placeholder": "Câteva cuvinte despre experiență (minim 10 caractere)...",
+      "submit": "Trimite recenzia",
+      "submitting": "Se trimite...",
+      "cancel": "Renunță",
+      "error": "Recenzia nu a putut fi trimisă. Reîncearcă."
     }
   }
 }
