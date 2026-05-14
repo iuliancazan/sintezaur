@@ -1,6 +1,10 @@
-/**
- * @sintezaur/auth — shared auth primitives (services, guards, strategies,
- * decorators). Empty until M1 lands AuthModule + JwtStrategy +
- * RolesGuard + @CurrentUser/@RolesAllowed decorators per execution plan.
- */
-export {};
+export * from './lib/auth.module';
+export * from './lib/password.service';
+export * from './lib/token.service';
+export * from './lib/cookies';
+export * from './lib/strategies/jwt.strategy';
+export * from './lib/guards/jwt-auth.guard';
+export * from './lib/guards/roles.guard';
+export * from './lib/decorators/current-user.decorator';
+export * from './lib/decorators/roles.decorator';
+export * from './lib/decorators/public.decorator';

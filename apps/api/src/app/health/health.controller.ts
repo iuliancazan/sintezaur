@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { Public } from '@sintezaur/auth';
 
 /**
  * Liveness probe for Coolify (and any other orchestrator). Periodic
@@ -9,6 +10,7 @@ import { Controller, Get } from '@nestjs/common';
  * shouldn't restart-loop the container; that's a separate concern
  * (readiness probe, future).
  */
+@Public()
 @Controller('health')
 export class HealthController {
   @Get()
