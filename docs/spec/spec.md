@@ -845,29 +845,64 @@ Public page at `/autor/{slug}` displaying bio, avatar, social links, and all pub
 - Anonymous: read all.
 - Account: post, reply, like, subscribe to threads, mention.
 
-#### Categories (initial proposal — refine before M5)
+#### Categories (locked v0.3, per design v01 consolidation)
 
-- Sintetizatoare
-- Drum Machines & Sampleri
-- Effects & Procesoare
-- Controllers & MIDI
-- DAWs & Software
-- Tehnici de producție
-- Scena RO
-- Discuții articole (auto-populated by Revista)
-- Discuții echipamente (canonical gear Q&A threads — populated by editor toggles in Tezaur)
-- Anunțuri (admin-only posts)
+Six visible categories + three system-managed categories.
 
-#### Threading model
+**Visible categories:**
+- **Tezaur — Întrebări** (gear Q&A: synth, drum machine, sampler, modular, etc.)
+- **Producție** (DAW, mixing, mastering, workflow)
+- **Modular & Eurorack** (rack planning, modules, patches, troubleshooting)
+- **Bazar — Discuții** (prețuri, dispute, reviews vânzători — listings sunt în Bazar)
+- **Software & Plugins** (VST/AU/AAX, DAWs, soft sintezatoare)
+- **Live & Performance** (setup live, MIDI sync, hardware portabil, festivaluri)
 
-**Discourse-hybrid** (chosen explicitly over 3-level Facebook-style):
-- Posts in chronological order (linear)
-- Each reply shows "în răspuns la @user — Postare #N" header
-- Click header → expand inline preview / scroll-and-highlight
-- Each post with replies shows "X răspunsuri" footer → expand inline (flat sub-list)
-- **No depth limit. No indentation. No collapse.**
+**System categories** (auto-managed):
+- **Discuții articole** — auto-populated by Revista on article publish
+- **Discuții echipamente** — canonical Q&A threads per gear, populated by Tezaur editor toggle (gear.canonical_thread_id)
+- **Anunțuri** — admin-only system announcements
 
-Why: mobile-first audience; use-case mix favors linear; Elektronauts + lines run this model.
+**UI placement of system categories:** may render in a separate "Sistem" section at bottom of the main category list, OR be hidden from the main list and accessed contextually (via article page, gear page). Decision deferred to design — both options compatible with the data model.
+
+#### Threading model (locked v0.3 — 2-level hybrid)
+
+**Updated from earlier "Discourse-hybrid linear" specification.** Reasoning: when 3-4 users discuss in parallel under the same OP, pure linear loses sub-conversation context (the Gearspace problem). Pure Reddit-style unlimited nesting is tragic on mobile. 2-level visible nesting (Twitter/YouTube model) is the right balance.
+
+**Structure:**
+- OP at top, full-width, prominent
+- Top-level replies in chronological order under OP
+- Sub-replies indented **1 level** under their parent top-level reply
+- **Maximum 1 indent level visible** — replies to sub-replies (level 3+ in data) render at level 2 visually with `"în răspuns la @user — Postare #N.M"` header for context
+- Data model unchanged: `forum_post.parent_post_id` remains arbitrary depth; only the renderer caps visual nesting at 1 level
+
+**Indent specifics:**
+- Mobile: 16-20px left indent on sub-replies (visible but minimal)
+- Desktop: 32-48px left indent
+- Visual cue: subtle vertical line on left side of sub-reply block
+
+**Default expand/collapse state:**
+- Top-level reply with **≤5 sub-replies** → default **EXPANDED** (all sub-replies visible)
+- Top-level reply with **>5 sub-replies** → default **COLLAPSED** with `"Afișează cele X răspunsuri"` CTA
+- User can click the strip to toggle anytime
+
+**Master controls (in thread header):**
+- `"Extinde toate"` / `"Restrânge toate"` buttons toggle all sub-reply groups in the thread simultaneously
+- User preference is per-session (no need to persist across visits)
+
+**Numbering:**
+- Top-level reply: `#1`, `#2`, `#3`...
+- Sub-replies: `#1.1`, `#1.2`, `#2.1`, etc. (parent number . sub-index)
+- Used in `"în răspuns la @user — Postare #N.M"` references
+
+**Terminology in UI:**
+- Use `"X răspunsuri"` for the collapse/expand strip — **do NOT use "imbricate"** (technical Romanian, sounds awkward conversationally). Visual indentation communicates the nesting; the count is sufficient.
+- For the parent reference header use `"în răspuns la @user — #N.M"`.
+
+**Why 2-level instead of pure linear:**
+- Sintezaur use cases mix narrative megathreads (linear-friendly) with active Q&A and parallel discussions (nesting-friendly)
+- Multiple use cases benefit from visible sub-conversation grouping; none benefit from pure linear over 2-level
+- Mobile still manageable at 1 indent level (~16-20px)
+- Modern feel (Twitter/YouTube familiar) without Reddit chaos
 
 #### Thread features
 
