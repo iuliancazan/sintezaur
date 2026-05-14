@@ -313,9 +313,11 @@
       "profile": "Profil",
       "password": "Parolă",
       "email": "Email",
-      "logout": "Ieși din cont"
+      "logout": "Ieși din cont",
+      "messages": "Mesaje"
     },
-    "logged_in_as": "Conectat ca {{email}}"
+    "logged_in_as": "Conectat ca {{email}}",
+    "back_to_account": "← Înapoi la cont"
   },
   "bazar": {
     "page_eyebrow": "Bazar · Marketplace muzical",
@@ -475,6 +477,43 @@
       "photo_upload_error": "Fișierul {{name}} nu a putut fi încărcat.",
       "photo_delete_error": "Fotografia nu a putut fi ștearsă.",
       "photo_reorder_error": "Reordonarea a eșuat. Reîncearcă."
+    }
+  },
+  "inbox": {
+    "title": "Mesaje",
+    "lede": "Toate conversațiile tale de pe Bazar — vânzător sau cumpărător.",
+    "empty": "Nu ai conversații încă. Mesajele apar aici după ce intri în contact pe un anunț.",
+    "no_preview": "(fără preview)",
+    "status": {
+      "draft": "Schiță",
+      "active": "Activ",
+      "sold": "Vândut",
+      "expired": "Expirat",
+      "removed": "Eliminat"
+    },
+    "relative": {
+      "now": "acum",
+      "minutes": "{{count}} min",
+      "hours": "{{count}}h",
+      "days": "{{count}}z"
+    }
+  },
+  "thread": {
+    "back_to_inbox": "Mesaje",
+    "compose_placeholder": "Scrie un mesaj... (Ctrl+Enter)",
+    "send": "Trimite",
+    "sending": "...",
+    "send_error": "Mesajul nu a putut fi trimis. Reîncearcă.",
+    "not_found": "Conversația nu există sau nu mai ai acces la ea.",
+    "locked": {
+      "sold": "Anunțul este vândut — conversația este arhivată.",
+      "expired": "Anunțul a expirat — nu mai poți trimite mesaje.",
+      "removed": "Anunțul a fost eliminat.",
+      "draft": "Anunțul este în schiță."
+    },
+    "system": {
+      "tx_confirmed": "Tranzacție confirmată",
+      "offer_placeholder": "(ofertă structurată — UI urmează)"
     }
   }
 }

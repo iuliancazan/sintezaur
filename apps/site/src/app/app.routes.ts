@@ -102,6 +102,21 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/change-email.page').then((m) => m.ChangeEmailPage),
       },
+      {
+        path: 'mesaje',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./account/messages-inbox.page').then(
+            (m) => m.MessagesInboxPage,
+          ),
+      },
+      {
+        path: 'mesaje/:threadId',
+        loadComponent: () =>
+          import('./account/messages-thread.page').then(
+            (m) => m.MessagesThreadPage,
+          ),
+      },
     ],
   },
 ];

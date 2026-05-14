@@ -26,6 +26,9 @@ import { AuthService } from '../auth/auth.service';
       </header>
 
       <nav class="account__menu">
+        <a routerLink="/cont/mesaje" class="account__link">
+          {{ 'account.menu.messages' | t }}
+        </a>
         <a routerLink="/cont/parola" class="account__link">
           {{ 'account.menu.password' | t }}
         </a>

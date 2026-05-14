@@ -91,6 +91,70 @@ export interface ListingPayload {
   contactPhone?: string;
 }
 
+export interface InboxThread {
+  threadId: string;
+  listingId: string;
+  listingSlug: string;
+  listingTitle: string;
+  listingStatus: ListingStatusLiteral;
+  buyerId: string;
+  sellerId: string;
+  lastMessageAt: string;
+  lastMessagePreview: string | null;
+  sellerLastReadAt: string | null;
+  buyerLastReadAt: string | null;
+  otherUsername: string;
+}
+
+export type ChatMessageKind =
+  | 'text'
+  | 'offer'
+  | 'counter_offer'
+  | 'offer_accepted'
+  | 'offer_rejected'
+  | 'transaction_confirmed'
+  | 'system';
+
+export interface ChatMessage {
+  id: string;
+  threadId: string;
+  senderId: string | null;
+  kind: ChatMessageKind;
+  body: string | null;
+  offerAmount: string | null;
+  offerCurrency: DisplayCurrencyLiteral | null;
+  offerExpiresAt: string | null;
+  repliesToMessageId: string | null;
+  createdAt: string;
+  editedAt: string | null;
+}
+
+export interface ThreadView {
+  thread: {
+    id: string;
+    listingId: string;
+    buyerId: string;
+    lastMessageAt: string;
+    lastMessagePreview: string | null;
+    sellerLastReadAt: string | null;
+    buyerLastReadAt: string | null;
+    offerRoundCount: number;
+    createdAt: string;
+  };
+  listing: {
+    id: string;
+    slug: string;
+    sellerId: string;
+    title: string;
+    price: string;
+    currency: DisplayCurrencyLiteral;
+    condition: ListingConditionLiteral;
+    status: ListingStatusLiteral;
+    acceptsOffers: boolean;
+  };
+  messages: ChatMessage[];
+}
+
 export interface QuickListSuggestion {
   gear: {
     id: string;
@@ -303,6 +367,34 @@ export class BazarService {
     return firstValueFrom(
       this.http.post<{ thread: { id: string }; message: { id: string } }>(
         `${this.base}/me/bazar/listings/${listingId}/threads/messages`,
+        { body },
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /* ============ inbox + chat (M3-E4) ============ */
+
+  listInbox(): Promise<InboxThread[]> {
+    return firstValueFrom(
+      this.http.get<InboxThread[]>(`${this.base}/me/bazar/threads`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  readThread(threadId: string): Promise<ThreadView> {
+    return firstValueFrom(
+      this.http.get<ThreadView>(`${this.base}/me/bazar/threads/${threadId}`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  sendMessage(threadId: string, body: string): Promise<{ message: ChatMessage }> {
+    return firstValueFrom(
+      this.http.post<{ thread: { id: string }; message: ChatMessage }>(
+        `${this.base}/me/bazar/threads/${threadId}/messages`,
         { body },
         { withCredentials: true },
       ),
