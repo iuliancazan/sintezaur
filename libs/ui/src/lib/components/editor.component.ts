@@ -12,10 +12,14 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { Editor, type Content, type JSONContent } from '@tiptap/core';
+import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import Youtube from '@tiptap/extension-youtube';
 import StarterKit from '@tiptap/starter-kit';
 import { SzIconComponent } from '../icons/icon.component';
+
+export type SzEditorImageUploader = (file: File) => Promise<string>;
 
 export interface SzEditorChange {
   json: JSONContent;
@@ -112,6 +116,22 @@ export interface SzEditorChange {
           (click)="onLinkClick()"
           aria-label="Link"
         >↗</button>
+        @if (richMode) {
+          <button
+            type="button"
+            class="sz-editor__btn"
+            (click)="onImageClick()"
+            aria-label="Image"
+            [disabled]="!imageUploader"
+          >🖼</button>
+          <button
+            type="button"
+            class="sz-editor__btn"
+            (click)="onYoutubeClick()"
+            aria-label="YouTube"
+          >▶</button>
+          <span class="sz-editor__sep"></span>
+        }
         <button
           type="button"
           class="sz-editor__btn"
@@ -257,6 +277,16 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
   @Input() maxLength = 8000;
   @Input() showCount = true;
   @Input() disabled = false;
+  /**
+   * Enables image + YouTube embed extensions and the matching toolbar
+   * buttons. M4 Revista turns this on; Bazar descriptions leave it off.
+   */
+  @Input() richMode = false;
+  /**
+   * Async upload callback used by the image button. Receives the picked
+   * File, returns the absolute URL to insert into the document.
+   */
+  @Input() imageUploader: SzEditorImageUploader | null = null;
 
   @Output() valueChange = new EventEmitter<SzEditorChange>();
 
@@ -275,19 +305,37 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
   characterCount = 0;
 
   ngAfterViewInit(): void {
+    const extensions = [
+      StarterKit.configure({
+        heading: { levels: [2, 3] },
+      }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        protocols: ['http', 'https', 'mailto'],
+      }),
+      Placeholder.configure({ placeholder: this.placeholder }),
+    ];
+    if (this.richMode) {
+      extensions.push(
+        Image.configure({
+          inline: false,
+          allowBase64: false,
+          HTMLAttributes: { loading: 'lazy' },
+        }) as never,
+        Youtube.configure({
+          controls: true,
+          nocookie: true,
+          modestBranding: true,
+          // Embeds render with a thumbnail-then-click in CSS; no autoplay.
+          width: 720,
+          height: 405,
+        }) as never,
+      );
+    }
     this.editor = new Editor({
       element: this.hostRef.nativeElement,
-      extensions: [
-        StarterKit.configure({
-          heading: { levels: [2, 3] },
-        }),
-        Link.configure({
-          openOnClick: false,
-          autolink: true,
-          protocols: ['http', 'https', 'mailto'],
-        }),
-        Placeholder.configure({ placeholder: this.placeholder }),
-      ],
+      extensions,
       content: this.value ?? '',
       editable: !this.disabled,
       onUpdate: ({ editor }) => this.emitChange(editor),
@@ -324,6 +372,44 @@ export class SzEditorComponent implements AfterViewInit, OnDestroy {
     const chain = this.editor.chain().focus() as unknown as Chain;
     const next = (chain[name] as (a?: unknown) => Chain)(arg);
     next.run();
+  }
+
+  async onImageClick(): Promise<void> {
+    if (!this.editor || !this.imageUploader) return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+    const file = await new Promise<File | null>((resolve) => {
+      input.onchange = () => {
+        resolve(input.files?.[0] ?? null);
+        input.remove();
+      };
+      input.click();
+    });
+    if (!file) return;
+    try {
+      const url = await this.imageUploader(file);
+      this.editor
+        .chain()
+        .focus()
+        .setImage({ src: url })
+        .createParagraphNear()
+        .run();
+    } catch (err) {
+      console.error('[sz-editor] image upload failed', err);
+      window.alert('Imaginea nu a putut fi încărcată.');
+    }
+  }
+
+  onYoutubeClick(): void {
+    if (!this.editor) return;
+    const url = window.prompt('URL YouTube:');
+    if (!url) return;
+    type ChainWithYt = { setYoutubeVideo: (args: { src: string }) => { run: () => void } };
+    const chain = this.editor.chain().focus() as unknown as ChainWithYt;
+    chain.setYoutubeVideo({ src: url.trim() }).run();
   }
 
   onLinkClick(): void {

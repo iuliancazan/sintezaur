@@ -139,7 +139,117 @@ export class RevistaService {
     );
   }
 
+  /* ============ editor surface (M4-D) ============ */
+
+  loadOwn(id: string): Promise<ArticleDetail> {
+    return firstValueFrom(
+      this.http.get<ArticleDetail>(`${this.base}/me/revista/articles/${id}`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  loadOwnBySlug(slug: string): Promise<ArticleDetail> {
+    return firstValueFrom(
+      this.http.get<ArticleDetail>(
+        `${this.base}/me/revista/by-slug/${slug}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  create(payload: CreateArticlePayload): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/me/revista/articles`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  update(
+    id: string,
+    patch: Partial<CreateArticlePayload>,
+  ): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.patch<{ id: string; slug: string }>(
+        `${this.base}/me/revista/articles/${id}`,
+        patch,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  publish(id: string): Promise<{ slug: string; threadId: string }> {
+    return firstValueFrom(
+      this.http.post<{ slug: string; threadId: string }>(
+        `${this.base}/me/revista/articles/${id}/publish`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  unpublish(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/revista/articles/${id}/unpublish`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  archive(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/me/revista/articles/${id}/archive`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  uploadImage(
+    articleId: string,
+    file: File,
+    caption?: string,
+  ): Promise<{ sourceId: string; path: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    if (caption) form.append('caption', caption);
+    return firstValueFrom(
+      this.http.post<{ sourceId: string; path: string }>(
+        `${this.base}/me/revista/articles/${articleId}/images`,
+        form,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteImage(articleId: string, sourceId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/revista/articles/${articleId}/images/${sourceId}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
   imageUrl(relativePath: string): string {
     return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
   }
+}
+
+export interface CreateArticlePayload {
+  title: string;
+  excerpt?: string;
+  category: ArticleCategoryLiteral;
+  body: Record<string, unknown>;
+  bodyHtml?: string;
+  tags?: string[];
+  gearIds?: string[];
+  heroSourceId?: string;
+  isPremium?: boolean;
 }

@@ -62,6 +62,20 @@ export class EditorRevistaController {
     return data;
   }
 
+  @Get('by-slug/:slug')
+  async getOwnBySlug(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('slug') slug: string,
+  ) {
+    const data = await this.articles.findOwnedBySlug(
+      user.sub,
+      isAdmin(user),
+      slug,
+    );
+    if (!data) throw new NotFoundException(`article ${slug} not found`);
+    return data;
+  }
+
   @Post('articles')
   create(
     @CurrentUser() user: AuthenticatedUser,

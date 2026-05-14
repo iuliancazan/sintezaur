@@ -472,6 +472,27 @@ export class ArticlesService {
     return this.hydrateDetail(article);
   }
 
+  /**
+   * Editor by-slug lookup. Matches the latest non-archived row with this
+   * slug. Used by `/revista/:slug/editare` so the URL stays human.
+   */
+  async findOwnedBySlug(
+    actorId: string,
+    actorIsAdmin: boolean,
+    slug: string,
+  ): Promise<ArticleDetail | null> {
+    const [article] = await this.db
+      .select()
+      .from(articles)
+      .where(eq(articles.slug, slug))
+      .limit(1);
+    if (!article) return null;
+    if (article.authorId !== actorId && !actorIsAdmin) {
+      throw new ForbiddenException('Nu poți edita acest articol.');
+    }
+    return this.hydrateDetail(article);
+  }
+
   bumpViewCount(id: string): void {
     void this.db
       .update(articles)

@@ -53,4 +53,5 @@ export {
 export {
   SzEditorComponent,
   type SzEditorChange,
+  type SzEditorImageUploader,
 } from './lib/components/editor.component';

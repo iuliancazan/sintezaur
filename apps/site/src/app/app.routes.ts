@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { authGuard } from './auth/auth.guard';
+import { authGuard, editorGuard } from './auth/auth.guard';
 
 /**
  * Site routes. M1 ships auth + a stub home; section routes
@@ -56,6 +56,18 @@ export const appRoutes: Route[] = [
     pathMatch: 'full',
     loadComponent: () =>
       import('./revista/revista-list.page').then((m) => m.RevistaListPage),
+  },
+  {
+    path: 'revista/nou',
+    canActivate: [editorGuard],
+    loadComponent: () =>
+      import('./revista/revista-form.page').then((m) => m.RevistaFormPage),
+  },
+  {
+    path: 'revista/:slug/editare',
+    canActivate: [editorGuard],
+    loadComponent: () =>
+      import('./revista/revista-form.page').then((m) => m.RevistaFormPage),
   },
   {
     path: 'revista/:slug',
