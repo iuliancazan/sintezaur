@@ -1,0 +1,35 @@
+{
+  "app": {
+    "name": "Sintezaur Admin",
+    "loading": "Se încarcă..."
+  },
+  "auth": {
+    "login": {
+      "title": "Autentificare admin",
+      "subtitle": "Doar conturile cu rol de admin sau moderator pot intra aici.",
+      "fields": {
+        "email": "Email",
+        "password": "Parolă"
+      },
+      "submit": "Intră în cont"
+    },
+    "shared": {
+      "submitting": "Se trimite...",
+      "unexpected_error": "Ceva n-a mers cum trebuie. Reîncearcă peste un moment."
+    },
+    "errors": {
+      "invalid_credentials": "Email sau parolă invalidă.",
+      "not_staff": "Contul tău nu are acces la dashboard. Cere unui admin să-ți promoveze rolul.",
+      "email_not_verified": "Adresa de email nu este confirmată.",
+      "rate_limited": "Prea multe încercări. Reîncearcă peste un moment."
+    }
+  },
+  "dashboard": {
+    "home": {
+      "title": "Panou administrare",
+      "subtitle": "M1 ships doar pagina de autentificare. Modulele de gear / useri / conținut sosesc începând cu M2.",
+      "logged_in_as": "Conectat ca {{email}} (rol: {{role}})",
+      "logout": "Ieși din cont"
+    }
+  }
+}

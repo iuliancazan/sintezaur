@@ -1,28 +1,22 @@
 @use 'primeicons/primeicons.css';
 @use 'primeflex/primeflex.css';
 
-/* Base reset + mobile-first touch target enforcement (per spec §M0
- * mobile-first checklist). Real design tokens land in M2 via the
- * libs/ui/tokens module when Iulian's design imports start landing. */
-html,
-body {
-  margin: 0;
-  padding: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  font-size: 16px; /* prevents iOS auto-zoom on input focus */
-  line-height: 1.5;
+/* Design tokens — source: docs/design-imports/2026-05-14-v01/styles.css.
+   Re-exported through libs/ui so the dashboard can pick them up too. */
+@use '../../../libs/ui/src/lib/tokens/tokens.css';
+
+/* Mobile-first defense: prevent iOS auto-zoom on input focus. The
+   token reset sets body font-size already; this is the input-specific
+   override that keeps the page calm when the keyboard pops. */
+input,
+textarea,
+select {
+  font-size: 16px;
 }
 
-/* Minimum 44×44 touch target on interactive elements — Apple HIG +
- * Sintezaur mobile-first principle. Easy to override on specific
- * components later; harder to retrofit after the fact. */
+/* 44×44 minimum touch target on actionable controls (Apple HIG +
+   Sintezaur mobile-first principle). Easy to override on dense
+   admin tables; harder to retrofit after the fact. */
 button,
 a {
   min-height: 44px;
@@ -30,4 +24,14 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Plain anchors inside paragraph copy get tighter targets — the
+   44px-min rule above applies to buttons / nav links, not inline
+   word-level links. Re-enable inline display. */
+p a,
+li a {
+  display: inline;
+  min-width: 0;
+  min-height: 0;
 }

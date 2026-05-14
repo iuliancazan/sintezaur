@@ -1,0 +1,133 @@
+{
+  "app": {
+    "name": "Sintezaur",
+    "tagline": "Platforma în limba română pentru sintetizatoare și music gear",
+    "loading": "Se încarcă...",
+    "section": {
+      "tezaur": "Tezaur",
+      "bazar": "Bazar",
+      "revista": "Revista",
+      "forum": "Forum"
+    }
+  },
+  "auth": {
+    "shared": {
+      "back_home": "← Înapoi la pagina principală",
+      "submitting": "Se trimite...",
+      "field_required": "Câmp obligatoriu.",
+      "email_invalid": "Adresă de email invalidă.",
+      "password_too_short": "Parola trebuie să aibă cel puțin 8 caractere.",
+      "username_invalid": "Folosește 3–30 caractere: litere mici, cifre, _ sau -.",
+      "unexpected_error": "Ceva n-a mers cum trebuie. Reîncearcă peste un moment."
+    },
+    "signup": {
+      "title": "Creează cont",
+      "subtitle": "Un singur cont pentru Tezaur, Bazar, Revista și Forum.",
+      "fields": {
+        "email": "Email",
+        "email_help": "Folosim adresa doar pentru autentificare și notificări.",
+        "password": "Parolă",
+        "password_help": "Minim 8 caractere. Cu cât mai lungă, cu atât mai bine.",
+        "username": "Username",
+        "username_help": "Numele tău public, folosit în URL-uri și mențiuni @.",
+        "full_name": "Nume afișat",
+        "full_name_help": "Cum vrei să apari în comunitate."
+      },
+      "submit": "Creează cont",
+      "have_account": "Ai deja cont?",
+      "login_link": "Autentifică-te",
+      "success_title": "Cont creat",
+      "success_body": "Ți-am trimis un email de confirmare la {{email}}. Verifică inbox-ul (și folder-ul de spam) și apasă pe linkul de confirmare ca să poți intra în cont."
+    },
+    "login": {
+      "title": "Autentificare",
+      "subtitle": "Bine ai revenit pe Sintezaur.",
+      "fields": {
+        "email": "Email",
+        "password": "Parolă"
+      },
+      "submit": "Intră în cont",
+      "forgot_link": "Ai uitat parola?",
+      "no_account": "N-ai cont încă?",
+      "signup_link": "Creează unul"
+    },
+    "forgot": {
+      "title": "Recuperare parolă",
+      "subtitle": "Îți trimitem un link de resetare pe email.",
+      "fields": {
+        "email": "Email"
+      },
+      "submit": "Trimite linkul",
+      "back_login": "← Înapoi la autentificare",
+      "success_title": "Verifică inbox-ul",
+      "success_body": "Dacă există un cont legat de {{email}}, ți-am trimis acolo un link de resetare. Linkul expiră într-o oră."
+    },
+    "reset": {
+      "title": "Setează o parolă nouă",
+      "subtitle": "Alege ceva pe care n-o folosești și pe alte site-uri.",
+      "fields": {
+        "password": "Parolă nouă",
+        "password_help": "Minim 8 caractere."
+      },
+      "submit": "Salvează parola nouă",
+      "success_title": "Parolă schimbată",
+      "success_body": "Te poți autentifica acum cu noua parolă.",
+      "login_link": "Mergi la autentificare",
+      "invalid_token_title": "Link expirat sau invalid",
+      "invalid_token_body": "Linkul de resetare nu mai e valid. Cere unul nou.",
+      "request_again": "Cere alt link"
+    },
+    "verify": {
+      "title": "Verificare email",
+      "in_progress": "Confirmăm adresa de email...",
+      "success_title": "Email confirmat",
+      "success_body": "Mulțumim. Acum te poți autentifica.",
+      "failure_title": "Link expirat sau invalid",
+      "failure_body": "Linkul de confirmare nu mai e valid. Loghează-te ca să primești unul nou.",
+      "login_link": "Mergi la autentificare"
+    },
+    "change_password": {
+      "title": "Schimbă parola",
+      "subtitle": "După salvare îți vom da log-out din toate sesiunile.",
+      "fields": {
+        "current": "Parola curentă",
+        "new": "Parolă nouă",
+        "new_help": "Minim 8 caractere."
+      },
+      "submit": "Salvează",
+      "success": "Parola a fost schimbată. Te rugăm să te autentifici din nou."
+    },
+    "change_email": {
+      "title": "Schimbă adresa de email",
+      "subtitle": "Îți trimitem un link de confirmare pe noua adresă. Adresa veche rămâne activă până confirmi.",
+      "fields": {
+        "current_password": "Parola curentă",
+        "new_email": "Email nou"
+      },
+      "submit": "Trimite confirmare",
+      "success_title": "Verifică noul email",
+      "success_body": "Ți-am trimis un link de confirmare la {{email}}. Adresa veche rămâne activă până confirmi."
+    },
+    "errors": {
+      "email_exists": "Există deja un cont cu această adresă de email.",
+      "username_taken": "Acest username este deja folosit.",
+      "invalid_credentials": "Email sau parolă invalidă.",
+      "account_locked": "Contul este blocat temporar. Reîncearcă peste câteva minute.",
+      "email_not_verified": "Adresa de email nu este confirmată. Verifică inbox-ul.",
+      "invalid_token": "Linkul este invalid sau a expirat.",
+      "current_password_wrong": "Parola curentă este incorectă.",
+      "same_email": "Noua adresă este identică cu cea curentă.",
+      "rate_limited": "Prea multe încercări. Reîncearcă peste un moment."
+    }
+  },
+  "account": {
+    "title": "Contul meu",
+    "menu": {
+      "profile": "Profil",
+      "password": "Parolă",
+      "email": "Email",
+      "logout": "Ieși din cont"
+    },
+    "logged_in_as": "Conectat ca {{email}}"
+  }
+}

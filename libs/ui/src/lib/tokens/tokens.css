@@ -1,0 +1,129 @@
+/* ============================================================
+   SINTEZAUR — design tokens (subset)
+   ============================================================
+   Sourced from docs/design-imports/2026-05-14-v01/styles.css.
+   This file ships only the tokens (CSS custom properties + base
+   reset) — the full screen-specific component styles arrive in M2
+   alongside the design integration work.
+
+   Apps consume via:
+     @use '../../../libs/ui/src/lib/tokens/tokens.css';
+*/
+
+:root {
+  /* Type */
+  --font-display: 'Big Shoulders Stencil Display', 'Big Shoulders Display', 'Impact', system-ui, sans-serif;
+  --font-ui: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Sizing */
+  --container: 1440px;
+  --gutter-x: clamp(16px, 4vw, 56px);
+  --gutter-y: clamp(28px, 5vw, 56px);
+  --radius: 2px;
+
+  /* Accent — gold/amber by default (semantic to "aur") */
+  --accent: #ebb023;
+  --accent-2: #f08a1b;
+  --accent-fg: #0b0905;
+
+  /* Grid line */
+  --grid-line: 1px;
+}
+
+/* ---- DARK (default) — slate + ambient gold ---- */
+:root,
+[data-theme='dark'] {
+  --bg: oklch(0.165 0.008 255);
+  --bg-elev: oklch(0.205 0.009 255);
+  --bg-card: oklch(0.235 0.010 250);
+  --bg-card-2: oklch(0.275 0.011 250);
+  --line: oklch(0.325 0.018 85);
+  --line-strong: oklch(0.46 0.030 85);
+  --fg: oklch(0.95 0.015 85);
+  --fg-muted: oklch(0.66 0.012 85);
+  --fg-subtle: oklch(0.46 0.010 85);
+  --grid-dots: oklch(0.78 0.16 80 / 0.20);
+  --shadow: 0 1px 0 oklch(1 0 0 / 0.025) inset;
+}
+
+/* ---- LIGHT ---- */
+[data-theme='light'] {
+  --bg: #f3eedd;
+  --bg-elev: #ebe5cf;
+  --bg-card: #faf6e8;
+  --bg-card-2: #f1ebd4;
+  --line: #d4ccaf;
+  --line-strong: #b4a983;
+  --fg: #18140c;
+  --fg-muted: #6a6147;
+  --fg-subtle: #948a6c;
+  --grid-dots: rgba(60, 50, 20, 0.16);
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.04) inset;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  color: inherit;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 100% 60% at 50% 100%, oklch(0.78 0.16 80 / 0.045), transparent 65%),
+    radial-gradient(circle at 1px 1px, var(--grid-dots) 1px, transparent 0);
+  background-size: 100% 100%, 24px 24px;
+  background-attachment: fixed, scroll;
+  min-height: 100vh;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-fg);
+}
