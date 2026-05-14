@@ -633,5 +633,49 @@
       "bazar_review_submitted_on_me": "Ai primit o recenzie ({{rating}}★)",
       "generic": "Notificare nouă"
     }
+  },
+  "revista": {
+    "page_eyebrow": "Revista · Editorial muzical",
+    "page_title": "Revista",
+    "page_lede": "Reviews, tutoriale, interviuri, ghiduri de cumpărare și deep-dive-uri pe sinteze hardware. Scris de comunitate, curat de redacție.",
+    "search_placeholder": "Caută în articole...",
+    "new_article": "Articol nou",
+    "sort": {
+      "label": "Sortează",
+      "newest": "Cele mai noi",
+      "oldest": "Cele mai vechi",
+      "most_viewed": "Cele mai citite"
+    },
+    "cat": {
+      "all": "Toate categoriile",
+      "reviews": "Reviews",
+      "tutorials": "Tutoriale",
+      "news": "News",
+      "interviews": "Interviuri",
+      "buying_guides": "Ghiduri de cumpărare",
+      "hardware_deep_dives": "Hardware deep-dives"
+    },
+    "results_count": "{{shown}} articole din {{total}}",
+    "pagination": {
+      "page_of": "Pagina {{page}} / {{total}}"
+    },
+    "no_results": "Niciun articol nu corespunde căutării.",
+    "views": "vizualizări",
+    "back_to_list": "Înapoi la Revista",
+    "edit": "Editează",
+    "not_found": "Articolul căutat nu există.",
+    "gear_sidebar": "Echipament în articol",
+    "see_all_by_author": "Toate articolele lui {{name}}",
+    "comments_title": "Discuții",
+    "comments_thread_hint": "{{count}} răspunsuri în firul de discuție de pe Forum.",
+    "comments_no_thread": "Firul de discuție va fi creat automat la publicare.",
+    "comments_placeholder": "Forum-ul deschide pentru postări în M5. Vei putea răspunde din pagina articolului sau direct pe forum.",
+    "comments_signup_cta": "Vezi forum-ul",
+    "author": {
+      "member_since": "Membru din {{date}}",
+      "articles_title": "Articole ({{count}})",
+      "no_articles": "Acest autor încă nu a publicat nimic.",
+      "not_found": "Utilizatorul nu există."
+    }
   }
 }

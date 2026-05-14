@@ -52,6 +52,22 @@ export const appRoutes: Route[] = [
       import('./bazar/bazar-detail.page').then((m) => m.BazarDetailPage),
   },
   {
+    path: 'revista',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./revista/revista-list.page').then((m) => m.RevistaListPage),
+  },
+  {
+    path: 'revista/:slug',
+    loadComponent: () =>
+      import('./revista/revista-detail.page').then((m) => m.RevistaDetailPage),
+  },
+  {
+    path: 'autor/:username',
+    loadComponent: () =>
+      import('./revista/author-profile.page').then((m) => m.AuthorProfilePage),
+  },
+  {
     path: 'signup',
     loadComponent: () =>
       import('./auth/pages/signup.page').then((m) => m.SignupPage),
