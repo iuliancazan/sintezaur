@@ -6,7 +6,23 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13-B** — Home page rewrite V05 1:1. Sub
+**Last shipped:** **M13-C1** — Bazar list re-aligned la V05 (`5d5c541`).
+Migrare de pe clase scoped `.bz-header/.bz-toolbar/.bz-main/.bz-rail/
+.bz-card/.bz-pag` la utilități V05 globale (`.tez-header/.tez-toolbar/
+.tez-search/.tez-sort/.tez-chips/.tez-main/.tez-rail/.tez-check/
+.tez-pag`) livrate de `v05.css`. Cards switched de la `.bz-card`
+inline-styled la `.bz-grid > .listing` (aceeași clasă ca pe Home
+bazar-scroll). Nou `.bz-actions` action row înainte de toolbar
+(„Vinde un produs" + 2 ghost links salvate, vizibil doar logat).
+Style block redus de la ~500 la ~50 linii (păstrate doar
+extra-uri page-local: `bz-price-row` dual-input, `bz-currency`
+toggle, `bz-text-input`, `bz-results-row`). `SzIconComponent`
+import scos — SVG-uri via `<use href="#i-..."/>` la
+`V05SpriteComponent`. 3 chei i18n noi (`bazar.card.tx`,
+`bazar.actions_saved_listings`, `bazar.actions_saved_searches`).
+Build curat; bundle Bazar list 32→22 kB.
+
+**Last shipped (previous):** **M13-B** — Home page rewrite V05 1:1. Sub
 `apps/site/src/app/home.page.ts` complet rescris cu markup V05 +
 date reale prin servicii existente. Welcome strip auth-aware,
 hero featured article (article[0] din `revista.list({sort:'newest',
@@ -60,13 +76,16 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M13-C** — Bazar (list + detail) per
-`docs/design-imports/2026-05-16-v05/Bazar.html` și `Bazar - Roland
-Juno-60.html`. Stickyfilter toolbar (search + sort + view), `.bz-grid`
-3-col, listing card cu chip condition + heart toggle; detail page
-cu `.bd-hero` gallery, `.bd-info` price-row + chips + CTAs, prose
-description, included items grid, mini-specs, sidebar sticky.
-După M13-G și închiderea M13 completă, revenim la **M11** —
+**Next up:** **M13-C2** — Bazar detail (`bazar-detail.page.ts`) per
+`docs/design-imports/2026-05-16-v05/Bazar - Roland Juno-60.html`.
+Detail page rewrite la clase V05: `.bd-hero` (galerie 1.4fr + info
+1fr panel), `.bd-info` cu price-row strikethrough + delta, chips
+(condition / kind / accepts_offers), CTA grid 2+1 (primary contact +
+ghost offer + icon save), `.bd-desc` prose, `.bd-included` grid
+4-col, `.bd-mini-specs`, sidebar sticky cu seller card + similar
+listings. Apoi **M13-D** (Tezaur list + detail), **M13-E** (Revista
+list + detail), **M13-F** (Forum 5 pagini), **M13-G** (Cont 3 shells
++ close + testing doc). După M13 complet, revenim la **M11** —
 Tezaur contributor flow per spec §7.2: rol
 `contributor` (auto-promote la 100 forum posts) și `curator` (manual
 de admin) primesc capacitatea de a propune / edita echipamente direct
@@ -204,7 +223,8 @@ E (Revistă) / F (Forum) / G (Cont + close).
 |-----|--------|--------|-------|
 | A   | `84dda78` | done | Foundation: V05 `styles.css` copiat la `apps/site/src/v05.css` (4503 linii) cu dark tokens swapped la valorile v2-neutral hex per design decision (`#0a0a0b`/`#131314`/`#181819`/...). Light theme rămâne warm cream. `apps/site/src/styles.scss` migrat de pe `libs/ui/tokens/tokens.css` pe `v05.css`. Nou `V05SpriteComponent` (`apps/site/src/app/ui/v05-sprite.component.ts`) cu 58 simboluri SVG lifted 1:1 din toate paginile v05. Sprite mount în `app.ts` root. Footer markup aliniat la clasele V05 (`.foot` / `.foot__grid` / `.foot__col` / `.brand` / `.locale`) — stilurile inline din app.ts eliminate (livrate global de v05.css). `libs/ui` și `apps/dashboard` neatinse. Build OK (CSS bundle 30→31 kB). |
 | B   | `044fd5a` | done | Home page rewrite V05 1:1: welcome strip auth-aware, hero featured article (revista.list newest #1) + rotator placeholder, revista grid 1 big + 2 small, bazar horizontal scroll 8 listings, forum + 4-cell pulse aside (static threads + `—` pulse pending dedicated endpoint), tezaur spotlight popular #1 + catalog 6, CTA strip auth-aware (Guest signup vs Logat 3 ghost actions + newsletter). 60 chei i18n noi (înlocuiește vechiul `home.hero/sections` tree). Build curat. |
-| C   | _TBD_ | pending | Bazar list + detail. |
+| C1  | `5d5c541` | done | Bazar list re-aligned la V05: clase `.tez-*` globale (header/toolbar/main/rail/check/pag) + cards switched la `.bz-grid > .listing` (uniform cu Home bazar-scroll) + `.bz-actions` row. Style block 500→50 linii. Bundle 32→22 kB. |
+| C2  | _TBD_ | pending | Bazar detail (`bd-hero` gallery + `bd-info` price-row + chips + CTAs, `bd-desc` prose, `bd-included` grid, `bd-mini-specs`, sidebar). |
 | D   | _TBD_ | pending | Tezaur list + detail. |
 | E   | _TBD_ | pending | Revista list + detail. |
 | F   | _TBD_ | pending | Forum (list, thread, category, new, search). |

@@ -14,6 +14,68 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-C1 — Bazar list re-aligned to V05 (single commit `5d5c541`)
+
+`apps/site/src/app/bazar/bazar-list.page.ts` re-aligned 1:1 to
+V05's `Bazar.html` design without touching the working filter /
+search / pagination logic.
+
+- **Shell migration**: page-scoped `.bz-header/.bz-toolbar/
+  .bz-main/.bz-rail/.bz-card/.bz-pag` classes (~500 lines of
+  inline styles) replaced with V05's shared `.tez-*` utilities
+  globally provided by `v05.css`. Same shell that Tezaur list
+  uses — Bazar inherits it per V05 spec.
+
+- **Cards**: `.bz-card` (4-col grid, inline borders) → V05's
+  `.bz-grid > .listing` (same `.listing` class used on Home
+  bazar-scroll). Listing cards now carry `.gear-fill` media with
+  photo fallback, `.listing__chip` condition badge,
+  brand/title/price-row/seller block with deterministic
+  initial-avatar.
+
+- **Action row**: new `.bz-actions` strip before sticky toolbar
+  (per V05 Bazar.html): primary CTA "Vinde un produs" + 2
+  ghost links (Listinguri salvate, Cautari salvate). Ghost
+  links visible only when logged in.
+
+- **Toolbar**: `.tez-toolbar` with `.tez-search` (with kbd ⌘K
+  hint) + `.tez-sort` + caret icon. The view toggle (Grid/List
+  from V05) is omitted for now since we don't have a list-mode
+  yet — design parity is the structure, not a placeholder
+  toggle.
+
+- **Chips**: `.tez-chips` with `.tez-chip` items + clear-all +
+  `☆ Salveaza cautarea` button (when logged in).
+
+- **Filter rail**: `.tez-rail` with 6 sections (Condition,
+  Kind, Delivery, Price, Location, Category) using `.tez-check`
+  with custom box. Price uses dual min/max inputs + currency
+  toggle (page-local extras since V05 design used a slider —
+  functional parity beats visual parity here, slider can come
+  later).
+
+- **Style block trimmed** from ~500 lines to ~50 lines: kept
+  only page-local extras NOT in v05.css (`.bz-price-row` dual
+  input, `.bz-currency` toggle, `.bz-text-input`,
+  `.bz-results-row` top counter). Everything else (header,
+  toolbar, rail, check, grid, pagination, chips) inherits from
+  v05.css globally.
+
+- **SzIconComponent import removed** — all SVGs now via
+  `<svg><use href="#i-name"/>` against V05SpriteComponent.
+
+- **i18n**: 3 new keys (`bazar.card.tx`,
+  `bazar.actions_saved_listings`, `bazar.actions_saved_searches`).
+
+- **Build clean**; bazar-list lazy chunk shrank from ~32 kB
+  to ~22 kB thanks to scoped CSS removal.
+
+- **Out of scope for C1** (follow-ups):
+  - Bazar detail page (`bazar-detail.page.ts`) → **M13-C2**.
+  - Grid/List view toggle.
+  - Price slider (currently dual inputs).
+  - Location checkboxes (currently free-text input).
+
 #### M13-B — Home page rewrite (single commit `044fd5a`)
 
 `apps/site/src/app/home.page.ts` complet rescris cu markup V05
