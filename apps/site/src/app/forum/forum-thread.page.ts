@@ -1548,7 +1548,23 @@ export class ForumThreadPage {
         void this.loadUserAnnotations(t.thread.id);
       }
       void this.loadAttachments(slug);
-    } catch {
+    } catch (err) {
+      // Spec §7.13: backend returns 404 with body `{ redirectTo, message }`
+      // when the slug has a redirect (active 301 or expired 410). Site
+      // router honors it — replaceUrl for active, /gone route for expired.
+      const body = (err as { error?: { redirectTo?: string; message?: string } })
+        ?.error;
+      if (body?.redirectTo) {
+        if (body.message === 'gone') {
+          void this.router.navigate(['/gone']);
+        } else {
+          // Forum redirect body comes back with placeholder path; the
+          // canonical category slug isn't in the redirect payload, so
+          // route to /forum and let the user re-find the thread.
+          void this.router.navigateByUrl('/forum', { replaceUrl: true });
+        }
+        return;
+      }
       this.error.set(true);
       this.thread.set(null);
       this.posts.set(null);
@@ -1591,31 +1607,42 @@ export class ForumThreadPage {
       canonicalPath: `/forum/${t.category.slug}/${t.thread.slug}`,
       ogType: 'article',
     });
-    this.seo.setJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'DiscussionForumPosting',
-      headline: t.thread.title,
-      articleBody: lede,
-      datePublished: t.thread.createdAt,
-      dateModified: t.thread.updatedAt,
-      author: t.author
-        ? {
-            '@type': 'Person',
-            name: t.author.fullName || t.author.username,
-            url: `${window.location.origin}/autor/${t.author.username}`,
-          }
-        : undefined,
-      interactionStatistic: {
-        '@type': 'InteractionCounter',
-        interactionType: 'https://schema.org/CommentAction',
-        userInteractionCount: Math.max(0, t.thread.postCount - 1),
+    this.seo.setJsonLd([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'DiscussionForumPosting',
+        headline: t.thread.title,
+        articleBody: lede,
+        datePublished: t.thread.createdAt,
+        dateModified: t.thread.updatedAt,
+        author: t.author
+          ? {
+              '@type': 'Person',
+              name: t.author.fullName || t.author.username,
+              url: `${window.location.origin}/autor/${t.author.username}`,
+            }
+          : undefined,
+        interactionStatistic: {
+          '@type': 'InteractionCounter',
+          interactionType: 'https://schema.org/CommentAction',
+          userInteractionCount: Math.max(0, t.thread.postCount - 1),
+        },
+        isPartOf: {
+          '@type': 'WebPage',
+          name: t.category.name,
+          url: `${window.location.origin}/forum/${t.category.slug}`,
+        },
       },
-      isPartOf: {
-        '@type': 'WebPage',
-        name: t.category.name,
-        url: `${window.location.origin}/forum/${t.category.slug}`,
-      },
-    });
+      SeoService.breadcrumbList([
+        { name: 'Acasă', path: '/' },
+        { name: 'Forum', path: '/forum' },
+        { name: t.category.name, path: `/forum/${t.category.slug}` },
+        {
+          name: t.thread.title,
+          path: `/forum/${t.category.slug}/${t.thread.slug}`,
+        },
+      ]),
+    ]);
   }
 
   private async loadUserAnnotations(threadId: string): Promise<void> {

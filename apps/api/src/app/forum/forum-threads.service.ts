@@ -13,6 +13,7 @@ import {
   forumCategories,
   forumThreads,
   gear,
+  slugRedirects,
   users,
   type ForumThread,
   type SintezaurDb,
@@ -319,6 +320,39 @@ export class ForumThreadsService {
           }
         : null,
       sourceLink,
+    };
+  }
+
+  /**
+   * Slug-redirect lookup per spec §7.13. Resolves an old slug to its
+   * current (or expired) target. Public controller turns this into a
+   * 301 redirect when `expired=false` or a 410 Gone when expired —
+   * search engines drop the URL actively rather than retrying 404.
+   */
+  async lookupSlugRedirect(oldSlug: string): Promise<{
+    newSlug: string;
+    targetId: string;
+    expired: boolean;
+  } | null> {
+    const [row] = await this.db
+      .select({
+        newSlug: slugRedirects.newSlug,
+        targetId: slugRedirects.targetId,
+        expiresAt: slugRedirects.expiresAt,
+      })
+      .from(slugRedirects)
+      .where(
+        and(
+          eq(slugRedirects.targetType, 'forum_thread'),
+          eq(slugRedirects.oldSlug, oldSlug),
+        ),
+      )
+      .limit(1);
+    if (!row) return null;
+    return {
+      newSlug: row.newSlug,
+      targetId: row.targetId,
+      expired: row.expiresAt <= new Date(),
     };
   }
 

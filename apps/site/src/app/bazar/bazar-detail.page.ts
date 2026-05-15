@@ -990,22 +990,29 @@ export class BazarDetailPage {
           ? 'https://schema.org/SoldOut'
           : 'https://schema.org/OutOfStock';
 
-    this.seo.setJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: l.title,
-      description,
-      image: ogImage ? [ogImage] : undefined,
-      itemCondition: conditionMap[l.condition] ?? 'https://schema.org/UsedCondition',
-      offers: {
-        '@type': 'Offer',
-        price: l.price,
-        priceCurrency: l.currency.toUpperCase(),
-        availability,
-        url: `${origin}/bazar/${l.slug}`,
-        areaServed: { '@type': 'Country', name: 'Romania' },
+    this.seo.setJsonLd([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: l.title,
+        description,
+        image: ogImage ? [ogImage] : undefined,
+        itemCondition: conditionMap[l.condition] ?? 'https://schema.org/UsedCondition',
+        offers: {
+          '@type': 'Offer',
+          price: l.price,
+          priceCurrency: l.currency.toUpperCase(),
+          availability,
+          url: `${origin}/bazar/${l.slug}`,
+          areaServed: { '@type': 'Country', name: 'Romania' },
+        },
       },
-    });
+      SeoService.breadcrumbList([
+        { name: 'Acasă', path: '/' },
+        { name: 'Bazar', path: '/bazar' },
+        { name: l.title, path: `/bazar/${l.slug}` },
+      ]),
+    ]);
   }
 
   shippingCarriersLabel(carriers: string[]): string {

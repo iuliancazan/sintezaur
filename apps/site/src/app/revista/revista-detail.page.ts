@@ -547,34 +547,41 @@ export class RevistaDetailPage {
       canonicalPath: `/revista/${a.slug}`,
       ogType: 'article',
     });
-    this.seo.setJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'Article',
-      headline: a.title,
-      description,
-      image: heroUrl ? [heroUrl] : undefined,
-      datePublished: a.publishedAt ?? a.createdAt,
-      dateModified: a.updatedAt,
-      author: {
-        '@type': 'Person',
-        name: d.author.fullName || d.author.username,
-        url: `${origin}/autor/${d.author.username}`,
-      },
-      publisher: {
-        '@type': 'Organization',
-        name: 'Sintezaur',
-        logo: {
-          '@type': 'ImageObject',
-          url: `${origin}/assets/branding/logo.png`,
+    this.seo.setJsonLd([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Article',
+        headline: a.title,
+        description,
+        image: heroUrl ? [heroUrl] : undefined,
+        datePublished: a.publishedAt ?? a.createdAt,
+        dateModified: a.updatedAt,
+        author: {
+          '@type': 'Person',
+          name: d.author.fullName || d.author.username,
+          url: `${origin}/autor/${d.author.username}`,
         },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Sintezaur',
+          logo: {
+            '@type': 'ImageObject',
+            url: `${origin}/assets/branding/logo.png`,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `${origin}/revista/${a.slug}`,
+        },
+        articleSection: a.category,
+        keywords: a.tags.join(', '),
       },
-      mainEntityOfPage: {
-        '@type': 'WebPage',
-        '@id': `${origin}/revista/${a.slug}`,
-      },
-      articleSection: a.category,
-      keywords: a.tags.join(', '),
-    });
+      SeoService.breadcrumbList([
+        { name: 'Acasă', path: '/' },
+        { name: 'Revista', path: '/revista' },
+        { name: a.title, path: `/revista/${a.slug}` },
+      ]),
+    ]);
   }
 
   formatDate(iso: string): string {

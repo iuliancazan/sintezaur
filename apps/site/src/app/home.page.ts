@@ -239,15 +239,45 @@ export class HomePage {
         'Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Cont gratuit, comunitate de producători din România.',
       canonicalPath: '/',
     });
-    this.seo.setJsonLd({
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: 'Sintezaur',
-      url:
-        typeof window !== 'undefined'
-          ? window.location.origin
-          : 'https://sintezaur.ro',
-      inLanguage: 'ro-RO',
-    });
+    const origin =
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://sintezaur.ro';
+    this.seo.setJsonLd([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'Sintezaur',
+        alternateName: 'Sintezaur.ro',
+        url: origin,
+        inLanguage: 'ro-RO',
+        /**
+         * `SearchAction` unlocks the sitelinks search box in Google's
+         * homepage SERP card. Points at /forum/cautare since that's the
+         * only search surface live in MVP; the unified /cautare lands
+         * in M9-B and will replace this target.
+         */
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${origin}/forum/cautare?q={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: 'Sintezaur',
+        url: origin,
+        logo: `${origin}/assets/branding/logo.png`,
+        sameAs: [
+          // Add social handles here when they exist:
+          // 'https://www.instagram.com/sintezaur.ro',
+          // 'https://twitter.com/sintezaur',
+        ],
+      },
+    ]);
   }
 }

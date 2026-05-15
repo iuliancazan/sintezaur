@@ -124,7 +124,7 @@ import { uploadUrl } from '../seo/seo.utils';
             maxlength="600"
             placeholder="Scurt despre tine — ce produci, instrumente, scena…"
           ></textarea>
-          <small class="muted">{{ form.controls.bio.value?.length ?? 0 }}/600</small>
+          <small class="muted">{{ form.controls.bio.value.length }}/600</small>
         </div>
 
         <div class="field">

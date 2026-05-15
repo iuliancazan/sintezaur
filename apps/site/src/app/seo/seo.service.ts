@@ -111,6 +111,27 @@ export class SeoService {
     }
   }
 
+  /**
+   * Helper for building a schema.org `BreadcrumbList` block. Pass the
+   * crumb chain top-down (root first). Returns an object suitable to
+   * push into a `setJsonLd([primary, breadcrumb])` array on detail
+   * pages. URLs are absolutized against the site origin.
+   */
+  static breadcrumbList(
+    items: Array<{ name: string; path: string }>,
+  ): Record<string, unknown> {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items.map((it, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: it.name,
+        item: absolutize(it.path),
+      })),
+    };
+  }
+
   private upsert(
     attr: 'name' | 'property',
     key: string,

@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { I18nService } from '../i18n/i18n.service';
-import { TPipe } from '../i18n/t.pipe';
 import type { SubscriptionLevel } from './forum.service';
 
 const LEVELS: (SubscriptionLevel | null)[] = [
@@ -34,7 +33,7 @@ const LEVELS: (SubscriptionLevel | null)[] = [
 @Component({
   selector: 'app-forum-subscribe-bell',
   standalone: true,
-  imports: [CommonModule, TPipe],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bell" [class.bell--open]="open()">

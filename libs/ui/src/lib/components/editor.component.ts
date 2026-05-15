@@ -19,7 +19,6 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Youtube from '@tiptap/extension-youtube';
 import StarterKit from '@tiptap/starter-kit';
 import type { SuggestionProps } from '@tiptap/suggestion';
-import { SzIconComponent } from '../icons/icon.component';
 
 export type SzEditorImageUploader = (file: File) => Promise<string>;
 
@@ -56,7 +55,7 @@ export interface SzEditorChange {
 @Component({
   selector: 'sz-editor',
   standalone: true,
-  imports: [CommonModule, SzIconComponent],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `

@@ -1352,7 +1352,14 @@ export class TezaurDetailPage {
             : 'https://schema.org/InStock',
       };
     }
-    this.seo.setJsonLd(productData);
+    this.seo.setJsonLd([
+      productData,
+      SeoService.breadcrumbList([
+        { name: 'Acasă', path: '/' },
+        { name: 'Tezaur', path: '/tezaur' },
+        { name: title, path: `/tezaur/${g.slug}` },
+      ]),
+    ]);
   }
 
   async loadReviews(slug: string): Promise<void> {

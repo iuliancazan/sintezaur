@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   Query,
 } from '@nestjs/common';
@@ -88,8 +89,11 @@ export class PublicForumController {
 
   @Get('threads/:slug')
   async getThread(@Param('slug') slug: string) {
-    const t = await this.threads.findBySlug(slug);
-    return t;
+    try {
+      return await this.threads.findBySlug(slug);
+    } catch (err) {
+      return this.handleSlugMiss(slug, err);
+    }
   }
 
   @Get('threads/:slug/posts')
@@ -98,7 +102,13 @@ export class PublicForumController {
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
   ) {
-    const t = await this.threads.findBySlug(slug);
+    let t;
+    try {
+      t = await this.threads.findBySlug(slug);
+    } catch (err) {
+      await this.handleSlugMiss(slug, err);
+      return; // unreachable — handleSlugMiss always throws
+    }
     return this.posts.listForThread(t.thread.id, {
       page: page ? Number(page) : undefined,
       pageSize: pageSize ? Number(pageSize) : undefined,
@@ -107,7 +117,32 @@ export class PublicForumController {
 
   @Get('threads/:slug/attachments')
   async listAttachments(@Param('slug') slug: string) {
-    const t = await this.threads.findBySlug(slug);
+    let t;
+    try {
+      t = await this.threads.findBySlug(slug);
+    } catch (err) {
+      await this.handleSlugMiss(slug, err);
+      return;
+    }
     return { items: await this.attachments.listForThread(t.thread.id) };
+  }
+
+  /**
+   * Spec §7.13: when a thread slug 404s, try slug_redirects for a
+   * 301 (active) or 410 (expired) hint. Site router uses this to
+   * either replaceUrl to the new slug or render the Gone state.
+   */
+  private async handleSlugMiss(slug: string, original: unknown): Promise<never> {
+    if (!(original instanceof NotFoundException)) {
+      throw original instanceof Error ? original : new Error(String(original));
+    }
+    const redirect = await this.threads.lookupSlugRedirect(slug);
+    if (redirect) {
+      throw new NotFoundException({
+        message: redirect.expired ? 'gone' : 'redirect',
+        redirectTo: `/forum/.../${redirect.newSlug}`,
+      });
+    }
+    throw original;
   }
 }
