@@ -9,6 +9,7 @@ import {
   inject,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { SzAvatarComponent } from './avatar.component';
 import { SzIconComponent } from '../icons/icon.component';
 import { ThemeMode, ThemeService } from '../theme/theme.service';
 
@@ -19,8 +20,13 @@ export interface SzNavLink {
 }
 
 export interface SzTopbarUser {
+  /** Stable id used as the avatar hue seed (deterministic colour). */
+  id?: string;
   email: string;
   username?: string;
+  /** Pretty name used to derive initials when no photo is set. */
+  displayName?: string;
+  photo?: string;
   initials?: string;
 }
 
@@ -41,7 +47,13 @@ export interface SzTopbarUser {
 @Component({
   selector: 'sz-topbar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, SzIconComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterLinkActive,
+    SzAvatarComponent,
+    SzIconComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   template: `
@@ -132,12 +144,22 @@ export interface SzTopbarUser {
           }
 
           @if (user) {
-            <a
-              class="sz-btn-ghost"
-              [routerLink]="accountHref"
+            <button
+              #accountTrigger
+              class="sz-account-trigger"
+              type="button"
+              [attr.aria-label]="accountLabel"
+              [attr.aria-haspopup]="'menu'"
+              [attr.aria-expanded]="accountMenuOpen"
+              (click)="accountClick.emit()"
             >
-              {{ accountLabel }}
-            </a>
+              <sz-avatar
+                size="sm"
+                [photo]="user.photo"
+                [name]="user.displayName ?? user.username ?? user.email"
+                [seed]="user.id ?? user.email"
+              />
+            </button>
           } @else {
             @if (signupHref) {
               <a class="sz-btn-ghost" [routerLink]="signupHref">
@@ -344,6 +366,28 @@ export interface SzTopbarUser {
         border-color: var(--fg-muted);
       }
 
+      .sz-account-trigger {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0;
+        background: transparent;
+        border: 1px solid transparent;
+        display: inline-grid;
+        place-items: center;
+        transition:
+          border-color 0.15s ease,
+          background 0.15s ease;
+      }
+      .sz-account-trigger:hover {
+        border-color: var(--line);
+        background: var(--bg-elev);
+      }
+      .sz-account-trigger[aria-expanded='true'] {
+        border-color: var(--accent);
+      }
+
       @media (max-width: 1100px) {
         .sz-nav {
           display: none;
@@ -357,6 +401,9 @@ export interface SzTopbarUser {
         .sz-theme-toggle,
         .sz-btn-ghost {
           display: none;
+        }
+        .sz-account-trigger {
+          display: inline-grid;
         }
       }
     `,
@@ -388,9 +435,12 @@ export class SzTopbarComponent {
   @Input() signupLabel = 'Sign up';
   @Input() accountHref = '/cont';
   @Input() accountLabel = 'Account';
+  /** Visual hint for the avatar trigger when the dropdown is open. */
+  @Input() accountMenuOpen = false;
 
   @Output() searchClick = new EventEmitter<void>();
   @Output() bellClick = new EventEmitter<void>();
+  @Output() accountClick = new EventEmitter<void>();
 
   readonly theme = inject(ThemeService);
 

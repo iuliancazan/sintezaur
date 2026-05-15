@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
+import { AccountMenuComponent } from './account/account-menu.component';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
@@ -35,6 +36,7 @@ import { ToastContainer } from './ui/toast-container.component';
     SzTopbarComponent,
     TPipe,
     NotificationsPanelComponent,
+    AccountMenuComponent,
     CookiesBanner,
     ToastContainer,
     FeedbackModal,
@@ -49,7 +51,9 @@ import { ToastContainer } from './ui/toast-container.component';
       [user]="topbarUser()"
       [showBell]="auth.isLoggedIn()"
       [bellBadge]="notifications.unread()"
+      [accountMenuOpen]="accountMenuOpen()"
       (bellClick)="toggleNotifications()"
+      (accountClick)="toggleAccountMenu()"
       (searchClick)="goToSearch()"
       [loginHref]="'/login'"
       [signupHref]="'/signup'"
@@ -67,6 +71,10 @@ import { ToastContainer } from './ui/toast-container.component';
 
     @if (notificationsOpen()) {
       <app-notifications-panel (closed)="notificationsOpen.set(false)" />
+    }
+
+    @if (accountMenuOpen()) {
+      <app-account-menu (closed)="accountMenuOpen.set(false)" />
     }
 
     <router-outlet />
@@ -244,6 +252,7 @@ export class App {
   private readonly router = inject(Router);
 
   readonly notificationsOpen = signal(false);
+  readonly accountMenuOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -252,6 +261,7 @@ export class App {
       } else {
         this.notifications.stopPolling();
         this.notificationsOpen.set(false);
+        this.accountMenuOpen.set(false);
       }
     });
   }
@@ -259,7 +269,16 @@ export class App {
   toggleNotifications(): void {
     const next = !this.notificationsOpen();
     this.notificationsOpen.set(next);
-    if (next) void this.notifications.loadList();
+    if (next) {
+      this.accountMenuOpen.set(false);
+      void this.notifications.loadList();
+    }
+  }
+
+  toggleAccountMenu(): void {
+    const next = !this.accountMenuOpen();
+    this.accountMenuOpen.set(next);
+    if (next) this.notificationsOpen.set(false);
   }
 
   goToSearch(): void {
@@ -273,7 +292,7 @@ export class App {
   readonly navAriaLabel = computed(() => this.i18n.t('app.nav.aria'));
   readonly loginLabel = computed(() => this.i18n.t('app.actions.login_short'));
   readonly signupLabel = computed(() => this.i18n.t('app.actions.signup_short'));
-  readonly accountLabel = computed(() => this.i18n.t('app.actions.account_short'));
+  readonly accountLabel = computed(() => this.i18n.t('app.actions.account_menu'));
   readonly searchAriaLabel = computed(() => this.i18n.t('app.nav.search'));
   readonly bellAriaLabel = computed(() => this.i18n.t('app.nav.notifications'));
   readonly themeAriaLabel = computed(() => this.i18n.t('app.nav.theme'));
@@ -292,6 +311,12 @@ export class App {
   readonly topbarUser = computed<SzTopbarUser | null>(() => {
     const u = this.auth.currentUser();
     if (!u) return null;
-    return { email: u.email, username: u.username };
+    return {
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      displayName: u.fullName?.trim() || u.username,
+      photo: u.avatarUrl ?? undefined,
+    };
   });
 }

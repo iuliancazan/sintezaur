@@ -22,7 +22,8 @@
     "actions": {
       "signup_short": "Înregistrare",
       "login_short": "Conectează-te",
-      "account_short": "Cont"
+      "account_short": "Cont",
+      "account_menu": "Deschide meniu cont"
     }
   },
   "footer": {
@@ -315,6 +316,9 @@
   "account": {
     "title": "Contul meu",
     "menu": {
+      "aria": "Meniu cont",
+      "settings": "Setări",
+      "dashboard": "Dashboard",
       "profile": "Profil",
       "password": "Parolă",
       "email": "Email",

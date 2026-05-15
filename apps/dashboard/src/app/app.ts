@@ -5,7 +5,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
@@ -34,6 +34,7 @@ import { I18nService } from './i18n/i18n.service';
       [showBell]="false"
       [accountHref]="'/'"
       [accountLabel]="accountLabel()"
+      (accountClick)="goHome()"
       [loginHref]="'/login'"
       [loginLabel]="loginLabel()"
       [signupHref]="''"
@@ -58,6 +59,11 @@ import { I18nService } from './i18n/i18n.service';
 export class App {
   private readonly auth = inject(AuthService);
   private readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
+
+  goHome(): void {
+    void this.router.navigateByUrl('/');
+  }
 
   readonly logoSrc = '/assets/brand/logo-white.png';
   readonly brandText = computed(() => this.i18n.t('app.name'));
@@ -81,6 +87,11 @@ export class App {
   readonly topbarUser = computed<SzTopbarUser | null>(() => {
     const u = this.auth.currentUser();
     if (!u) return null;
-    return { email: u.email, username: u.username };
+    return {
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      displayName: u.fullName || u.username,
+    };
   });
 }

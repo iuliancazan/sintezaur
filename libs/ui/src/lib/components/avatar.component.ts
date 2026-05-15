@@ -13,6 +13,10 @@ export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
  * Editorial-style square avatar with initials fallback. Used in topbar,
  * bylines, threads, listings sellers, etc. Optional photo; if missing or
  * fails to load, falls back to up to 2 initials derived from `name`.
+ *
+ * When `seed` is provided (e.g. user id), the initials fallback paints
+ * a deterministic hue background so each user gets a stable visual
+ * identity even without a photo.
  */
 @Component({
   selector: 'sz-avatar',
@@ -28,7 +32,9 @@ export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
         (error)="failed.set(true)"
       />
     } @else {
-      <span>{{ initials() }}</span>
+      <span [style.backgroundColor]="bgColor()" [style.color]="fgColor()">
+        {{ initials() }}
+      </span>
     }
   `,
   host: {
@@ -53,6 +59,13 @@ export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
         width: 100%;
         height: 100%;
         object-fit: cover;
+      }
+      .sz-avatar > span {
+        width: 100%;
+        height: 100%;
+        display: inline-grid;
+        place-items: center;
+        line-height: 1;
       }
 
       .sz-avatar[data-size='xs'] {
@@ -83,6 +96,12 @@ export class SzAvatarComponent {
   @Input() photo?: string;
   @Input() size: SzAvatarSize = 'sm';
   @Input() fallback?: string;
+  /**
+   * Optional deterministic seed (e.g. user id) used to compute the
+   * fallback background hue. When absent, falls back to the theme's
+   * neutral background tone — preserving legacy call sites.
+   */
+  @Input() seed?: string;
 
   readonly failed = signal(false);
 
@@ -94,4 +113,23 @@ export class SzAvatarComponent {
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return parts[0].slice(0, 2).toUpperCase();
   });
+
+  readonly bgColor = computed(() => {
+    const seed = this.seed?.trim();
+    if (!seed) return null;
+    const hue = hashHue(seed);
+    return `oklch(0.55 0.12 ${hue})`;
+  });
+
+  readonly fgColor = computed(() => (this.seed ? '#fff' : null));
+}
+
+/** Deterministic 0–359 hue from any string (FNV-1a-ish 32-bit). */
+function hashHue(input: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return Math.abs(h) % 360;
 }
