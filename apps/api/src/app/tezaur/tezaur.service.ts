@@ -9,6 +9,9 @@ import 'multer';
 import {
   DATABASE,
   type SintezaurDb,
+  forumCategories,
+  forumPosts,
+  forumThreads,
   gear,
   gearDescriptions,
   gearFamilies,
@@ -38,6 +41,15 @@ import type {
 
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export interface PublicGearListItem {
   id: string;
@@ -208,6 +220,181 @@ export class TezaurService {
       targetId: id,
       req,
     });
+  }
+
+  /* ============================================================
+     Canonical forum thread per spec §8.1 ("Thread oficial" in RO UI).
+     Editor toggles ON to attach a forum thread; OFF clears the link
+     but preserves the thread (replies stay). Toggling ON twice on the
+     same gear re-attaches the previous thread instead of creating a
+     new one (the `forum_threads.canonical_for_gear_id` reverse FK is
+     unique partial → enforces this).
+     ============================================================ */
+
+  async enableOfficialThread(
+    gearId: string,
+    actorId: string,
+    req?: Request,
+  ): Promise<{ threadId: string; threadSlug: string; created: boolean }> {
+    const [g] = await this.db
+      .select()
+      .from(gear)
+      .where(eq(gear.id, gearId))
+      .limit(1);
+    if (!g) throw new NotFoundException(`gear ${gearId} not found`);
+
+    // Fast path: already linked.
+    if (g.canonicalThreadId) {
+      const [t] = await this.db
+        .select({ id: forumThreads.id, slug: forumThreads.slug })
+        .from(forumThreads)
+        .where(eq(forumThreads.id, g.canonicalThreadId))
+        .limit(1);
+      if (t) return { threadId: t.id, threadSlug: t.slug, created: false };
+    }
+
+    // Try to reuse the previously-attached thread (toggle-OFF preserved it).
+    const [existing] = await this.db
+      .select({ id: forumThreads.id, slug: forumThreads.slug })
+      .from(forumThreads)
+      .where(eq(forumThreads.canonicalForGearId, gearId))
+      .limit(1);
+
+    if (existing) {
+      await this.db
+        .update(gear)
+        .set({ canonicalThreadId: existing.id, updatedBy: actorId })
+        .where(eq(gear.id, gearId));
+      await this.audit.record({
+        actorId,
+        action: 'set_canonical_thread',
+        targetType: 'gear',
+        targetId: gearId,
+        details: { threadId: existing.id, reused: true },
+        req,
+      });
+      return { threadId: existing.id, threadSlug: existing.slug, created: false };
+    }
+
+    // Create new in `discutii_echipamente`.
+    const [cat] = await this.db
+      .select({ id: forumCategories.id })
+      .from(forumCategories)
+      .where(eq(forumCategories.key, 'discutii_echipamente'))
+      .limit(1);
+    if (!cat) {
+      throw new ConflictException(
+        'Categoria forum `discutii_echipamente` lipsește — rulează migrațiile.',
+      );
+    }
+
+    const title = `Discuții: ${g.brand} ${g.model}`;
+    const slug = await uniqueSlug(slugFromParts(g.brand, g.model), (s) =>
+      this.forumThreadSlugTaken(s),
+    );
+    const opHtml = `<p>Thread oficial pentru discuții despre <strong>${escapeHtml(g.brand)} ${escapeHtml(g.model)}</strong>. Vezi specificații și istoric pe pagina <a href="/tezaur/${g.slug}">Tezaur</a>.</p>`;
+    const opJson = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Thread oficial pentru discuții despre ' },
+            { type: 'text', marks: [{ type: 'bold' }], text: `${g.brand} ${g.model}` },
+            { type: 'text', text: '. Vezi specificații și istoric pe pagina Tezaur.' },
+          ],
+        },
+      ],
+    };
+
+    const [thread] = await this.db
+      .insert(forumThreads)
+      .values({
+        slug,
+        categoryId: cat.id,
+        authorId: actorId,
+        title,
+        postCount: 0,
+        canonicalForGearId: gearId,
+      })
+      .returning({ id: forumThreads.id, slug: forumThreads.slug });
+
+    const [op] = await this.db
+      .insert(forumPosts)
+      .values({
+        threadId: thread.id,
+        parentPostId: null,
+        authorId: actorId,
+        body: opJson,
+        bodyHtml: opHtml,
+        topLevelSeq: 0,
+        subSeq: null,
+        status: 'approved',
+      })
+      .returning({ id: forumPosts.id });
+
+    await this.db
+      .update(forumThreads)
+      .set({
+        firstPostId: op.id,
+        postCount: 1,
+        lastPostAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(forumThreads.id, thread.id));
+
+    await this.db
+      .update(gear)
+      .set({ canonicalThreadId: thread.id, updatedBy: actorId })
+      .where(eq(gear.id, gearId));
+
+    await this.audit.record({
+      actorId,
+      action: 'set_canonical_thread',
+      targetType: 'gear',
+      targetId: gearId,
+      details: { threadId: thread.id, created: true, title },
+      req,
+    });
+
+    return { threadId: thread.id, threadSlug: thread.slug, created: true };
+  }
+
+  async disableOfficialThread(
+    gearId: string,
+    actorId: string,
+    req?: Request,
+  ): Promise<void> {
+    const [g] = await this.db
+      .select({ canonicalThreadId: gear.canonicalThreadId })
+      .from(gear)
+      .where(eq(gear.id, gearId))
+      .limit(1);
+    if (!g) throw new NotFoundException(`gear ${gearId} not found`);
+    if (!g.canonicalThreadId) return; // already off
+
+    await this.db
+      .update(gear)
+      .set({ canonicalThreadId: null, updatedBy: actorId })
+      .where(eq(gear.id, gearId));
+
+    await this.audit.record({
+      actorId,
+      action: 'set_canonical_thread',
+      targetType: 'gear',
+      targetId: gearId,
+      details: { unlinked: true, threadId: g.canonicalThreadId },
+      req,
+    });
+  }
+
+  private async forumThreadSlugTaken(slug: string): Promise<boolean> {
+    const rows = await this.db
+      .select({ id: forumThreads.id })
+      .from(forumThreads)
+      .where(eq(forumThreads.slug, slug))
+      .limit(1);
+    return rows.length > 0;
   }
 
   async restoreGear(
@@ -611,6 +798,15 @@ export class TezaurService {
       parent: { id: string; slug: string; brand: string; model: string; type: string }[];
       child: { id: string; slug: string; brand: string; model: string; type: string }[];
     };
+    /** Canonical (official) forum thread (spec §8.1), null when toggle OFF. */
+    officialThread: {
+      id: string;
+      slug: string;
+      title: string;
+      postCount: number;
+      lastPostAt: Date | null;
+    } | null;
+    relatedThreadsCount: number;
   } | null> {
     const [gearRow] = await this.db
       .select()
@@ -720,6 +916,34 @@ export class TezaurService {
         ),
       );
 
+    let officialThread:
+      | { id: string; slug: string; title: string; postCount: number; lastPostAt: Date | null }
+      | null = null;
+    if (gearRow.canonicalThreadId) {
+      const [t] = await this.db
+        .select({
+          id: forumThreads.id,
+          slug: forumThreads.slug,
+          title: forumThreads.title,
+          postCount: forumThreads.postCount,
+          lastPostAt: forumThreads.lastPostAt,
+        })
+        .from(forumThreads)
+        .where(eq(forumThreads.id, gearRow.canonicalThreadId))
+        .limit(1);
+      if (t) officialThread = t;
+    }
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(forumThreads)
+      .where(
+        and(
+          sql`${gearRow.id} = ANY(${forumThreads.gearTag})`,
+          isNull(forumThreads.deletedAt),
+        ),
+      );
+
     return {
       gear: gearRow,
       family: familyRow ?? null,
@@ -729,6 +953,8 @@ export class TezaurService {
       links,
       description: desc_ ?? null,
       relationships: { parent: parentRels, child: childRels },
+      officialThread,
+      relatedThreadsCount: count,
     };
   }
 

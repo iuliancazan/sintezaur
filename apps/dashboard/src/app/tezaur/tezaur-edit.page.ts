@@ -122,6 +122,33 @@ import type { TezaurDetail } from './tezaur.types';
             <input type="checkbox" [(ngModel)]="form().published" name="published" />
             <span>Publicat (vizibil public). Slug-ul se blochează la prima publicare.</span>
           </label>
+
+          @if (isEdit()) {
+            <label class="admin__check">
+              <input
+                type="checkbox"
+                [ngModel]="form().officialThreadOn"
+                (ngModelChange)="onOfficialToggle($event)"
+                [disabled]="officialBusy()"
+                name="officialThreadOn"
+              />
+              <span>
+                <strong>Thread oficial pe forum</strong> — creează un thread unic
+                de discuții pentru acest echipament în „Discuții echipamente".
+                Recomandat ON pentru gear current, OFF pentru vintage / istoric.
+                @if (officialBusy()) {
+                  <em>· se aplică...</em>
+                }
+                @if (officialError()) {
+                  <span class="admin__err">{{ officialError() }}</span>
+                }
+              </span>
+            </label>
+          } @else {
+            <p class="admin__hint">
+              💡 După prima salvare, vei putea activa „Thread oficial" pentru acest echipament.
+            </p>
+          }
         </section>
 
         <section class="admin__sec">
@@ -296,6 +323,12 @@ import type { TezaurDetail } from './tezaur.types';
         font-family: var(--font-mono);
         font-size: 11px;
       }
+      .admin__hint {
+        font-size: 12px;
+        color: var(--p-text-muted-color, #666);
+        font-style: italic;
+        margin: 8px 0 0;
+      }
 
       .admin__images {
         display: grid;
@@ -396,6 +429,7 @@ export class TezaurAdminEditPage {
     msrpAtLaunchEur: number | null;
     latestFirmwareVersion: string | null;
     published: boolean;
+    officialThreadOn: boolean;
   }>({
     brand: '',
     model: '',
@@ -408,7 +442,11 @@ export class TezaurAdminEditPage {
     msrpAtLaunchEur: null,
     latestFirmwareVersion: null,
     published: false,
+    officialThreadOn: false,
   });
+
+  readonly officialBusy = signal(false);
+  readonly officialError = signal<string | null>(null);
 
   specsText = '{}';
   descriptionHtml = '';
@@ -440,6 +478,31 @@ export class TezaurAdminEditPage {
       JSON.parse(this.specsText || '{}');
     } catch {
       this.specsError.set('JSON invalid');
+    }
+  }
+
+  async onOfficialToggle(next: boolean): Promise<void> {
+    const id = this.editingId();
+    if (!id || this.officialBusy()) return;
+    const prev = this.form().officialThreadOn;
+    this.officialBusy.set(true);
+    this.officialError.set(null);
+    // Optimistic flip.
+    this.form.set({ ...this.form(), officialThreadOn: next });
+    try {
+      if (next) {
+        await this.tezaur.enableOfficialThread(id);
+      } else {
+        await this.tezaur.disableOfficialThread(id);
+      }
+    } catch (err) {
+      this.form.set({ ...this.form(), officialThreadOn: prev });
+      const msg =
+        (err as { error?: { message?: string } })?.error?.message ??
+        'Acțiunea a eșuat.';
+      this.officialError.set(msg);
+    } finally {
+      this.officialBusy.set(false);
     }
   }
 
@@ -590,6 +653,7 @@ export class TezaurAdminEditPage {
         msrpAtLaunchEur: d.gear.msrpAtLaunchEur ? Number(d.gear.msrpAtLaunchEur) : null,
         latestFirmwareVersion: d.gear.latestFirmwareVersion,
         published: d.gear.published,
+        officialThreadOn: !!d.gear.canonicalThreadId,
       });
       this.specsText = JSON.stringify(d.gear.specs, null, 2);
       this.descriptionHtml = d.description?.bodyHtml ?? '';

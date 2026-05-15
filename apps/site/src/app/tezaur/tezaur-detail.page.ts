@@ -418,8 +418,42 @@ interface ReviewsResponse {
             <!-- ----- FORUM ----- -->
             @if (activeTab() === 'forum') {
               <section class="td-panel">
-                <div class="td-empty">
-                  <p>{{ 'tezaur.detail.forum_section.empty' | t }}</p>
+                @if (d.officialThread; as ot) {
+                  <a
+                    class="td-official"
+                    [routerLink]="['/forum', 'discutii-echipamente', ot.slug]"
+                  >
+                    <div class="td-official__head">
+                      <span class="td-official__badge">{{ 'tezaur.detail.forum_section.official_badge' | t }}</span>
+                      <span class="td-official__meta">
+                        {{ ot.postCount }} {{ 'forum.posts_count' | t }}
+                        @if (ot.lastPostAt) {
+                          · {{ formatRelative(ot.lastPostAt) }}
+                        }
+                      </span>
+                    </div>
+                    <h3 class="td-official__title">{{ ot.title }}</h3>
+                    <p class="td-official__lede">
+                      {{ 'tezaur.detail.forum_section.official_lede' | t }}
+                    </p>
+                  </a>
+                } @else {
+                  <div class="td-empty">
+                    <p>{{ 'tezaur.detail.forum_section.no_official' | t }}</p>
+                  </div>
+                }
+
+                <div class="td-related-cta">
+                  <a
+                    class="td-related-link"
+                    [routerLink]="['/forum/cautare']"
+                    [queryParams]="{ gearId: d.gear.id }"
+                  >
+                    🔍
+                    {{
+                      'tezaur.detail.forum_section.related_cta' | t: { count: d.relatedThreadsCount }
+                    }}
+                  </a>
                 </div>
               </section>
             }
@@ -744,6 +778,74 @@ interface ReviewsResponse {
       }
       .td-panel {
         padding: 0;
+      }
+
+      /* M5-I — official forum thread card */
+      .td-official {
+        display: block;
+        text-decoration: none;
+        color: var(--fg);
+        padding: 18px 20px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line-strong);
+        border-left: 3px solid var(--accent);
+        margin-bottom: 18px;
+      }
+      .td-official:hover {
+        background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%);
+      }
+      .td-official__head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+      }
+      .td-official__badge {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        padding: 3px 8px;
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+      .td-official__meta {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--fg-muted);
+      }
+      .td-official__title {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 20px;
+        line-height: 1.2;
+        margin: 0 0 6px;
+      }
+      .td-official__lede {
+        margin: 0;
+        color: var(--fg-muted);
+        font-size: 13px;
+      }
+      .td-related-cta {
+        margin-top: 12px;
+      }
+      .td-related-link {
+        display: inline-block;
+        padding: 8px 14px;
+        background: transparent;
+        border: 1px dashed var(--line-strong);
+        color: var(--accent);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-decoration: none;
+      }
+      .td-related-link:hover {
+        background: var(--bg-elev);
       }
 
       /* prose */
@@ -1308,5 +1410,14 @@ export class TezaurDetailPage {
   formatDate(iso: string): string {
     const d = new Date(iso);
     return d.toLocaleDateString('ro-RO', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  formatRelative(iso: string): string {
+    const diff = Date.now() - new Date(iso).getTime();
+    const day = Math.round(diff / 86_400_000);
+    if (day < 1) return 'azi';
+    if (day < 7) return `acum ${day} zile`;
+    if (day < 30) return `acum ${Math.round(day / 7)} săpt`;
+    return this.formatDate(iso);
   }
 }

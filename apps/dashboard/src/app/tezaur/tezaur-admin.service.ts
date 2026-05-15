@@ -86,6 +86,32 @@ export class TezaurAdminService {
     );
   }
 
+  /** M5-I — turn ON the official forum thread for this gear. */
+  enableOfficialThread(gearId: string): Promise<{
+    threadId: string;
+    threadSlug: string;
+    created: boolean;
+  }> {
+    return firstValueFrom(
+      this.http.post<{ threadId: string; threadSlug: string; created: boolean }>(
+        `${this.base}/admin/tezaur/gear/${gearId}/canonical-thread`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /** M5-I — turn OFF (unlink, thread preserved with replies). */
+  disableOfficialThread(gearId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.request<void>(
+        'DELETE',
+        `${this.base}/admin/tezaur/gear/${gearId}/canonical-thread`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
   upsertDescription(
     gearId: string,
     body: { lang: 'ro' | 'en'; body: unknown; bodyHtml: string },

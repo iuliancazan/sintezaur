@@ -7,7 +7,24 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
-### Forum (M5)
+### Forum (M5) — walking skeleton complet ✅
+
+#### M5-I — Thread oficial per echipament (HEAD)
+- Migration `0011_canonical_gear_thread.sql`: `forum_threads.canonical_for_gear_id uuid` cu unique partial index. Reverse FK conform spec §8.1 — permite reuse când editorul toggle-ează OFF→ON pe același echipament.
+- `TezaurService.enableOfficialThread`:
+  - dacă `gear.canonical_thread_id` deja setat → return existing
+  - dacă thread cu `canonical_for_gear_id=gearId` există (toggle OFF anterior) → re-attach
+  - altfel: creează thread nou în categoria `discutii_echipamente` cu OP auto-generat („Thread oficial pentru discuții despre **Brand Model**. Vezi specificații și istoric pe pagina [Tezaur](…).") + setează `gear.canonical_thread_id` + audit `set_canonical_thread`.
+- `TezaurService.disableOfficialThread`: doar clear `gear.canonical_thread_id` (thread + replies preserve, FK reverse rămâne pentru reuse).
+- Endpoints noi (curator/admin/superadmin):
+  - `POST /api/admin/tezaur/gear/:id/canonical-thread` — toggle ON
+  - `DELETE /api/admin/tezaur/gear/:id/canonical-thread` — toggle OFF
+- Public `GET /api/tezaur/:slug` extins cu `officialThread: { id, slug, title, postCount, lastPostAt } | null` + `relatedThreadsCount` (count threads cu `gear_id ∈ gear_tag[]`).
+- Site `/tezaur/:slug` forum tab:
+  - card prominent cu badge „OFICIAL" + titlu + meta + lede explicativ când există thread
+  - empty state explicativ pentru editori când lipsește
+  - CTA dashed jos: „🔍 Caută toate thread-urile care menționează acest echipament (N)" → `/forum/cautare?gearId=...`
+- Dashboard `/tezaur/:id/edit`: checkbox „Thread oficial pe forum" lângă `Publicat`. Click flip optimistic + apel endpoint + rollback la error. Hint pentru gear nou: „💡 După prima salvare…".
 
 #### M5-H — Faceted search + anti-spam + tags + FPA queue (`1417fce`)
 - Migration `0010_forum_thread_tags.sql` adaugă `forum_threads.tags text[]` + `gear_tag uuid[]` cu GIN indexes pentru containment queries.

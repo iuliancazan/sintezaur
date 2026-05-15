@@ -121,6 +121,15 @@ export const forumThreads = pgTable(
     firstPostId: uuid('first_post_id'),
 
     /**
+     * Reverse FK for the canonical-gear-thread feature (spec §8.1).
+     * Set when the editor flips ON the "Thread oficial" toggle on a
+     * gear entry. Toggling OFF clears `gear.canonical_thread_id` but
+     * leaves this column set so the same thread can be re-attached
+     * later (replies preserved).
+     */
+    canonicalForGearId: uuid('canonical_for_gear_id'),
+
+    /**
      * Free-text tags per spec §8.4 thread features. Lowercase, trimmed,
      * deduplicated app-side. Indexed via GIN for ANY/ALL containment
      * queries from the search facet.
@@ -159,6 +168,10 @@ export const forumThreads = pgTable(
     uniqueIndex('forum_threads_category_pin_slot_unique')
       .on(t.categoryId, t.pinPosition)
       .where(sql`${t.pinPosition} IS NOT NULL`),
+    /** Reverse-lookup for canonical-gear-thread toggle (spec §8.1). */
+    uniqueIndex('forum_threads_canonical_for_gear_unique')
+      .on(t.canonicalForGearId)
+      .where(sql`${t.canonicalForGearId} IS NOT NULL`),
   ],
 );
 export type ForumThread = typeof forumThreads.$inferSelect;

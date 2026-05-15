@@ -171,7 +171,11 @@
         "canonical_badge": "Discuție canonică",
         "canonical_locked": "închis · doar moderare poate adăuga",
         "replies": "{{count}} răspunsuri",
-        "empty": "Forumul deschide în curând. Vei vedea aici discuțiile despre acest gear."
+        "empty": "Forumul deschide în curând. Vei vedea aici discuțiile despre acest gear.",
+        "official_badge": "Oficial",
+        "official_lede": "Thread oficial de discuții pentru acest echipament. Pune întrebări, postează patch-uri, citește experiențe.",
+        "no_official": "Nu există încă un thread oficial pentru acest echipament. (Editorii Tezaur pot activa unul.)",
+        "related_cta": "Caută toate thread-urile care menționează acest echipament ({{count}})"
       },
       "sidebar": {
         "stats_title": "Statistici Sintezaur",

@@ -105,6 +105,27 @@ export class AdminTezaurController {
     await this.tezaur.restoreGear(id, user.sub, req);
   }
 
+  /* canonical (official) forum thread per spec §8.1 — editor toggle. */
+
+  @Post('gear/:id/canonical-thread')
+  enableOfficial(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    return this.tezaur.enableOfficialThread(id, user.sub, req);
+  }
+
+  @Delete('gear/:id/canonical-thread')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async disableOfficial(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    await this.tezaur.disableOfficialThread(id, user.sub, req);
+  }
+
   /* description */
   @Put('gear/:id/description')
   @HttpCode(HttpStatus.NO_CONTENT)

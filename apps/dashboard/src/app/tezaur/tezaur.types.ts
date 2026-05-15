@@ -41,6 +41,7 @@ export interface TezaurDetail {
     firmwareNotesUrl: string | null;
     published: boolean;
     specs: Record<string, unknown>;
+    canonicalThreadId?: string | null;
   };
   family: { id: string; slug: string; name: string } | null;
   siblings: { id: string; slug: string; brand: string; model: string; yearReleased: number | null }[];

@@ -69,6 +69,16 @@ export interface TezaurDetail {
     parent: { id: string; slug: string; brand: string; model: string; type: string }[];
     child: { id: string; slug: string; brand: string; model: string; type: string }[];
   };
+  /** Spec §8.1 official forum thread (RO: „Thread oficial"). */
+  officialThread: {
+    id: string;
+    slug: string;
+    title: string;
+    postCount: number;
+    lastPostAt: string | null;
+  } | null;
+  /** Count of threads with this gear in their `gear_tag[]` (excluding canonical). */
+  relatedThreadsCount: number;
 }
 
 @Injectable({ providedIn: 'root' })
