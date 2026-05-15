@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
+import { SentryModule } from '@sentry/nestjs/setup';
 import {
   DATABASE,
   DATABASE_POOL,
@@ -16,11 +17,13 @@ import { ListingCleanupJob } from './jobs/listing-cleanup.job';
 import { ListingExpiringSoonJob } from './jobs/listing-expiring-soon.job';
 import { ListingExpiryJob } from './jobs/listing-expiry.job';
 import { PgBossService } from './jobs/pg-boss.service';
+import { PgDumpBackupJob } from './jobs/pg-dump.job';
 import { StorageDailyResetJob } from './jobs/storage-daily-reset.job';
 import { StorageReconcileJob } from './jobs/storage-reconcile.job';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -55,6 +58,7 @@ import { StorageReconcileJob } from './jobs/storage-reconcile.job';
     BadgeSweepJob,
     StorageDailyResetJob,
     StorageReconcileJob,
+    PgDumpBackupJob,
     PgBossService,
   ],
 })

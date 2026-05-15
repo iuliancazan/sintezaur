@@ -8,6 +8,9 @@
  * the bootstrap path + Coolify resource shape end-to-end.
  */
 
+// Sentry must be imported first — installs global error handlers
+// before the worker boots and pg-boss starts firing jobs.
+import './instrument';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';

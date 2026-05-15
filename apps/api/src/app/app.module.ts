@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { SentryModule } from '@sentry/nestjs/setup';
 import { JwtAuthGuard, RolesGuard } from '@sintezaur/auth';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -29,6 +30,11 @@ import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
+    // Sentry hooks into Nest's exception filter chain. The actual
+    // SDK init happens via the side-effect import in `main.ts` —
+    // this module just wires the per-request integration. No-op
+    // when `SENTRY_DSN` is empty.
+    SentryModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     LoggerModule.forRoot({
       pinoHttp: {

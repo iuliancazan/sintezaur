@@ -111,6 +111,8 @@
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/websockets": "^11.0.0",
     "@primeuix/themes": "^1.2.5",
+    "@sentry/nestjs": "^10.53.1",
+    "@sentry/node": "^10.53.1",
     "@tiptap/core": "^3.22.5",
     "@tiptap/extension-image": "^3.22.5",
     "@tiptap/extension-link": "^3.22.5",

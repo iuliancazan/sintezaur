@@ -144,11 +144,24 @@ Note: `passport-google-oauth20` is installed but Google OAuth is **NOT wired** i
 ```
 
 ### Logging — Pino
+
 ```json
 "nestjs-pino": "^4.6.1",
 "pino":        "^9.14.0",
 "pino-http":   "^10.5.0"
 ```
+
+### Error tracking — Sentry
+
+```json
+"@sentry/nestjs": "^10.53.1",
+"@sentry/node":   "^10.53.1"
+```
+
+Cablat în M9-C — `apps/{api,worker}/src/instrument.ts` face init-ul
+înainte de `NestFactory.create` ca să prindă erorile de boot.
+`SentryModule.forRoot()` în fiecare AppModule wire-uiește per-request
+integration. No-op când `SENTRY_DSN` e gol (dev default).
 
 ---
 

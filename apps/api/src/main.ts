@@ -1,3 +1,6 @@
+// Sentry must be imported first so its global error handlers are
+// installed before NestJS does any work. Side-effect-only import.
+import './instrument';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
