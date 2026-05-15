@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-B — Home page rewrite (single commit, _SHA TBD_)
+#### M13-B — Home page rewrite (single commit `044fd5a`)
 
 `apps/site/src/app/home.page.ts` complet rescris cu markup V05
 1:1 (Home Guest + Home Logat variants combinate într-un singur
