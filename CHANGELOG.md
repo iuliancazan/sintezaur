@@ -9,6 +9,23 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### Forum (M5)
 
+#### M5-G — Moderation inline + content_reports queue (HEAD)
+- Kebab `⋮` reutilizabil pe orice post și thread (componentă `<app-post-actions-menu>`):
+  - „Raportează" pentru orice utilizator autentificat (nu pe propriul conținut).
+  - Mod actions pentru `moderator|admin|superadmin`: Hide/Unhide post, Approve/Reject pending, Lock/Unlock + Pin/Unpin + Delete thread.
+- Modal reutilizabil `<app-report-dialog>` cu două moduri:
+  - `report` — 5 categorii predefinite (Spam / Hostilitate / Off-topic / Conținut ilegal / Altul) + textarea reason min 10 chars. Trimis ca `[CAT] reason text`.
+  - `hide` — doar reason min 2 chars. Vizibil utilizatorului afectat în notificare.
+- Backend `ContentReportsService` + `ContentReportsController`:
+  - `POST /api/content-reports` (auth) — create cu unique-per-(reporter, target) când e `open`.
+  - `GET /api/content-reports?status&targetType&page` (mod) — list cu snapshots (titlu thread, excerpt 240 chars din post body).
+  - `PATCH /api/content-reports/:id/resolve` (mod) — rezolvare cu opțional `action` combinat (`hide_post` / `lock_thread` / `delete_thread`). One-click combo per spec interview.
+- `ModForumController` extins: fiecare endpoint scrie `audit_log` (actor + IP + UA) + fan-out `forum_mod_action_on_my_content` la hide/delete cu reason vizibil în payload.
+- `forum_report_resolved` notification către reporter la fiecare resolve.
+- Dashboard `/rapoarte` (route nouă): tabel cu filtre status + targetType, butoane combinate per row, dialog confirmare cu reason + notă internă, link extern „Deschide" către target. Link în meniul home.
+- AuditAction extended cu: `hide_post`, `unhide_post`, `lock_thread`, `unlock_thread`, `delete_thread`, `pin_thread`, `unpin_thread`, `first_post_approve`, `first_post_reject`.
+- i18n: bloc `forum.report.*` + `forum.mod.*` + `forum.actions_menu` + `forum.action.report`.
+
 #### M5-F — Badges (`a2fcd23`)
 - Schema `badges` (definiții) + `user_badges` (awards) live din M5-A; M5-F livrează awarding-ul.
 - Migration `9008_badges_seed.sql` cu 6 badge-uri default: Primul post / 10 postări / 100 postări / Veteran 1 an / Prima reacție „Util" / 50 reacții „Util".

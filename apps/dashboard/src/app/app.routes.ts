@@ -50,6 +50,12 @@ export const appRoutes: Route[] = [
       import('./badges/badges-admin.page').then((m) => m.BadgesAdminPage),
   },
   {
+    path: 'rapoarte',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./reports/reports-admin.page').then((m) => m.ReportsAdminPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

@@ -38,6 +38,10 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Badges</span>
           <span class="module__desc">Definiții badge-uri · cron nightly + sweep manual</span>
         </a>
+        <a class="module" routerLink="/rapoarte">
+          <span class="module__name">Raportări</span>
+          <span class="module__desc">Coadă unificată · resolve cu acțiune combinată</span>
+        </a>
         <span class="module is-disabled">
           <span class="module__name">Audit log</span>
           <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>

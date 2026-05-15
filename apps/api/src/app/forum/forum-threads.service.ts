@@ -200,6 +200,16 @@ export class ForumThreadsService {
     };
   }
 
+  async findById(id: string): Promise<ForumThread> {
+    const [row] = await this.db
+      .select()
+      .from(forumThreads)
+      .where(eq(forumThreads.id, id))
+      .limit(1);
+    if (!row) throw new NotFoundException('thread not found');
+    return row;
+  }
+
   async findBySlug(slug: string): Promise<{
     thread: ForumThread;
     category: {

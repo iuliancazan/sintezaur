@@ -758,7 +758,40 @@
       "reply": "Răspunde",
       "like": "Util",
       "edit": "Editează",
-      "delete": "Șterge"
+      "delete": "Șterge",
+      "report": "Raportează"
+    },
+    "actions_menu": "Mai multe acțiuni",
+    "mod": {
+      "hide_post": "Ascunde postare",
+      "unhide_post": "Re-arată postare",
+      "approve_post": "Aprobă (queue)",
+      "reject_post": "Respinge (queue)",
+      "lock_thread": "Blochează thread",
+      "unlock_thread": "Deblochează thread",
+      "pin_thread": "Fixează thread",
+      "unpin_thread": "Desfixează thread",
+      "delete_thread": "Șterge thread",
+      "confirm_delete_thread": "Sigur ștergi acest thread? (irevocabil — autorul primește notificare)",
+      "thread_deleted": "Thread șters.",
+      "action_ok": "Acțiune aplicată."
+    },
+    "report": {
+      "title": "Raportează conținut",
+      "lede": "Moderatorii primesc acest raport în coadă. Furnizează detalii utile.",
+      "hide_title": "Ascunde postare",
+      "hide_lede": "Postarea va fi ascunsă cu un placeholder. Autorul primește notificare cu motivul tău.",
+      "category_label": "Categorie",
+      "cat_spam": "Spam",
+      "cat_hostility": "Atitudine ostilă / hărțuire",
+      "cat_off_topic": "Off-topic",
+      "cat_illegal": "Conținut ilegal",
+      "cat_other": "Altul",
+      "reason_label": "Detalii",
+      "reason_placeholder": "Explică pe scurt motivul (min 10 caractere).",
+      "send": "Trimite raport",
+      "hide_action": "Ascunde",
+      "thanks": "Mulțumim. Raportul tău a fost trimis."
     },
     "compose": {
       "new_thread": "Thread nou",

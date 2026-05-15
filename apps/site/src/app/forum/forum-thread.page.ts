@@ -22,6 +22,15 @@ import {
   SubscriptionLevel,
   ThreadDetail,
 } from './forum.service';
+import {
+  PostActionsMenuComponent,
+  type PostActionKind,
+  type ThreadActionKind,
+} from './post-actions-menu.component';
+import {
+  ReportDialogComponent,
+  type ReportSubmit,
+} from './report-dialog.component';
 import { SubscribeBellComponent } from './subscribe-bell.component';
 
 interface SubReplyVM extends PostListItem {
@@ -57,7 +66,15 @@ const EMPTY_COMPOSER: ComposerState = {
 @Component({
   selector: 'app-forum-thread-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SzEditorComponent, SubscribeBellComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SzEditorComponent,
+    SubscribeBellComponent,
+    PostActionsMenuComponent,
+    ReportDialogComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (thread(); as t) {
@@ -120,6 +137,15 @@ const EMPTY_COMPOSER: ComposerState = {
                 [level]="subLevel()"
                 [busy]="subBusy()"
                 (levelChange)="onSubChange($event)"
+              />
+              <app-post-actions-menu
+                kind="thread"
+                [canReport]="true"
+                [isMod]="isMod()"
+                [isOwn]="isOwnThread(t)"
+                [threadIsLocked]="!!t.thread.lockedAt"
+                [threadIsPinned]="t.thread.pinPosition !== null"
+                (action)="onThreadAction($any($event), t)"
               />
             }
             @if (groups().length > 0) {
@@ -236,6 +262,15 @@ const EMPTY_COMPOSER: ComposerState = {
         @if (toast()) {
           <div class="ft-toast">{{ toast() }}</div>
         }
+
+        <app-report-dialog
+          [open]="!!dialogState()"
+          [mode]="dialogState()?.mode ?? 'report'"
+          [busy]="dialogBusy()"
+          [error]="dialogError()"
+          (submitReport)="onDialogSubmit($event)"
+          (cancel)="closeDialog()"
+        />
       </div>
 
       <!-- POST TEMPLATE -->
@@ -350,6 +385,17 @@ const EMPTY_COMPOSER: ComposerState = {
                 <button type="button" class="ft-action ft-action--danger" (click)="deletePost(p)">
                   🗑 {{ 'forum.action.delete' | t }}
                 </button>
+              }
+              @if (auth.currentUser()) {
+                <app-post-actions-menu
+                  kind="post"
+                  [canReport]="true"
+                  [isMod]="isMod()"
+                  [isOwn]="isOwnPost(p)"
+                  [postIsHidden]="!!p.hiddenAt"
+                  [postIsPending]="p.status === 'pending'"
+                  (action)="onPostAction($any($event), p)"
+                />
               }
             </div>
           }
@@ -783,6 +829,14 @@ export class ForumThreadPage {
   readonly subLevel = signal<SubscriptionLevel | null>(null);
   readonly subBusy = signal(false);
 
+  readonly dialogState = signal<{
+    mode: 'report' | 'hide';
+    targetType: 'forum_post' | 'forum_thread';
+    targetId: string;
+  } | null>(null);
+  readonly dialogBusy = signal(false);
+  readonly dialogError = signal<string | null>(null);
+
   readonly expandedMap = signal<Map<string, boolean>>(new Map());
 
   readonly replyingTo = signal<string | null>(null);
@@ -1155,6 +1209,170 @@ export class ForumThreadPage {
       op: cur.op ? apply(cur.op) : cur.op,
       replies: cur.replies.map(apply),
     });
+  }
+
+  /* ============ kebab actions (M5-G) ============ */
+
+  isOwnPost(p: PostListItem): boolean {
+    const u = this.auth.currentUser();
+    return !!u && p.authorId === u.id;
+  }
+
+  isOwnThread(t: ThreadDetail): boolean {
+    const u = this.auth.currentUser();
+    return !!u && t.thread.authorId === u.id;
+  }
+
+  onPostAction(action: PostActionKind, p: PostListItem): void {
+    if (action === 'report') {
+      this.openDialog('report', 'forum_post', p.id);
+      return;
+    }
+    if (action === 'hide') {
+      this.openDialog('hide', 'forum_post', p.id);
+      return;
+    }
+    if (action === 'unhide') {
+      void this.runMod(() => this.forum.modUnhidePost(p.id), () =>
+        this.replacePost({ ...p, hiddenAt: null, hiddenReason: null }),
+      );
+      return;
+    }
+    if (action === 'approve') {
+      void this.runMod(() => this.forum.modApprovePost(p.id), () =>
+        this.replacePost({ ...p, status: 'approved' }),
+      );
+      return;
+    }
+    if (action === 'reject') {
+      void this.runMod(() => this.forum.modRejectPost(p.id), () =>
+        this.removePost(p.id),
+      );
+      return;
+    }
+  }
+
+  onThreadAction(action: ThreadActionKind, t: ThreadDetail): void {
+    if (action === 'report') {
+      this.openDialog('report', 'forum_thread', t.thread.id);
+      return;
+    }
+    if (action === 'lock' || action === 'unlock') {
+      void this.runMod(
+        () => this.forum.modLockThread(t.thread.id, action === 'lock'),
+        () => {
+          const cur = this.thread();
+          if (!cur) return;
+          this.thread.set({
+            ...cur,
+            thread: {
+              ...cur.thread,
+              lockedAt: action === 'lock' ? new Date().toISOString() : null,
+            },
+          });
+        },
+      );
+      return;
+    }
+    if (action === 'pin' || action === 'unpin') {
+      void this.runMod(
+        () => this.forum.modPinThread(t.thread.id, action === 'pin'),
+        () => {
+          const cur = this.thread();
+          if (!cur) return;
+          this.thread.set({
+            ...cur,
+            thread: {
+              ...cur.thread,
+              pinPosition: action === 'pin' ? 1 : null,
+              pinnedAt: action === 'pin' ? new Date().toISOString() : null,
+            },
+          });
+        },
+      );
+      return;
+    }
+    if (action === 'delete') {
+      if (!confirm(this.i18n.t('forum.mod.confirm_delete_thread'))) return;
+      void this.runMod(
+        () => this.forum.modDeleteThread(t.thread.id),
+        () => {
+          this.flashToast(this.i18n.t('forum.mod.thread_deleted'));
+          setTimeout(
+            () =>
+              this.router.navigate(['/forum', t.category.slug]).catch(() => {}),
+            800,
+          );
+        },
+      );
+    }
+  }
+
+  private async runMod(
+    call: () => Promise<unknown>,
+    onSuccess: () => void,
+  ): Promise<void> {
+    try {
+      await call();
+      onSuccess();
+      this.flashToast(this.i18n.t('forum.mod.action_ok'));
+    } catch (err) {
+      this.flashToast(this.errorMessage(err, 'forum.compose.submit_error'));
+    }
+  }
+
+  openDialog(
+    mode: 'report' | 'hide',
+    targetType: 'forum_post' | 'forum_thread',
+    targetId: string,
+  ): void {
+    this.dialogState.set({ mode, targetType, targetId });
+    this.dialogError.set(null);
+  }
+
+  closeDialog(): void {
+    if (this.dialogBusy()) return;
+    this.dialogState.set(null);
+    this.dialogError.set(null);
+  }
+
+  async onDialogSubmit(payload: ReportSubmit): Promise<void> {
+    const ds = this.dialogState();
+    if (!ds || this.dialogBusy()) return;
+    this.dialogBusy.set(true);
+    this.dialogError.set(null);
+    try {
+      if (ds.mode === 'report') {
+        const reason = `[${payload.category.toUpperCase()}] ${payload.reason}`;
+        await this.forum.reportContent({
+          targetType: ds.targetType,
+          targetId: ds.targetId,
+          reason,
+        });
+        this.flashToast(this.i18n.t('forum.report.thanks'));
+      } else {
+        // hide
+        await this.forum.modHidePost(ds.targetId, payload.reason);
+        const cur = this.posts();
+        if (cur) {
+          const apply = (p: PostListItem): PostListItem =>
+            p.id === ds.targetId
+              ? { ...p, hiddenAt: new Date().toISOString(), hiddenReason: payload.reason }
+              : p;
+          this.posts.set({
+            ...cur,
+            op: cur.op ? apply(cur.op) : cur.op,
+            replies: cur.replies.map(apply),
+          });
+        }
+        this.flashToast(this.i18n.t('forum.mod.action_ok'));
+      }
+      this.dialogState.set(null);
+    } catch (err) {
+      this.dialogError.set(this.errorMessage(err, 'forum.compose.submit_error'));
+    } finally {
+      this.dialogBusy.set(false);
+    }
   }
 
   /* ============ subscription ============ */

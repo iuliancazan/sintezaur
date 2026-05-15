@@ -130,6 +130,37 @@ export class CreateBadgeDto {
   position?: number;
 }
 
+export class CreateReportDto {
+  @IsIn(['forum_post', 'forum_thread'])
+  targetType!: 'forum_post' | 'forum_thread';
+
+  @IsUUID()
+  targetId!: string;
+
+  @IsString()
+  @Length(10, 1000)
+  reason!: string;
+}
+
+export class ResolveReportDto {
+  @IsIn(['resolved_action_taken', 'resolved_no_action', 'duplicate'])
+  resolution!: 'resolved_action_taken' | 'resolved_no_action' | 'duplicate';
+
+  @IsOptional()
+  @IsIn(['none', 'hide_post', 'lock_thread', 'delete_thread'])
+  action?: 'none' | 'hide_post' | 'lock_thread' | 'delete_thread';
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 500)
+  actionReason?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  resolutionNote?: string;
+}
+
 export class UpdateBadgeDto {
   @IsOptional()
   @IsString()

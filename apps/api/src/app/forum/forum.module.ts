@@ -3,6 +3,8 @@ import { AuthForumController } from './auth-forum.controller';
 import { BadgeAwardingService } from './badge-awarding.service';
 import { BadgesController } from './badges.controller';
 import { BadgesService } from './badges.service';
+import { ContentReportsController } from './content-reports.controller';
+import { ContentReportsService } from './content-reports.service';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumLikesService } from './forum-likes.service';
 import { ForumPostsService } from './forum-posts.service';
@@ -24,6 +26,7 @@ import { PublicForumController } from './public-forum.controller';
     AuthForumController,
     ModForumController,
     BadgesController,
+    ContentReportsController,
   ],
   providers: [
     ForumCategoriesService,
@@ -34,6 +37,7 @@ import { PublicForumController } from './public-forum.controller';
     ForumSubscriptionsService,
     BadgesService,
     BadgeAwardingService,
+    ContentReportsService,
   ],
   exports: [
     ForumCategoriesService,

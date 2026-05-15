@@ -352,4 +352,92 @@ export class ForumService {
       ),
     );
   }
+
+  /* ============ reports + mod actions (M5-G) ============ */
+
+  reportContent(payload: {
+    targetType: 'forum_post' | 'forum_thread';
+    targetId: string;
+    reason: string;
+  }): Promise<unknown> {
+    return firstValueFrom(
+      this.http.post(
+        `${this.base}/content-reports`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /* mod actions */
+  modHidePost(postId: string, reason: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/forum/mod/posts/${postId}/hide`,
+        { reason },
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modUnhidePost(postId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/forum/mod/posts/${postId}/unhide`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modApprovePost(postId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/forum/mod/posts/${postId}/approve`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modRejectPost(postId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/forum/mod/posts/${postId}/reject`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modLockThread(threadId: string, lock: boolean): Promise<void> {
+    const path = lock ? 'lock' : 'unlock';
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/forum/mod/threads/${threadId}/${path}`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modPinThread(threadId: string, pin: boolean): Promise<{ pinPosition?: number }> {
+    const path = pin ? 'pin' : 'unpin';
+    return firstValueFrom(
+      this.http.post<{ pinPosition?: number }>(
+        `${this.base}/forum/mod/threads/${threadId}/${path}`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  modDeleteThread(threadId: string, reason?: string): Promise<void> {
+    return firstValueFrom(
+      this.http.request<void>('DELETE', `${this.base}/forum/mod/threads/${threadId}`, {
+        body: { reason },
+        withCredentials: true,
+      }),
+    );
+  }
 }

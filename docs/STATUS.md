@@ -6,14 +6,16 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-F (`a2fcd23`) — badges (instant hooks + nightly cron sweep)
-+ dashboard CRUD + seed 6 default badges + secțiune badges pe author profile.
+**Last shipped:** M5-G (HEAD) — moderation tools inline (kebab cu mod
+actions + report) + content_reports queue în dashboard cu acțiuni
+combinate + audit_log + notification fan-out (forum_mod_action_on_my_content
++ forum_report_resolved).
 
-**Next up:** **M5-G** — moderation tools inline + `content_report` queue
-în dashboard. Începe cu o rundă interview (5-8 întrebări) per regula
-spec-first.
+**Next up:** **M5-H** — faceted search + anti-spam stack (honeypot +
+time-on-form + rate limit + first-post queue UI). Începe cu rundă
+interview per regula spec-first.
 
-**Active milestone:** M5 Forum (walking skeleton complet, 9 sub-faze A-I; 6/9 done).
+**Active milestone:** M5 Forum (walking skeleton complet, 9 sub-faze A-I; 7/9 done).
 
 ## Milestones
 
@@ -88,9 +90,8 @@ spec-first.
 | D   | `b204883` | done | posting (new thread page + inline reply + general reply + edit window + delete) + `@mention` autocomplete (server parsing) + pending state UI + mention-search endpoint |
 | E   | `7395179` | done | likes toggle + 4-level subscriptions (thread + category) + bell dropdown UI + auto-watch on reply + notification fan-out (mention > revista-author > thread-watcher) + `/cont/abonamente` |
 | F   | `a2fcd23` | done | badge awarding (3 kinds: post_count / account_age_days / likes_received) + instant hooks (post / like) + nightly cron sweep 04:00 UTC + dashboard CRUD + 6 seeded badges + `forum_badge_earned` notify + secțiune badges pe `/autor/:username` |
-| F   |  —      | pending | badges cron + dashboard editor pentru badge definitions |
-| G   |  —      | **next** | moderation tools inline + `content_report` queue în dashboard |
-| H   |  —      | pending | faceted search + anti-spam stack (honeypot + time-on-form + rate limit + first-post queue UI) |
+| G   | HEAD    | done | mod inline kebab (hide/lock/pin/delete/approve/reject) + report dialog cu 5 categorii + content_reports CRUD + `/rapoarte` queue cu acțiuni combinate (hide+resolve / lock+resolve / delete+resolve) + audit_log per acțiune + notify (`forum_mod_action_on_my_content` + `forum_report_resolved`) |
+| H   |  —      | **next** | faceted search + anti-spam stack (honeypot + time-on-form + rate limit + first-post queue UI) |
 | I   |  —      | pending | canonical gear thread (Tezaur toggle integration) |
 
 ## Conventions (recap from memory)

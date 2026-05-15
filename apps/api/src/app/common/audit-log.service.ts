@@ -25,7 +25,17 @@ export type AuditAction =
   | 'resolve_content_report'
   // Auth — role management
   | 'promote_user'
-  | 'demote_user';
+  | 'demote_user'
+  // Forum mod (M5-G)
+  | 'hide_post'
+  | 'unhide_post'
+  | 'lock_thread'
+  | 'unlock_thread'
+  | 'delete_thread'
+  | 'pin_thread'
+  | 'unpin_thread'
+  | 'first_post_approve'
+  | 'first_post_reject';
 
 interface RecordOptions {
   actorId: string;
