@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-E1 (`PENDING`) — profil public complet:
+**Last shipped:** M6-E1 (`5e36ec7`) — profil public complet:
 `users.location` (migration `9010`) + `AuthUserPublic` extins cu
 bio/location/avatar/website/3× social, `PATCH /auth/me/profile` +
 `POST/DELETE /auth/me/avatar` (pipeline 256×256 WebP dedicat),
@@ -108,7 +108,7 @@ E2 + E3 next. Apoi trecere la M7 / storage refactor.
 | B   | `4f786ad` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
 | C   | `0f08502` | done | polish UI pass: ToastService + ToastContainer + HttpErrorInterceptor global (network/5xx/429/403) + NotFoundPage brand-aware pentru 404 + 410 catch-all + EmptyStateComponent cablat pe 9 spoturi (Tezaur/Bazar/Revista lists, Forum cautare + category, 5 account pages) + SkeletonComponent CSS-only aplicat pe legal page |
 | D   | `e663622` | done | schema `user_feedback` (migration 0013) + backend `FeedbackModule` (POST auth-only cu throttle + email notify operator, GET/PATCH admin) + site FeedbackService + FeedbackModal (mount root shell, link declanșator în `/cont`, auto-capture pathname+search) + dashboard `/feedback` queue cu filtre status+kind + expand-row + auto-mark-read |
-| E1  | `PENDING` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
+| E1  | `5e36ec7` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
 | E2  | — | pending | block + report UI pe Bazar (butoane block pe chat/listing/profile, `/cont/blocuri` list, report dialog refolosit din forum cu target_type-uri listing/bazar_message/gear_review/user_profile, filter blocked din liste) |
 | E3  | — | pending | admin closure: dashboard `/audit-log` viewer (filter action+target+date+actor) + seed EUR-RON în `currency_rates` + dashboard `/currency-rates` minimal CRUD |
 

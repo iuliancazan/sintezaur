@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
-#### M6-E1 — Profil public complet (`PENDING`)
+#### M6-E1 — Profil public complet (`5e36ec7`)
 
 - Schema:
   - `users.location text` adăugat (migration postflight
