@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-A (`<commit>`) — pagini legale (6 slug-uri) +
+**Last shipped:** M6-A (`83c6ba4`) — pagini legale (6 slug-uri) +
 formular contact + cookies banner + admin dashboard CRUD. Soft-launch
 ready pe latura GDPR.
 
@@ -99,7 +99,7 @@ A legal ✅ → B SEO → C polish UI → D feedback widget).
 
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
-| A   | `<commit>` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
+| A   | `83c6ba4` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
 | B   | — | pending | SEO mediu: `MetaService` global per pagină, `sitemap.xml` dinamic, JSON-LD Product/Article/ClassifiedAd + TODO max-level |
 | C   | — | pending | polish UI pass: 404+410 brand pages, empty states peste tot, HTTP error interceptor global, skeleton loaders |
 | D   | — | pending | feedback widget în user menu + admin `/feedback` queue cu mark-read/archive |

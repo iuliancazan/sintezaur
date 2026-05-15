@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep
 
-#### M6-A — Pagini legale + formular contact + cookies banner (`<commit>`)
+#### M6-A — Pagini legale + formular contact + cookies banner (`83c6ba4`)
 
 - Migration `0012_legal_pages.sql` (schema) + `9009_legal_pages_seed.sql` (postflight seed). Două tabele noi:
   - `legal_pages (slug unique, title, body_md, meta_description, updated_by_user_id, timestamps)` — 6 slug-uri canonice: `termeni`, `confidentialitate`, `cookies`, `regulament-forum`, `despre`, `contact`.
