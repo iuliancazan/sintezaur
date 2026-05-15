@@ -6,30 +6,30 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M7-B (`d23661f`) — multi-type pipeline + quota
-infra + storage crons. Magic-byte detector zero-dep (JPEG/PNG/WebP/
-MP3/WAV/OGG/PDF/ZIP). `StorageLimitsService` cu wildcard fallback +
-cache 5min. `UploadQuotaService` cu `check()` (413/429 pre-upload) +
-`track()` (storage_events / user_upload_quota / storage_folder_stats
-+ notification one-shot la threshold lifetime). `StorageService`
-extins cu `processAudio` / `processPdf` / `processZip` + integrare
-quota pe imagine/avatar. Public `GET /api/storage/limits` (cache
-300s). Nou notification kind `storage_quota_lifetime_reached`
-(migration `9015`). pg-boss crons în worker:
-`storage:reset-daily-quota` @ 00:00 UTC + `storage:reconcile` @
-03:00 UTC (skeleton paginat 1000 keys/page + 200ms sleep, no-op pe
-LocalDriver). DB type rename: `StorageFileType` (db) →
-`StorageFileTypeValue` ca să nu colideze cu cel din `@sintezaur/shared`.
-Smoke check extins cu 10 cazuri magic-byte (toate pass).
+**Last shipped:** M7-C (`e246332`) — attachment endpoints + site UI.
+Forum: `POST/DELETE /forum/posts/:postId/attachments` (max 3
+enforced) + `GET /forum/threads/:slug/attachments`. Revista:
+`POST/DELETE /revista/articles/:articleId/attachments` (uncapped,
+optional caption) + `GET /revista/:slug/attachments`. Filename
+sanitization + multer cap 25MB; real per-type limits prin
+`UploadQuotaService.check`. Site: `AttachmentsService` HTTP client
+(+ cache 5min pe limite + wildcard fallback identic backend) +
+`AttachmentBoxComponent` (uploader + delete) +
+`AttachmentListComponent` (audio `<audio controls>` / PDF link /
+ZIP download). Wire pe `forum-thread.page` (per post) +
+`revista-detail.page` (sub article body). `i18n key
+revista.attachments_label`. `StorageDriver` interface: `Buffer` →
+`Uint8Array` ca să rămână `libs/shared` browser-safe (Node Buffer
+îl extinde).
 
-**Next up:** **M7-C** — attachment endpoints (Forum max 3/post,
-Revista uncapped): backend CRUD + frontend uploaders (audio inline
-player, PDF link, ZIP download) integrate în composer Forum
-(`new-thread` + `reply`) și editor Revista. Plus client-side
-pre-check pe limite via `/api/storage/limits`.
+**Next up:** **M7-D** — admin panel `/admin/storage` (4 tabs:
+Limits editor + Overview + Folders drill-down + Trends chart + Top
+users + buton Reconcile) + `docs/devops/storage-r2.md` (setup
+Cloudflare R2 step-by-step) + `docs/testing/m7-testing.md` (plan
+manual de testare pentru tot M7).
 
-**Active milestone:** M7 — A ✅, B ✅, C (UI uploaders), D (admin
-panel + docs/testing/m7-testing.md + cutover docs).
+**Active milestone:** M7 — A ✅, B ✅, C ✅, D (admin panel +
+docs/testing).
 
 ## Milestones
 
@@ -127,6 +127,7 @@ panel + docs/testing/m7-testing.md + cutover docs).
 |-----|--------|--------|-------|
 | A   | `6341d09` | done | StorageDriver interface (libs/shared) + Local/S3 drivers (apps/api/storage) + StorageModule env-driven; schema migration `9013` (storage_limits + user_upload_quota + storage_events + storage_folder_stats + forum_post_attachments + revista_article_attachments + 4 enums); seed migration `9014` (limite default per spec, idempotent); StorageService refactat la driver I/O cu chei content-addressed (`<module>/<resource>/<source>/<variant>-<hash12>.jpg`); refactor callers Tezaur/Bazar/Revista la `deleteObjects(keys[])`; avatar pipeline pe driver cu cache mutable; env nou (`STORAGE_DRIVER` + `STORAGE_PUBLIC_BASE_URL` + `R2_*`); `@aws-sdk/client-s3@^3.1047.0` adăugat; smoke script `tools/scripts/smoke-storage.ts` |
 | B   | `d23661f` | done | Magic-byte detector (8 formats, zero-dep); `StorageLimitsService` (wildcard fallback + cache 5min); `UploadQuotaService` (`check()` 413/429 pre-upload + `track()` storage_events/user_upload_quota/storage_folder_stats + lifetime alert notification); StorageService extins cu `processAudio`/`processPdf`/`processZip` + integrare quota pe image/avatar; public `GET /api/storage/limits` (cache 300s); migration `9015` adaugă `storage_quota_lifetime_reached` în `notification_kind`; pg-boss crons în worker — `storage:reset-daily-quota` @ 00:00 UTC + `storage:reconcile` @ 03:00 UTC (paginat 1000 keys/page + 200ms sleep, no-op pe LocalDriver); DB type rename `StorageFileType` → `StorageFileTypeValue`; smoke check extins cu 10 cazuri magic-byte |
+| C   | `e246332` | done | Forum attachments backend (`POST/DELETE /forum/posts/:postId/attachments` cu max 3 enforce + `GET /forum/threads/:slug/attachments` public) + Revista attachments backend (uncapped, optional caption); site `AttachmentsService` HTTP client cu cache 5min limite + wildcard fallback; site `AttachmentBoxComponent` (uploader + delete) + `AttachmentListComponent` (audio `<audio controls>` inline / PDF link / ZIP download); wire pe `forum-thread.page` (per post pentru autor) + `revista-detail.page` (sub article body pentru autor/editor/admin); i18n key `revista.attachments_label`; `StorageDriver` interface: `Buffer` → `Uint8Array` ca să rămână libs/shared browser-safe |
 
 ## Conventions (recap from memory)
 

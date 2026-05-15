@@ -9,6 +9,78 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M7 — Storage Refactor (Local → Cloudflare R2)
 
+#### M7-C — Forum + Revista attachment endpoints + site UI (`e246332`)
+
+- Backend (`apps/api/src/app/forum/`):
+  - `ForumAttachmentsService` + `ForumAttachmentsController`:
+    - `POST   /forum/posts/:postId/attachments` (multipart `file`,
+      owner-only, max 3 enforced).
+    - `DELETE /forum/posts/:postId/attachments/:attachmentId`
+      (owner-only).
+    - Routează upload-ul la `processAudio` / `processPdf` /
+      `processZip` în funcție de magic-byte. Track prin
+      `UploadQuotaService`.
+  - Public read endpoint `GET /forum/threads/:slug/attachments`
+    returnează toate atașamentele în single round-trip; thread page
+    le indexează client-side pe `postId`.
+- Backend (`apps/api/src/app/revista/`):
+  - `RevistaAttachmentsService` + `RevistaAttachmentsController`:
+    - `POST   /revista/articles/:articleId/attachments` (author or
+      editor/admin, optional `caption`).
+    - `DELETE /revista/articles/:articleId/attachments/:attachmentId`.
+  - Public `GET /revista/:slug/attachments`.
+- Ambele controllere folosesc multer cu cap 25 MB
+  (`MAX_ATTACHMENT_INPUT_BYTES`); limita reală per tip vine din
+  `storage_limits` și e aplicată în `UploadQuotaService.check()`.
+- Filename sanitization (strip path separators + control chars +
+  cap 200 chars) pe ambele servicii.
+- Site (`apps/site/src/app/storage/`):
+  - `AttachmentsService` HTTP client (`providedIn: 'root'`):
+    - `uploadToForumPost`, `deleteForumAttachment`,
+      `listForumAttachmentsByThread`, `uploadToRevistaArticle`,
+      `deleteRevistaAttachment`, `listRevistaAttachmentsBySlug`,
+      `getLimits` (cache 5min), `getPerFileMaxBytes` cu wildcard
+      fallback identic backend-ului.
+    - `describeError()` traduce 413/429/403 + network blips în
+      mesaje RO user-facing.
+  - `AttachmentListComponent` (read-only renderer):
+    - Audio: native `<audio controls>` cu preload="metadata".
+    - PDF: link `target=_blank rel=noopener`.
+    - ZIP: link cu `download` attr.
+    - Kind-coded badges (audio mov, PDF roșu, ZIP albastru),
+      CSS-only, mobile-friendly.
+  - `AttachmentBoxComponent` (uploader + manage):
+    - File picker cu accept-list explicit (audio/pdf/zip mimes).
+    - Pre-check mime + per-file cap client-side înainte să pună
+      byte-uri pe wire.
+    - Hides picker când e atins cap 3 pe Forum.
+    - Emits `(changed)` ca pagina părinte să re-render counts /
+      state.
+- Site wiring:
+  - `forum-thread.page.ts`:
+    - Load all attachments o singură dată după thread fetch.
+    - Index pe `postId` pentru O(1) lookup în template.
+    - `<app-attachment-list>` sub fiecare body de post.
+    - `<app-attachment-box>` doar pentru post-urile autorului.
+    - `onAttachmentsChanged()` ține map-ul page-level sync fără
+      refetch.
+  - `revista-detail.page.ts`:
+    - Load atașamente după article fetch.
+    - `<app-attachment-list>` într-o secțiune labeled (i18n key
+      `revista.attachments_label = "Atașamente"`).
+    - `<app-attachment-box>` doar pentru autor / editor / admin.
+- Cross-cutting: `libs/shared/src/lib/storage.ts` schimbă
+  `StorageDriver.put(body)` + `get()` de la `Buffer` la
+  `Uint8Array`. Node `Buffer` extinde `Uint8Array`, deci driverele
+  concrete continuă să primească / returneze Buffer fără modificare.
+  Schimbarea menține `@sintezaur/shared` browser-safe (site-ul
+  pulează tipuri tranzitiv).
+- Verificări locale:
+  - `nx run api:typecheck` + `worker:typecheck` + `site:typecheck`
+    — clean.
+  - `pnpm tsx tools/scripts/smoke-storage.ts` — round-trip + 10
+    cazuri magic-byte + 9 limite seed all OK.
+
 #### M7-B — Multi-type pipeline + quota infra + storage crons (`d23661f`)
 
 - Magic-byte detector (`apps/api/src/app/storage/file-type-detector.ts`):
