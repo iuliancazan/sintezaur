@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-A — Foundation (single commit, _SHA TBD_)
+#### M13-A — Foundation (single commit `84dda78`)
 
 - **V05 global stylesheet** copiat verbatim la
   `apps/site/src/v05.css` (4503 linii) cu două modificări:

@@ -186,7 +186,7 @@ E (Revistă) / F (Forum) / G (Cont + close).
 
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
-| A   | _TBD_ | in progress | Foundation: V05 `styles.css` copiat la `apps/site/src/v05.css` (4503 linii) cu dark tokens swapped la valorile v2-neutral hex per design decision (`#0a0a0b`/`#131314`/`#181819`/...). Light theme rămâne warm cream. `apps/site/src/styles.scss` migrat de pe `libs/ui/tokens/tokens.css` pe `v05.css`. Nou `V05SpriteComponent` (`apps/site/src/app/ui/v05-sprite.component.ts`) cu 58 simboluri SVG lifted 1:1 din toate paginile v05. Sprite mount în `app.ts` root. Footer markup aliniat la clasele V05 (`.foot` / `.foot__grid` / `.foot__col` / `.brand` / `.locale`) — stilurile inline din app.ts eliminate (livrate global de v05.css). `libs/ui` și `apps/dashboard` neatinse. Build OK (CSS bundle 30→31 kB). |
+| A   | `84dda78` | done | Foundation: V05 `styles.css` copiat la `apps/site/src/v05.css` (4503 linii) cu dark tokens swapped la valorile v2-neutral hex per design decision (`#0a0a0b`/`#131314`/`#181819`/...). Light theme rămâne warm cream. `apps/site/src/styles.scss` migrat de pe `libs/ui/tokens/tokens.css` pe `v05.css`. Nou `V05SpriteComponent` (`apps/site/src/app/ui/v05-sprite.component.ts`) cu 58 simboluri SVG lifted 1:1 din toate paginile v05. Sprite mount în `app.ts` root. Footer markup aliniat la clasele V05 (`.foot` / `.foot__grid` / `.foot__col` / `.brand` / `.locale`) — stilurile inline din app.ts eliminate (livrate global de v05.css). `libs/ui` și `apps/dashboard` neatinse. Build OK (CSS bundle 30→31 kB). |
 | B   | _TBD_ | pending | Home page re-skin (Guest + Logat conditional shell). |
 | C   | _TBD_ | pending | Bazar list + detail. |
 | D   | _TBD_ | pending | Tezaur list + detail. |
