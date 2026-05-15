@@ -1,14 +1,20 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { StorageService } from '../common/storage.service';
 import { Throttle, seconds } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -28,6 +34,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { SignupDto } from './dto/signup.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 
 interface MeResponse {
@@ -175,6 +182,40 @@ export class AuthController {
       body.currentPassword,
       body.newEmail,
     );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/profile')
+  @HttpCode(HttpStatus.OK)
+  async updateProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() body: UpdateProfileDto,
+  ): Promise<MeResponse> {
+    return { user: await this.auth.updateProfile(user.sub, body) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/avatar')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: StorageService.MAX_INPUT_BYTES },
+    }),
+  )
+  async uploadAvatar(
+    @CurrentUser() user: AuthenticatedUser,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<MeResponse> {
+    return { user: await this.auth.setAvatar(user.sub, file) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('me/avatar')
+  @HttpCode(HttpStatus.OK)
+  async removeAvatar(
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<MeResponse> {
+    return { user: await this.auth.removeAvatar(user.sub) };
   }
 }
 

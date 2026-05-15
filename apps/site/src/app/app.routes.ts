@@ -149,6 +149,13 @@ export const appRoutes: Route[] = [
           import('./account/account-home.page').then((m) => m.AccountHomePage),
       },
       {
+        path: 'profil',
+        loadComponent: () =>
+          import('./account/profile-edit.page').then(
+            (m) => m.ProfileEditPage,
+          ),
+      },
+      {
         path: 'parola',
         loadComponent: () =>
           import('./account/change-password.page').then(

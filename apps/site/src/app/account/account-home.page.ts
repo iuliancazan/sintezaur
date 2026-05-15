@@ -27,6 +27,9 @@ import { FeedbackService } from '../feedback/feedback.service';
       </header>
 
       <nav class="account__menu">
+        <a routerLink="/cont/profil" class="account__link">
+          {{ 'account.menu.profile' | t }}
+        </a>
         <a routerLink="/cont/mesaje" class="account__link">
           {{ 'account.menu.messages' | t }}
         </a>

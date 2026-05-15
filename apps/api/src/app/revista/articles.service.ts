@@ -557,6 +557,7 @@ export class ArticlesService {
       username: string;
       fullName: string;
       bio: string | null;
+      location: string | null;
       avatarUrl: string | null;
       websiteUrl: string | null;
       socialInstagram: string | null;
@@ -572,6 +573,7 @@ export class ArticlesService {
         username: users.username,
         fullName: users.fullName,
         bio: users.bio,
+        location: users.location,
         avatarUrl: users.avatarUrl,
         websiteUrl: users.websiteUrl,
         socialInstagram: users.socialInstagram,

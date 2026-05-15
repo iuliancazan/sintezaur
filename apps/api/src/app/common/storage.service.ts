@@ -104,6 +104,43 @@ export class StorageService {
     }
   }
 
+  /**
+   * Avatar pipeline: one 256×256 WebP centered crop. Returns the
+   * relative path under `<UPLOADS_DIR>/avatar/<user-id>.webp`. EXIF
+   * stripped on re-encode. Replaces any existing avatar for the user.
+   */
+  async processAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<{ relativePath: string; sizeBytes: number }> {
+    if (!StorageService.ALLOWED_INPUT_MIMES.has(file.mimetype)) {
+      throw new Error(`Unsupported avatar mime type: ${file.mimetype}`);
+    }
+    const dir = join(this.uploadsDir, 'avatar');
+    await mkdir(dir, { recursive: true });
+    const path = join(dir, `${userId}.webp`);
+    const { data, info } = await sharp(file.buffer)
+      .rotate()
+      .resize(256, 256, { fit: 'cover', position: 'attention' })
+      .webp({ quality: 86 })
+      .withMetadata({})
+      .toBuffer({ resolveWithObject: true });
+    await writeFile(path, data);
+    return {
+      relativePath: `avatar/${userId}.webp`,
+      sizeBytes: info.size ?? data.byteLength,
+    };
+  }
+
+  async deleteAvatar(userId: string): Promise<void> {
+    const abs = join(this.uploadsDir, 'avatar', `${userId}.webp`);
+    try {
+      await unlink(abs);
+    } catch {
+      // ignore — DB row is source of truth
+    }
+  }
+
   absolutePath(relPath: string): string {
     return join(this.uploadsDir, relPath);
   }

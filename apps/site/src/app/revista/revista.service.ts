@@ -101,6 +101,7 @@ export interface AuthorProfile {
     username: string;
     fullName: string;
     bio: string | null;
+    location: string | null;
     avatarUrl: string | null;
     websiteUrl: string | null;
     socialInstagram: string | null;

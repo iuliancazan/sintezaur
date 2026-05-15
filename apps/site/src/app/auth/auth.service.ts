@@ -156,4 +156,47 @@ export class AuthService {
       ),
     );
   }
+
+  async updateProfile(patch: UpdateProfilePayload): Promise<AuthUser> {
+    const res = await firstValueFrom(
+      this.http.patch<MeResponse>(`${this.base}/auth/me/profile`, patch, {
+        withCredentials: true,
+      }),
+    );
+    this._currentUser.set(res.user);
+    return res.user;
+  }
+
+  async uploadAvatar(file: File): Promise<AuthUser> {
+    const data = new FormData();
+    data.append('file', file);
+    const res = await firstValueFrom(
+      this.http.post<MeResponse>(`${this.base}/auth/me/avatar`, data, {
+        withCredentials: true,
+      }),
+    );
+    this._currentUser.set(res.user);
+    return res.user;
+  }
+
+  async removeAvatar(): Promise<AuthUser> {
+    const res = await firstValueFrom(
+      this.http.delete<MeResponse>(`${this.base}/auth/me/avatar`, {
+        withCredentials: true,
+      }),
+    );
+    this._currentUser.set(res.user);
+    return res.user;
+  }
+}
+
+export interface UpdateProfilePayload {
+  fullName?: string;
+  bio?: string | null;
+  location?: string | null;
+  displayCurrency?: 'ron' | 'eur';
+  websiteUrl?: string | null;
+  socialInstagram?: string | null;
+  socialSoundcloud?: string | null;
+  socialBandcamp?: string | null;
 }

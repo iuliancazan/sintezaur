@@ -6,20 +6,22 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-D (`e663622`) — feedback widget: schema
-`user_feedback` (migration 0013) + backend module cu submit auth +
-admin queue + email notify, FeedbackService + FeedbackModal pe site
-(mount în root shell, link declanșator în `/cont`, auto-capture page
-URL), dashboard `/feedback` queue cu filtre status + kind + expand
-detail. **M6 complete (4/4 sub-faze) ✅**
+**Last shipped:** M6-E1 (`PENDING`) — profil public complet:
+`users.location` (migration `9010`) + `AuthUserPublic` extins cu
+bio/location/avatar/website/3× social, `PATCH /auth/me/profile` +
+`POST/DELETE /auth/me/avatar` (pipeline 256×256 WebP dedicat),
+`/cont/profil` page cu uploader + form, link „Profil" în `/cont`,
+`/autor/:username` afișează location. Închide spec §11 foundation
+profile bullet.
 
-**Next up:** **M7 / Soft-launch** — momentul deschiderii. Recomandat:
-(a) deploy în Coolify cu env real, (b) seed superadmin + primele 10
-echipamente curate manual, (c) anunț prima undă de utilizatori. Sau
-post-MVP items din `docs/seo-todo.md` + analytics (Umami + Sentry).
-Discută la următoarea sesiune ce vrei prioritar.
+**Next up:** **M6-E2** — block + report UI cablat pe Bazar
+(butoane block pe chat + listing seller + autor, `/cont/blocuri`
+list, report dialog refolosit din forum cu target_type-uri Bazar
+listing/bazar_message/gear_review/user_profile, filter blocked din
+liste). Spec §11 Phase 1 bullets care nu au UI încă.
 
-**Active milestone:** M6 ✅ complet. Trecere la soft-launch / M7.
+**Active milestone:** M6-E (MVP foundation closure) — E1 done,
+E2 + E3 next. Apoi trecere la M7 / storage refactor.
 
 ## Milestones
 
@@ -98,7 +100,7 @@ Discută la următoarea sesiune ce vrei prioritar.
 | H   | `1417fce` | done | faceted search `/forum/cautare` (text + category + author + date + tags + gear_tag, ts_headline snippets cu `<mark>`) + tags + gear_tag schema (migration 0010) + tag input + gear picker pe thread form + anti-spam stack (honeypot + time-on-form + IP rate-limit per-process) + dashboard `/forum-queue` first-post approval |
 | I   | `efd6b1c` | done | thread oficial per echipament (Tezaur toggle integration, reverse FK migration 0011) + auto-OP + toggle ON/OFF cu reuse pe re-enable + audit log + card oficial + listă related threads pe `/tezaur/:slug` forum tab + checkbox „Thread oficial" în dashboard tezaur edit |
 
-### M6 — Polish + Soft-launch prep ✅
+### M6 — Polish + Soft-launch prep + MVP foundation closure
 
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
@@ -106,6 +108,9 @@ Discută la următoarea sesiune ce vrei prioritar.
 | B   | `4f786ad` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
 | C   | `0f08502` | done | polish UI pass: ToastService + ToastContainer + HttpErrorInterceptor global (network/5xx/429/403) + NotFoundPage brand-aware pentru 404 + 410 catch-all + EmptyStateComponent cablat pe 9 spoturi (Tezaur/Bazar/Revista lists, Forum cautare + category, 5 account pages) + SkeletonComponent CSS-only aplicat pe legal page |
 | D   | `e663622` | done | schema `user_feedback` (migration 0013) + backend `FeedbackModule` (POST auth-only cu throttle + email notify operator, GET/PATCH admin) + site FeedbackService + FeedbackModal (mount root shell, link declanșator în `/cont`, auto-capture pathname+search) + dashboard `/feedback` queue cu filtre status+kind + expand-row + auto-mark-read |
+| E1  | `PENDING` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
+| E2  | — | pending | block + report UI pe Bazar (butoane block pe chat/listing/profile, `/cont/blocuri` list, report dialog refolosit din forum cu target_type-uri listing/bazar_message/gear_review/user_profile, filter blocked din liste) |
+| E3  | — | pending | admin closure: dashboard `/audit-log` viewer (filter action+target+date+actor) + seed EUR-RON în `currency_rates` + dashboard `/currency-rates` minimal CRUD |
 
 ## Conventions (recap from memory)
 

@@ -71,6 +71,8 @@ export const users = pgTable(
 
     /** Public profile (visible on /autor/:username and gear-review cards). */
     bio: text('bio'),
+    /** Free-text city / country (e.g. "Cluj-Napoca, RO"). MVP scope per spec §11. */
+    location: text('location'),
     avatarUrl: text('avatar_url'),
     websiteUrl: text('website_url'),
     socialInstagram: text('social_instagram'),

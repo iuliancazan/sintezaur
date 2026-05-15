@@ -7,7 +7,51 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
-### M6 — Polish + Soft-launch prep · M6 complete ✅
+### M6 — Polish + Soft-launch prep + MVP foundation closure
+
+#### M6-E1 — Profil public complet (`PENDING`)
+
+- Schema:
+  - `users.location text` adăugat (migration postflight
+    `9010_users_location.sql`, `ALTER TABLE … ADD COLUMN IF NOT EXISTS`).
+    Coloana e singura missing din foundation §11 spec; restul
+    (`bio` / `avatar_url` / `website_url` / `social_*` / `display_currency`)
+    existau din M1.
+- Backend:
+  - `AuthUserPublic` extins cu `bio` / `location` / `avatarUrl` /
+    `websiteUrl` / `socialInstagram` / `socialSoundcloud` / `socialBandcamp`
+    → `toPublic()` propagă tot setul de câmpuri publice. Hidratează
+    automat în `/auth/me` + login + refresh.
+  - `PATCH /api/auth/me/profile` — DTO `UpdateProfileDto` cu `fullName`,
+    `bio`, `location`, `displayCurrency` (enum app-side `ron|eur`),
+    `websiteUrl` (validate http(s)) și 3× social (max 80 chars). Toate
+    optionale; `null` clears. Lungimi: bio 600, location 120, website 200,
+    social 80, fullName 2–80. Sanitizare pe server (trim + empty → null +
+    length check).
+  - `POST /api/auth/me/avatar` — `FileInterceptor('file')`, scope `avatar`,
+    pipeline dedicat `StorageService.processAvatar(userId, file)` →
+    `256×256` WebP cover crop + EXIF strip, scrie la
+    `<UPLOADS_DIR>/avatar/<userId>.webp`. Replaces existing automatically.
+  - `DELETE /api/auth/me/avatar` — `StorageService.deleteAvatar(userId)` +
+    `users.avatar_url = NULL`. Idempotent (missing file ignored).
+  - `ArticlesService.authorProfile()` extins cu `location` în SELECT și
+    în tipul returnat — apare pe `/autor/:username`.
+- Site:
+  - `/cont/profil` page (`profile-edit.page.ts`) — formular cu avatar
+    uploader (preview cerc, „Încarcă avatar" / „Șterge"); câmpuri text
+    fullName, location, bio (cu contor 600 chars), displayCurrency select
+    RON/EUR, website URL + 3× social handles. Save dirty-only via PATCH.
+    Toast feedback pe success + error 400 → mesaj din API.
+  - Link „Profil" adăugat în `/cont` menu deasupra „Mesaje"
+    (i18n `account.menu.profile`, deja exista în bundle).
+  - Site + dashboard `AuthUser`: tip extins cu noile câmpuri. Metode noi
+    pe `AuthService`: `updateProfile(patch)`, `uploadAvatar(file)`,
+    `removeAvatar()`. Setează `_currentUser` din response → topbar avatar
+    și nume reflectă schimbarea fără reload.
+  - `/autor/:username` (revista author profile) afișează `location` între
+    handle și bio cu `.ap-location` style mono uppercase.
+- Închide spec §11 foundation — user profile complete (avatar + bio +
+  location + display_currency + public page rendering).
 
 #### M6-D — Feedback widget + admin queue (`e663622`)
 

@@ -47,6 +47,9 @@ import {
           <div>
             <h1>{{ p.author.fullName }}</h1>
             <div class="ap-handle">&#64;{{ p.author.username }}</div>
+            @if (p.author.location) {
+              <p class="ap-location">{{ p.author.location }}</p>
+            }
             @if (p.author.bio) {
               <p class="ap-bio">{{ p.author.bio }}</p>
             }
@@ -172,6 +175,13 @@ import {
         color: var(--accent);
         letter-spacing: 0.1em;
         margin-top: 4px;
+      }
+      .ap-location {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--fg-muted);
+        letter-spacing: 0.08em;
+        margin: 8px 0 0;
       }
       .ap-bio {
         font-size: 15px;

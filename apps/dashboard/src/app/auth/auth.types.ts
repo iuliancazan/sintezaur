@@ -28,6 +28,13 @@ export interface AuthUser {
   emailVerified: boolean;
   mustChangePassword: boolean;
   createdAt: string;
+  bio: string | null;
+  location: string | null;
+  avatarUrl: string | null;
+  websiteUrl: string | null;
+  socialInstagram: string | null;
+  socialSoundcloud: string | null;
+  socialBandcamp: string | null;
 }
 
 /** Roles allowed to enter the dashboard per spec §7.2. Everyone else

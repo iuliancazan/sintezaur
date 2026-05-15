@@ -31,6 +31,7 @@ import {
   passwordResetEmail,
   verificationEmail,
 } from './email-templates';
+import { StorageService } from '../common/storage.service';
 
 /**
  * User shape returned to the frontend (no PII like password hash, no
@@ -52,6 +53,24 @@ export interface AuthUserPublic {
   emailVerified: boolean;
   mustChangePassword: boolean;
   createdAt: string;
+  bio: string | null;
+  location: string | null;
+  avatarUrl: string | null;
+  websiteUrl: string | null;
+  socialInstagram: string | null;
+  socialSoundcloud: string | null;
+  socialBandcamp: string | null;
+}
+
+export interface UpdateProfileInput {
+  fullName?: string;
+  bio?: string | null;
+  location?: string | null;
+  displayCurrency?: User['displayCurrency'];
+  websiteUrl?: string | null;
+  socialInstagram?: string | null;
+  socialSoundcloud?: string | null;
+  socialBandcamp?: string | null;
 }
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1_000; // 24h
@@ -69,6 +88,7 @@ export class AuthService {
     private readonly passwords: PasswordService,
     private readonly tokens: TokenService,
     private readonly email: EmailService,
+    private readonly storage: StorageService,
   ) {}
 
   // ────────────────────────────────────────────────────────────────────
@@ -363,6 +383,68 @@ export class AuthService {
     return toPublic(row, roles);
   }
 
+  async updateProfile(
+    userId: string,
+    input: UpdateProfileInput,
+  ): Promise<AuthUserPublic> {
+    const patch: Partial<User> = { updatedAt: new Date() };
+    if (input.fullName !== undefined) {
+      const fullName = input.fullName.trim();
+      if (fullName.length < 2 || fullName.length > 80) {
+        throw new BadRequestException(
+          'Numele trebuie să aibă între 2 și 80 de caractere.',
+        );
+      }
+      patch.fullName = fullName;
+    }
+    if (input.bio !== undefined) {
+      patch.bio = sanitizeOptionalText(input.bio, 600);
+    }
+    if (input.location !== undefined) {
+      patch.location = sanitizeOptionalText(input.location, 120);
+    }
+    if (input.displayCurrency !== undefined) {
+      patch.displayCurrency = input.displayCurrency;
+    }
+    if (input.websiteUrl !== undefined) {
+      patch.websiteUrl = sanitizeOptionalUrl(input.websiteUrl);
+    }
+    if (input.socialInstagram !== undefined) {
+      patch.socialInstagram = sanitizeOptionalText(input.socialInstagram, 80);
+    }
+    if (input.socialSoundcloud !== undefined) {
+      patch.socialSoundcloud = sanitizeOptionalText(input.socialSoundcloud, 80);
+    }
+    if (input.socialBandcamp !== undefined) {
+      patch.socialBandcamp = sanitizeOptionalText(input.socialBandcamp, 80);
+    }
+
+    await this.db.update(users).set(patch).where(eq(users.id, userId));
+    return this.getById(userId);
+  }
+
+  async setAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<AuthUserPublic> {
+    if (!file) throw new BadRequestException('Lipsește fișierul.');
+    const { relativePath } = await this.storage.processAvatar(userId, file);
+    await this.db
+      .update(users)
+      .set({ avatarUrl: relativePath, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    return this.getById(userId);
+  }
+
+  async removeAvatar(userId: string): Promise<AuthUserPublic> {
+    await this.storage.deleteAvatar(userId);
+    await this.db
+      .update(users)
+      .set({ avatarUrl: null, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+    return this.getById(userId);
+  }
+
   async changePassword(
     userId: string,
     currentPassword: string,
@@ -504,6 +586,36 @@ function sha256(input: string): string {
   return createHash('sha256').update(input).digest('hex');
 }
 
+function sanitizeOptionalText(value: string | null, maxLen: number): string | null {
+  if (value === null) return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  if (trimmed.length > maxLen) {
+    throw new BadRequestException(
+      `Câmpul depășește ${maxLen} caractere.`,
+    );
+  }
+  return trimmed;
+}
+
+function sanitizeOptionalUrl(value: string | null): string | null {
+  if (value === null) return null;
+  const trimmed = value.trim();
+  if (trimmed.length === 0) return null;
+  if (trimmed.length > 200) {
+    throw new BadRequestException('Adresa URL este prea lungă.');
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('protocol');
+    }
+    return parsed.toString();
+  } catch {
+    throw new BadRequestException('Adresa URL nu este validă.');
+  }
+}
+
 /** Reused for timing-attenuation on login when email doesn't exist. */
 function dummyHash(): string {
   return '$2a$12$0000000000000000000000.0000000000000000000000000000000000';
@@ -522,5 +634,12 @@ function toPublic(row: User, roles: UserRole[]): AuthUserPublic {
     emailVerified: row.emailVerified,
     mustChangePassword: row.mustChangePassword,
     createdAt: row.createdAt.toISOString(),
+    bio: row.bio,
+    location: row.location,
+    avatarUrl: row.avatarUrl,
+    websiteUrl: row.websiteUrl,
+    socialInstagram: row.socialInstagram,
+    socialSoundcloud: row.socialSoundcloud,
+    socialBandcamp: row.socialBandcamp,
   };
 }
