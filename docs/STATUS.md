@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-E (HEAD) — likes („Util") + subscriptions (thread +
+**Last shipped:** M5-E (`7395179`) — likes („Util") + subscriptions (thread +
 category, 4 leveluri) + notification fan-out (`forum_mention` > `revista_reply_to_my_article` > `forum_reply_in_subscribed`) + `/cont/abonamente`.
 
 **Next up:** **M5-F** — badges cron + dashboard editor pentru badge
@@ -86,7 +86,7 @@ spec-first.
 | B   | `eb57245` | done | backend: 3 services (Categories/Threads/Posts) + 3 controllers (Public/Auth/Mod) |
 | C   | `31b5b99` | done | site read pages: `/forum` index + `/forum/:category` listă + `/forum/:category/:slug` thread cu 2-level threading + sourceLink pentru system threads |
 | D   | `b204883` | done | posting (new thread page + inline reply + general reply + edit window + delete) + `@mention` autocomplete (server parsing) + pending state UI + mention-search endpoint |
-| E   | HEAD    | done | likes toggle + 4-level subscriptions (thread + category) + bell dropdown UI + auto-watch on reply + notification fan-out (mention > revista-author > thread-watcher) + `/cont/abonamente` |
+| E   | `7395179` | done | likes toggle + 4-level subscriptions (thread + category) + bell dropdown UI + auto-watch on reply + notification fan-out (mention > revista-author > thread-watcher) + `/cont/abonamente` |
 | F   |  —      | **next** | badges cron + dashboard editor pentru badge definitions |
 | F   |  —      | pending | badges cron + dashboard editor pentru badge definitions |
 | G   |  —      | pending | moderation tools inline + `content_report` queue în dashboard |
