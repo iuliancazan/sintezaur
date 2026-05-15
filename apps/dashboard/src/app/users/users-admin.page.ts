@@ -7,213 +7,190 @@ import {
   signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { TableModule } from 'primeng/table';
+import { Router, RouterLink } from '@angular/router';
+import { TableLazyLoadEvent, TableModule } from 'primeng/table';
 import { AuthService } from '../auth/auth.service';
 import {
   UsersAdminService,
   type AdminUserRow,
 } from './users-admin.service';
 
-/** Grantable by admin (not superadmin). Match server-side allowlist. */
 const ADMIN_GRANTABLE = ['editor', 'curator', 'moderator'] as const;
-/** Additional roles only superadmin can grant/revoke. */
 const SUPERADMIN_GRANTABLE = ['admin', 'superadmin'] as const;
 
 @Component({
-  selector: 'app-users-admin-page',
+  selector: 'sz-users-admin-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterLink,
-    TableModule,
-    InputTextModule,
-    ButtonModule,
-  ],
+  imports: [CommonModule, FormsModule, RouterLink, TableModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="admin">
-      <header class="admin__head">
-        <a routerLink="/" class="admin__back">← Înapoi la dashboard</a>
-        <h1>Utilizatori · roluri</h1>
-        @if (totalCount() !== null) {
-          <p class="admin__meta">{{ totalCount() }} useri (filtrați)</p>
-        }
-      </header>
+    <div class="main__pad">
+      <nav class="crumb">
+        <a routerLink="/">Admin</a>
+        <span class="sep">/</span>
+        <span class="cur">Useri</span>
+      </nav>
 
-      <div class="admin__filters">
-        <input
-          pInputText
-          type="search"
-          placeholder="Caută username / email..."
-          [(ngModel)]="q"
-          (input)="onFilterInput()"
-        />
+      <div class="ph-row">
+        <div class="ph-title-block">
+          <h1 class="ph-title">Useri</h1>
+          <p class="ph-sub">
+            <b style="color:var(--fg)">{{ totalCount() ?? '—' }}</b> useri înregistrați
+            (filtrați curent)
+          </p>
+        </div>
+        <div class="ph-actions">
+          <button class="btn btn--ghost" type="button" (click)="exportCsv()" disabled>
+            <svg><use href="#i-download" /></svg>Export CSV
+          </button>
+        </div>
       </div>
 
-      <p-table
-        [value]="items()"
-        [loading]="loading()"
-        [lazy]="true"
-        [paginator]="true"
-        [rows]="pageSize"
-        [totalRecords]="totalCount() ?? 0"
-        [first]="(page() - 1) * pageSize"
-        (onLazyLoad)="onLazy($any($event))"
-        [rowsPerPageOptions]="[25, 50, 100]"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th>User</th>
-            <th>Email</th>
-            <th>Roluri</th>
-            <th>Trust</th>
-            <th>Creat</th>
-            <th>Acțiuni</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-row>
-          <tr>
-            <td>
-              <div class="admin__user">
-                <strong>{{ row.fullName }}</strong>
-                <span class="admin__handle">&#64;{{ row.username }}</span>
-              </div>
-            </td>
-            <td>{{ row.email }}</td>
-            <td>
-              <div class="admin__roles">
-                @for (r of row.roles; track r) {
-                  <span class="admin__chip">
-                    {{ r }}
-                    @if (canRevoke(r)) {
-                      <button
-                        type="button"
-                        (click)="revoke(row, r)"
-                        [disabled]="actingKey() === row.id + ':' + r"
-                        aria-label="Revocă"
-                      >×</button>
+      <div class="filterbar" role="toolbar" aria-label="Filtrează useri">
+        <div class="fb-search">
+          <svg><use href="#i-search" /></svg>
+          <input
+            type="text"
+            placeholder="username · email · nume real…"
+            [(ngModel)]="q"
+            (input)="onFilterInput()"
+          />
+        </div>
+        <button class="fb-select" type="button" disabled>
+          <span class="lbl">Rol</span>
+          <span class="val">toate</span>
+          <span class="chev">▾</span>
+        </button>
+        <button class="fb-select" type="button" disabled>
+          <span class="lbl">Trust</span>
+          <span class="val">toate</span>
+          <span class="chev">▾</span>
+        </button>
+        <button class="fb-select" type="button" disabled>
+          <span class="lbl">Status</span>
+          <span class="val">active</span>
+          <span class="chev">▾</span>
+        </button>
+        <button class="fb-select" type="button" disabled>
+          <span class="lbl">Înregistrat</span>
+          <span class="val">toate</span>
+          <span class="chev">▾</span>
+        </button>
+        <button class="fb-reset" type="button" (click)="resetFilters()">
+          <svg width="11" height="11"><use href="#i-x" /></svg>
+          Reset
+        </button>
+      </div>
+
+      @if (selected().size > 0) {
+        <div class="bulk">
+          <span class="bulk__count"><b>{{ selected().size }}</b>useri selectați</span>
+          <span class="bulk__sep"></span>
+          <button class="btn btn--ghost btn--sm" type="button" disabled>Trimite mesaj</button>
+          <button class="btn btn--danger btn--sm" type="button" disabled>Ban</button>
+          <button class="btn btn--quiet btn--sm" type="button" (click)="clearSelection()" aria-label="Închide bulk">
+            <svg width="12" height="12"><use href="#i-x" /></svg>
+          </button>
+        </div>
+      }
+
+      <section class="card">
+        <div class="tbl-wrap">
+          <p-table
+            [value]="items()"
+            [loading]="loading()"
+            [lazy]="true"
+            [paginator]="true"
+            [rows]="pageSize"
+            [totalRecords]="totalCount() ?? 0"
+            [first]="(page() - 1) * pageSize"
+            (onLazyLoad)="onLazy($event)"
+            [rowsPerPageOptions]="[25, 50, 100]"
+            styleClass="tbl"
+          >
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="width:34px">
+                  <span
+                    class="tbl__check"
+                    [class.is-mixed]="hasPartialSelection()"
+                    [class.is-on]="hasFullSelection()"
+                    (click)="toggleSelectAll()"
+                    aria-label="Selectează toți"
+                  ></span>
+                </th>
+                <th>User</th>
+                <th>Email</th>
+                <th>Rol</th>
+                <th>Trust level</th>
+                <th>Member since</th>
+                <th>Status</th>
+                <th style="width:60px"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-row>
+              <tr [class.is-selected]="selected().has(row.id)">
+                <td>
+                  <span
+                    class="tbl__check"
+                    [class.is-on]="selected().has(row.id)"
+                    (click)="toggleSelect(row.id)"
+                  ></span>
+                </td>
+                <td>
+                  <div class="tbl__user">
+                    <span class="avt">{{ initials(row) }}</span>
+                    <div style="min-width:0">
+                      <div class="name">{{ row.fullName || row.username }}</div>
+                      <div class="sub">&#64;{{ row.username }} · <span style="opacity:.7">{{ shortId(row.id) }}</span></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="tbl__mono">{{ row.email }}</td>
+                <td>
+                  <div style="display:flex;gap:4px;flex-wrap:wrap">
+                    @for (r of row.roles; track r) {
+                      <span class="bdg" [class]="'bdg--role-' + r">{{ r }}</span>
                     }
-                  </span>
-                }
-              </div>
-            </td>
-            <td><span class="admin__chip">{{ row.trustLevel }}</span></td>
-            <td>{{ formatDate(row.createdAt) }}</td>
-            <td>
-              <div class="admin__grant">
-                <select [(ngModel)]="pendingRole[row.id]">
-                  <option [ngValue]="undefined">Adaugă rol...</option>
-                  @for (r of grantableRoles(row); track r) {
-                    <option [value]="r">{{ r }}</option>
-                  }
-                </select>
-                <button
-                  pButton
-                  type="button"
-                  size="small"
-                  label="Acordă"
-                  [disabled]="!pendingRole[row.id] || actingKey() === row.id + ':grant'"
-                  (click)="grant(row)"
-                ></button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="6" class="admin__empty">Niciun rezultat.</td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </main>
+                  </div>
+                </td>
+                <td><span class="bdg" [class]="'bdg--trust-' + row.trustLevel">{{ trustLabel(row.trustLevel) }}</span></td>
+                <td class="tbl__mono">{{ formatDate(row.createdAt) }}</td>
+                <td>
+                  <span class="bdg bdg--status-active">Active</span>
+                </td>
+                <td style="text-align:right">
+                  <a class="tbl__action" [routerLink]="['/useri', row.id]" [attr.aria-label]="'Edit ' + row.username">
+                    <svg width="14" height="14" fill="currentColor"><use href="#i-more" /></svg>
+                  </a>
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="8" style="text-align:center;padding:40px;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px">
+                  Niciun rezultat.
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </section>
+    </div>
   `,
-  styles: [
-    `
-      :host { display: block; }
-      .admin { max-width: 1400px; margin: 0 auto; padding: 32px var(--gutter-x); }
-      .admin__back {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--accent);
-        text-decoration: none;
-        display: inline-block;
-        margin-bottom: 8px;
-      }
-      h1 {
-        font-family: var(--font-display);
-        font-size: clamp(24px, 4vw, 36px);
-        margin: 0;
-      }
-      .admin__meta { color: var(--fg-muted); font-family: var(--font-mono); font-size: 12px; margin: 4px 0 0; }
-      .admin__filters { margin: 18px 0 14px; }
-      .admin__user strong {
-        font-family: var(--font-display);
-        font-weight: 500;
-        display: block;
-      }
-      .admin__handle {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--accent);
-        letter-spacing: 0.06em;
-      }
-      .admin__roles { display: inline-flex; flex-wrap: wrap; gap: 4px; }
-      .admin__chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 8px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line-strong);
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-      }
-      .admin__chip button {
-        background: none;
-        border: 0;
-        color: var(--fg-muted);
-        cursor: pointer;
-        font-size: 13px;
-        line-height: 1;
-        padding: 0 2px;
-      }
-      .admin__chip button:hover:not(:disabled) { color: #c0392b; }
-      .admin__chip button:disabled { opacity: 0.5; cursor: not-allowed; }
-      .admin__grant {
-        display: inline-flex;
-        gap: 6px;
-      }
-      .admin__grant select {
-        padding: 6px 8px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        font-family: var(--font-mono);
-        font-size: 11px;
-      }
-      .admin__empty { text-align: center; padding: 40px; color: var(--fg-muted); }
-    `,
-  ],
 })
 export class UsersAdminPage {
   readonly admin = inject(UsersAdminService);
   readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly pageSize = 50;
   readonly items = signal<AdminUserRow[]>([]);
   readonly totalCount = signal<number | null>(null);
   readonly page = signal(1);
   readonly loading = signal(false);
-  readonly actingKey = signal<string | null>(null);
+  readonly selected = signal<Set<string>>(new Set<string>());
 
-  pendingRole: Record<string, string | undefined> = {};
   q = '';
 
   private debounce: ReturnType<typeof setTimeout> | null = null;
@@ -223,12 +200,20 @@ export class UsersAdminPage {
     return !!u?.roles.includes('superadmin');
   });
 
-  constructor() {
-    void this.reload();
-  }
+  readonly hasFullSelection = computed(() => {
+    const list = this.items();
+    if (list.length === 0) return false;
+    const sel = this.selected();
+    return list.every((r) => sel.has(r.id));
+  });
 
-  reload(): void {
-    this.page.set(1);
+  readonly hasPartialSelection = computed(() => {
+    const sel = this.selected();
+    if (sel.size === 0) return false;
+    return !this.hasFullSelection();
+  });
+
+  constructor() {
     void this.fetch();
   }
 
@@ -240,11 +225,40 @@ export class UsersAdminPage {
     }, 300);
   }
 
-  onLazy(event: { first?: number; rows?: number }): void {
+  onLazy(event: TableLazyLoadEvent): void {
     const first = event.first ?? 0;
     const rows = event.rows ?? this.pageSize;
     this.page.set(Math.floor(first / rows) + 1);
     void this.fetch();
+  }
+
+  resetFilters(): void {
+    this.q = '';
+    this.page.set(1);
+    void this.fetch();
+  }
+
+  toggleSelect(id: string): void {
+    const next = new Set(this.selected());
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    this.selected.set(next);
+  }
+
+  toggleSelectAll(): void {
+    if (this.hasFullSelection()) {
+      this.selected.set(new Set());
+    } else {
+      this.selected.set(new Set(this.items().map((r) => r.id)));
+    }
+  }
+
+  clearSelection(): void {
+    this.selected.set(new Set());
+  }
+
+  exportCsv(): void {
+    // Placeholder — server endpoint not yet implemented.
   }
 
   private async fetch(): Promise<void> {
@@ -266,57 +280,46 @@ export class UsersAdminPage {
     }
   }
 
-  grantableRoles(row: AdminUserRow): string[] {
-    const all = this.isSuperadmin()
-      ? [...ADMIN_GRANTABLE, ...SUPERADMIN_GRANTABLE]
-      : [...ADMIN_GRANTABLE];
-    return all.filter((r) => !row.roles.includes(r));
+  initials(row: AdminUserRow): string {
+    const source = row.fullName || row.username;
+    const parts = source.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
-  canRevoke(role: string): boolean {
-    if (role === 'user') return false;
-    if (role === 'admin' || role === 'superadmin') return this.isSuperadmin();
-    return true;
+  shortId(id: string): string {
+    return id.slice(0, 8);
   }
 
-  async grant(row: AdminUserRow): Promise<void> {
-    const role = this.pendingRole[row.id];
-    if (!role) return;
-    this.actingKey.set(row.id + ':grant');
-    try {
-      await this.admin.grantRole(row.id, role);
-      this.pendingRole[row.id] = undefined;
-      await this.fetch();
-    } catch (err) {
-      console.error('[users admin] grant failed', err);
-      window.alert('Acordarea a eșuat.');
-    } finally {
-      this.actingKey.set(null);
-    }
-  }
-
-  async revoke(row: AdminUserRow, role: string): Promise<void> {
-    const ok = window.confirm(
-      `Revocă rolul "${role}" pentru @${row.username}?`,
-    );
-    if (!ok) return;
-    this.actingKey.set(row.id + ':' + role);
-    try {
-      await this.admin.revokeRole(row.id, role);
-      await this.fetch();
-    } catch (err) {
-      console.error('[users admin] revoke failed', err);
-      window.alert('Revocarea a eșuat.');
-    } finally {
-      this.actingKey.set(null);
+  trustLabel(level: string): string {
+    switch (level) {
+      case 'id_verified':
+        return 'ID verified';
+      case 'phone_verified':
+        return 'Phone verified';
+      case 'email_verified':
+        return 'Email verified';
+      case 'unverified':
+        return 'Unverified';
+      case 'trusted_seller':
+        return 'Trusted seller';
+      default:
+        return level;
     }
   }
 
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString('ro-RO', {
       day: '2-digit',
-      month: '2-digit',
+      month: 'short',
       year: 'numeric',
     });
+  }
+
+  grantableRoles(row: AdminUserRow): readonly string[] {
+    const all = this.isSuperadmin()
+      ? [...ADMIN_GRANTABLE, ...SUPERADMIN_GRANTABLE]
+      : [...ADMIN_GRANTABLE];
+    return all.filter((r) => !row.roles.includes(r));
   }
 }

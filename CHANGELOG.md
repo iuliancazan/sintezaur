@@ -7,6 +7,121 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M12 — Dashboard design import v04 (out-of-order before M11)
+
+Re-skin complet al `apps/dashboard` la design-ul v04
+(`docs/design-imports/2026-05-16-v04`). Shell admin nou inline în
+dashboard (sidebar + topbar dedicate), tokens oklch override-uiți
+peste base `libs/ui/tokens/tokens.css` în scope dashboard
+(site neatins), trei pagini complet redesenate (Dashboard
+overview, Useri list, User Edit), plus theme + density toggles
+persistate via localStorage. Restul paginilor admin moștenesc
+chrome-ul + tokens prin fallback global `main.admin`.
+
+#### M12 — single commit (_pending SHA_)
+
+- **Shell admin inline** sub `apps/dashboard/src/app/shell/`:
+  - `AdminShellService` — signals `theme()` (default `light`),
+    `density()` (default `comfortable`), `collapsed()`,
+    persisted via `localStorage` cu cheile
+    `sintezaur-theme` / `sintezaur-admin-density` /
+    `sintezaur-admin-side`. Aplică automat `data-theme` și
+    `data-density` pe `<html>` la hidratare.
+  - `AdminIconsComponent` — SVG sprite cu 28 simboluri lifted 1:1
+    din designul v04 (grid, users, archive, tag, book, chat,
+    flag, log, coins, badge, sliders, sun, moon, density,
+    search, bell, external, arrow, plus, refresh, check, x,
+    upload, download, more, folder, mail, shield).
+  - `AdminSidebarComponent` — left nav 240px (collapsible la
+    64px), 4 grupe (Operare / Conținut / Sistem / Altele) cu
+    11 link-uri totale, `routerLinkActive` cu `is-active` bar
+    accent, brand spre site public.
+  - `AdminTopbarComponent` — search input + 4 atop-btn-uri
+    (notif placeholder, theme toggle, density cycle, external),
+    plus avatar logout cu inițiale calculate din `fullName`.
+  - `AdminShellComponent` — wrapper grid
+    `[sidebar | main+topbar+router-outlet]`. Wrapper-ul interior
+    e `<div class="main">` (nu `<main>`) ca să nu genereze
+    nested-main cu paginile vechi care păstrează
+    `<main class="admin">`.
+
+- **Tokens v04 oklch** override în `apps/dashboard/src/styles.scss`
+  peste base `libs/ui/tokens/tokens.css`:
+  - Dark theme: `--bg/-elev/-card/-card-2` din `oklch(0.16–0.275)`,
+    `--line` / `--line-strong` din `oklch(0.32–0.46 ⋅ 85)`,
+    `--fg-*` din `oklch(0.46–0.95 ⋅ 85)`.
+  - Light theme: cream warm hex (`#f3eedd` → `#18140c`).
+  - Site-ul public nu e afectat — overrides scoped la
+    `apps/dashboard/src/styles.scss`.
+  - Plus tokens admin-specifici: `--side-w(-collapsed)`,
+    `--top-h`, semantic colors (`--ok/-warn/-danger/-info` +
+    `*-soft` variants), 3 preset-uri density
+    (`compact/comfortable/spacious`) ca CSS vars.
+
+- **Pagini noi:**
+  - `dashboard.page.ts` (`/`) — KPI strip 6 carduri, 3 alerts,
+    activity feed placeholder, quick actions 4 link-uri, pulse
+    pe secțiuni 4 row-uri. Valorile sunt stub-uri în M12; cuplarea
+    la audit_log / counters reale e în roadmap-ul M11+.
+  - `user-edit.page.ts` (`/useri/:id`) — breadcrumb,
+    badge header (trust + status + roluri), sticky save bar
+    cu dirty-detection signals, 4 tab-uri (Profil / Activitate /
+    Audit log / Mesaje raportate), role radio-grid 7 opțiuni
+    cu permission gating (admin/superadmin doar de superadmin),
+    trust verification placeholder, sidebar dreapta cu
+    stat-grid + linkuri rapide + danger zone (Ban + GDPR delete
+    disabled până la M12+ backend).
+
+- **Re-skin Useri list** (`/useri`) — păstrăm PrimeNG
+  `TableModule` cu override-uri CSS care îi dau aspectul `.tbl`
+  din design. Adăugate: filter bar sticky cu 5 controale
+  (search + 4 select-uri disabled until M12+), bulk actions
+  strip cu select-all + count + ban/grant placeholders,
+  coloane noi (User cu avatar inițiale, badge-uri role/trust/status,
+  formatare RO pentru data). Click pe `⋯` → `/useri/:id`.
+
+- **Login page** decuplat de shell. `<div class="auth-shell">` +
+  `<div class="auth-card">` centrate pe ecran, fără sidebar.
+  Logo + titlu „Autentificare" + form cu `.field` + `.btn--primary`
+  wide. Mesajele de eroare folosesc `.auth-card__err`.
+
+- **app.routes.ts** restructurat pe shell-wrapped child tree:
+  - `/login` rămâne la top level (nu primește shell).
+  - Toate celelalte sub `path: ''` cu
+    `component: AdminShellComponent` + `canActivate`/`canActivateChild`
+    `staffGuard`. Pagini incluse:
+    `/` (dashboard) · `/useri` + `/useri/:id` · `/tezaur` (+ `/new`,
+    `/:id/edit`) · `/bazar` · `/revista` · `/badges` · `/rapoarte`
+    · `/forum-queue` · `/legal` · `/contact-messages` · `/feedback`
+    · `/audit-log` · `/currency-rates` · `/storage`.
+
+- **Fallback pentru pagini fără design**: reguli globale în
+  `styles.scss` mapează `main.admin` → echivalent `.main__pad`
+  (padding via tokens density-aware). `.admin__head h1` ia font
+  din `--font-ui` 28px (drop la `.font-display + clamp()`).
+  `.admin__chip` redefinit ca `.bdg`. Asta menține paginile
+  vechi (Tezaur/Bazar/Revistă/Forum-queue/Badges/Rapoarte/Audit/
+  Currency/Storage/Legal/Contact/Feedback) consistente cu noua
+  paletă fără edit per-fișier.
+
+- `apps/dashboard/src/app/home.page.ts` șters (înlocuit de
+  `dashboard.page.ts` din rădăcina app).
+
+- `apps/dashboard/src/index.html` setat default
+  `data-theme="light"` + `data-density="comfortable"` pe `<html>`
+  ca să nu existe flash de tema-greșită înainte de hidratarea
+  `AdminShellService`.
+
+- Build: `pnpm exec nx build dashboard` ✅ (warning preexistent
+  „bundle initial 1.28 MB" rămâne — drop la asta nu intră în M12).
+
+- `docs/testing/m12-testing.md` — plan manual testare pentru:
+  shell (sidebar + collapse + topbar + theme + density),
+  Dashboard overview, Useri list (filter + bulk + paginare),
+  User Edit (edit + save + tabs), Login (3 scenarii), fallback
+  pe paginile fără design dedicat, regresii (nesting `<main>`,
+  401 login, theme persistence, site public neafectat).
+
 ### M10 — Post-launch UX iteration #1 (cont reorg)
 
 Vechea pagină-grid `/cont` cu 12 link-uri dispare. În locul ei: un

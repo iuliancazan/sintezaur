@@ -6,16 +6,26 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M10-F — post-launch UX iteration #1. Vechea pagină-grid
-`/cont` cu 12 link-uri e dezasamblată în topbar nou (avatar dropdown
-role-gated, ❤️ favorite, ✉️ mesaje, burger pe mobil) + 3 tab-shell-uri
-(`/cont/setari` × 6 tab-uri, `/cont/favorite` × 3, `/cont/mesaje` × 2 cu
-Forum placeholder). Avatar fallback cu inițiale colorate determinist
-din `user.id` via `oklch(0.55 0.12 hue)`. AccountMenuComponent +
-MobileMenuComponent ambele cu outside-click + Esc + role-gated
-Dashboard. AuthShell gains `embedded` mode pentru change-password /
-change-email când sunt în shell. Toate URL-urile vechi (`/cont/profil`,
-`/cont/salvate`, etc.) redirect-uite. `account-home.page.ts` șters.
+**Last shipped:** **M12** — dashboard design import v04. Re-skin
+complet al `apps/dashboard`: shell nou inline (sidebar + admin
+topbar + SVG sprite în `apps/dashboard/src/app/shell/`), tokens
+oklch din `docs/design-imports/2026-05-16-v04` override-uiți peste
+`libs/ui/tokens/tokens.css` (scope dashboard only, site neatins).
+Theme + density + sidebar-collapse persistate via
+`AdminShellService` în signals + localStorage (`sintezaur-theme`,
+`sintezaur-admin-density`, `sintezaur-admin-side`). Pagini noi:
+`/` (DashboardPage cu KPI strip + alerts + activity feed +
+quick actions + section pulse), `/useri/:id` (UserEditPage cu
+breadcrumb + sticky save bar + 4 tabs + role radio-grid + danger
+zone). `/useri` re-skin: filter bar sticky + bulk actions strip +
+PrimeNG TableModule peste design tokens. Login decuplat de shell
+(centered card pe `.auth-shell`). Restul paginilor admin (Tezaur,
+Bazar, Revistă, Forum-queue, Rapoarte, Badges, Audit, Currency,
+Storage, Legal, Contact, Feedback) păstrează template-ul vechi
+dar inherit shell + tokens via fallback global `main.admin`.
+Light = default. `home.page.ts` șters (înlocuit de
+`dashboard.page.ts`). Acest milestone a fost executat
+out-of-order — M11 (Tezaur contributor) rămâne next.
 
 **Next up:** **M11** — Tezaur contributor flow per spec §7.2: rol
 `contributor` (auto-promote la 100 forum posts) și `curator` (manual
@@ -25,7 +35,7 @@ cu coadă moderare pentru status `pending_review`. Cod existent
 pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
 relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** M10 — A ✅, B ✅, C ✅, D ✅, E ✅, F ✅, testing doc + close.
+**Active milestone:** M12 — single-commit ✅, testing doc + close.
 
 ## Milestones
 
@@ -139,6 +149,12 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M12 — Dashboard design import v04 (out-of-order before M11)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| —   | _pending_ | done | Re-skin complet apps/dashboard la `docs/design-imports/2026-05-16-v04`. **Shell** inline în `apps/dashboard/src/app/shell/` (AdminShellComponent + AdminSidebarComponent + AdminTopbarComponent + AdminIconsComponent SVG sprite + AdminShellService cu theme/density/collapse persisted via signals + localStorage). **Tokens v04 oklch** override peste `libs/ui/tokens/tokens.css` în `apps/dashboard/src/styles.scss` (scope dashboard only — site neatins, alt agent lucra paralel pe M10 site UX). **Pagini noi:** `/` DashboardPage (KPI strip, alerts, activity feed, quick actions, section pulse), `/useri/:id` UserEditPage (breadcrumb, sticky save bar, 4 tabs, role radio-grid, danger zone). **Re-skin Useri list** cu filter bar sticky + bulk actions + PrimeNG TableModule peste design tokens. **Login** decuplat de shell (centered `.auth-shell` + `.auth-card`). **Restul paginilor** admin inherit shell + tokens via fallback global `main.admin` din `styles.scss`. Default theme = `light`, density = `comfortable`. `home.page.ts` șters. `app.routes.ts` mutat la shell-wrapped child route tree. `docs/testing/m12-testing.md` cu plan complet de testare manual. |
 
 ### M10 — Post-launch UX iteration #1 (cont reorg)
 

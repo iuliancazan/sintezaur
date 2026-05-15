@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark" data-density="comfortable">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur Admin — @vladpetre</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.admin.css" />
+  <script src="reveals.js"></script>
+</head>
+<body class="admin-body" data-screen-label="Admin · User Edit">
+
+  <!-- SVG sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-chev-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M14 6l-6 6 6 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5.5 5"/></symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="3" y="4" width="18" height="4"/><path d="M5 8v12h14V8"/><path d="M10 12h4"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="8" cy="9" r="1.5"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 4h7a3 3 0 0 1 3 3v13"/><path d="M20 4h-7a3 3 0 0 0-3 3v13"/><path d="M4 4v15h7"/><path d="M20 4v15h-7"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16v12H8l-4 4V5z"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M5 21V4h12l-2 4 2 4H5"/></symbol>
+      <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="4" y="3" width="16" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M3 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></symbol>
+      <symbol id="i-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M12 2l3 4 5 1-3 4 1 5-6-2-6 2 1-5-3-4 5-1z"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 7h12M4 12h8M4 17h14"/><circle cx="18" cy="7" r="2"/><circle cx="14" cy="12" r="2"/><circle cx="20" cy="17" r="2"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M5 5h7M5 5v14h14v-7M14 4h6v6M11 13l9-9"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M5 12l5 5L20 7"/></symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M12 3l10 18H2z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.7" fill="currentColor"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M12 4v12M6 10l6-6 6 6M4 20h16"/></symbol>
+      <symbol id="i-density" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16M4 12h16M4 19h16"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="admin-shell" id="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <a class="side__brand" href="Home.html"><img src="assets/logo-black.png" alt="" /><span class="side__brand-text">Sintezaur</span></a>
+      <div class="side__scroll">
+        <div class="side__group">Operare</div>
+        <a class="side__item" href="Admin - Dashboard.html"><svg><use href="#i-grid"/></svg><span class="side__item-label">Dashboard</span></a>
+        <a class="side__item is-active" href="Admin - Useri.html"><svg><use href="#i-users"/></svg><span class="side__item-label">Useri</span><span class="side__item-badge is-warn">3</span></a>
+        <div class="side__group">Conținut</div>
+        <a class="side__item" href="#"><svg><use href="#i-archive"/></svg><span class="side__item-label">Tezaur</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-tag"/></svg><span class="side__item-label">Bazar</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-book"/></svg><span class="side__item-label">Revistă</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-chat"/></svg><span class="side__item-label">Forum</span></a>
+        <div class="side__group">Sistem</div>
+        <a class="side__item" href="#"><svg><use href="#i-flag"/></svg><span class="side__item-label">Rapoarte</span><span class="side__item-badge">7</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-log"/></svg><span class="side__item-label">Audit log</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-coins"/></svg><span class="side__item-label">Currency rates</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-badge"/></svg><span class="side__item-label">Badges</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-sliders"/></svg><span class="side__item-label">Config</span></a>
+      </div>
+      <div class="side__foot">
+        <button class="side__collapse" data-collapse><svg><use href="#i-chev-l"/></svg><span>Restrânge</span></button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="atop">
+        <label class="atop__search" for="top-search">
+          <svg><use href="#i-search"/></svg>
+          <input id="top-search" type="text" placeholder="Caută user, gear, listing, articol, thread…" />
+          <kbd>⌘K</kbd>
+        </label>
+        <div class="atop__tools">
+          <button class="atop__btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg><span class="dot-warn"></span></button>
+          <button class="atop__btn" data-theme-toggle aria-label="Schimbă tema">
+            <svg class="icon-sun"><use href="#i-sun"/></svg>
+            <svg class="icon-moon"><use href="#i-moon"/></svg>
+          </button>
+          <button class="atop__btn atop__density" data-density-toggle aria-label="Schimbă densitatea" title="Densitate: comfortable">
+            <svg><use href="#i-density"/></svg>
+            <span class="atop__density-dot"></span>
+          </button>
+          <a class="atop__btn" href="Home.html"><svg><use href="#i-external"/></svg></a>
+          <button class="atop__avatar">
+            <span class="avt">AC</span>
+            <span style="text-align:left"><span class="name">Alexandru C.</span><span class="role">admin</span></span>
+            <span class="chev">▾</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main__pad">
+
+        <nav class="crumb">
+          <a href="Admin - Dashboard.html">Admin</a>
+          <span class="sep">/</span>
+          <a href="Admin - Useri.html">Useri</a>
+          <span class="sep">/</span>
+          <span class="cur">@vladpetre</span>
+          <span class="sep" style="margin-left:auto">·</span>
+          <span style="font-family:var(--font-mono);font-size:10px;color:var(--fg-subtle);letter-spacing:.06em">usr_4421</span>
+        </nav>
+
+        <div class="ph-row">
+          <div class="ph-title-block">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <h1 class="ph-title" style="margin:0">@vladpetre</h1>
+              <span class="bdg bdg--trust-id">ID verified</span>
+              <span class="bdg bdg--status-active">Active</span>
+              <span class="bdg bdg--role-moderator">Moderator</span>
+            </div>
+            <p class="ph-sub">Vlad Petre · Timișoara · membru de 2 luni · ultimă activitate acum 12 min</p>
+          </div>
+          <div class="ph-actions">
+            <a class="btn btn--ghost" href="#"><svg><use href="#i-external"/></svg>Vezi profil public</a>
+            <a class="btn btn--quiet" href="Admin - Useri.html">← Înapoi la listă</a>
+          </div>
+        </div>
+
+        <!-- Save bar (sticky) -->
+        <div class="savebar">
+          <div class="savebar__state is-dirty">
+            <span class="savebar__dot"></span>
+            <span><b style="color:var(--fg)">Modificări nesalvate</b> · 3 câmpuri · ultima editare acum 14 sec</span>
+          </div>
+          <div class="savebar__actions">
+            <button class="btn btn--quiet">Anulează</button>
+            <button class="btn btn--ghost">Previzualizează</button>
+            <button class="btn btn--primary"><svg><use href="#i-check"/></svg>Salvează modificări</button>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="is-active">Profil</button>
+          <button>Activitate <span class="count">142</span></button>
+          <button>Audit log <span class="count">28</span></button>
+          <button>Mesaje raportate <span class="count">2</span></button>
+        </div>
+
+        <!-- Main grid: form left, sidebar right -->
+        <div class="grid-main-side">
+
+          <!-- LEFT: Profil tab content -->
+          <div>
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Profil de bază</h2>
+                <span class="card__head-meta">vizibil pe site-ul public</span>
+              </header>
+
+              <div class="formsec" style="border-bottom:1px dashed var(--line)">
+                <div class="formsec__grid formsec__grid--single">
+                  <div class="span-2">
+                    <span class="field__label">Avatar</span>
+                    <div class="avatar-change" style="margin-top:8px">
+                      <div class="avatar-change__main">VP</div>
+                      <div class="avatar-change__ctrls">
+                        <div style="display:flex;gap:6px">
+                          <button class="btn btn--ghost btn--sm"><svg><use href="#i-upload"/></svg>Schimbă imagine</button>
+                          <button class="btn btn--quiet btn--sm">Resetează la inițiale</button>
+                        </div>
+                        <span class="small">PNG / JPG · max 2 MB · pătrat (1:1) recomandat</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="formsec">
+                <div class="formsec__grid">
+                  <div class="field">
+                    <label class="field__label" for="f-name">Display name <span class="req">*</span></label>
+                    <input id="f-name" class="field__input" type="text" value="Vlad Petre" />
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-handle">Username <span class="meta">@</span></label>
+                    <input id="f-handle" class="field__input field__input--mono" type="text" value="vladpetre" />
+                    <div class="field__warning">
+                      <svg><use href="#i-alert"/></svg>
+                      <span>Max 1 schimbare per 180 zile. Ultima modificare: <b>14 mar 2026</b> · disponibil din <b>10 sep 2026</b>.</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-email">Email <span class="req">*</span></label>
+                    <div class="field__row">
+                      <input id="f-email" class="field__input field__input--mono" type="email" value="vlad.petre@protonmail.com" />
+                      <span class="field__verified"><svg><use href="#i-check"/></svg>Verified</span>
+                    </div>
+                    <span class="field__hint">Verificat la <b style="color:var(--fg)">14 mai 2026, 09:42</b></span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-loc">Locație</label>
+                    <input id="f-loc" class="field__input" type="text" value="Timișoara, RO" />
+                  </div>
+                  <div class="field span-2">
+                    <label class="field__label" for="f-bio">Bio <span class="meta">280 caractere</span></label>
+                    <textarea id="f-bio" class="field__textarea">Colecționar de drum machines + analog synths din '80. Studio mic în Timișoara, mostly Roland. Vând doar ce am testat personal și nu țin morțiș la preț.</textarea>
+                    <span class="field__hint">186 / 280 caractere</span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label">Display currency</label>
+                    <div class="radio-inline">
+                      <label class="is-on"><input type="radio" name="curr" checked />RON</label>
+                      <label><input type="radio" name="curr" />EUR</label>
+                    </div>
+                    <span class="field__hint">Prețuri afișate în această monedă. Conversia folosește rata BNR oficială.</span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-tz">Fus orar</label>
+                    <select id="f-tz" class="field__select">
+                      <option>Europe/Bucharest (UTC+02:00)</option>
+                      <option>Europe/Berlin</option>
+                      <option>UTC</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Rol + permissions -->
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Rol și permissions</h2>
+                <span class="card__head-meta">acțiunea se loghează în audit_log</span>
+              </header>
+              <div class="formsec" style="border:0;padding:22px 24px">
+                <div class="radio-grid">
+                  <label class="radio-card"><span class="radio-card__dot"></span><div class="radio-card__name">User</div><div class="radio-card__desc">Cumpără, vinde, postează în forum. Default pentru cont nou.</div></label>
+                  <label class="radio-card"><span class="radio-card__dot"></span><div class="radio-card__name">Editor</div><div class="radio-card__desc">Editor — poate scrie + publica în Revistă. Necesită approval admin.</div></label>
+                  <label class="radio-card is-on"><span class="radio-card__dot"></span><div class="radio-card__name">Moderator</div><div class="radio-card__desc">Editează / șterge postări forum + listings. Ban max 30 zile. Răspunde rapoarte.</div></label>
+                  <label class="radio-card"><span class="radio-card__dot"></span><div class="radio-card__name">Admin</div><div class="radio-card__desc">Full access. Doar 3 conturi globale.</div></label>
+                </div>
+                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+                  <button class="btn btn--ghost">Revocă rol</button>
+                  <button class="btn btn--primary"><svg><use href="#i-check"/></svg>Salvează rol</button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Trust verification -->
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Trust &amp; verification</h2>
+                <span class="card__head-meta">trust_level: <b style="color:var(--accent)">id_verified</b></span>
+              </header>
+              <div class="formsec" style="border:0">
+                <div class="formsec__grid">
+                  <div class="field">
+                    <span class="field__label">Email <span class="meta">read-only</span></span>
+                    <div class="field__row">
+                      <input class="field__input field__input--mono" type="text" value="vlad.petre@protonmail.com" readonly style="background:var(--bg-elev);color:var(--fg-muted)" />
+                      <span class="field__verified"><svg><use href="#i-check"/></svg>14 mai</span>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-phone">Telefon <span class="meta">format E.164</span></label>
+                    <div class="field__row">
+                      <input id="f-phone" class="field__input field__input--mono" type="tel" value="+40 722 481 902" />
+                      <span class="field__verified"><svg><use href="#i-check"/></svg>Verified</span>
+                    </div>
+                    <span class="field__hint">SMS verificare disponibilă post-MVP · curent doar admin approval manual</span>
+                  </div>
+                  <div class="field span-2">
+                    <span class="field__label">Document de identitate</span>
+                    <div style="display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 14px;border:1px solid var(--line);background:var(--bg);align-items:center">
+                      <div>
+                        <div style="font-family:var(--font-mono);font-size:12px;color:var(--fg);letter-spacing:.04em">CI-RO-buletin-anonymized.pdf · 312 KB</div>
+                        <div style="font-family:var(--font-mono);font-size:10px;color:var(--fg-muted);margin-top:4px;letter-spacing:.04em">Upload acum 6 săpt · verificat manual de <b style="color:var(--fg)">@alex.c</b> pe 02 apr 2026</div>
+                      </div>
+                      <div style="display:flex;gap:6px">
+                        <button class="btn btn--quiet btn--sm">Vezi document</button>
+                        <button class="btn btn--danger btn--sm">Revocă</button>
+                      </div>
+                    </div>
+                    <span class="field__hint">Documentele se șterg automat la 90 zile după verificare. Stocate criptat AES-256.</span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-trust">Manual trust override <span class="meta">admin only</span></label>
+                    <select id="f-trust" class="field__select">
+                      <option>— niciun override —</option>
+                      <option selected>trusted_seller (override manual)</option>
+                      <option>unverified (force)</option>
+                    </select>
+                    <span class="field__hint is-warn">Override-ul vizibil ca badge special. Folosește doar dacă verificarea automată e blocată.</span>
+                  </div>
+                  <div class="field">
+                    <label class="field__label" for="f-trustnote">Notă internă (override)</label>
+                    <input id="f-trustnote" class="field__input" type="text" placeholder="ex: verificat la întâlnire offline cu @alex.c" />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Subscription -->
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Subscription</h2>
+                <span class="card__head-meta">Stripe customer · cus_NkP2x91…</span>
+              </header>
+              <div class="formsec" style="border:0">
+                <div class="formsec__grid">
+                  <div class="field">
+                    <label class="field__label" for="f-tier">Tier</label>
+                    <select id="f-tier" class="field__select">
+                      <option>Free</option>
+                      <option selected>Supporter — 19 RON/lună</option>
+                      <option>Premium — 49 RON/lună</option>
+                      <option>Lifetime — 499 RON one-time</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <span class="field__label">Status plată</span>
+                    <div style="padding:9px 12px;border:1px solid var(--ok);background:var(--ok-soft);color:var(--ok);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em">
+                      <b>Active</b> · următoarea plată: 14 iun 2026
+                    </div>
+                  </div>
+                  <div class="span-2" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+                    <button class="btn btn--ghost">Anulează abonament</button>
+                    <button class="btn btn--primary"><svg><use href="#i-check"/></svg>Salvează tier</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- RIGHT: user stats + danger -->
+          <div class="userside">
+            <section class="card" style="margin-bottom:0">
+              <div class="userside__head">
+                <div class="userside__avt">VP</div>
+                <div class="userside__name">Vlad Petre</div>
+                <div class="userside__handle">@vladpetre · usr_4421</div>
+                <div class="userside__badges">
+                  <span class="bdg bdg--trust-id">ID verified</span>
+                  <span class="bdg bdg--status-active">Active</span>
+                </div>
+              </div>
+              <div class="userside__statgrid">
+                <div>
+                  <span class="k">Member since</span>
+                  <span class="v mono">14 mai 2026</span>
+                </div>
+                <div>
+                  <span class="k">Rating</span>
+                  <span class="v accent">4.7 <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-muted);letter-spacing:.04em">/ 23</span></span>
+                </div>
+                <div>
+                  <span class="k">Listings active</span>
+                  <span class="v">12</span>
+                </div>
+                <div>
+                  <span class="k">Tranzacții</span>
+                  <span class="v">47</span>
+                </div>
+                <div>
+                  <span class="k">Forum messages</span>
+                  <span class="v">142</span>
+                </div>
+                <div>
+                  <span class="k">Articole</span>
+                  <span class="v" style="color:var(--fg-subtle)">0</span>
+                </div>
+              </div>
+            </section>
+
+            <!-- Subscription mini -->
+            <section class="card" style="margin-bottom:0">
+              <header class="card__head">
+                <h2 class="card__title">Linkuri rapide</h2>
+              </header>
+              <div style="display:flex;flex-direction:column">
+                <a href="#" style="display:flex;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--line);font-size:13px;align-items:center">
+                  <span>Listings publicate</span>
+                  <span class="tbl__mono" style="color:var(--accent)">12 →</span>
+                </a>
+                <a href="#" style="display:flex;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--line);font-size:13px;align-items:center">
+                  <span>Reviews primite</span>
+                  <span class="tbl__mono">23 →</span>
+                </a>
+                <a href="#" style="display:flex;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--line);font-size:13px;align-items:center">
+                  <span>Threaduri forum</span>
+                  <span class="tbl__mono">8 →</span>
+                </a>
+                <a href="#" style="display:flex;justify-content:space-between;padding:11px 18px;font-size:13px;align-items:center">
+                  <span>Trimite mesaj privat</span>
+                  <span class="tbl__mono">→</span>
+                </a>
+              </div>
+            </section>
+
+            <!-- Danger zone -->
+            <section class="card danger" style="margin-bottom:0">
+              <header class="card__head">
+                <h2 class="card__title">Danger zone</h2>
+                <span class="card__head-meta" style="color:var(--danger)">acțiuni ireversibile</span>
+              </header>
+              <div class="danger__item">
+                <div>
+                  <div class="danger__lbl">Ban user</div>
+                  <div class="danger__desc">Userul pierde accesul. Listings ascunse, forum posts păstrate dar marcate. Notificare email + raport audit.</div>
+                </div>
+                <div class="danger__row">
+                  <select>
+                    <option>24 ore</option>
+                    <option>7 zile</option>
+                    <option selected>30 zile</option>
+                    <option>Permanent</option>
+                  </select>
+                  <button class="btn btn--danger btn--sm">Ban</button>
+                </div>
+              </div>
+              <div class="danger__item">
+                <div>
+                  <div class="danger__lbl">Anonimizează &amp; șterge (GDPR)</div>
+                  <div class="danger__desc">Email, nume, IP, bio, avatar — wipe permanent. Listings / posts păstrate ca „[user șters]". Necesită confirm modal + 2nd admin approval.</div>
+                </div>
+                <div class="danger__row">
+                  <button class="btn btn--danger btn--sm">Inițiază…</button>
+                </div>
+              </div>
+            </section>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = (m) => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    (function collapse(){
+      const KEY = 'sintezaur-admin-side';
+      const shell = document.getElementById('shell');
+      const btn = document.querySelector('[data-collapse]');
+      if (localStorage.getItem(KEY) === '1') shell.classList.add('is-collapsed');
+      btn.addEventListener('click', () => {
+        shell.classList.toggle('is-collapsed');
+        localStorage.setItem(KEY, shell.classList.contains('is-collapsed') ? '1' : '0');
+      });
+    })();
+
+    // ---------- DENSITY TOGGLE ----------
+    (function density(){
+      const KEY = 'sintezaur-admin-density';
+      const ORDER = ['compact', 'comfortable', 'spacious'];
+      const LABEL = { compact: 'Compact', comfortable: 'Comfortable', spacious: 'Spațios' };
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-density-toggle]');
+      const apply = (d) => {
+        root.setAttribute('data-density', d);
+        btn.title = 'Densitate: ' + LABEL[d] + ' · click pentru următoarea';
+        btn.setAttribute('aria-label', 'Densitate: ' + LABEL[d]);
+      };
+      apply(localStorage.getItem(KEY) || 'comfortable');
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-density') || 'comfortable';
+        const next = ORDER[(ORDER.indexOf(cur) + 1) % ORDER.length];
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // Role radio cards toggle
+    document.querySelectorAll('.radio-grid .radio-card').forEach(card => {
+      card.addEventListener('click', () => {
+        card.parentElement.querySelectorAll('.radio-card').forEach(c => c.classList.remove('is-on'));
+        card.classList.add('is-on');
+      });
+    });
+
+    // Currency inline radio
+    document.querySelectorAll('.radio-inline label').forEach(label => {
+      label.addEventListener('click', () => {
+        label.parentElement.querySelectorAll('label').forEach(l => l.classList.remove('is-on'));
+        label.classList.add('is-on');
+      });
+    });
+
+    // Tabs (visual only)
+    document.querySelectorAll('.tabs button').forEach(b => {
+      b.addEventListener('click', () => {
+        b.parentElement.querySelectorAll('button').forEach(x => x.classList.remove('is-active'));
+        b.classList.add('is-active');
+      });
+    });
+  </script>
+</body>
+</html>

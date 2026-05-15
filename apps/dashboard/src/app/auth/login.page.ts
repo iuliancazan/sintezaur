@@ -17,118 +17,51 @@ import { DASHBOARD_ROLES, hasAnyRole } from './auth.types';
   imports: [ReactiveFormsModule, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="login">
-      <h1 class="login__title">{{ 'auth.login.title' | t }}</h1>
-      <p class="login__subtitle">{{ 'auth.login.subtitle' | t }}</p>
+    <div class="auth-shell">
+      <div class="auth-card">
+        <div class="auth-card__brand">
+          <img src="/assets/brand/logo-white.png" alt="" />
+          <span class="name">Sintezaur</span>
+        </div>
+        <h1 class="auth-card__title">{{ 'auth.login.title' | t }}</h1>
+        <p class="auth-card__sub">{{ 'auth.login.subtitle' | t }}</p>
 
-      @if (notStaffReason()) {
-        <div class="form-error">{{ 'auth.errors.not_staff' | t }}</div>
-      }
-
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        @if (formError()) {
-          <div class="form-error">{{ formError() }}</div>
+        @if (notStaffReason()) {
+          <div class="auth-card__err">{{ 'auth.errors.not_staff' | t }}</div>
         }
-        <div class="field">
-          <label class="field__label" for="email">{{ 'auth.login.fields.email' | t }}</label>
-          <input
-            id="email"
-            class="field__input"
-            type="email"
-            autocomplete="email"
-            inputmode="email"
-            formControlName="email"
-          />
-        </div>
-        <div class="field">
-          <label class="field__label" for="password">{{ 'auth.login.fields.password' | t }}</label>
-          <input
-            id="password"
-            class="field__input"
-            type="password"
-            autocomplete="current-password"
-            formControlName="password"
-          />
-        </div>
-        <button class="submit" type="submit" [disabled]="form.invalid || pending()">
-          {{ (pending() ? 'auth.shared.submitting' : 'auth.login.submit') | t }}
-        </button>
-      </form>
-    </main>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          @if (formError()) {
+            <div class="auth-card__err">{{ formError() }}</div>
+          }
+          <div class="field">
+            <label class="field__label" for="email">{{ 'auth.login.fields.email' | t }}</label>
+            <input
+              id="email"
+              class="field__input field__input--mono"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              formControlName="email"
+            />
+          </div>
+          <div class="field">
+            <label class="field__label" for="password">{{ 'auth.login.fields.password' | t }}</label>
+            <input
+              id="password"
+              class="field__input field__input--mono"
+              type="password"
+              autocomplete="current-password"
+              formControlName="password"
+            />
+          </div>
+          <button class="btn btn--primary" type="submit" [disabled]="form.invalid || pending()" style="width:100%;justify-content:center;margin-top:6px">
+            {{ (pending() ? 'auth.shared.submitting' : 'auth.login.submit') | t }}
+          </button>
+        </form>
+      </div>
+    </div>
   `,
-  styles: [
-    `
-      .login {
-        max-width: 440px;
-        margin: 80px auto;
-        padding: 32px 28px;
-        background: var(--bg-elev);
-        border: var(--grid-line) solid var(--line);
-      }
-      .login__title {
-        font-family: var(--font-display);
-        font-size: 32px;
-        margin: 0 0 6px;
-        color: var(--fg);
-        letter-spacing: 0.02em;
-      }
-      .login__subtitle {
-        color: var(--fg-muted);
-        font-size: 14px;
-        margin: 0 0 24px;
-      }
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-      }
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .field__label {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-      }
-      .field__input {
-        padding: 12px 14px;
-        background: var(--bg-card);
-        border: var(--grid-line) solid var(--line);
-        color: var(--fg);
-        outline: none;
-      }
-      .field__input:focus {
-        border-color: var(--accent);
-      }
-      .submit {
-        padding: 14px 18px;
-        background: var(--accent);
-        color: var(--accent-fg);
-        font-family: var(--font-mono);
-        font-size: 13px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        font-weight: 600;
-        width: 100%;
-      }
-      .submit:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .form-error {
-        background: rgba(224, 122, 95, 0.12);
-        border: 1px solid rgba(224, 122, 95, 0.45);
-        color: #e07a5f;
-        padding: 10px 14px;
-        font-size: 13px;
-        margin-bottom: 18px;
-      }
-    `,
-  ],
 })
 export class LoginPage {
   private readonly fb = inject(FormBuilder);
