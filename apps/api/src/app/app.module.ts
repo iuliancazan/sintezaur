@@ -18,6 +18,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 import { AdminClosureModule } from './admin-closure/admin-closure.module';
+import { AdminStorageModule } from './admin-storage/admin-storage.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GdprModule } from './gdpr/gdpr.module';
@@ -56,6 +57,7 @@ import { StorageModule } from './storage/storage.module';
     RevistaModule,
     ForumModule,
     AdminClosureModule,
+    AdminStorageModule,
     AdminUsersModule,
     LegalModule,
     SeoModule,

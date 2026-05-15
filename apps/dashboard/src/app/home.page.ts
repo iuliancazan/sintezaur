@@ -66,6 +66,10 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Curs valutar</span>
           <span class="module__desc">Rate manuale EUR→RON · istoric · adaugă rată nouă</span>
         </a>
+        <a class="module" routerLink="/storage">
+          <span class="module__name">Storage</span>
+          <span class="module__desc">Limite upload · overview · folders · trends · top useri · reconcile</span>
+        </a>
       </nav>
 
       <button class="logout" (click)="logout()">

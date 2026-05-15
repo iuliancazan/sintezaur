@@ -98,6 +98,12 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'storage',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./storage/storage-admin.page').then((m) => m.StorageAdminPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],
