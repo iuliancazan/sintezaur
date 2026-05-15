@@ -1,4 +1,10 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import 'multer';
 import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
@@ -7,8 +13,11 @@ import {
   IMAGE_VARIANT_SIZES,
   type ImageVariantLiteral,
   type StorageDriver,
+  type StorageModule as SharedStorageModule,
 } from '@sintezaur/shared';
 import { STORAGE_DRIVER } from '../storage/storage-driver.token';
+import { detectFileType } from '../storage/file-type-detector';
+import { UploadQuotaService } from '../storage/upload-quota.service';
 
 export interface ProcessedVariant {
   variant: ImageVariantLiteral;
@@ -25,17 +34,49 @@ export interface ProcessedUpload {
   variants: ProcessedVariant[];
 }
 
+export interface ProcessedAttachment {
+  objectKey: string;
+  bytes: number;
+  contentType: string;
+  contentHash: string;
+  extension: string;
+  /** One of: 'audio' | 'pdf' | 'zip'. */
+  kind: Exclude<SharedStorageModule, 'tezaur' | 'bazar' | 'revista' | 'forum' | 'avatar'> | 'audio' | 'pdf' | 'zip';
+}
+
+export type AttachmentKindLiteral = 'audio' | 'pdf' | 'zip';
+
+const IMAGE_SCOPE_TO_MODULE: Record<
+  'gear' | 'listing' | 'article',
+  SharedStorageModule
+> = {
+  gear: 'tezaur',
+  listing: 'bazar',
+  article: 'revista',
+};
+
+const ALLOWED_AUDIO_MIMES = new Set(['audio/mpeg', 'audio/wav', 'audio/ogg']);
+const ALLOWED_PDF_MIMES = new Set(['application/pdf']);
+const ALLOWED_ZIP_MIMES = new Set([
+  'application/zip',
+  'application/x-zip-compressed',
+]);
+
 /**
- * Image-pipeline orchestrator. Sharp does the encoding; the active
- * `StorageDriver` does the I/O (local FS in dev, Cloudflare R2 in prod).
+ * File-pipeline orchestrator. Sharp does image encoding; magic-byte
+ * detection vets audio/PDF/ZIP; the active `StorageDriver` does the
+ * I/O (local FS in dev, Cloudflare R2 in prod).
  *
  * Each source image produces 7 variants — 3 aspect ratios × 2 sizes,
  * plus the original. EXIF is stripped on every variant. Object keys are
  * `<module>/<resource-id>/<source-id>/<variant>-<sha256-12>.jpg` so each
  * variant is content-addressed and safe to cache forever.
  *
- * `original` is re-encoded (not byte-copied) so EXIF strips on it too.
- * Avatars are mutable (single key per user) since the cache TTL is short.
+ * Audio / PDF / ZIP attachments are content-addressed by their input
+ * bytes (no re-encode) at
+ * `<module>/<resource-id>/attachment-<sha256-12>.<ext>`.
+ *
+ * Avatars are mutable (single key per user) — short cache TTL on edit.
  */
 @Injectable()
 export class StorageService {
@@ -43,9 +84,10 @@ export class StorageService {
 
   constructor(
     @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver,
+    private readonly quota: UploadQuotaService,
   ) {}
 
-  /** Allow-list of input mime types (Sharp tolerates more; we narrow defensively). */
+  /** Allow-list of input mime types for images (Sharp tolerates more; we narrow defensively). */
   private static readonly ALLOWED_INPUT_MIMES = new Set([
     'image/jpeg',
     'image/png',
@@ -55,13 +97,36 @@ export class StorageService {
   /** Max input size (10 MB) — bigger uploads are rejected upstream by Multer. */
   static readonly MAX_INPUT_BYTES = 10 * 1024 * 1024;
 
+  /** Larger multer ceiling for audio/PDF/ZIP — the quota guard applies the real per-type caps. */
+  static readonly MAX_ATTACHMENT_INPUT_BYTES = 25 * 1024 * 1024;
+
   async processImage(
     scope: 'gear' | 'listing' | 'article',
     entityId: string,
     file: Express.Multer.File,
+    actorId?: string | null,
   ): Promise<ProcessedUpload> {
     if (!StorageService.ALLOWED_INPUT_MIMES.has(file.mimetype)) {
-      throw new Error(`Unsupported image mime type: ${file.mimetype}`);
+      throw new UnsupportedMediaTypeException(
+        `Tip imagine neacceptat: ${file.mimetype}.`,
+      );
+    }
+    const detected = detectFileType(file.buffer);
+    if (!detected || detected.fileType !== 'image') {
+      throw new UnsupportedMediaTypeException(
+        'Fișierul nu pare a fi o imagine validă.',
+      );
+    }
+
+    const module = IMAGE_SCOPE_TO_MODULE[scope];
+
+    if (actorId) {
+      await this.quota.check({
+        userId: actorId,
+        bytes: file.size,
+        fileType: 'image',
+        module,
+      });
     }
 
     const sourceId = randomUUID();
@@ -85,9 +150,74 @@ export class StorageService {
         sizeBytes: put.size,
         mimeType: 'image/jpeg',
       });
+      if (actorId) {
+        await this.quota.track({
+          userId: actorId,
+          module,
+          resourceId: entityId,
+          purpose: `image-${variant}`,
+          objectKey: key,
+          bytes: put.size,
+          contentType: 'image/jpeg',
+          fileType: 'image',
+        });
+      }
     }
 
     return { sourceId, variants };
+  }
+
+  /**
+   * Audio attachment pipeline. Magic-byte vets MP3/WAV/OGG, then the
+   * file is stored as-is (no re-encode). Caller owns DB row creation
+   * in `forum_post_attachments` / `revista_article_attachments`.
+   */
+  async processAudio(
+    module: SharedStorageModule,
+    resourceId: string,
+    file: Express.Multer.File,
+    actorId: string,
+  ): Promise<ProcessedAttachment> {
+    return this.processAttachment(
+      module,
+      resourceId,
+      file,
+      actorId,
+      'audio',
+      ALLOWED_AUDIO_MIMES,
+    );
+  }
+
+  async processPdf(
+    module: SharedStorageModule,
+    resourceId: string,
+    file: Express.Multer.File,
+    actorId: string,
+  ): Promise<ProcessedAttachment> {
+    return this.processAttachment(
+      module,
+      resourceId,
+      file,
+      actorId,
+      'pdf',
+      ALLOWED_PDF_MIMES,
+    );
+  }
+
+  async processZip(
+    module: SharedStorageModule,
+    resourceId: string,
+    file: Express.Multer.File,
+    actorId: string,
+  ): Promise<ProcessedAttachment> {
+    return this.processAttachment(
+      module,
+      resourceId,
+      file,
+      actorId,
+      'zip',
+      ALLOWED_ZIP_MIMES,
+    );
   }
 
   /**
@@ -119,8 +249,17 @@ export class StorageService {
     file: Express.Multer.File,
   ): Promise<{ relativePath: string; sizeBytes: number }> {
     if (!StorageService.ALLOWED_INPUT_MIMES.has(file.mimetype)) {
-      throw new Error(`Unsupported avatar mime type: ${file.mimetype}`);
+      throw new UnsupportedMediaTypeException(
+        `Tip avatar neacceptat: ${file.mimetype}.`,
+      );
     }
+    await this.quota.check({
+      userId,
+      bytes: file.size,
+      fileType: 'image',
+      module: 'avatar',
+    });
+
     const { data, info } = await sharp(file.buffer)
       .rotate()
       .resize(256, 256, { fit: 'cover', position: 'attention' })
@@ -135,6 +274,16 @@ export class StorageService {
       contentType: 'image/webp',
       cacheControl: 'public, max-age=60, must-revalidate',
     });
+    await this.quota.track({
+      userId,
+      module: 'avatar',
+      resourceId: userId,
+      purpose: 'avatar',
+      objectKey: key,
+      bytes: put.size,
+      contentType: 'image/webp',
+      fileType: 'image',
+    });
     return {
       relativePath: key,
       sizeBytes: put.size > 0 ? put.size : info.size ?? data.byteLength,
@@ -144,6 +293,7 @@ export class StorageService {
   async deleteAvatar(userId: string): Promise<void> {
     try {
       await this.driver.delete(`avatar/${userId}.webp`);
+      await this.quota.untrack('avatar', userId, 0);
     } catch {
       // ignore — DB row is source of truth
     }
@@ -157,6 +307,64 @@ export class StorageService {
   /** Existence check — used by smoke tests + future reconciliation. */
   async exists(key: string): Promise<boolean> {
     return this.driver.exists(key);
+  }
+
+  private async processAttachment(
+    module: SharedStorageModule,
+    resourceId: string,
+    file: Express.Multer.File,
+    actorId: string,
+    expected: AttachmentKindLiteral,
+    allowedMimes: Set<string>,
+  ): Promise<ProcessedAttachment> {
+    if (!allowedMimes.has(file.mimetype)) {
+      throw new UnsupportedMediaTypeException(
+        `Tip neacceptat pentru ${expected}: ${file.mimetype}.`,
+      );
+    }
+    const detected = detectFileType(file.buffer);
+    if (!detected || detected.fileType !== expected) {
+      throw new BadRequestException(
+        `Conținutul fișierului nu corespunde tipului ${expected}.`,
+      );
+    }
+
+    await this.quota.check({
+      userId: actorId,
+      bytes: file.size,
+      fileType: expected,
+      module,
+    });
+
+    const fullHash = createHash('sha256').update(file.buffer).digest('hex');
+    const shortHash = fullHash.slice(0, 12);
+    const key = `${module}/${resourceId}/attachment-${shortHash}.${detected.extension}`;
+
+    const put = await this.driver.put({
+      key,
+      body: file.buffer,
+      contentType: detected.mimeType,
+    });
+
+    await this.quota.track({
+      userId: actorId,
+      module,
+      resourceId,
+      purpose: `attachment-${expected}`,
+      objectKey: key,
+      bytes: put.size,
+      contentType: detected.mimeType,
+      fileType: expected,
+    });
+
+    return {
+      objectKey: key,
+      bytes: put.size,
+      contentType: detected.mimeType,
+      contentHash: fullHash,
+      extension: detected.extension,
+      kind: expected,
+    };
   }
 
   private static async renderVariant(

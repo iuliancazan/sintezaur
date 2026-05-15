@@ -16,6 +16,7 @@ import { Pool } from 'pg';
 import { randomBytes } from 'node:crypto';
 import { LocalStorageDriver } from '../../apps/api/src/app/storage/local-storage.driver';
 import { S3StorageDriver } from '../../apps/api/src/app/storage/s3-storage.driver';
+import { detectFileType } from '../../apps/api/src/app/storage/file-type-detector';
 import type { StorageDriver } from '@sintezaur/shared';
 
 function selectDriver(config: ConfigService): StorageDriver {
@@ -91,6 +92,56 @@ async function checkLimitsSeed(): Promise<void> {
   }
 }
 
+function checkMagicBytes(): void {
+  const cases: Array<{ name: string; bytes: number[]; expect: string }> = [
+    { name: 'JPEG', bytes: [0xff, 0xd8, 0xff, 0xe0, 0x00], expect: 'image' },
+    {
+      name: 'PNG',
+      bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00],
+      expect: 'image',
+    },
+    {
+      name: 'WebP',
+      bytes: [
+        0x52, 0x49, 0x46, 0x46, 0x10, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
+      ],
+      expect: 'image',
+    },
+    {
+      name: 'MP3 (ID3v2)',
+      bytes: [0x49, 0x44, 0x33, 0x04, 0x00, 0x00, 0x00, 0x00],
+      expect: 'audio',
+    },
+    { name: 'MP3 (frame sync)', bytes: [0xff, 0xfb, 0x90, 0x00], expect: 'audio' },
+    {
+      name: 'WAV',
+      bytes: [
+        0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
+      ],
+      expect: 'audio',
+    },
+    {
+      name: 'OGG',
+      bytes: [0x4f, 0x67, 0x67, 0x53, 0x00],
+      expect: 'audio',
+    },
+    { name: 'PDF', bytes: [0x25, 0x50, 0x44, 0x46, 0x2d, 0x31], expect: 'pdf' },
+    { name: 'ZIP', bytes: [0x50, 0x4b, 0x03, 0x04, 0x14], expect: 'zip' },
+    { name: 'unknown', bytes: [0x00, 0x00, 0x00, 0x00], expect: 'null' },
+  ];
+  for (const c of cases) {
+    const buf = Buffer.from(c.bytes);
+    const got = detectFileType(buf);
+    const gotLabel = got ? got.fileType : 'null';
+    if (gotLabel !== c.expect) {
+      throw new Error(
+        `magic-byte ${c.name}: expected ${c.expect}, got ${gotLabel}`,
+      );
+    }
+    process.stdout.write(`[smoke] magic-byte ${c.name} → ${gotLabel}\n`);
+  }
+}
+
 async function main(): Promise<void> {
   const config = new ConfigService();
   const driver = selectDriver(config);
@@ -98,6 +149,7 @@ async function main(): Promise<void> {
     `[smoke] driver = ${driver.constructor.name}\n`,
   );
   await checkDriver(driver);
+  checkMagicBytes();
   await checkLimitsSeed();
   process.stdout.write('[smoke] all checks ok\n');
 }

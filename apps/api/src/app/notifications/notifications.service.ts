@@ -40,6 +40,7 @@ const DEFAULT_PREFS: Record<
   forum_mod_action_on_my_content: { in_app: 'on', email: 'on' },
   forum_report_resolved: { in_app: 'on', email: 'digest' },
   admin_announcement: { in_app: 'on', email: 'on' },
+  storage_quota_lifetime_reached: { in_app: 'on', email: 'on' },
 };
 
 export interface PostNotificationInput {

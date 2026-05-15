@@ -363,7 +363,12 @@ export class ArticlesService {
     caption?: string,
   ): Promise<{ sourceId: string; path: string }> {
     const existing = await this.requireOwnable(articleId, actorId, actorIsAdmin);
-    const processed = await this.storage.processImage('article', articleId, file);
+    const processed = await this.storage.processImage(
+      'article',
+      articleId,
+      file,
+      actorId,
+    );
     await this.db.insert(articleImages).values(
       processed.variants.map((v) => ({
         articleId,

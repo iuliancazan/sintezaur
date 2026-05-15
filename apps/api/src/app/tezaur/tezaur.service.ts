@@ -534,6 +534,7 @@ export class TezaurService {
       'gear',
       gearId,
       file,
+      actorId,
     );
 
     // Next position = max(position) + 1 (per source).

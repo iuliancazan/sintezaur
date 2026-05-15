@@ -55,7 +55,12 @@ export const storageFileTypeEnum = pgEnum('storage_file_type', [
   'zip',
   '*',
 ]);
-export type StorageFileType =
+/**
+ * DB-side widened type (includes the wildcard `'*'`). The narrower
+ * 4-value `StorageFileType` in `@sintezaur/shared` is used everywhere
+ * outside of `storage_limits` lookups.
+ */
+export type StorageFileTypeValue =
   (typeof storageFileTypeEnum.enumValues)[number];
 
 /**

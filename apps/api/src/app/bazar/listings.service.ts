@@ -377,7 +377,12 @@ export class ListingsService {
     if (existing.sellerId !== sellerId)
       throw new ForbiddenException('You can only add photos to your listings.');
 
-    const processed = await this.storage.processImage('listing', listingId, file);
+    const processed = await this.storage.processImage(
+      'listing',
+      listingId,
+      file,
+      sellerId,
+    );
 
     const [{ max }] = await this.db
       .select({

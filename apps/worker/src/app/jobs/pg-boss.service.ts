@@ -10,6 +10,8 @@ import { BadgeSweepJob } from './badge-sweep.job';
 import { ListingExpiryJob } from './listing-expiry.job';
 import { ListingExpiringSoonJob } from './listing-expiring-soon.job';
 import { ListingCleanupJob } from './listing-cleanup.job';
+import { StorageDailyResetJob } from './storage-daily-reset.job';
+import { StorageReconcileJob } from './storage-reconcile.job';
 
 export const PG_BOSS = Symbol.for('PG_BOSS');
 
@@ -24,6 +26,8 @@ export class PgBossService implements OnModuleInit, OnApplicationShutdown {
     private readonly expiringSoon: ListingExpiringSoonJob,
     private readonly cleanup: ListingCleanupJob,
     private readonly badgeSweep: BadgeSweepJob,
+    private readonly storageDailyReset: StorageDailyResetJob,
+    private readonly storageReconcile: StorageReconcileJob,
   ) {}
 
   async onModuleInit() {
@@ -45,15 +49,23 @@ export class PgBossService implements OnModuleInit, OnApplicationShutdown {
     );
     await this.boss.work('listing:cleanup', () => this.cleanup.run());
     await this.boss.work('badges:sweep', () => this.badgeSweep.run());
+    await this.boss.work('storage:reset-daily-quota', () =>
+      this.storageDailyReset.run(),
+    );
+    await this.boss.work('storage:reconcile', () =>
+      this.storageReconcile.run(),
+    );
 
     // Schedule daily crons. pg-boss uses node-cron syntax (min hr dom mon dow).
     // Times below in UTC; daily window before Romanian morning traffic.
+    await this.boss.schedule('storage:reset-daily-quota', '0 0 * * *');
+    await this.boss.schedule('storage:reconcile', '0 3 * * *');
     await this.boss.schedule('listing:expire', '15 3 * * *');
     await this.boss.schedule('listing:expiring-soon', '30 3 * * *');
     await this.boss.schedule('listing:cleanup', '45 3 * * *');
     await this.boss.schedule('badges:sweep', '0 4 * * *');
     this.logger.log(
-      'crons scheduled (listings 03:15/03:30/03:45 + badges 04:00 UTC)',
+      'crons scheduled (storage 00:00/03:00 + listings 03:15/03:30/03:45 + badges 04:00 UTC)',
     );
   }
 

@@ -467,6 +467,8 @@ export const notificationKindEnum = pgEnum('notification_kind', [
   'forum_report_resolved',
   // Cross-cutting
   'admin_announcement',
+  // Storage (M7)
+  'storage_quota_lifetime_reached',
 ]);
 export type NotificationKind =
   (typeof notificationKindEnum.enumValues)[number];

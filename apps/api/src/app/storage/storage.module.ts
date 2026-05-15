@@ -3,6 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { LocalStorageDriver } from './local-storage.driver';
 import { S3StorageDriver } from './s3-storage.driver';
 import { STORAGE_DRIVER } from './storage-driver.token';
+import { StorageController } from './storage.controller';
+import { StorageLimitsService } from './storage-limits.service';
+import { UploadQuotaService } from './upload-quota.service';
 
 const driverProvider: Provider = {
   provide: STORAGE_DRIVER,
@@ -28,14 +31,16 @@ const driverProvider: Provider = {
 };
 
 /**
- * Provides the active `StorageDriver` to the rest of the app. The
- * concrete impl is selected at bootstrap from `STORAGE_DRIVER` env
- * (`local` | `s3`). Marked `@Global()` so feature modules don't have
- * to import StorageModule explicitly.
+ * Provides the active `StorageDriver` to the rest of the app + the
+ * quota / limits services that drive M7's per-user upload caps.
+ * The concrete driver is selected at bootstrap from `STORAGE_DRIVER`
+ * env (`local` | `s3`). Marked `@Global()` so feature modules don't
+ * have to import StorageModule explicitly.
  */
 @Global()
 @Module({
-  providers: [driverProvider],
-  exports: [STORAGE_DRIVER],
+  controllers: [StorageController],
+  providers: [driverProvider, StorageLimitsService, UploadQuotaService],
+  exports: [STORAGE_DRIVER, StorageLimitsService, UploadQuotaService],
 })
 export class StorageModule {}

@@ -16,6 +16,8 @@ import { ListingCleanupJob } from './jobs/listing-cleanup.job';
 import { ListingExpiringSoonJob } from './jobs/listing-expiring-soon.job';
 import { ListingExpiryJob } from './jobs/listing-expiry.job';
 import { PgBossService } from './jobs/pg-boss.service';
+import { StorageDailyResetJob } from './jobs/storage-daily-reset.job';
+import { StorageReconcileJob } from './jobs/storage-reconcile.job';
 
 @Module({
   imports: [
@@ -51,6 +53,8 @@ import { PgBossService } from './jobs/pg-boss.service';
     ListingExpiringSoonJob,
     ListingCleanupJob,
     BadgeSweepJob,
+    StorageDailyResetJob,
+    StorageReconcileJob,
     PgBossService,
   ],
 })
