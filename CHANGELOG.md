@@ -14,6 +14,84 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-B — Home page rewrite (single commit, _SHA TBD_)
+
+`apps/site/src/app/home.page.ts` complet rescris cu markup V05
+1:1 (Home Guest + Home Logat variants combinate într-un singur
+component auth-aware).
+
+- **Welcome strip** auth-gated între topbar și hero
+  (`.welcome` cu accent eyebrow + greeting interpolat cu prenume
+  + 2 ghost action buttons → `/bazar/nou`, `/forum`).
+
+- **Hero** featured article (latest din `revista.list({sort:'newest',
+  pageSize:4})`):
+  - `.hero crosses` cu rotator placeholder (counter `01 / N`).
+  - Media: `.gear-fill` cu photo opțional (hero thumb path
+    resolved via `mediaUrl()`).
+  - Meta pills: Featured (accent) + Live · Revistă +
+    formatted date (`formatShortDate()`).
+  - Title + lede din articolul real; fallback la stringuri
+    generice când lista e goală (fresh prod).
+  - Byline cu avatar (initials calculate din `fullName||username`)
+    + 8 min stub citire + CTA → `/revista/:slug`.
+
+- **Revista grid** `1 big + 2 small` (article[1..3]):
+  - `.article.is-big` cu media + category pill + title + excerpt
+    + byline.
+  - `.revista-side` cu 2× `.article.is-small`.
+  - Fallback: 1 article-big stub când lista nu are nimic.
+
+- **Bazar horizontal scroll** (8 listings via
+  `bazar.list({pageSize:8})`):
+  - `.bazar-scroll` cu `.listing` cards (media + chip
+    condition + body cu brand/title/price/loc/seller).
+  - `formatPrice()` pentru RO locale, `conditionLabel()` via
+    i18n (`home.condition.*` map peste LISTING_CONDITIONS).
+  - Stelele rating ascunse când seller-ul nu are reviews.
+
+- **Forum + Pulse** (`.forum-with-pulse`):
+  - 5 thread stubs hardcoded din V05 design (no „recent across
+    categories" endpoint disponibil — issue tracked pentru
+    M13-F backend follow-up).
+  - 4 pulse cells cu `—` placeholder + label generic („din
+    /bazar" etc.) — stats reale necesită endpoint dedicat.
+
+- **Tezaur Spotlight** (popular #1) + **Catalog** (popular
+  #2..#7) via `tezaur.list({sort:'popular', pageSize:7})`:
+  - Spotlight: media + brand + model + descriere generică
+    (i18n template cu `{{brand}} {{model}}`) + `.spec-table`
+    6-cell cu specs din `TezaurListItem` (year, category, form,
+    rating, reviewCount, type) + owners count.
+  - Catalog: 6 × `.gear` cards cu media + brand + model +
+    tags (category, type) + owners count.
+
+- **CTA Strip** auth-aware:
+  - Guest: „Fă-ți cont" + body + signup ghost button +
+    newsletter form (placeholder + Abonează-te).
+  - Logat: „Postează" + 3 ghost actions (anunț nou, thread nou,
+    propune articol) + newsletter form.
+
+- **i18n bundle** `apps/site/public/assets/i18n/ro.json`:
+  - Vechiul sub-tree `home.hero.*` + `home.sections.*`
+    (folosit pe placeholder-ul M2) eliminat.
+  - 60 chei flat noi sub `home.*`: welcome, hero, revista,
+    bazar, forum, spotlight, catalog, cta_logged, cta_guest,
+    newsletter — plus map-uri `home.condition.{new|mint|
+    very_good|good|fair|for_parts}` și `home.category.{reviews|
+    tutorials|news|interviews|buying_guides|hardware_deep_dives}`.
+
+- **Build curat** — 3 warning-uri NG8107 (cosmetic optional
+  chain) fixate prin extragerea de computed signals
+  (`heroPublishedAt`, `heroAuthor`, `welcomeFirstName`).
+
+- **Limitări conștiente** (urmează la M13-F + endpoint extra):
+  - Forum recent threads: hardcoded până avem endpoint
+    `/forum/threads/recent`.
+  - Pulse counts: `—` până avem endpoint stats.
+  - Hero rotator: butoanele ‹ › sunt placeholder (no JS handler);
+    rotația reală peste 4 articole = enhancement viitor.
+
 #### M13-A — Foundation (single commit `84dda78`)
 
 - **V05 global stylesheet** copiat verbatim la
