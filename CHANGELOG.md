@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### Forum (M5) — walking skeleton complet ✅
 
-#### M5-I — Thread oficial per echipament (HEAD)
+#### M5-I — Thread oficial per echipament (`efd6b1c`)
 - Migration `0011_canonical_gear_thread.sql`: `forum_threads.canonical_for_gear_id uuid` cu unique partial index. Reverse FK conform spec §8.1 — permite reuse când editorul toggle-ează OFF→ON pe același echipament.
 - `TezaurService.enableOfficialThread`:
   - dacă `gear.canonical_thread_id` deja setat → return existing
