@@ -6,7 +6,25 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M12** — dashboard design import v04. Re-skin
+**Last shipped:** **M13-A** — site design import v05, foundation.
+V05 `styles.css` copiat la `apps/site/src/v05.css` (4503 linii) cu
+dark tokens swapped la valorile v2-neutral hex per design decision
+(`#0a0a0b`/`#131314`/`#181819`/...). Light theme rămâne warm cream
+din v05. `apps/site/src/styles.scss` migrat de pe
+`libs/ui/tokens/tokens.css` pe noul `v05.css`. SVG sprite component
+nou — `V05SpriteComponent` în `apps/site/src/app/ui/` cu 58 simboluri
+lifted 1:1 din toate paginile v05 (search, bell, sun, moon, heart,
+pin, arrow, mail, burger, plus, check, alert, info, flag, eye, link,
+image, list, grid, archive, book, bookmark, tag, chat, reply, quote,
+share, external, doc, log, code, play, upload, download, cog, coins,
+truck, users, sliders, density, shield, logout, etc.). Sprite mount
+în app.ts root; footer markup aliniat la clasele V05 (`.foot` /
+`.foot__grid` / `.foot__col` / `.brand` / `.locale`) — stilurile
+inline din app.ts eliminate, livrate acum global de `v05.css`.
+`libs/ui` și `apps/dashboard` neatinse. Build OK (CSS bundle 30→31 kB).
+
+M12 anterior (dashboard design import v04) rămâne deployment ultimului
+commit pe dashboard. Re-skin
 complet al `apps/dashboard`: shell nou inline (sidebar + admin
 topbar + SVG sprite în `apps/dashboard/src/app/shell/`), tokens
 oklch din `docs/design-imports/2026-05-16-v04` override-uiți peste
@@ -27,7 +45,13 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M11** — Tezaur contributor flow per spec §7.2: rol
+**Next up:** **M13-B** — Home page re-skin (Guest + Logat variants per
+`docs/design-imports/2026-05-16-v05/Home - Guest.html` + `Home -
+Logat.html`). Hero rotator + revista grid + bazar scroll +
+forum-with-pulse + tezaur spotlight + catalog + cta-strip + newsletter.
+Auth-aware conditional shell (welcome strip pentru logați). După M13-G
+și închiderea M13 completă, revenim la **M11** — Tezaur contributor
+flow per spec §7.2: rol
 `contributor` (auto-promote la 100 forum posts) și `curator` (manual
 de admin) primesc capacitatea de a propune / edita echipamente direct
 de pe site (`/tezaur/propune`, „Editează" inline pe `/tezaur/:slug`),
@@ -35,7 +59,9 @@ cu coadă moderare pentru status `pending_review`. Cod existent
 pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
 relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** M12 — single-commit ✅, testing doc + close.
+**Active milestone:** M13 — site design import v05; sub-faze
+A (foundation) ✅ / B (Home) / C (Bazar) / D (Tezaur) /
+E (Revistă) / F (Forum) / G (Cont + close).
 
 ## Milestones
 
@@ -155,6 +181,18 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | —   | `b641f85` | done | Re-skin complet apps/dashboard la `docs/design-imports/2026-05-16-v04`. **Shell** inline în `apps/dashboard/src/app/shell/` (AdminShellComponent + AdminSidebarComponent + AdminTopbarComponent + AdminIconsComponent SVG sprite + AdminShellService cu theme/density/collapse persisted via signals + localStorage). **Tokens v04 oklch** override peste `libs/ui/tokens/tokens.css` în `apps/dashboard/src/styles.scss` (scope dashboard only — site neatins, alt agent lucra paralel pe M10 site UX). **Pagini noi:** `/` DashboardPage (KPI strip, alerts, activity feed, quick actions, section pulse), `/useri/:id` UserEditPage (breadcrumb, sticky save bar, 4 tabs, role radio-grid, danger zone). **Re-skin Useri list** cu filter bar sticky + bulk actions + PrimeNG TableModule peste design tokens. **Login** decuplat de shell (centered `.auth-shell` + `.auth-card`). **Restul paginilor** admin inherit shell + tokens via fallback global `main.admin` din `styles.scss`. Default theme = `light`, density = `comfortable`. `home.page.ts` șters. `app.routes.ts` mutat la shell-wrapped child route tree. `docs/testing/m12-testing.md` cu plan complet de testare manual. |
+
+### M13 — Site design import v05 (out-of-order before M11)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | _TBD_ | in progress | Foundation: V05 `styles.css` copiat la `apps/site/src/v05.css` (4503 linii) cu dark tokens swapped la valorile v2-neutral hex per design decision (`#0a0a0b`/`#131314`/`#181819`/...). Light theme rămâne warm cream. `apps/site/src/styles.scss` migrat de pe `libs/ui/tokens/tokens.css` pe `v05.css`. Nou `V05SpriteComponent` (`apps/site/src/app/ui/v05-sprite.component.ts`) cu 58 simboluri SVG lifted 1:1 din toate paginile v05. Sprite mount în `app.ts` root. Footer markup aliniat la clasele V05 (`.foot` / `.foot__grid` / `.foot__col` / `.brand` / `.locale`) — stilurile inline din app.ts eliminate (livrate global de v05.css). `libs/ui` și `apps/dashboard` neatinse. Build OK (CSS bundle 30→31 kB). |
+| B   | _TBD_ | pending | Home page re-skin (Guest + Logat conditional shell). |
+| C   | _TBD_ | pending | Bazar list + detail. |
+| D   | _TBD_ | pending | Tezaur list + detail. |
+| E   | _TBD_ | pending | Revista list + detail. |
+| F   | _TBD_ | pending | Forum (list, thread, category, new, search). |
+| G   | _TBD_ | pending | Cont pages (Favorite, Mesaje, Setari) + `docs/testing/m13-testing.md` + close. |
 
 ### M10 — Post-launch UX iteration #1 (cont reorg)
 

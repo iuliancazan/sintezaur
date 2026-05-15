@@ -7,6 +7,75 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M13 — Site design import v05 (out-of-order before M11)
+
+Re-skin progresiv al `apps/site` la design-ul v05
+(`docs/design-imports/2026-05-16-v05`), pe sub-faze
+(A foundation → B Home → C Bazar → D Tezaur → E Revistă →
+F Forum → G Cont + close).
+
+#### M13-A — Foundation (single commit, _SHA TBD_)
+
+- **V05 global stylesheet** copiat verbatim la
+  `apps/site/src/v05.css` (4503 linii) cu două modificări:
+  - **Dark tokens** swapped la valorile v2-neutral hex
+    (`--bg: #0a0a0b`, `--bg-elev: #131314`, `--bg-card: #181819`,
+    `--bg-card-2: #1f1f20`, `--line: #2a2a2c`,
+    `--line-strong: #3e3e40`, `--fg: #edecea`,
+    `--fg-muted: #8e8d8a`, `--fg-subtle: #5c5b58`,
+    `--grid-dots: rgba(235,176,35,0.16)`) per decision la spec
+    time (V05 a livrat două palete dark — OKLCH ambient gold și
+    v2-neutral pure hex; user a ales v2-neutral pentru dark, V05
+    pentru light cream warm).
+  - **Body bg** simplificat (doar gradient de dots @ 24px,
+    fără radial-ellipse de jos) ca să match-uiască v2-neutral.
+
+- **styles.scss** migrat de pe `libs/ui/tokens/tokens.css` pe
+  `v05.css`. Dashboard rămâne pe `libs/ui/tokens.css` cu propriul
+  scope-local OKLCH override din M12 — nu e afectat.
+
+- **`V05SpriteComponent`** nou — SVG sprite global cu **58
+  simboluri** lifted 1:1 din toate paginile v05:
+  - Topbar/account: `search`, `bell`, `mail`, `heart`, `burger`,
+    `caret-down`, `chevron`, `chev-d`, `chev-l`.
+  - Theme: `sun`, `moon`, `auto`.
+  - Actions: `plus`, `check`, `x`, `back`, `more`, `refresh`,
+    `external`, `share`, `bookmark`, `save-search`, `link`,
+    `upload`, `download`.
+  - Status: `alert`, `info`, `flag`, `clock`, `eye`.
+  - Content types: `book`, `image`, `list`, `grid`, `archive`,
+    `tag`, `badge`, `chat`, `reply`, `quote`, `doc`, `log`,
+    `code`, `play`.
+  - Admin/system: `cog`, `coins`, `truck`, `users`, `sliders`,
+    `density`, `density-c`, `density-s`, `megaphone`, `shield`,
+    `logout`.
+  - Geo: `pin`, `arrow`, `arrow-down`.
+  - Mount: o singură instanță în `app.ts` template root, sub
+    `<app-v05-sprite />` (width=0 height=0 aria-hidden). Toate
+    paginile pot consuma via `<svg><use href="#i-name"/></svg>`.
+
+- **Footer markup** aliniat la clasele V05:
+  - `app-foot__*` → `foot__*` (per `v05.css`).
+  - Brand row folosește `.brand` / `.brand__mark` /
+    `.brand__wordmark` (din topbar component, dar global în
+    v05.css).
+  - Locale switch folosește `.locale` (în loc de
+    `.app-foot__locale`).
+  - Stilurile inline din `app.ts` eliminate complet — toate
+    sunt acum în v05.css, scoped global pentru `.foot`.
+  - Singura inline style păstrată: `.foot__col a { min-height:
+    auto; min-width: auto; display: inline; }` ca să anuleze
+    regula globală 44×44 pentru link-urile de footer (care nu
+    trebuie să fie touch targets de 44px).
+
+- **`libs/ui` și `apps/dashboard` neatinse** — toate
+  modificările M13-A sunt scoped la `apps/site`.
+
+- **Build verified** — `pnpm exec nx build site --skip-nx-cache`
+  OK; CSS bundle crește de la ~30 kB la ~31 kB (v05 utility
+  classes incluse, dar majoritatea unused până la paginile
+  M13-B+). Nu apar warning-uri compile.
+
 ### M12 — Dashboard design import v04 (out-of-order before M11)
 
 Re-skin complet al `apps/dashboard` la design-ul v04

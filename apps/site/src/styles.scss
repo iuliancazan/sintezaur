@@ -1,22 +1,20 @@
 @use 'primeicons/primeicons.css';
 @use 'primeflex/primeflex.css';
 
-/* Design tokens — source: docs/design-imports/2026-05-14-v01/styles.css.
-   Re-exported through libs/ui so the dashboard can pick them up too. */
-@use '../../../libs/ui/src/lib/tokens/tokens.css';
+/* V05 design system — tokens, reset, layout primitives, all utility classes
+   for hero / listings / threads / spotlight / forum / revista / tezaur / bazar.
+   Source: docs/design-imports/2026-05-16-v05/styles.css.
+   Dark tokens use v2-neutral hex per user decision (2026-05-16). */
+@use './v05.css';
 
-/* Mobile-first defense: prevent iOS auto-zoom on input focus. The
-   token reset sets body font-size already; this is the input-specific
-   override that keeps the page calm when the keyboard pops. */
+/* Mobile-first defense: prevent iOS auto-zoom on input focus. */
 input,
 textarea,
 select {
   font-size: 16px;
 }
 
-/* 44×44 minimum touch target on actionable controls (Apple HIG +
-   Sintezaur mobile-first principle). Easy to override on dense
-   admin tables; harder to retrofit after the fact. */
+/* 44×44 minimum touch target on actionable controls. */
 button,
 a {
   min-height: 44px;
@@ -26,9 +24,7 @@ a {
   justify-content: center;
 }
 
-/* Plain anchors inside paragraph copy get tighter targets — the
-   44px-min rule above applies to buttons / nav links, not inline
-   word-level links. Re-enable inline display. */
+/* Inline word-level links keep tight targets. */
 p a,
 li a {
   display: inline;

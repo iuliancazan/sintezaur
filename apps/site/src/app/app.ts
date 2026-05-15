@@ -19,6 +19,7 @@ import { CookiesBanner } from './legal/cookies-banner.component';
 import { NotificationsPanelComponent } from './notifications/notifications-panel.component';
 import { NotificationsService } from './notifications/notifications.service';
 import { ToastContainer } from './ui/toast-container.component';
+import { V05SpriteComponent } from './ui/v05-sprite.component';
 
 /**
  * Root shell — sticky topbar + router outlet + footer. The topbar is
@@ -42,9 +43,12 @@ import { ToastContainer } from './ui/toast-container.component';
     CookiesBanner,
     ToastContainer,
     FeedbackModal,
+    V05SpriteComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <app-v05-sprite />
+
     <sz-topbar
       [brandText]="brandText()"
       [logoSrc]="logoSrc"
@@ -98,17 +102,17 @@ import { ToastContainer } from './ui/toast-container.component';
     <app-toast-container />
     <app-feedback-modal />
 
-    <footer class="app-foot">
+    <footer class="foot">
       <div class="shell">
-        <div class="app-foot__grid">
-          <div class="app-foot__brand-col">
-            <a class="app-foot__brand" routerLink="/">
-              <img class="app-foot__mark" [src]="logoSrc" [alt]="brandText()" />
-              <span class="app-foot__wordmark">{{ brandText() }}</span>
+        <div class="foot__grid">
+          <div class="foot__brand-col">
+            <a class="brand" routerLink="/">
+              <img class="brand__mark" [src]="logoSrc" [alt]="brandText()" />
+              <span class="brand__wordmark">{{ brandText() }}</span>
             </a>
             <p>{{ 'footer.tagline' | t }}</p>
           </div>
-          <div class="app-foot__col">
+          <div class="foot__col">
             <h4>// {{ 'footer.col_platform' | t }}</h4>
             <ul>
               <li><a routerLink="/tezaur">{{ 'app.section.tezaur' | t }}</a></li>
@@ -117,7 +121,7 @@ import { ToastContainer } from './ui/toast-container.component';
               <li><a routerLink="/forum">{{ 'app.section.forum' | t }}</a></li>
             </ul>
           </div>
-          <div class="app-foot__col">
+          <div class="foot__col">
             <h4>// {{ 'footer.col_about' | t }}</h4>
             <ul>
               <li><a routerLink="/despre">{{ 'footer.about' | t }}</a></li>
@@ -128,7 +132,7 @@ import { ToastContainer } from './ui/toast-container.component';
               <li><a routerLink="/regulament-forum">{{ 'footer.forum_rules' | t }}</a></li>
             </ul>
           </div>
-          <div class="app-foot__col">
+          <div class="foot__col">
             <h4>// {{ 'footer.col_social' | t }}</h4>
             <ul>
               <li><a href="https://instagram.com/sintezaur" rel="noopener" target="_blank">Instagram</a></li>
@@ -138,9 +142,9 @@ import { ToastContainer } from './ui/toast-container.component';
             </ul>
           </div>
         </div>
-        <div class="app-foot__bottom">
+        <div class="foot__bottom">
           <span>{{ 'footer.copy' | t: { year: copyYear } }}</span>
-          <div class="app-foot__locale">
+          <div class="locale">
             <span class="is-active">{{ 'footer.locale_ro' | t }}</span>
             <span>{{ 'footer.locale_en' | t }}</span>
           </div>
@@ -158,105 +162,12 @@ import { ToastContainer } from './ui/toast-container.component';
       :host > router-outlet + * {
         flex: 1;
       }
-
-      .app-foot {
-        border-top: 1px solid var(--line);
-        padding: 40px 0 24px;
-        margin-top: 40px;
-      }
-      .app-foot__grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr;
-        gap: 32px;
-        padding-bottom: 32px;
-        border-bottom: 1px solid var(--line);
-      }
-      .app-foot__brand {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-height: auto;
-        min-width: auto;
-      }
-      .app-foot__mark {
-        width: 36px;
-        height: 36px;
-        filter: var(--logo-filter);
-      }
-      .app-foot__wordmark {
-        font-family: var(--font-display);
-        font-size: 26px;
-        font-weight: 600;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        line-height: 1;
-      }
-      .app-foot__brand-col p {
-        color: var(--fg-muted);
-        max-width: 32ch;
-        margin: 12px 0 0;
-        font-size: 14px;
-      }
-      .app-foot__col h4 {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-        margin: 0 0 12px;
-        font-weight: 600;
-      }
-      .app-foot__col li {
-        padding: 4px 0;
-        font-size: 14px;
-      }
-      .app-foot__col a {
+      /* Footer link targets — global a/button rules in styles.scss enforce
+         44×44 min, but footer link rows need tighter targets. */
+      .foot__col a {
         min-height: auto;
         min-width: auto;
         display: inline;
-      }
-      .app-foot__col a:hover {
-        color: var(--accent);
-      }
-      .app-foot__bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: 24px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.06em;
-        color: var(--fg-subtle);
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-      .app-foot__locale {
-        display: flex;
-        border: 1px solid var(--line);
-      }
-      .app-foot__locale span {
-        padding: 4px 10px;
-        border-right: 1px solid var(--line);
-        text-transform: uppercase;
-      }
-      .app-foot__locale span:last-child {
-        border-right: 0;
-        color: var(--fg-subtle);
-      }
-      .app-foot__locale span.is-active {
-        background: var(--bg-elev);
-        color: var(--fg);
-      }
-
-      @media (max-width: 1100px) {
-        .app-foot__grid {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-      @media (max-width: 640px) {
-        .app-foot__grid {
-          grid-template-columns: 1fr;
-        }
       }
     `,
   ],
