@@ -15,23 +15,33 @@ import { TPipe } from '../i18n/t.pipe';
   imports: [RouterLink, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <main class="auth">
-      <header class="auth__brand">
-        <a routerLink="/" class="auth__logo">SINTEZAUR</a>
-      </header>
-
-      <section class="auth__card">
+    @if (embedded) {
+      <section class="auth__card auth__card--embedded">
         <h1 class="auth__title">{{ title }}</h1>
         @if (subtitle) {
           <p class="auth__subtitle">{{ subtitle }}</p>
         }
         <ng-content />
       </section>
+    } @else {
+      <main class="auth">
+        <header class="auth__brand">
+          <a routerLink="/" class="auth__logo">SINTEZAUR</a>
+        </header>
 
-      <footer class="auth__back">
-        <a routerLink="/">{{ 'auth.shared.back_home' | t }}</a>
-      </footer>
-    </main>
+        <section class="auth__card">
+          <h1 class="auth__title">{{ title }}</h1>
+          @if (subtitle) {
+            <p class="auth__subtitle">{{ subtitle }}</p>
+          }
+          <ng-content />
+        </section>
+
+        <footer class="auth__back">
+          <a routerLink="/">{{ 'auth.shared.back_home' | t }}</a>
+        </footer>
+      </main>
+    }
   `,
   styles: [
     `
@@ -65,6 +75,15 @@ import { TPipe } from '../i18n/t.pipe';
         background: var(--bg-elev);
         border: var(--grid-line) solid var(--line);
         padding: 32px 28px;
+      }
+      .auth__card--embedded {
+        max-width: none;
+        background: transparent;
+        border: 0;
+        padding: 0;
+      }
+      .auth__card--embedded .auth__title {
+        font-size: clamp(20px, 3vw, 24px);
       }
       .auth__title {
         font-family: var(--font-display);
@@ -102,4 +121,11 @@ import { TPipe } from '../i18n/t.pipe';
 export class AuthShellComponent {
   @Input() title = '';
   @Input() subtitle?: string;
+  /**
+   * When true, render just the card body without the full-page
+   * chrome (logo, back-home footer, min-height). Use this when the
+   * auth-shell is nested inside another page like the settings
+   * tab shell.
+   */
+  @Input() embedded = false;
 }

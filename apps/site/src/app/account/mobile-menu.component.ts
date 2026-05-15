@@ -50,7 +50,7 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
       </header>
 
       @if (auth.currentUser(); as user) {
-        <a class="mm__profile" routerLink="/cont" (click)="close()">
+        <a class="mm__profile" routerLink="/cont/setari" (click)="close()">
           <span class="mm__profile-name">{{ displayName() }}</span>
           <span class="mm__profile-email">{{ user.email }}</span>
         </a>
@@ -93,7 +93,7 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
       </div>
 
       <nav class="mm__group" [attr.aria-label]="'account.menu.aria' | t">
-        <a class="mm__item" routerLink="/cont" (click)="close()">
+        <a class="mm__item" routerLink="/cont/setari" (click)="close()">
           {{ 'account.menu.settings' | t }}
         </a>
         <a class="mm__item" routerLink="/cont/anunturi" (click)="close()">

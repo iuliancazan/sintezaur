@@ -345,7 +345,13 @@
     },
     "logged_in_as": "Conectat ca {{email}}",
     "back": "← Înapoi la cont",
-    "back_to_account": "← Înapoi la cont"
+    "back_to_account": "← Înapoi la cont",
+    "settings": {
+      "title": "Setări",
+      "tabs_aria": "Secțiuni setări",
+      "my_data": "Datele mele",
+      "blocked_users": "Utilizatori blocați"
+    }
   },
   "common": {
     "loading": "Se încarcă…",

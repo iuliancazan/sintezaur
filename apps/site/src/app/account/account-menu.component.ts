@@ -44,7 +44,7 @@ import { TPipe } from '../i18n/t.pipe';
       <a
         role="menuitem"
         class="am__item"
-        routerLink="/cont"
+        routerLink="/cont/setari"
         (click)="close()"
       >
         {{ 'account.menu.settings' | t }}

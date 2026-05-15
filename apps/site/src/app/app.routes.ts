@@ -153,24 +153,64 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/account-home.page').then((m) => m.AccountHomePage),
       },
+      // M10-C: legacy paths redirect into the new /cont/setari shell.
+      { path: 'profil', redirectTo: 'setari/profil', pathMatch: 'full' },
+      { path: 'parola', redirectTo: 'setari/parola', pathMatch: 'full' },
+      { path: 'email', redirectTo: 'setari/email', pathMatch: 'full' },
+      { path: 'date', redirectTo: 'setari/date', pathMatch: 'full' },
+      { path: 'preferinte', redirectTo: 'setari/preferinte', pathMatch: 'full' },
+      { path: 'blocuri', redirectTo: 'setari/blocuri', pathMatch: 'full' },
       {
-        path: 'profil',
+        path: 'setari',
         loadComponent: () =>
-          import('./account/profile-edit.page').then(
-            (m) => m.ProfileEditPage,
+          import('./account/settings-shell.page').then(
+            (m) => m.SettingsShellPage,
           ),
-      },
-      {
-        path: 'parola',
-        loadComponent: () =>
-          import('./account/change-password.page').then(
-            (m) => m.ChangePasswordPage,
-          ),
-      },
-      {
-        path: 'email',
-        loadComponent: () =>
-          import('./account/change-email.page').then((m) => m.ChangeEmailPage),
+        children: [
+          { path: '', redirectTo: 'profil', pathMatch: 'full' },
+          {
+            path: 'profil',
+            loadComponent: () =>
+              import('./account/profile-edit.page').then(
+                (m) => m.ProfileEditPage,
+              ),
+          },
+          {
+            path: 'parola',
+            loadComponent: () =>
+              import('./account/change-password.page').then(
+                (m) => m.ChangePasswordPage,
+              ),
+          },
+          {
+            path: 'email',
+            loadComponent: () =>
+              import('./account/change-email.page').then(
+                (m) => m.ChangeEmailPage,
+              ),
+          },
+          {
+            path: 'date',
+            loadComponent: () =>
+              import('./account/account-data.page').then(
+                (m) => m.AccountDataPage,
+              ),
+          },
+          {
+            path: 'preferinte',
+            loadComponent: () =>
+              import('./account/notification-preferences.page').then(
+                (m) => m.NotificationPreferencesPage,
+              ),
+          },
+          {
+            path: 'blocuri',
+            loadComponent: () =>
+              import('./account/blocks-list.page').then(
+                (m) => m.BlocksListPage,
+              ),
+          },
+        ],
       },
       {
         path: 'mesaje',
@@ -209,27 +249,6 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/forum-subscriptions.page').then(
             (m) => m.ForumSubscriptionsPage,
-          ),
-      },
-      {
-        path: 'blocuri',
-        loadComponent: () =>
-          import('./account/blocks-list.page').then(
-            (m) => m.BlocksListPage,
-          ),
-      },
-      {
-        path: 'date',
-        loadComponent: () =>
-          import('./account/account-data.page').then(
-            (m) => m.AccountDataPage,
-          ),
-      },
-      {
-        path: 'preferinte',
-        loadComponent: () =>
-          import('./account/notification-preferences.page').then(
-            (m) => m.NotificationPreferencesPage,
           ),
       },
     ],

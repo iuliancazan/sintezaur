@@ -19,6 +19,7 @@ import { authFormStyles } from '../auth/auth-form.styles';
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-auth-shell
+      [embedded]="true"
       [title]="'auth.change_password.title' | t"
       [subtitle]="'auth.change_password.subtitle' | t"
     >
