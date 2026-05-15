@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep
 
-#### M6-C — Polish UI: toast + interceptor + 404/410 + empty states + skeleton (`<commit>`)
+#### M6-C — Polish UI: toast + interceptor + 404/410 + empty states + skeleton (`0f08502`)
 
 - `ui/toast.service.ts` + `<app-toast-container>` — primitive minimal (no
   PrimeNG dep): 4 niveluri (info/success/warn/error), TTL implicit
