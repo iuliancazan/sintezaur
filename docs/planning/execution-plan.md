@@ -68,8 +68,9 @@ Effort estimates are in **engineering-days** (focused work blocks), not calendar
 | **M4** | Revista (Phase 2) | Article CRUD with Tiptap (+ paste-handler + lazy-load), editor role, auto-forum-thread, author profiles | M3 (or in parallel with M5 schema-stub) | 5–7 | Article reader + editor |
 | **M5** | Forum (Phase 3) | Categories, Discourse-hybrid threading, replies, **subscription levels**, **likes**, **badges**, **pinned threads**, **faceted search**, moderation | M4 | 8–11 | Forum browse + post |
 | **M6** | Launch Prep | SEO, sitemap, schema.org, backups, error tracking, mobile polish | M5 | 3–5 | Final polish pass |
+| **M7** | Storage Refactor (R2) | Local → Cloudflare R2, multi-type uploads (image/audio/PDF/ZIP), table-driven quotas, admin storage panel (limits editor + folder reports + trends), `files.sintezaur.ro` | M6 | 5–7 | None — backend + admin UI only |
 
-**Total:** ~43–60 engineering-days for MVP (up from 33–47 in v0.1 — spec v0.2 added ~10–13 days). Calendar estimate with parallel design work: **3.5–5.5 months**.
+**Total:** ~48–67 engineering-days for MVP+storage (M0–M7). Calendar estimate with parallel design work: **3.5–5.5 months**.
 
 ---
 
@@ -506,6 +507,166 @@ Sintezaur is production-ready: SEO-optimized, observable, backed up, error-track
 
 ### Estimated effort
 **3–5 eng-days.**
+
+---
+
+## M7 — Storage Refactor (Local → Cloudflare R2)
+
+### Goal
+Migrate uploaded files (images, audio, PDF, ZIP) from local Docker volume to Cloudflare R2 (S3-compatible). Code abstracted behind a `StorageDriver` interface so dev keeps simple local storage while prod uses R2. **Wipe & remake** — no migration script for existing local uploads (MVP seed data is regenerated post-launch).
+
+Decision rationale: R2 = zero egress fees forever, S3-compatible API, native Cloudflare CDN integration, cheapest at our scale (~€1-2/mo for 70 GB). Locks out at-scale storage cost surprise from bot scraping. See `docs/devops/storage-r2.md` for architecture detail (created as part of this milestone).
+
+### Deliverables
+- [ ] `StorageDriver` interface in `libs/shared/storage`
+- [ ] `LocalStorageDriver` (dev) — writes to `./storage/uploads`, serves via existing `/api/files/...`
+- [ ] `S3StorageDriver` (prod) — uses `@aws-sdk/client-s3` against Cloudflare R2
+- [ ] All upload paths refactored to use `StorageDriver` across Tezaur, Bazar, Revista, Forum
+- [ ] Multi-type upload pipeline (all supported from day 1, even if UI exposes them later):
+  - **Images** (JPG/PNG/WebP): Sharp variants (thumb / medium / large / original)
+  - **Audio** (MP3/WAV/OGG): MIME + magic-byte validation, stored as-is (no re-encode)
+  - **PDF**: magic-byte validation, stored as-is
+  - **ZIP**: magic-byte validation, stored as-is
+- [ ] Hash-suffixed object keys (immutable URLs): `<module>/<resource-id>/<purpose>-<sha256-12>.<ext>`
+- [ ] `Cache-Control: public, max-age=31536000, immutable` set at upload time
+- [ ] Correct `Content-Type` per file type
+- [ ] Custom domain `files.sintezaur.ro` connected to R2 bucket (CNAME via Cloudflare R2 UI)
+- [ ] Cloudflare WAF rule: hotlink protection (Referer must end in `sintezaur.ro` for image GETs)
+- [ ] Quota system (table-driven, NOT hardcoded — admin editable):
+  - Per-upload limits per type / module (see Limits table as initial seed)
+  - Per-user daily upload cap (50 MB default, editable)
+  - Per-user lifetime tracking with admin + user notification at threshold (1 GB default, editable)
+- [ ] Dashboard storage panel (`/admin/storage`):
+  - **Limits config tab** — edit values in `storage_limits` table from UI (values seeded from Limits table below)
+  - **Overview tab** — total bytes used, breakdown per module (Tezaur / Bazar / Forum / Revista) + per file type
+  - **Folder drill-down tab** — module → resource (gear / listing / article / thread) → bytes + file count
+  - **Trends tab** — line chart, daily / weekly / monthly consumption (last 30 / 90 / 365 days), aggregated per module
+  - **Top users table** — sortable by total bytes, daily bytes, file count; filterable by date range
+  - **Reconcile button** — manual trigger for the nightly reconciliation job (admin-on-demand)
+- [ ] Wipe local uploads folder on VPS post-deploy verification
+
+### Backend work
+- New `libs/shared/storage` module: interface + 2 drivers
+- Refactor existing upload services (TezaurPhotosService, BazarPhotosService, RevistaImagesService, ForumAttachmentsService) to use the driver
+- New schema (migration):
+  - `storage_limits` — config table, single-row or keyed by (scope, file_type, module). Columns: `id`, `scope` (`per_file` | `per_user_daily` | `per_user_lifetime_alert`), `file_type` (`image` | `audio` | `pdf` | `zip` | `*`), `module` (`tezaur` | `bazar` | `forum` | `revista` | `*`), `max_bytes`, `updated_at`, `updated_by`
+  - `user_upload_quota` — per-user counters (`user_id`, `daily_bytes`, `lifetime_bytes`, `last_reset_at`, `notified_lifetime_at`)
+  - `storage_events` — append-only audit log (`id`, `user_id`, `module`, `resource_id`, `purpose`, `object_key`, `bytes`, `content_type`, `created_at`). Indexed on `(module, created_at)` + `(user_id, created_at)` for fast aggregations
+  - `storage_folder_stats` — materialized rollup (`module`, `resource_id`, `total_bytes`, `file_count`, `updated_at`). Updated incrementally on upload + nightly reconciliation
+- Pre-upload `UploadQuotaGuard` (NestJS Guard) — reads `storage_limits` (cached 5 min) + `user_upload_quota`; rejects with `413 Payload Too Large` or `429 Quota Exceeded`
+- pg-boss cron: nightly reset of `daily_bytes` at 00:00 UTC
+- pg-boss cron: nightly **reconciliation** at 03:00 UTC — `ListObjectsV2` per module prefix on R2, compare totals to `storage_folder_stats`, flag drift > 1 MB in `audit_log`. Throttled (paginated, 1000 keys/page, 200ms sleep between pages) so it never spikes API quota
+- pg-boss job: trigger `storage_quota_lifetime_reached` notification (admin + user) when crossing threshold from `storage_limits.per_user_lifetime_alert`
+- File-type detection via magic bytes (`file-type` package) — never trust client MIME
+- Read-only API endpoints for the admin panel (all gated by `admin` role):
+  - `GET /admin/storage/limits` + `PUT /admin/storage/limits/:id` (edit limits)
+  - `GET /admin/storage/overview` (totals + per-module breakdown)
+  - `GET /admin/storage/folders?module=&from=&to=` (drill-down)
+  - `GET /admin/storage/trends?granularity=day|week|month&from=&to=` (time series)
+  - `GET /admin/storage/users?sort=&from=&to=` (top users)
+  - `POST /admin/storage/reconcile` (manual trigger of reconciliation job)
+- All admin queries hit Postgres only (NOT R2) — reconciliation is the only path that lists R2 objects. Keeps the panel snappy and avoids R2 API spend.
+
+### Frontend work
+- Update existing upload components in `libs/ui`: progress indicator, client-side type/size pre-check (pulled from a public `/api/storage/limits` endpoint, cached client-side 5 min — same source of truth as backend guard, so changing a limit in admin reflects instantly)
+- Audio upload UI: simple `<input type="file" accept="audio/*">`, no waveform editor
+- PDF / ZIP: file picker, no preview
+- Error UI (i18n): "Daily upload limit reached", "File too large", "Type not allowed"
+- Dashboard admin storage panel at `/admin/storage` with 4 tabs (Limits / Overview / Folders / Trends), each lazy-loaded route:
+  - **Limits**: editable form, inline save, history of who-edited-when via `updated_by` + `updated_at`
+  - **Overview**: 4 PrimeNG cards (total / images / audio / docs) + donut chart per module
+  - **Folders**: drill-down tree (module → top-N resources by bytes)
+  - **Trends**: chart.js / PrimeNG chart, granularity switcher (day / week / month), date range picker
+  - **Top users**: data table, sortable, with "View files" action that opens a side-panel listing that user's recent uploads
+
+### Limits (initial seed into `storage_limits` — editable from admin panel)
+
+| File type | Module(s) | Max per file |
+|---|---|---|
+| Image (JPG/PNG/WebP) | All | 8 MB |
+| Audio (MP3/WAV/OGG) | Forum, Tezaur, Bazar | 10 MB |
+| Audio (MP3/WAV/OGG) | Revista articles | 20 MB |
+| PDF | All | 10 MB |
+| ZIP | All | 20 MB |
+
+**Per-user quotas (seeded, editable):**
+- **Daily:** 50 MB total uploads per user per UTC day
+- **Lifetime alert:** admin + user notified once when user's total uploaded bytes exceed 1 GB
+
+**No hardcoded values in code.** All checks read from `storage_limits`. Migration seeds the initial values; admin overrides them at runtime.
+
+### Naming convention
+Object keys: `<module>/<resource-id>/<purpose>-<sha256-12>.<ext>`
+
+Examples:
+- `tezaur/gear-roland-jupiter-8/photo-3a4f9b2c1d5e.webp`
+- `bazar/listing-1287/photo-2-7e1c8f0a9b4d.webp`
+- `revista/article-best-synths-2026/cover-9d2e4a1c8b7f.webp`
+- `forum/post-44231/audio-sample-5b3c7a2e1d9f.mp3`
+
+Hash = first 12 chars of SHA-256 of file content → immutable, dedup natural, cache-forever safe.
+
+### Dev mode
+- `STORAGE_DRIVER=local` (default in dev) — uses `LocalStorageDriver`, files at `./storage/uploads`, served via `/api/files/...`
+- `STORAGE_DRIVER=s3` (prod) — uses R2 via `S3StorageDriver`, files at `https://files.sintezaur.ro/...`
+- No R2 credentials required for local dev — keeps onboarding simple, works offline.
+
+### Env vars (new)
+| Var | Dev default | Prod value |
+|---|---|---|
+| `STORAGE_DRIVER` | `local` | `s3` |
+| `STORAGE_PUBLIC_BASE_URL` | `http://localhost:3000/api/files` | `https://files.sintezaur.ro` |
+| `R2_ENDPOINT` | — | from Cloudflare R2 dashboard |
+| `R2_BUCKET` | — | `sintezaur-uploads` |
+| `R2_ACCESS_KEY_ID` | — | from R2 API token |
+| `R2_SECRET_ACCESS_KEY` | — | from R2 API token |
+
+### Cloudflare R2 setup (one-time, before deploy)
+1. Cloudflare dashboard → R2 → Create bucket `sintezaur-uploads`
+2. Settings → Public access → Connect Domain → `files.sintezaur.ro`
+   - Cloudflare auto-creates CNAME in the `sintezaur.ro` zone (proxied)
+3. Manage R2 API Tokens → Create token scoped to bucket `sintezaur-uploads` with `Object Read & Write`
+4. Save `Access Key ID` + `Secret Access Key` in 1Password as `Sintezaur R2 — prod`
+5. Set the env vars in Coolify Shared Variables
+
+### Mobile-first checklist
+- Upload UX validated on iPhone Safari + Android Chrome
+- Show "Large file, use Wi-Fi" warning client-side if file > 5 MB on cellular (`navigator.connection.effectiveType` check)
+- Touch-friendly file picker
+- No chunked / resumable uploads in MVP — single-shot POST
+
+### Verification gates
+- Image upload → R2 → served via `files.sintezaur.ro` with correct `Content-Type: image/webp` and `Cache-Control` headers
+- Audio MP3 upload → R2 → plays inline in browser
+- PDF upload → R2 → opens in browser viewer
+- ZIP upload → R2 → downloads correctly
+- 51st MB in a day rejected by `UploadQuotaGuard`; counter resets at 00:00 UTC
+- Editing a limit in `/admin/storage` Limits tab takes effect within ≤5 min (cache TTL); guard rejects accordingly
+- Hotlink protection: `curl https://files.sintezaur.ro/...` without Referer = 403; with `Referer: https://sintezaur.ro/...` = 200
+- Cache headers verified in DevTools Network tab
+- LocalDriver still works in dev with `STORAGE_DRIVER=local`
+- Switching `STORAGE_DRIVER=s3` in dev (with R2 creds) also works — driver swap is clean
+- Admin panel Overview totals match Postgres sum of `storage_events.bytes` (within ±1 MB after reconciliation)
+- Reconciliation cron completes in <5 min for 10k objects and uses <100 R2 List API calls per run
+- Trends chart renders correctly with empty data (no errors on day 1 with zero uploads)
+
+### Backup strategy
+**Decision deferred to M7.5.** For now: R2 is the only copy. Likely future options:
+- `rclone sync` daily R2 → Hetzner Storage Box BX11 (€3.20/mo)
+- Or accept that assets are recoverable (users re-upload if lost); only DB is critical (handled in M6 backup)
+
+Track in `docs/spec/spec.md` §13 Open Questions until resolved.
+
+### Performance & cost guardrails
+- Admin queries hit Postgres only — never R2 — so admins can refresh the dashboard freely
+- Reconciliation cron is **paginated + throttled** (200ms sleep between 1000-key pages); a 100k-object bucket = ~20s total R2 wall time, <100 List API calls. Won't exhaust R2 free-tier API quotas.
+- `storage_events` is append-only with indexes on `(module, created_at)` and `(user_id, created_at)` — aggregations are sargable, no full scans
+- `storage_folder_stats` is a rollup, updated incrementally on each upload (`+= bytes`) so Overview doesn't re-aggregate
+- Trends charts limited to 365 days max range and pre-aggregated by `date_trunc('day', created_at)` — no client-side date math on raw events
+- Cache layer (in-memory, 5 min TTL) in front of `storage_limits` reads (read-heavy, write-rare)
+
+### Estimated effort
+**5–7 eng-days** (revised up from 4–6 due to admin panel scope: limits editor + 4 dashboard tabs + reconciliation cron).
 
 ---
 
