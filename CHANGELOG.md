@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
-#### M6-E4 — Pre-launch hardening: GDPR + slug redirect + email history (`PENDING`)
+#### M6-E4 — Pre-launch hardening: GDPR + slug redirect + email history (`2cc2ceb`)
 
 - Schema (additive, idempotent):
   - Migration `9012_audit_action_gdpr_delete.sql` — `ALTER TYPE
