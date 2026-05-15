@@ -12,6 +12,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { marked } from 'marked';
 import { SeoService } from '../seo/seo.service';
+import { SkeletonComponent } from '../ui/skeleton.component';
 import { LegalService } from './legal.service';
 
 /**
@@ -28,13 +29,24 @@ import { LegalService } from './legal.service';
 @Component({
   selector: 'app-legal-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, SkeletonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="legal">
       <article class="legal__shell">
         @if (loading()) {
-          <p class="legal__loading">Se încarcă…</p>
+          <div class="legal__skeleton" aria-busy="true" aria-label="Se încarcă pagina">
+            <app-skeleton width="55%" height="34px" />
+            <app-skeleton width="35%" height="14px" />
+            <div class="legal__skeleton-body">
+              <app-skeleton width="100%" height="14px" />
+              <app-skeleton width="92%" height="14px" />
+              <app-skeleton width="96%" height="14px" />
+              <app-skeleton width="80%" height="14px" />
+              <app-skeleton width="100%" height="14px" />
+              <app-skeleton width="60%" height="14px" />
+            </div>
+          </div>
         } @else if (error()) {
           <div class="legal__error">
             <h1>Pagina nu poate fi afișată</h1>
@@ -116,6 +128,18 @@ import { LegalService } from './legal.service';
         margin: 24px 0;
       }
       .legal__body strong { font-weight: 600; }
+      .legal__skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px 0;
+      }
+      .legal__skeleton-body {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 22px;
+      }
       .legal__loading,
       .legal__error {
         text-align: center;

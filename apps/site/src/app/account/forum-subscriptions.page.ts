@@ -15,12 +15,19 @@ import {
 } from '../forum/forum.service';
 import { SubscribeBellComponent } from '../forum/subscribe-bell.component';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 
 @Component({
   selector: 'app-forum-subscriptions-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SubscribeBellComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SubscribeBellComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -38,7 +45,14 @@ import { TPipe } from '../i18n/t.pipe';
         <section class="fs-section">
           <h2 class="fs-section__title">{{ 'forum.account.threads' | t }}</h2>
           @if (d.threads.length === 0) {
-            <p class="fs-empty">{{ 'forum.account.no_threads' | t }}</p>
+            <app-empty-state
+              [compact]="true"
+              icon="🔔"
+              [title]="'Nu urmărești niciun thread'"
+              [lede]="'Apasă pe clopoțelul de pe un thread ca să primești notificare la reply-uri noi.'"
+              ctaLabel="Vezi forumul"
+              ctaRouterLink="/forum"
+            />
           } @else {
             <ul class="fs-list">
               @for (t of d.threads; track t.threadId) {
@@ -64,7 +78,14 @@ import { TPipe } from '../i18n/t.pipe';
         <section class="fs-section">
           <h2 class="fs-section__title">{{ 'forum.account.categories' | t }}</h2>
           @if (d.categories.length === 0) {
-            <p class="fs-empty">{{ 'forum.account.no_categories' | t }}</p>
+            <app-empty-state
+              [compact]="true"
+              icon="📂"
+              [title]="'Nu urmărești nicio categorie'"
+              [lede]="'În pagina unei categorii, alege Watching sau Tracking ca să primești thread-uri noi.'"
+              ctaLabel="Vezi categorii"
+              ctaRouterLink="/forum"
+            />
           } @else {
             <ul class="fs-list">
               @for (c of d.categories; track c.categoryId) {

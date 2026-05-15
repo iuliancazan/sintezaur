@@ -239,4 +239,19 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./legal/contact-page.component').then((m) => m.ContactPage),
   },
+  // 410 Gone (M6-C) — wired for the post-redirect-expiry flow described
+  // in docs/seo-todo.md. Currently used manually by components that want
+  // to surface a definitive "this used to exist but won't again" page.
+  {
+    path: 'gone',
+    data: { variant: 'gone' },
+    loadComponent: () =>
+      import('./ui/not-found.page').then((m) => m.NotFoundPage),
+  },
+  // Catch-all 404 (M6-C). MUST stay last in this list.
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./ui/not-found.page').then((m) => m.NotFoundPage),
+  },
 ];

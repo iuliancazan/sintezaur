@@ -15,6 +15,7 @@ import {
 import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 import {
   TezaurService,
@@ -35,7 +36,14 @@ const PAGE_SIZE = 24;
 @Component({
   selector: 'app-tezaur-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -193,7 +201,13 @@ const PAGE_SIZE = 24;
 
           @if (response(); as r) {
             @if (r.items.length === 0) {
-              <p class="tez-empty">{{ 'tezaur.filters.no_results' | t }}</p>
+              <app-empty-state
+                icon="🎛️"
+                [title]="'Niciun echipament pentru filtrele alese'"
+                [lede]="'Încearcă să elimini un filtru sau să cauți alt brand. Catalogul are 100+ echipamente — nu te oprești la zero.'"
+                ctaLabel="Resetează filtrele"
+                ctaRouterLink="/tezaur"
+              />
             } @else {
               <div class="tez-grid crosses">
                 <span class="crosses-tl"></span><span class="crosses-tr"></span>

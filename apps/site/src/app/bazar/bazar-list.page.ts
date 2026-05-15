@@ -26,6 +26,7 @@ import {
 import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 import { AuthService } from '../auth/auth.service';
 import { BazarService, type BazarListResponse } from './bazar.service';
@@ -35,7 +36,14 @@ const PAGE_SIZE = 24;
 @Component({
   selector: 'app-bazar-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -289,7 +297,13 @@ const PAGE_SIZE = 24;
 
           @if (response(); as r) {
             @if (r.items.length === 0) {
-              <p class="bz-empty">{{ 'bazar.filters.no_results' | t }}</p>
+              <app-empty-state
+                icon="🛒"
+                [title]="'Niciun anunț pentru filtrele alese'"
+                [lede]="'Salvează căutarea ca să primești notificare când apar anunțuri care se potrivesc — sau resetează filtrele.'"
+                ctaLabel="Resetează filtrele"
+                ctaRouterLink="/bazar"
+              />
             } @else {
               <div class="bz-grid crosses">
                 <span class="crosses-tl"></span><span class="crosses-tr"></span>

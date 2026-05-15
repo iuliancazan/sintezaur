@@ -17,6 +17,7 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
+import { httpErrorInterceptor } from './ui/http-error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,7 +26,10 @@ export const appConfig: ApplicationConfig = {
       appRoutes,
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor, httpErrorInterceptor]),
+    ),
     provideAnimationsAsync(),
     providePrimeNG({
       theme: {

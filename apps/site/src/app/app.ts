@@ -15,6 +15,7 @@ import { TPipe } from './i18n/t.pipe';
 import { CookiesBanner } from './legal/cookies-banner.component';
 import { NotificationsPanelComponent } from './notifications/notifications-panel.component';
 import { NotificationsService } from './notifications/notifications.service';
+import { ToastContainer } from './ui/toast-container.component';
 
 /**
  * Root shell — sticky topbar + router outlet + footer. The topbar is
@@ -34,6 +35,7 @@ import { NotificationsService } from './notifications/notifications.service';
     TPipe,
     NotificationsPanelComponent,
     CookiesBanner,
+    ToastContainer,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -66,6 +68,7 @@ import { NotificationsService } from './notifications/notifications.service';
 
     <router-outlet />
     <app-cookies-banner />
+    <app-toast-container />
 
     <footer class="app-foot">
       <div class="shell">

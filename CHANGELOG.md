@@ -9,6 +9,47 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep
 
+#### M6-C — Polish UI: toast + interceptor + 404/410 + empty states + skeleton (`<commit>`)
+
+- `ui/toast.service.ts` + `<app-toast-container>` — primitive minimal (no
+  PrimeNG dep): 4 niveluri (info/success/warn/error), TTL implicit
+  3.5s/5s/6.5s, sticky cu `ttlMs: 0`, slide-in CSS, `aria-live="polite"`,
+  honors `prefers-reduced-motion`. Stack jos-dreapta, mobile fullwidth.
+- `ui/http-error.interceptor.ts` — global error toast cu reguli:
+  - `0` (network) → „Serverul nu răspunde" + detail despre conexiune
+  - `401` → silent (auth interceptor face refresh + retry)
+  - `404` → silent (componenta gestionează 404 inline)
+  - `403` → „Nu ai permisiunea"
+  - `429` → „Prea multe acțiuni" + sfat de așteptare
+  - `5xx` → „Ceva nu a funcționat pe server"
+  - alte `4xx` → silent (form validation inline)
+  - exemptează `/auth/*` (login/signup/refresh etc. — au inline UX
+    proprie, toast ar fi duplicat)
+- `ui/not-found.page.ts` — 404 + 410 brand-aware (variant prin
+  `route.data: { variant: 'gone' }`). Suggest 4 secțiuni principale,
+  CTA spre `/` + spre `/contact` pentru raportare. `seo.set()` cu
+  meta corespunzător. Catch-all route `**` la final + `/gone` route
+  pentru viitorul flow post-redirect-expiry (vezi `docs/seo-todo.md`).
+- `ui/empty-state.component.ts` — reusable cu inputs (`icon`, `title`,
+  `lede`, `ctaLabel`, `ctaRouterLink`/`ctaQueryParams`/`ctaHref`,
+  `compact`). Cablat pe 9 spoturi:
+  - `/tezaur` cu filtre fără rezultate
+  - `/bazar` cu filtre fără rezultate
+  - `/revista` cu filtre fără rezultate
+  - `/forum/cautare` fără rezultate
+  - `/forum/:category` fără thread-uri (CTA „Deschide thread nou")
+  - `/cont/mesaje` inbox gol (CTA „Vezi anunțuri")
+  - `/cont/anunturi` user fără anunțuri (CTA „Publică anunț")
+  - `/cont/salvate` watches goale (CTA „Vezi anunțuri")
+  - `/cont/cautari-salvate` saved searches goale
+  - `/cont/abonamente` (2 secțiuni: threads + categorii)
+- `ui/skeleton.component.ts` — CSS shimmer pe linii cu width/height/
+  radius configurable, honors reduced-motion. Aplicat pe `/legal/:slug`
+  loading state (cea mai vizibilă pentru utilizatori noi). Pattern
+  extensibil pe tezaur/revista detail în polish-ul viitor.
+- Toast container montat în root shell sub router-outlet, după
+  cookies banner.
+
 #### M6-B — SEO mediu: meta + OG + JSON-LD + sitemap.xml (`4f786ad`)
 
 - `SeoService` (site, providedIn root): un singur loc pentru title (cu sufix

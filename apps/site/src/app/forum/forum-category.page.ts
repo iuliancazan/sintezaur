@@ -10,6 +10,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ForumService,
@@ -23,7 +24,13 @@ const PAGE_SIZE = 25;
 @Component({
   selector: 'app-forum-category-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SubscribeBellComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SubscribeBellComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -80,7 +87,13 @@ const PAGE_SIZE = 25;
         </div>
 
         @if (r.items.length === 0) {
-          <p class="fc-empty">{{ 'forum.no_threads' | t }}</p>
+          <app-empty-state
+            icon="💬"
+            [title]="'Nu există încă discuții în această categorie'"
+            [lede]="'Fii primul care deschide un subiect. O discuție bună începe cu o întrebare clară.'"
+            ctaLabel="Deschide thread nou"
+            [ctaRouterLink]="['/forum', categorySlug(), 'nou']"
+          />
         } @else {
           <ul class="fc-list">
             @for (t of r.items; track t.id) {

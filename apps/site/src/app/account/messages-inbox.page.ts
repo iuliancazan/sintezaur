@@ -14,12 +14,19 @@ import {
   type InboxThread,
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 
 @Component({
   selector: 'app-messages-inbox-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="inbox">
@@ -35,7 +42,13 @@ import { TPipe } from '../i18n/t.pipe';
       @if (loading()) {
         <p class="inbox__empty">{{ 'app.loading' | t }}</p>
       } @else if (threads().length === 0) {
-        <p class="inbox__empty">{{ 'inbox.empty' | t }}</p>
+        <app-empty-state
+          icon="✉️"
+          [title]="'Inbox-ul tău e gol'"
+          [lede]="'Vezi un anunț interesant și începe o conversație din pagina lui — toate firele rămân aici.'"
+          ctaLabel="Vezi anunțuri"
+          ctaRouterLink="/bazar"
+        />
       } @else {
         <ul class="inbox__list">
           @for (t of threads(); track t.threadId) {

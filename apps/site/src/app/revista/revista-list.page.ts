@@ -12,6 +12,7 @@ import { SzIconComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ARTICLE_CATEGORIES,
@@ -26,7 +27,14 @@ const PAGE_SIZE = 12;
 @Component({
   selector: 'app-revista-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -139,7 +147,13 @@ const PAGE_SIZE = 12;
         </div>
 
         @if (r.items.length === 0) {
-          <p class="rv-empty">{{ 'revista.no_results' | t }}</p>
+          <app-empty-state
+            icon="📰"
+            [title]="'Niciun articol pentru filtrele alese'"
+            [lede]="'Revista crește pe măsură ce comunitatea contribuie. Vezi toate articolele publicate sau încearcă altă categorie.'"
+            ctaLabel="Toate articolele"
+            ctaRouterLink="/revista"
+          />
         } @else {
           <div class="rv-grid">
             @for (a of r.items; track a.id) {

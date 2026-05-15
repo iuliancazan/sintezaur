@@ -14,6 +14,7 @@ import {
   type BazarListItem,
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 
 type FilterKey = 'all' | 'active' | 'sold' | 'expired' | 'draft';
@@ -22,7 +23,13 @@ const FILTERS: FilterKey[] = ['all', 'active', 'sold', 'expired', 'draft'];
 @Component({
   selector: 'app-my-listings-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="ml">
@@ -57,7 +64,13 @@ const FILTERS: FilterKey[] = ['all', 'active', 'sold', 'expired', 'draft'];
       @if (loading()) {
         <p class="ml__empty">{{ 'app.loading' | t }}</p>
       } @else if (filtered().length === 0) {
-        <p class="ml__empty">{{ 'my_listings.empty' | t }}</p>
+        <app-empty-state
+          icon="📦"
+          [title]="'Nu ai publicat încă niciun anunț'"
+          [lede]="'Echipament în plus? Publică-l în 2 minute — formularul îți completează automat detaliile dacă găsești articolul în Tezaur.'"
+          ctaLabel="Publică anunț"
+          ctaRouterLink="/bazar/nou"
+        />
       } @else {
         <ul class="ml__list">
           @for (l of filtered(); track l.id) {

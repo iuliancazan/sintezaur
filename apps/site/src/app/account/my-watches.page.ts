@@ -13,12 +13,19 @@ import {
   type WatchedListingRow,
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 
 @Component({
   selector: 'app-my-watches-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="mw">
@@ -34,7 +41,13 @@ import { TPipe } from '../i18n/t.pipe';
       @if (loading()) {
         <p class="mw__empty">{{ 'app.loading' | t }}</p>
       } @else if (rows().length === 0) {
-        <p class="mw__empty">{{ 'my_watches.empty' | t }}</p>
+        <app-empty-state
+          icon="♡"
+          [title]="'Nu urmărești niciun anunț'"
+          [lede]="'Apasă pe inimioara unui anunț ca să-l salvezi. Te notificăm la price-drop sau schimbare de status.'"
+          ctaLabel="Vezi anunțuri"
+          ctaRouterLink="/bazar"
+        />
       } @else {
         <ul class="mw__list">
           @for (w of rows(); track w.listingId) {

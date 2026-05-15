@@ -6,20 +6,20 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-B (`4f786ad`) — SEO mediu: `SeoService` global
-(title/description/OG/Twitter/canonical) cablat pe toate paginile
-publice + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/
-ProfilePage/WebSite) + sitemap.xml dinamic (129 URL-uri baseline) +
-robots.txt dinamic. TODO max-level documentat în `docs/seo-todo.md`.
+**Last shipped:** M6-C (`<commit>`) — polish UI pass: ToastService +
+HttpErrorInterceptor global (network/5xx/429/403 cu mesaje prietenoase),
+NotFoundPage brand-aware pentru 404 + 410 cu catch-all route, EmptyState
+component cablat pe 9 spoturi (Tezaur/Bazar/Revista/Forum search +
+category + 5 pagini account), Skeleton component aplicat pe legal page.
 
-**Next up:** **M6-C** — polish UI pass: 404 + 410 brand-aware pages,
-empty states peste tot (Tezaur/Bazar/Revista/Forum/inbox/notifications/
-abonamente/colecție/saved-searches/my-listings/my-watches), HTTP error
-interceptor global cu Toast prietenos (înlocuiește 500 brut), skeleton
-loaders pe paginile list+detail majore (înlocuiește spinnerii albi).
+**Next up:** **M6-D** — feedback widget: schema `user_feedback` (bug/
+sugestie/altele × new/read/archived), link discret în user menu →
+modal cu textarea + select categorie + auto-capture URL + screenshot
+flag, admin dashboard `/feedback` queue cu mark-read/archive,
+notify superadmin.
 
 **Active milestone:** M6 — polish + soft-launch prep (4 sub-faze:
-A legal ✅ → B SEO ✅ → C polish UI → D feedback widget).
+A legal ✅ → B SEO ✅ → C polish UI ✅ → D feedback widget).
 
 ## Milestones
 
@@ -104,7 +104,7 @@ A legal ✅ → B SEO ✅ → C polish UI → D feedback widget).
 |-----|--------|--------|-------|
 | A   | `83c6ba4` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
 | B   | `4f786ad` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
-| C   | — | pending | polish UI pass: 404+410 brand pages, empty states peste tot, HTTP error interceptor global, skeleton loaders |
+| C   | `<commit>` | done | polish UI pass: ToastService + ToastContainer + HttpErrorInterceptor global (network/5xx/429/403) + NotFoundPage brand-aware pentru 404 + 410 catch-all + EmptyStateComponent cablat pe 9 spoturi (Tezaur/Bazar/Revista lists, Forum cautare + category, 5 account pages) + SkeletonComponent CSS-only aplicat pe legal page |
 | D   | — | pending | feedback widget în user menu + admin `/feedback` queue cu mark-read/archive |
 
 ## Conventions (recap from memory)

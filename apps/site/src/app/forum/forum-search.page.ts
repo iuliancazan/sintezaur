@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ForumCategory,
@@ -22,7 +23,13 @@ type Sort = (typeof SORT_OPTIONS)[number];
 @Component({
   selector: 'app-forum-search-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TPipe],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TPipe,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -111,7 +118,13 @@ type Sort = (typeof SORT_OPTIONS)[number];
         </div>
 
         @if (r.items.length === 0) {
-          <p class="fs-empty">{{ 'forum.search.no_results' | t }}</p>
+          <app-empty-state
+            icon="🔍"
+            [title]="'Nicio postare nu se potrivește'"
+            [lede]="'Încearcă alți termeni de căutare sau elimină filtrele de categorie / autor.'"
+            ctaLabel="Resetează căutarea"
+            ctaRouterLink="/forum/cautare"
+          />
         } @else {
           <ul class="fs-list">
             @for (hit of r.items; track hit.threadId) {

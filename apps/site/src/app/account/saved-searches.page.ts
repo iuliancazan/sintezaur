@@ -13,6 +13,7 @@ import {
   type SavedSearchRow,
 } from '../bazar/bazar.service';
 import { I18nService } from '../i18n/i18n.service';
+import { EmptyStateComponent } from '../ui/empty-state.component';
 import { TPipe } from '../i18n/t.pipe';
 
 type NotifyMode = SavedSearchRow['notifyMode'];
@@ -22,7 +23,14 @@ const MODES: NotifyMode[] = ['instant', 'daily_digest', 'off'];
 @Component({
   selector: 'app-saved-searches-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TPipe, SzIconComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    TPipe,
+    SzIconComponent,
+    EmptyStateComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="ss">
@@ -38,7 +46,13 @@ const MODES: NotifyMode[] = ['instant', 'daily_digest', 'off'];
       @if (loading()) {
         <p class="ss__empty">{{ 'app.loading' | t }}</p>
       } @else if (rows().length === 0) {
-        <p class="ss__empty">{{ 'saved_searches.empty' | t }}</p>
+        <app-empty-state
+          icon="🔖"
+          [title]="'Nu ai salvat încă nicio căutare'"
+          [lede]="'Cauți ceva specific? Filtrează în Bazar și apasă butonul Salvează căutarea — te anunțăm când apar anunțuri noi care se potrivesc.'"
+          ctaLabel="Caută anunțuri"
+          ctaRouterLink="/bazar"
+        />
       } @else {
         <ul class="ss__list">
           @for (s of rows(); track s.id) {
