@@ -6,26 +6,22 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M9-A (`4e2103c`) — SEO closure final pass.
-**Forum 410 Gone path** §7.13 — `ForumThreadsService.lookupSlugRedirect`
-mirror la Tezaur/Revista, `PublicForumController.handleSlugMiss`
-helper catch+redirect, site `forum-thread.page` honors `gone`/`redirect`.
-**BreadcrumbList JSON-LD** pe toate 4 detail pages (Tezaur/Bazar/
-Revista/Forum) via nou `SeoService.breadcrumbList(items)` static
-helper + array form `setJsonLd([primary, breadcrumb])`.
-**Homepage Organization + WebSite SearchAction** — unlock sitelinks
-search box în Google SERP. **Brand placeholders** — script
-`tools/scripts/generate-brand-assets.ts` (Sharp) generează
-`og-default.png` (1200×630) + `logo.png` (512×512); fix share previews
-pe Facebook/iMessage/Slack. **Build warnings cleanup** — NG8107/8102
-+ 2× NG8113 (unused imports) + bundle budget bumped la 1500kb
-warning (Angular's mb parser trunchiază 1.5mb → 1mb).
+**Last shipped:** M9-B (`9f0e604`) — unified cross-module search
+`/cautare` per spec §7.6. Backend `UnifiedSearchService` fan-out
+paralel la `TezaurService.listPublic` + `ListingsService.listPublic`
++ `ArticlesService.listPublic` + `ForumSearchService.search` (fiecare
+wrapped în try/catch). Public `GET /api/search?q=&limit=`, min 2
+chars, max 20 per section. Site `SearchPage` cu input debounced
+300ms sync la `?q=` URL param, 4 secțiuni grouped cu top 5 +
+„Vezi toate" deep-link per modul. App shell topbar search button
+cablat prin `goToSearch()`. Homepage `WebSite` SearchAction target
+swap `/forum/cautare` → `/cautare`. i18n block nou `search.*`.
 
-**Next up:** **M9-B** — Unified search `/cautare` (§7.6). Cross-module
-text search backend + site page. Apoi M9-C observability (Sentry +
-pg_dump backup cron) + `docs/testing/m9-testing.md` final sync.
+**Next up:** **M9-C** — observability: `@sentry/nestjs` integration
+în api + worker, pg-boss cron pentru `pg_dump` zilnic la Hetzner
+Storage Box. Apoi `docs/testing/m9-testing.md` + close M9.
 
-**Active milestone:** M9 în lucru — A ✅, B (next), C (last).
+**Active milestone:** M9 — A ✅, B ✅, C (last).
 
 ## Milestones
 
@@ -137,6 +133,7 @@ pg_dump backup cron) + `docs/testing/m9-testing.md` final sync.
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
+| B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 
 ## Conventions (recap from memory)
 

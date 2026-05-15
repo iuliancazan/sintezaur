@@ -9,6 +9,49 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M9 — SEO closure + unified search + observability
 
+#### M9-B — Unified cross-module search `/cautare` (`9f0e604`)
+
+Spec §7.6 — „One unified search page + per-section filtered search".
+
+- Backend (`apps/api/src/app/search/`):
+  - `UnifiedSearchService.search(q, limit)` fan-out paralel via
+    `Promise.all` la 4 module:
+    - `TezaurService.listPublic({ q, pageSize })`
+    - `ListingsService.listPublic({ q, pageSize })`
+    - `ArticlesService.listPublic({ q, pageSize })`
+    - `ForumSearchService.search({ q, pageSize })`
+  - Fiecare fan-out wrapped în try/catch — un section slow / broken
+    nu pică toată request-ul.
+  - Min query 2 caractere; max limit 20 / section.
+  - Returnează native per-section item shapes (no projection) ca
+    frontend să poată face render cu cards specifici per modul.
+  - `UnifiedSearchController` `GET /api/search?q=&limit=`, `@Public()`.
+  - `SearchModule` importă Tezaur/Bazar/Revista/Forum modules.
+  - `ForumModule.exports` extins cu `ForumSearchService`.
+- Site (`apps/site/src/app/search/`):
+  - `UnifiedSearchService` HTTP client (providedIn root).
+  - `SearchPage` la `/cautare`:
+    - Input sync la `?q=` URL param (back-button friendly, shareable
+      links).
+    - Debounce 300ms pe input → `router.navigate({ q })` →
+      `queryParamMap` subscription declanșează fetch-ul.
+    - 4 grouped sections (Tezaur / Bazar / Revista / Forum), top 5 hits
+      + „Vezi toate {N}" deep-link per section.
+    - States complete i18n: empty / loading / too-short / no-results.
+    - SEO meta setat la init.
+  - App shell topbar search button cablat la `goToSearch()` →
+    `router.navigate(['/cautare'])`. Înainte emitea `searchClick`
+    fără handler.
+  - Homepage `WebSite` JSON-LD `SearchAction` target swap
+    `/forum/cautare?q=` → `/cautare?q=` — sitelinks search box
+    Google → pagina unificată.
+- i18n (`ro.json`) — block top-level nou `search.*`:
+  - title, intro, placeholder, too_short, start_typing, no_results,
+    totals, see_all, section_count, section.{tezaur,bazar,revista,forum}.
+- Verificări:
+  - `nx run api:typecheck` + `site:typecheck` — clean.
+  - `nx run site:build --configuration=production` — zero warnings.
+
 #### M9-A — SEO closure (`4e2103c`)
 
 Final polish pass pe SEO surface promise în spec §7.7/§7.13 + items
