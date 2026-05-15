@@ -538,8 +538,11 @@
       "both": "Predare sau curier"
     },
     "card": {
-      "accepts_offers": "Acceptă oferte"
+      "accepts_offers": "Acceptă oferte",
+      "tx": "vânzări"
     },
+    "actions_saved_listings": "Listinguri salvate",
+    "actions_saved_searches": "Căutări salvate",
     "results_count": "{{shown}} rezultate din {{total}}",
     "pagination": {
       "page_of": "Pagina {{page}} / {{total}}",

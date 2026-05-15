@@ -23,7 +23,6 @@ import {
   type ListingKindLiteral,
   type ListingSortLiteral,
 } from '@sintezaur/shared';
-import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
 import { EmptyStateComponent } from '../ui/empty-state.component';
@@ -41,33 +40,32 @@ const PAGE_SIZE = 24;
     FormsModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
     EmptyStateComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
-      <!-- HEADER -->
-      <section class="bz-header crosses">
+      <!-- HEADER (V05: shared .tez-header style) -->
+      <section class="tez-header crosses">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <div>
-          <p class="bz-header__sub">{{ 'bazar.page_eyebrow' | t }}</p>
-          <h1 class="bz-header__title">
+          <p class="tez-header__sub">{{ 'bazar.page_eyebrow' | t }}</p>
+          <h1 class="tez-header__title">
             {{ 'bazar.page_title' | t }}<span class="dot">.</span>
           </h1>
         </div>
         <div>
-          <p class="bz-header__lede">{{ 'bazar.page_lede' | t }}</p>
-          <div class="bz-header__stats">
-            <div class="bz-header__stat">
+          <p class="tez-header__lede">{{ 'bazar.page_lede' | t }}</p>
+          <div class="tez-header__stats">
+            <div class="tez-header__stat">
               <span class="k">// {{ 'bazar.stats.listings' | t }}</span>
               <span class="v">{{ response()?.totalCount ?? '—' }}</span>
             </div>
-            <div class="bz-header__stat">
+            <div class="tez-header__stat">
               <span class="k">// {{ 'bazar.stats.categories' | t }}</span>
               <span class="v">{{ categories.length }}</span>
             </div>
-            <div class="bz-header__stat">
+            <div class="tez-header__stat">
               <span class="k">// {{ 'bazar.stats.cities' | t }}</span>
               <span class="v">RO</span>
             </div>
@@ -75,20 +73,36 @@ const PAGE_SIZE = 24;
         </div>
       </section>
 
-      <!-- TOOLBAR -->
-      <div class="bz-toolbar crosses">
+      <!-- ACTION ROW (V05 Bazar.html — 3 quick links) -->
+      <div class="bz-actions">
+        <a class="bz-actions__primary" routerLink="/bazar/nou">{{ 'bazar.list_new' | t }}</a>
+        @if (auth.isLoggedIn()) {
+          <a class="bz-actions__link" routerLink="/cont/favorite">
+            <svg><use href="#i-bookmark"/></svg>
+            {{ 'bazar.actions_saved_listings' | t }}
+          </a>
+          <a class="bz-actions__link" routerLink="/cont/favorite/cautari">
+            <svg><use href="#i-save-search"/></svg>
+            {{ 'bazar.actions_saved_searches' | t }}
+          </a>
+        }
+      </div>
+
+      <!-- TOOLBAR (V05: .tez-toolbar) -->
+      <div class="tez-toolbar crosses">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
-        <label class="bz-search">
-          <sz-icon name="search" [size]="16" />
+        <label class="tez-search">
+          <svg><use href="#i-search"/></svg>
           <input
             type="search"
             [placeholder]="i18n.t('bazar.search_placeholder')"
             [value]="qText()"
             (input)="onSearchInput($any($event.target).value)"
           />
+          <kbd>⌘ K</kbd>
         </label>
-        <div class="bz-sort">
-          <span class="bz-sort__label">// {{ 'bazar.sort.label' | t }}</span>
+        <div class="tez-sort">
+          <span class="tez-sort__label">// {{ 'bazar.sort.label' | t }}</span>
           <select
             [value]="sort()"
             (change)="setSort($any($event.target).value)"
@@ -98,36 +112,34 @@ const PAGE_SIZE = 24;
               <option [value]="s">{{ 'bazar.sort.' + s | t }}</option>
             }
           </select>
-          <sz-icon name="caret-down" [size]="14" class="bz-sort__caret" />
+          <svg class="tez-sort__caret" width="14" height="14"><use href="#i-caret-down"/></svg>
         </div>
-        <a class="bz-cta" routerLink="/bazar/nou">
-          + {{ 'bazar.list_new' | t }}
-        </a>
       </div>
 
-      <!-- ACTIVE FILTER CHIPS -->
+      <!-- ACTIVE FILTER CHIPS (V05: .tez-chips) -->
       @if (activeChips().length) {
-        <div class="bz-chips">
-          <span class="bz-chips__label">{{ 'bazar.filters.active_label' | t }}</span>
+        <div class="tez-chips">
+          <span class="tez-chips__label">{{ 'bazar.filters.active_label' | t }}</span>
           @for (chip of activeChips(); track chip.key) {
-            <span class="bz-chip">
+            <span class="tez-chip">
               {{ chip.label }}
               <button
                 type="button"
                 [attr.aria-label]="i18n.t('bazar.filters.clear_all')"
                 (click)="clearChip(chip.key, chip.value)"
               >
-                <sz-icon name="x" [size]="11" />
+                <svg><use href="#i-x"/></svg>
               </button>
             </span>
           }
-          <button class="bz-chip__clear" type="button" (click)="clearAll()">
-            {{ 'bazar.filters.clear_all' | t }}
+          <button class="tez-chip__clear" type="button" (click)="clearAll()">
+            {{ 'bazar.filters.clear_all' | t }} ×
           </button>
           @if (auth.isLoggedIn()) {
             <button
               type="button"
-              class="bz-chip__save"
+              class="tez-chip__clear"
+              style="margin-left:0;color:var(--accent);"
               [disabled]="saving()"
               (click)="saveCurrentSearch()"
             >
@@ -141,18 +153,17 @@ const PAGE_SIZE = 24;
         </div>
       }
 
-      <!-- MAIN: rail + grid -->
-      <div class="bz-main">
-        <!-- ============ FILTER RAIL ============ -->
-        <aside class="bz-rail" [attr.aria-label]="i18n.t('bazar.filters.heading')">
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+      <!-- MAIN: rail + grid (V05: .tez-main) -->
+      <div class="tez-main">
+        <aside class="tez-rail" [attr.aria-label]="i18n.t('bazar.filters.heading')">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.condition' | t }}
               <span class="count">{{ conditions.length }}</span>
             </header>
-            <div class="bz-rail__body">
+            <div class="tez-rail__body">
               @for (c of conditions; track c) {
-                <label class="bz-check">
+                <label class="tez-check">
                   <input
                     type="checkbox"
                     [checked]="conditionSet().has(c)"
@@ -165,14 +176,14 @@ const PAGE_SIZE = 24;
             </div>
           </section>
 
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.kind' | t }}
               <span class="count">{{ kinds.length }}</span>
             </header>
-            <div class="bz-rail__body">
+            <div class="tez-rail__body">
               @for (k of kinds; track k) {
-                <label class="bz-check">
+                <label class="tez-check">
                   <input
                     type="checkbox"
                     [checked]="kindSet().has(k)"
@@ -185,14 +196,14 @@ const PAGE_SIZE = 24;
             </div>
           </section>
 
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.delivery' | t }}
               <span class="count">{{ deliveries.length }}</span>
             </header>
-            <div class="bz-rail__body">
+            <div class="tez-rail__body">
               @for (d of deliveries; track d) {
-                <label class="bz-check">
+                <label class="tez-check">
                   <input
                     type="checkbox"
                     [checked]="deliverySet().has(d)"
@@ -205,11 +216,12 @@ const PAGE_SIZE = 24;
             </div>
           </section>
 
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.price' | t }}
+              <span class="count">{{ (currency() ?? 'ron') | uppercase }}</span>
             </header>
-            <div class="bz-rail__body bz-rail__price">
+            <div class="tez-rail__body bz-rail__price">
               <div class="bz-price-row">
                 <input
                   type="number"
@@ -241,11 +253,11 @@ const PAGE_SIZE = 24;
             </div>
           </section>
 
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.location' | t }}
             </header>
-            <div class="bz-rail__body">
+            <div class="tez-rail__body">
               <input
                 class="bz-text-input"
                 type="text"
@@ -256,14 +268,14 @@ const PAGE_SIZE = 24;
             </div>
           </section>
 
-          <section class="bz-rail__sec">
-            <header class="bz-rail__head">
+          <section class="tez-rail__sec">
+            <header class="tez-rail__head">
               {{ 'bazar.filters.category' | t }}
               <span class="count">{{ categories.length }}</span>
             </header>
-            <div class="bz-rail__body">
+            <div class="tez-rail__body">
               @for (cat of categories; track cat) {
-                <label class="bz-check">
+                <label class="tez-check">
                   <input
                     type="checkbox"
                     [checked]="category() === cat"
@@ -277,7 +289,7 @@ const PAGE_SIZE = 24;
           </section>
         </aside>
 
-        <!-- ============ LISTING GRID ============ -->
+        <!-- Listing grid (V05: .bz-grid wrapping .listing cards) -->
         <div>
           <div class="bz-results-row">
             <span>
@@ -305,53 +317,36 @@ const PAGE_SIZE = 24;
                 ctaRouterLink="/bazar"
               />
             } @else {
-              <div class="bz-grid crosses">
-                <span class="crosses-tl"></span><span class="crosses-tr"></span>
+              <div class="bz-grid">
                 @for (l of r.items; track l.id) {
-                  <a class="bz-card" [routerLink]="['/bazar', l.slug]">
-                    <div class="bz-card__media">
-                      @if (l.thumb) {
-                        <img
-                          class="bz-card__photo"
-                          [src]="bazar.imageUrl(l.thumb)"
-                          [alt]="l.title"
-                          loading="lazy"
-                        />
-                      } @else {
-                        <div class="bz-card__ph">
-                          <span class="bz-card__ph-label">{{ l.brand ?? l.title }}</span>
-                        </div>
-                      }
-                      <div class="bz-card__badges">
-                        @if (l.kind !== 'sell') {
-                          <span class="bz-badge is-trade">{{ 'bazar.kind.' + l.kind | t }}</span>
+                  <a class="listing" [routerLink]="['/bazar', l.slug]" style="text-decoration:none;color:inherit;">
+                    <div class="listing__media">
+                      <div class="gear-fill" [attr.data-gear]="l.gearSlug ?? l.slug">
+                        @if (l.thumb) {
+                          <img class="gear-fill__photo" [src]="bazar.imageUrl(l.thumb)" [alt]="l.title" loading="lazy" />
                         }
-                        @if (l.acceptsOffers) {
-                          <span class="bz-badge">{{ 'bazar.card.accepts_offers' | t }}</span>
-                        }
+                        <span class="gear-fill__label">{{ l.brand || '' }} {{ l.brand ? '·' : '' }} {{ l.model || l.title }}</span>
                       </div>
+                      <span class="listing__chip" [attr.data-cond]="l.condition">{{ 'bazar.condition.' + l.condition | t }}</span>
                     </div>
-                    <div class="bz-card__top">
-                      @if (l.brand) {
-                        <span class="bz-card__brand">// {{ l.brand }}</span>
-                      }
-                      <span class="bz-card__cond">{{ 'bazar.condition.' + l.condition | t }}</span>
-                    </div>
-                    <div class="bz-card__title">{{ l.title }}</div>
-                    <div class="bz-card__price">
-                      {{ formatPrice(l.price, l.currency) }}
-                    </div>
-                    <div class="bz-card__foot">
-                      <span class="bz-card__loc">
-                        <sz-icon name="pin" [size]="12" />
-                        {{ l.location }}
-                      </span>
-                      <span class="bz-card__seller">
-                        &#64;{{ l.seller.username }}
+                    <div class="listing__body">
+                      <div class="listing__brand">// {{ l.brand || '—' }}</div>
+                      <div class="listing__title">{{ l.model || l.title }}</div>
+                      <div class="listing__row">
+                        <div class="listing__price">{{ formatPriceShort(l.price) }}<small>{{ l.currency | uppercase }}</small></div>
+                        <div class="listing__loc">
+                          <svg width="11" height="11" viewBox="0 0 24 24"><use href="#i-pin"/></svg>
+                          {{ l.location }}
+                        </div>
+                      </div>
+                      <div class="listing__seller">
+                        <span class="avatar" style="width:22px;height:22px;font-size:10px">{{ sellerInitials(l.seller.username) }}</span>
                         @if (l.seller.avgRating) {
-                          <span class="bz-card__rating">★ {{ l.seller.avgRating }}</span>
+                          <span><span class="star">★</span> {{ l.seller.avgRating }}</span>
+                          <span style="opacity:.5">·</span>
                         }
-                      </span>
+                        <span>{{ l.seller.transactionCount }} {{ 'bazar.card.tx' | t }}</span>
+                      </div>
                     </div>
                   </a>
                 }
@@ -359,14 +354,14 @@ const PAGE_SIZE = 24;
             }
 
             @if (r.totalPages > 1) {
-              <nav class="bz-pag" [attr.aria-label]="i18n.t('bazar.filters.active_label')">
+              <nav class="tez-pag" [attr.aria-label]="i18n.t('bazar.filters.active_label')">
                 <span>
                   {{ 'bazar.pagination.show_count' | t: { shown: r.items.length, total: r.totalCount } }}
                 </span>
-                <div class="bz-pag__nums">
+                <div class="tez-pag__nums">
                   <button
                     type="button"
-                    class="bz-pag__num"
+                    class="tez-pag__num"
                     [class.is-disabled]="r.page === 1"
                     [disabled]="r.page === 1"
                     (click)="goToPage(r.page - 1)"
@@ -374,11 +369,11 @@ const PAGE_SIZE = 24;
                   >‹</button>
                   @for (p of paginationPages(); track p) {
                     @if (p === '…') {
-                      <span class="bz-pag__num is-ellipsis">…</span>
+                      <span class="tez-pag__num is-ellipsis">…</span>
                     } @else {
                       <button
                         type="button"
-                        class="bz-pag__num"
+                        class="tez-pag__num"
                         [class.is-active]="p === r.page"
                         (click)="goToPage($any(p))"
                       >{{ p }}</button>
@@ -386,7 +381,7 @@ const PAGE_SIZE = 24;
                   }
                   <button
                     type="button"
-                    class="bz-pag__num"
+                    class="tez-pag__num"
                     [class.is-disabled]="r.page === r.totalPages"
                     [disabled]="r.page === r.totalPages"
                     (click)="goToPage(r.page + 1)"
@@ -403,250 +398,7 @@ const PAGE_SIZE = 24;
   styles: [
     `
       :host { display: block; }
-
-      .bz-header {
-        position: relative;
-        padding: clamp(40px, 6vw, 72px) clamp(20px, 3vw, 36px) clamp(28px, 4vw, 44px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: var(--gutter-y) 0 24px;
-        display: grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 32px;
-        align-items: end;
-      }
-      .bz-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(70px, 11vw, 160px);
-        line-height: 0.85;
-        text-transform: uppercase;
-        margin: 0;
-        padding-top: 0.22em;
-        letter-spacing: 0.005em;
-      }
-      .bz-header__title .dot { color: var(--accent); }
-      .bz-header__sub {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        margin: 0 0 14px;
-      }
-      .bz-header__sub::before { content: '* '; color: var(--accent); }
-      .bz-header__lede {
-        color: var(--fg-muted);
-        font-size: 15px;
-        max-width: 38ch;
-        margin: 0 0 18px;
-        text-wrap: pretty;
-      }
-      .bz-header__stats {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0;
-        border-top: 1px dashed var(--line);
-        padding-top: 16px;
-      }
-      .bz-header__stat { padding-right: 14px; border-right: 1px dashed var(--line); }
-      .bz-header__stat:last-child { border-right: 0; padding-left: 14px; padding-right: 0; }
-      .bz-header__stat:nth-child(2) { padding-left: 14px; padding-right: 14px; }
-      .bz-header__stat .k {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        display: block;
-      }
-      .bz-header__stat .v {
-        font-family: var(--font-display);
-        font-size: 40px;
-        font-weight: 600;
-        line-height: 1;
-        display: block;
-        margin-top: 4px;
-      }
-
-      .bz-toolbar {
-        position: sticky;
-        top: 64px;
-        z-index: 50;
-        background: color-mix(in oklab, var(--bg) 90%, transparent);
-        backdrop-filter: blur(10px) saturate(140%);
-        -webkit-backdrop-filter: blur(10px) saturate(140%);
-        border: var(--grid-line) solid var(--line);
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        gap: 0;
-      }
-      .bz-search {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 18px;
-        border-right: 1px solid var(--line);
-        min-height: 44px;
-      }
-      .bz-search input {
-        flex: 1;
-        background: none;
-        border: 0;
-        outline: 0;
-        font-family: var(--font-ui);
-        font-size: 15px;
-        color: var(--fg);
-        padding: 0;
-      }
-      .bz-search input::placeholder { color: var(--fg-subtle); }
-      .bz-search sz-icon { color: var(--fg-muted); }
-
-      .bz-sort {
-        display: flex;
-        align-items: center;
-        border-right: 1px solid var(--line);
-        position: relative;
-      }
-      .bz-sort__label {
-        padding: 0 14px;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--fg-muted);
-      }
-      .bz-sort select {
-        background: none;
-        border: 0;
-        border-left: 1px solid var(--line);
-        padding: 14px 32px 14px 14px;
-        font-family: var(--font-mono);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        color: var(--fg);
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-      }
-      .bz-sort select:focus { outline: none; color: var(--accent); }
-      .bz-sort__caret {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        color: var(--fg-muted);
-      }
-      .bz-cta {
-        padding: 14px 22px;
-        background: var(--accent);
-        color: var(--bg);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none;
-      }
-      .bz-cta:hover { filter: brightness(1.08); }
-
-      .bz-chips {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 14px 0;
-        font-family: var(--font-mono);
-        font-size: 11px;
-      }
-      .bz-chips__label {
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        margin-right: 6px;
-      }
-      .bz-chips__label::before { content: '// '; color: var(--accent); }
-      .bz-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 6px 4px 10px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line-strong);
-        letter-spacing: 0.06em;
-      }
-      .bz-chip button {
-        width: 16px;
-        min-width: 16px;
-        height: 16px;
-        min-height: 16px;
-        display: grid;
-        place-items: center;
-        color: var(--fg-muted);
-        transition: color 0.12s ease;
-      }
-      .bz-chip button:hover { color: var(--accent); }
-      .bz-chip__clear {
-        margin-left: auto;
-        color: var(--fg-muted);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-size: 10px;
-        min-height: auto;
-        min-width: auto;
-      }
-      .bz-chip__clear:hover { color: var(--accent); }
-      .bz-chip__save {
-        color: var(--accent);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-size: 10px;
-        min-height: auto;
-        background: none;
-        border: 0;
-        cursor: pointer;
-        padding: 0 8px;
-      }
-      .bz-chip__save:hover { text-decoration: underline; }
-      .bz-chip__save:disabled { opacity: 0.5; cursor: wait; }
-
-      .bz-main {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 32px;
-        align-items: start;
-        margin-bottom: var(--gutter-y);
-      }
-      .bz-rail {
-        position: sticky;
-        top: 128px;
-        border: 1px solid var(--line);
-        background: var(--bg-elev);
-      }
-      .bz-rail__sec { border-bottom: 1px solid var(--line); }
-      .bz-rail__sec:last-child { border-bottom: 0; }
-      .bz-rail__head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 14px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg);
-      }
-      .bz-rail__head::before { content: '// '; color: var(--accent); }
-      .bz-rail__head .count { color: var(--fg-muted); font-size: 10px; }
-      .bz-rail__body {
-        padding: 4px 14px 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
+      /* Page-local extras NOT covered by v05.css global utilities: */
       .bz-rail__price { gap: 10px; }
       .bz-price-row {
         display: grid;
@@ -663,10 +415,7 @@ const PAGE_SIZE = 24;
         font-size: 12px;
         color: var(--fg);
       }
-      .bz-currency {
-        display: inline-flex;
-        gap: 0;
-      }
+      .bz-currency { display: inline-flex; gap: 0; margin-top: 8px; }
       .bz-currency button {
         flex: 1;
         padding: 6px 8px;
@@ -677,241 +426,26 @@ const PAGE_SIZE = 24;
         color: var(--fg-muted);
         letter-spacing: 0.08em;
         cursor: pointer;
+        min-height: auto;
       }
       .bz-currency button + button { border-left: 0; }
       .bz-currency button.is-active {
         background: var(--accent);
-        color: var(--bg);
+        color: var(--accent-fg);
         border-color: var(--accent);
       }
-
-      .bz-check {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 5px 0;
-        cursor: pointer;
-        font-size: 13px;
-        color: var(--fg-muted);
-        font-family: var(--font-ui);
-      }
-      .bz-check:hover { color: var(--fg); }
-      .bz-check input { display: none; }
-      .bz-check .box {
-        width: 14px;
-        height: 14px;
-        border: 1px solid var(--line-strong);
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-        transition: border-color 0.12s ease;
-      }
-      .bz-check .box::after {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: var(--accent);
-        opacity: 0;
-        transition: opacity 0.12s ease;
-      }
-      .bz-check input:checked + .box { border-color: var(--accent); }
-      .bz-check input:checked + .box::after { opacity: 1; }
-      .bz-check input:checked ~ .lbl { color: var(--fg); }
-      .bz-check .lbl { flex: 1; }
-
       .bz-results-row {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
+        padding-bottom: 14px;
         font-family: var(--font-mono);
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.08em;
         color: var(--fg-muted);
-        margin-bottom: 14px;
+        text-transform: uppercase;
       }
       .bz-results-row .accent { color: var(--accent); }
-      .bz-empty {
-        padding: 60px 20px;
-        text-align: center;
-        font-family: var(--font-mono);
-        font-size: 13px;
-        color: var(--fg-muted);
-        border: 1px dashed var(--line);
-      }
-
-      .bz-grid {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0;
-        border: var(--grid-line) solid var(--line);
-      }
-      .bz-card {
-        display: flex;
-        flex-direction: column;
-        padding: 14px;
-        border-right: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-        text-decoration: none;
-        color: var(--fg);
-        background: var(--bg);
-        transition: background 0.15s ease;
-        gap: 6px;
-      }
-      .bz-card:hover { background: var(--bg-elev); }
-      .bz-card:nth-child(4n) { border-right: 0; }
-      .bz-card__media {
-        position: relative;
-        aspect-ratio: 4 / 3;
-        background: var(--bg-elev);
-        margin-bottom: 8px;
-        overflow: hidden;
-      }
-      .bz-card__photo { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .bz-card__ph {
-        width: 100%;
-        height: 100%;
-        display: grid;
-        place-items: center;
-        color: var(--fg-subtle);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-      }
-      .bz-card__badges {
-        position: absolute;
-        top: 6px;
-        left: 6px;
-        display: inline-flex;
-        gap: 4px;
-      }
-      .bz-badge {
-        font-family: var(--font-mono);
-        font-size: 9px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        padding: 3px 6px;
-        background: color-mix(in oklab, var(--bg) 80%, transparent);
-        border: 1px solid var(--line-strong);
-        color: var(--fg);
-        backdrop-filter: blur(4px);
-      }
-      .bz-badge.is-trade { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-      .bz-card__top {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-      }
-      .bz-card__brand { color: var(--accent); }
-      .bz-card__cond { color: var(--fg-muted); }
-      .bz-card__title {
-        font-family: var(--font-display);
-        font-weight: 500;
-        font-size: 15px;
-        line-height: 1.25;
-        margin: 2px 0 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .bz-card__price {
-        font-family: var(--font-display);
-        font-size: 22px;
-        font-weight: 600;
-        line-height: 1;
-        margin-top: 4px;
-        color: var(--fg);
-      }
-      .bz-card__foot {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: auto;
-        padding-top: 8px;
-        border-top: 1px dashed var(--line);
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.1em;
-        color: var(--fg-muted);
-      }
-      .bz-card__loc {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        text-transform: uppercase;
-      }
-      .bz-card__seller {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .bz-card__rating { color: var(--accent); }
-
-      .bz-pag {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 22px 0;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-      .bz-pag__nums { display: inline-flex; gap: 2px; }
-      .bz-pag__num {
-        min-width: 32px;
-        min-height: 32px;
-        padding: 0 8px;
-        display: inline-grid;
-        place-items: center;
-        border: 1px solid var(--line);
-        background: var(--bg-elev);
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        cursor: pointer;
-        transition: color 0.12s ease, border-color 0.12s ease;
-      }
-      .bz-pag__num:hover { color: var(--fg); border-color: var(--line-strong); }
-      .bz-pag__num.is-active {
-        color: var(--bg);
-        background: var(--accent);
-        border-color: var(--accent);
-      }
-      .bz-pag__num.is-disabled,
-      .bz-pag__num:disabled { color: var(--fg-subtle); cursor: not-allowed; opacity: 0.5; }
-      .bz-pag__num.is-ellipsis {
-        border: 0;
-        background: transparent;
-        cursor: default;
-      }
-
-      @media (max-width: 1240px) {
-        .bz-grid { grid-template-columns: repeat(3, 1fr); }
-        .bz-card:nth-child(4n) { border-right: 1px solid var(--line); }
-        .bz-card:nth-child(3n) { border-right: 0; }
-      }
-      @media (max-width: 1100px) {
-        .bz-header { grid-template-columns: 1fr; gap: 18px; }
-        .bz-main { grid-template-columns: 1fr; }
-        .bz-rail { position: static; }
-      }
-      @media (max-width: 720px) {
-        .bz-grid { grid-template-columns: repeat(2, 1fr); }
-        .bz-card:nth-child(3n) { border-right: 1px solid var(--line); }
-        .bz-card:nth-child(2n) { border-right: 0; }
-        .bz-toolbar { grid-template-columns: 1fr; }
-        .bz-toolbar > * { border-right: 0; border-bottom: 1px solid var(--line); }
-        .bz-toolbar > *:last-child { border-bottom: 0; }
-      }
     `,
   ],
 })
@@ -1045,6 +579,19 @@ export class BazarListPage {
       .split('_')
       .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
       .join(' ');
+  }
+
+  formatPriceShort(price: string | number): string {
+    const n = typeof price === 'number' ? price : Number(price);
+    if (!isFinite(n)) return String(price);
+    return n.toLocaleString('ro-RO', { maximumFractionDigits: 0 });
+  }
+
+  sellerInitials(name: string): string {
+    if (!name) return '—';
+    const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 
   onSearchInput(value: string): void {
