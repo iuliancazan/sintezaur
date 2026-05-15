@@ -276,6 +276,10 @@ export class ReportsAdminPage {
   readonly targetOptions = [
     { label: 'Forum post', value: 'forum_post' as ReportTarget },
     { label: 'Forum thread', value: 'forum_thread' as ReportTarget },
+    { label: 'Anunț Bazar', value: 'listing' as ReportTarget },
+    { label: 'Mesaj chat', value: 'message' as ReportTarget },
+    { label: 'Review echipament', value: 'gear_review' as ReportTarget },
+    { label: 'Profil user', value: 'user_profile' as ReportTarget },
   ];
 
   constructor() {
@@ -312,6 +316,12 @@ export class ReportsAdminPage {
     }
     if (row.targetType === 'forum_thread' && row.targetSnapshot?.slug) {
       return `${this.siteRoot()}/forum/cat/${row.targetSnapshot.slug}`;
+    }
+    if (row.targetType === 'listing' && row.targetSnapshot?.slug) {
+      return `${this.siteRoot()}/bazar/${row.targetSnapshot.slug}`;
+    }
+    if (row.targetType === 'user_profile' && row.targetSnapshot?.slug) {
+      return `${this.siteRoot()}/autor/${row.targetSnapshot.slug}`;
     }
     return null;
   }

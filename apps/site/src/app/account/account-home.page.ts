@@ -45,6 +45,9 @@ import { FeedbackService } from '../feedback/feedback.service';
         <a routerLink="/cont/abonamente" class="account__link">
           {{ 'account.menu.forum_subscriptions' | t }}
         </a>
+        <a routerLink="/cont/blocuri" class="account__link">
+          Utilizatori blocați
+        </a>
         <a routerLink="/cont/parola" class="account__link">
           {{ 'account.menu.password' | t }}
         </a>

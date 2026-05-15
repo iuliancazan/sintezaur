@@ -9,6 +9,55 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
+#### M6-E2 — Block & report UI cablat pe Bazar + Profil (`PENDING`)
+
+- Backend:
+  - `BlocksModule` nou (`apps/api/src/app/blocks/`): `BlocksService` cu
+    `list` (cu join pe users → username/fullName/avatar), `create`
+    (acceptă `blockedUserId` UUID sau `blockedUsername` handle), `remove`
+    (idempotent NotFound), `isBlocked`. `BlocksController` la
+    `/me/blocks` (GET/POST/DELETE). DB constraint `user_blocks_not_self`
+    și unique `(blocker, blocked)` aplică automat.
+  - `ContentReportsService.verifyTarget` extins pe 4 surface-uri noi:
+    `listing` (verifică `listings.sellerId`), `message`
+    (`messages.senderId`), `gear_review` (`gearReviews.userId`),
+    `user_profile` (`users.id`). Toate refuză auto-raport.
+  - `ContentReportsService.snapshot` extins pentru aceleași 4 cu
+    title/slug/bodyExcerpt corespunzător.
+  - `listings.listPublic` filtrează acum vânzătorii blocați de viewer
+    (subquery NOT IN pe `user_blocks` când `viewerId` e prezent).
+    Anonimii văd tot — block aplică doar pentru blocker.
+- Site:
+  - `BlocksService` (`apps/site/src/app/blocks/blocks.service.ts`) —
+    cache cu signal `items()` + computed Set de id-uri blocate. Metode
+    `load()` / `loadIfStale()` / `block()` / `unblock()` / `isBlocked()`.
+    Singleton; toate instanțele BlockButton citesc același cache.
+  - `<app-block-button [userId] [username]?>` — toggle block/unblock,
+    confirm browser pe block, toast pe ambele. Hidden pentru user-ul
+    însuși și pentru anonimi. Hidratează cache-ul la mount.
+  - `ReportsService` + `<app-report-button>` (refolosesc
+    `<app-report-dialog>` din forum): 5 categorii + reason free-text,
+    POST către `/content-reports` cu target generic. Reuse pe orice
+    surface.
+  - Wired pe:
+    - **Bazar listing detail** (`bd-trust-actions` în seller card):
+      `<app-report-button targetType="listing">` + block button.
+    - **Chat thread** (`/cont/mesaje/:id` header): block button pentru
+      celălalt party (computed via `view.listing.sellerId` vs `me`).
+    - **`/autor/:username`** (header): block + report
+      (target=`user_profile`).
+  - `/cont/blocuri` page — listă cu avatar / username / fullName /
+    reason / data + unblock 1-click. Link în meniul `/cont` între
+    „Abonamente" și „Parolă".
+- Dashboard:
+  - `/rapoarte` queue: 4 target options noi în dropdown (Anunț Bazar /
+    Mesaj chat / Review echipament / Profil user) + link-uri către
+    surface-urile corespunzătoare în `link(row)`.
+- Spec §11 Phase 1: bullet-uri „Block + report flows wired" — done.
+  Block enforcement: chat (`assertNotBlocked` din M3, existent) +
+  bazar list (nou). Forum block placeholder (`[Postare ascunsă]`) va
+  rămâne TODO până la un sweep dedicat pe forum thread page.
+
 #### M6-E1 — Profil public complet (`5e36ec7`)
 
 - Schema:

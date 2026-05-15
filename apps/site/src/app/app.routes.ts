@@ -206,6 +206,13 @@ export const appRoutes: Route[] = [
             (m) => m.ForumSubscriptionsPage,
           ),
       },
+      {
+        path: 'blocuri',
+        loadComponent: () =>
+          import('./account/blocks-list.page').then(
+            (m) => m.BlocksListPage,
+          ),
+      },
     ],
   },
   // Legal & informational static pages (M6-A). Five share one component;

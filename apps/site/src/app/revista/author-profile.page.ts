@@ -7,8 +7,10 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
+import { BlockButtonComponent } from '../blocks/block-button.component';
 import { ForumService, type UserBadgeItem } from '../forum/forum.service';
 import { I18nService } from '../i18n/i18n.service';
+import { ReportButtonComponent } from '../reports/report-button.component';
 import { SeoService } from '../seo/seo.service';
 import { clampDescription, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
@@ -26,6 +28,8 @@ import {
     TPipe,
     SzIconComponent,
     SzAvatarComponent,
+    BlockButtonComponent,
+    ReportButtonComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -72,6 +76,17 @@ import {
                 'revista.author.member_since' | t: { date: formatYear(p.author.createdAt) }
               }}
             </p>
+            <div class="ap-safety">
+              <app-report-button
+                targetType="user_profile"
+                [targetId]="p.author.id"
+                [authorUserId]="p.author.id"
+              />
+              <app-block-button
+                [userId]="p.author.id"
+                [username]="p.author.username"
+              />
+            </div>
           </div>
         </header>
 
@@ -182,6 +197,12 @@ import {
         color: var(--fg-muted);
         letter-spacing: 0.08em;
         margin: 8px 0 0;
+      }
+      .ap-safety {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        flex-wrap: wrap;
       }
       .ap-bio {
         font-size: 15px;

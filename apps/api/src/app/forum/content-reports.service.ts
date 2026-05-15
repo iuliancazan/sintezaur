@@ -12,6 +12,9 @@ import {
   contentReports,
   forumPosts,
   forumThreads,
+  gearReviews,
+  listings,
+  messages,
   users,
   type ContentReport,
   type ContentReportStatus,
@@ -287,9 +290,56 @@ export class ContentReportsService {
       }
       return;
     }
-    // Other target types are reportable via their own controllers (Bazar etc).
+    if (type === 'listing') {
+      const [row] = await this.db
+        .select({ sellerId: listings.sellerId })
+        .from(listings)
+        .where(eq(listings.id, id))
+        .limit(1);
+      if (!row) throw new NotFoundException('Anunțul nu există.');
+      if (row.sellerId === reporterId) {
+        throw new BadRequestException('Nu te poți raporta singur.');
+      }
+      return;
+    }
+    if (type === 'message') {
+      const [row] = await this.db
+        .select({ senderId: messages.senderId })
+        .from(messages)
+        .where(eq(messages.id, id))
+        .limit(1);
+      if (!row) throw new NotFoundException('Mesajul nu există.');
+      if (row.senderId === reporterId) {
+        throw new BadRequestException('Nu te poți raporta singur.');
+      }
+      return;
+    }
+    if (type === 'gear_review') {
+      const [row] = await this.db
+        .select({ authorId: gearReviews.userId })
+        .from(gearReviews)
+        .where(eq(gearReviews.id, id))
+        .limit(1);
+      if (!row) throw new NotFoundException('Review-ul nu există.');
+      if (row.authorId === reporterId) {
+        throw new BadRequestException('Nu te poți raporta singur.');
+      }
+      return;
+    }
+    if (type === 'user_profile') {
+      const [row] = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      if (!row) throw new NotFoundException('Utilizatorul nu există.');
+      if (row.id === reporterId) {
+        throw new BadRequestException('Nu te poți raporta singur.');
+      }
+      return;
+    }
     throw new BadRequestException(
-      `Tip de raport "${type}" nu e suportat de surface-ul forum.`,
+      `Tip de raport "${type}" nu e suportat.`,
     );
   }
 
@@ -329,6 +379,48 @@ export class ContentReportsService {
         .limit(1);
       if (!row) return { kind: type };
       return { kind: type, title: row.title, slug: row.slug };
+    }
+    if (type === 'listing') {
+      const [row] = await this.db
+        .select({ slug: listings.slug, title: listings.title })
+        .from(listings)
+        .where(eq(listings.id, id))
+        .limit(1);
+      if (!row) return { kind: type };
+      return { kind: type, title: row.title, slug: row.slug };
+    }
+    if (type === 'message') {
+      const [row] = await this.db
+        .select({ body: messages.body })
+        .from(messages)
+        .where(eq(messages.id, id))
+        .limit(1);
+      if (!row) return { kind: type };
+      return {
+        kind: type,
+        bodyExcerpt: (row.body ?? '').slice(0, 240),
+      };
+    }
+    if (type === 'gear_review') {
+      const [row] = await this.db
+        .select({ body: gearReviews.body })
+        .from(gearReviews)
+        .where(eq(gearReviews.id, id))
+        .limit(1);
+      if (!row) return { kind: type };
+      return {
+        kind: type,
+        bodyExcerpt: (row.body ?? '').slice(0, 240),
+      };
+    }
+    if (type === 'user_profile') {
+      const [row] = await this.db
+        .select({ username: users.username, fullName: users.fullName })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
+      if (!row) return { kind: type };
+      return { kind: type, title: row.fullName, slug: row.username };
     }
     return { kind: type };
   }

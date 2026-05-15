@@ -15,6 +15,7 @@ import {
   listingPriceHistory,
   listings,
   transactions,
+  userBlocks,
   userListingWatches,
   userReviewAggregate,
   users,
@@ -490,6 +491,16 @@ export class ListingsService {
     const offset = (page - 1) * pageSize;
 
     const conditions = [eq(listings.status, 'active'), isNull(listings.removedAt)];
+    // Hide listings from sellers the viewer has blocked (spec §7.4).
+    // Anonymous viewers see everything — block applies only to the blocker.
+    if (viewerId) {
+      conditions.push(
+        sql`${listings.sellerId} NOT IN (
+          SELECT ${userBlocks.blockedId} FROM ${userBlocks}
+          WHERE ${userBlocks.blockerId} = ${viewerId}
+        )`,
+      );
+    }
     if (query.gearId) conditions.push(eq(listings.gearId, query.gearId));
     if (query.brand) conditions.push(ilike(gear.brand, query.brand));
     if (query.category) conditions.push(eq(gear.category, query.category as any));

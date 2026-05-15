@@ -20,6 +20,8 @@ import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
 import { clampDescription, stripHtml, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
+import { BlockButtonComponent } from '../blocks/block-button.component';
+import { ReportButtonComponent } from '../reports/report-button.component';
 import {
   BazarService,
   type BazarListItem,
@@ -38,6 +40,8 @@ import {
     SzBadgeComponent,
     SzAvatarComponent,
     SzButtonComponent,
+    BlockButtonComponent,
+    ReportButtonComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -243,6 +247,20 @@ import {
                     </div>
                   </div>
                 </div>
+
+                @if (!isOwner() && auth.isLoggedIn()) {
+                  <div class="bd-trust-actions">
+                    <app-report-button
+                      targetType="listing"
+                      [targetId]="d.listing.id"
+                      [authorUserId]="d.seller.id"
+                    />
+                    <app-block-button
+                      [userId]="d.seller.id"
+                      [username]="d.seller.username"
+                    />
+                  </div>
+                }
 
                 @if (!isOwner() && d.listing.status === 'active') {
                   @if (auth.isLoggedIn()) {
@@ -621,6 +639,14 @@ import {
         letter-spacing: 0.1em;
       }
 
+      .bd-trust-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line);
+        flex-wrap: wrap;
+      }
       .bd-contact { display: flex; flex-direction: column; gap: 8px; }
       .bd-contact textarea {
         width: 100%;

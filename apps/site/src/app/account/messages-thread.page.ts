@@ -22,6 +22,7 @@ import {
   type ThreadView,
   type TransactionDto,
 } from '../bazar/bazar.service';
+import { BlockButtonComponent } from '../blocks/block-button.component';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
 import { RealtimeClientService } from '../realtime/realtime-client.service';
@@ -36,6 +37,7 @@ import { RealtimeClientService } from '../realtime/realtime-client.service';
     TPipe,
     SzIconComponent,
     SzAvatarComponent,
+    BlockButtonComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -62,6 +64,11 @@ import { RealtimeClientService } from '../realtime/realtime-client.service';
               </div>
             </a>
           </div>
+          @if (otherUserId(); as oid) {
+            <div class="thr__safety">
+              <app-block-button [userId]="oid" />
+            </div>
+          }
         }
       </header>
 
@@ -422,6 +429,7 @@ import { RealtimeClientService } from '../realtime/realtime-client.service';
         flex-direction: column;
       }
       .thr__head { padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+      .thr__safety { display: flex; gap: 8px; margin-top: 10px; }
       .thr__back {
         display: inline-flex;
         align-items: center;
@@ -835,6 +843,13 @@ export class MessagesThreadPage implements AfterViewChecked {
     const v = this.view();
     if (!v) return '';
     return v.listing.sellerId === this.me() ? 'Cumpărător' : 'Vânzător';
+  });
+
+  readonly otherUserId = computed<string | null>(() => {
+    const v = this.view();
+    const meId = this.me();
+    if (!v || !meId) return null;
+    return v.listing.sellerId === meId ? v.thread.buyerId : v.listing.sellerId;
   });
 
   readonly canMakeOffer = computed(() => {

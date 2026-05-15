@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BazarModule } from './bazar/bazar.module';
+import { BlocksModule } from './blocks/blocks.module';
 import { CommonModule } from './common/common.module';
 import { DbModule } from './db/db.module';
 import { ForumModule } from './forum/forum.module';
@@ -47,6 +48,7 @@ import { SeoModule } from './seo/seo.module';
     AuthModule,
     TezaurModule,
     BazarModule,
+    BlocksModule,
     RevistaModule,
     ForumModule,
     AdminUsersModule,

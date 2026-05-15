@@ -6,22 +6,23 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-E1 (`5e36ec7`) — profil public complet:
-`users.location` (migration `9010`) + `AuthUserPublic` extins cu
-bio/location/avatar/website/3× social, `PATCH /auth/me/profile` +
-`POST/DELETE /auth/me/avatar` (pipeline 256×256 WebP dedicat),
-`/cont/profil` page cu uploader + form, link „Profil" în `/cont`,
-`/autor/:username` afișează location. Închide spec §11 foundation
-profile bullet.
+**Last shipped:** M6-E2 (`PENDING`) — block + report UI pe Bazar:
+backend `BlocksModule` (GET/POST/DELETE `/me/blocks`) +
+`ContentReportsService.verifyTarget`/`snapshot` extins pentru
+listing/message/gear_review/user_profile, `listings.listPublic`
+filtrează vânzătorii blocați. Site: `BlocksService` cache,
+`<app-block-button>` + `<app-report-button>` reusable, wired pe
+bazar detail (seller card), chat thread (header), `/autor/:username`
+(safety actions row). `/cont/blocuri` list page cu unblock. Dashboard
+`/rapoarte` queue extins cu 4 target options noi + link-uri.
 
-**Next up:** **M6-E2** — block + report UI cablat pe Bazar
-(butoane block pe chat + listing seller + autor, `/cont/blocuri`
-list, report dialog refolosit din forum cu target_type-uri Bazar
-listing/bazar_message/gear_review/user_profile, filter blocked din
-liste). Spec §11 Phase 1 bullets care nu au UI încă.
+**Next up:** **M6-E3** — admin closure: dashboard `/audit-log` viewer
+(filter action+target+date+actor) + seed EUR-RON în `currency_rates`
+(migration sau seed `9011`) + dashboard `/currency-rates` minimal CRUD.
+Închide ultimele 3 bullets din spec §11 foundation.
 
-**Active milestone:** M6-E (MVP foundation closure) — E1 done,
-E2 + E3 next. Apoi trecere la M7 / storage refactor.
+**Active milestone:** M6-E (MVP foundation closure) — E1 + E2 done,
+E3 next. Apoi M7.
 
 ## Milestones
 
@@ -109,7 +110,7 @@ E2 + E3 next. Apoi trecere la M7 / storage refactor.
 | C   | `0f08502` | done | polish UI pass: ToastService + ToastContainer + HttpErrorInterceptor global (network/5xx/429/403) + NotFoundPage brand-aware pentru 404 + 410 catch-all + EmptyStateComponent cablat pe 9 spoturi (Tezaur/Bazar/Revista lists, Forum cautare + category, 5 account pages) + SkeletonComponent CSS-only aplicat pe legal page |
 | D   | `e663622` | done | schema `user_feedback` (migration 0013) + backend `FeedbackModule` (POST auth-only cu throttle + email notify operator, GET/PATCH admin) + site FeedbackService + FeedbackModal (mount root shell, link declanșator în `/cont`, auto-capture pathname+search) + dashboard `/feedback` queue cu filtre status+kind + expand-row + auto-mark-read |
 | E1  | `5e36ec7` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
-| E2  | — | pending | block + report UI pe Bazar (butoane block pe chat/listing/profile, `/cont/blocuri` list, report dialog refolosit din forum cu target_type-uri listing/bazar_message/gear_review/user_profile, filter blocked din liste) |
+| E2  | `PENDING` | done | block + report UI cablat: backend `BlocksModule` (`/me/blocks` GET/POST/DELETE) + `ContentReportsService.verifyTarget` + `snapshot` extins pe `listing`/`message`/`gear_review`/`user_profile` + `listings.listPublic` filtrează vânzători blocați; site `BlocksService` + `<app-block-button>` + `<app-report-button>` reusable, wired pe bazar detail (seller card), chat thread (header), `/autor/:username` (safety actions); `/cont/blocuri` list page; dashboard `/rapoarte` queue extins cu 4 target options noi + link-uri |
 | E3  | — | pending | admin closure: dashboard `/audit-log` viewer (filter action+target+date+actor) + seed EUR-RON în `currency_rates` + dashboard `/currency-rates` minimal CRUD |
 
 ## Conventions (recap from memory)
