@@ -23,6 +23,7 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GdprModule } from './gdpr/gdpr.module';
 import { LegalModule } from './legal/legal.module';
+import { SearchModule } from './search/search.module';
 import { SeoModule } from './seo/seo.module';
 import { StorageModule } from './storage/storage.module';
 
@@ -60,6 +61,7 @@ import { StorageModule } from './storage/storage.module';
     AdminStorageModule,
     AdminUsersModule,
     LegalModule,
+    SearchModule,
     SeoModule,
     FeedbackModule,
     GdprModule,

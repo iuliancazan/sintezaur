@@ -13,6 +13,11 @@ export const appRoutes: Route[] = [
       import('./home.page').then((m) => m.HomePage),
   },
   {
+    path: 'cautare',
+    loadComponent: () =>
+      import('./search/search.page').then((m) => m.SearchPage),
+  },
+  {
     path: 'tezaur',
     pathMatch: 'full',
     loadComponent: () =>

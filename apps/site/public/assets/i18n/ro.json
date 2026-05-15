@@ -335,6 +335,23 @@
     "loading": "Se încarcă…",
     "saving": "Se salvează…"
   },
+  "search": {
+    "title": "Caută pe Sintezaur",
+    "intro": "Un singur câmp — caut în Tezaur, Bazar, Revistă și Forum simultan.",
+    "placeholder": "Ce cauți? (gear, brand, articol, thread…)",
+    "too_short": "Scrie cel puțin 2 caractere ca să încep căutarea.",
+    "start_typing": "Începe să scrii ca să vezi rezultate.",
+    "no_results": "Niciun rezultat pentru „{{query}}\" în niciun modul. Încearcă alt termen.",
+    "totals": "{{total}} rezultate",
+    "see_all": "Vezi toate cele {{n}} rezultate",
+    "section_count": "{{n}} rezultate",
+    "section": {
+      "tezaur": "Tezaur · echipament",
+      "bazar": "Bazar · anunțuri",
+      "revista": "Revistă · articole",
+      "forum": "Forum · discuții"
+    }
+  },
   "prefs": {
     "title": "Preferințe notificări",
     "intro": "Bifează unde vrei să primești fiecare tip de notificare. Modificările se aplică imediat după salvare.",

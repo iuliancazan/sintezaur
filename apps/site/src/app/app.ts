@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
@@ -50,6 +50,7 @@ import { ToastContainer } from './ui/toast-container.component';
       [showBell]="auth.isLoggedIn()"
       [bellBadge]="notifications.unread()"
       (bellClick)="toggleNotifications()"
+      (searchClick)="goToSearch()"
       [loginHref]="'/login'"
       [signupHref]="'/signup'"
       [accountHref]="'/cont'"
@@ -240,6 +241,7 @@ export class App {
   readonly auth = inject(AuthService);
   readonly notifications = inject(NotificationsService);
   private readonly i18n = inject(I18nService);
+  private readonly router = inject(Router);
 
   readonly notificationsOpen = signal(false);
 
@@ -258,6 +260,10 @@ export class App {
     const next = !this.notificationsOpen();
     this.notificationsOpen.set(next);
     if (next) void this.notifications.loadList();
+  }
+
+  goToSearch(): void {
+    void this.router.navigate(['/cautare']);
   }
 
   readonly copyYear = new Date().getFullYear();

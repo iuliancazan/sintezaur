@@ -55,6 +55,7 @@ import { PublicForumController } from './public-forum.controller';
     BadgeAwardingService,
     BadgesService,
     ForumAttachmentsService,
+    ForumSearchService,
   ],
 })
 export class ForumModule {}

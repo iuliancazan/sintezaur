@@ -253,15 +253,14 @@ export class HomePage {
         inLanguage: 'ro-RO',
         /**
          * `SearchAction` unlocks the sitelinks search box in Google's
-         * homepage SERP card. Points at /forum/cautare since that's the
-         * only search surface live in MVP; the unified /cautare lands
-         * in M9-B and will replace this target.
+         * homepage SERP card. Targets `/cautare` — the unified
+         * cross-module search page.
          */
         potentialAction: {
           '@type': 'SearchAction',
           target: {
             '@type': 'EntryPoint',
-            urlTemplate: `${origin}/forum/cautare?q={search_term_string}`,
+            urlTemplate: `${origin}/cautare?q={search_term_string}`,
           },
           'query-input': 'required name=search_term_string',
         },
