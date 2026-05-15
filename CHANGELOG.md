@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep · M6 complete ✅
 
-#### M6-D — Feedback widget + admin queue (`<commit>`)
+#### M6-D — Feedback widget + admin queue (`e663622`)
 
 - Schema `user_feedback` (M6-A enums activate aici, tabela în migration
   `0013_user_feedback`): user_id NOT NULL (auth-only), kind (bug/sugestie/
