@@ -86,6 +86,12 @@ export const appRoutes: Route[] = [
       import('./forum/forum-list.page').then((m) => m.ForumListPage),
   },
   {
+    path: 'forum/cautare',
+    pathMatch: 'full',
+    loadComponent: () =>
+      import('./forum/forum-search.page').then((m) => m.ForumSearchPage),
+  },
+  {
     path: 'forum/:category',
     pathMatch: 'full',
     loadComponent: () =>

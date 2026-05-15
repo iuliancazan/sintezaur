@@ -60,6 +60,8 @@ export interface ThreadDetail {
     pinPosition: number | null;
     lockedAt: string | null;
     firstPostId: string | null;
+    tags: string[];
+    gearTag: string[];
     createdAt: string;
     updatedAt: string;
   };
@@ -105,17 +107,74 @@ export interface PostsResponse {
   totalReplies: number;
 }
 
-export interface CreateThreadPayload {
+export interface AntiSpamFields {
+  hp?: string;
+  formStartedAt?: number;
+}
+
+export interface CreateThreadPayload extends AntiSpamFields {
   categoryId: string;
   title: string;
   body: Record<string, unknown>;
   bodyHtml: string;
+  tags?: string[];
+  gearTag?: string[];
 }
 
-export interface CreateReplyPayload {
+export interface CreateReplyPayload extends AntiSpamFields {
   parentPostId?: string | null;
   body: Record<string, unknown>;
   bodyHtml: string;
+}
+
+export interface ReportContentPayload extends AntiSpamFields {
+  targetType: 'forum_post' | 'forum_thread';
+  targetId: string;
+  reason: string;
+}
+
+export interface ForumSearchQuery {
+  q?: string;
+  categories?: string[];
+  author?: string;
+  tag?: string;
+  gearId?: string;
+  from?: string;
+  to?: string;
+  sort?: 'relevance' | 'newest' | 'most_replies';
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ForumSearchHit {
+  threadId: string;
+  threadSlug: string;
+  threadTitle: string;
+  categorySlug: string;
+  categoryName: string;
+  authorId: string | null;
+  authorUsername: string | null;
+  postCount: number;
+  lastPostAt: string | null;
+  createdAt: string;
+  tags: string[];
+  snippet: string | null;
+}
+
+export interface ForumSearchResponse {
+  items: ForumSearchHit[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface GearPickItem {
+  id: string;
+  slug: string;
+  brand: string;
+  model: string;
+  category: string;
 }
 
 export interface UpdatePostPayload {
@@ -355,11 +414,7 @@ export class ForumService {
 
   /* ============ reports + mod actions (M5-G) ============ */
 
-  reportContent(payload: {
-    targetType: 'forum_post' | 'forum_thread';
-    targetId: string;
-    reason: string;
-  }): Promise<unknown> {
+  reportContent(payload: ReportContentPayload): Promise<unknown> {
     return firstValueFrom(
       this.http.post(
         `${this.base}/content-reports`,
@@ -438,6 +493,65 @@ export class ForumService {
         body: { reason },
         withCredentials: true,
       }),
+    );
+  }
+
+  /* ============ search + pending queue + gear picker (M5-H) ============ */
+
+  searchThreads(query: ForumSearchQuery): Promise<ForumSearchResponse> {
+    let params = new HttpParams();
+    if (query.q) params = params.set('q', query.q);
+    if (query.categories?.length)
+      params = params.set('categories', query.categories.join(','));
+    if (query.author) params = params.set('author', query.author);
+    if (query.tag) params = params.set('tag', query.tag);
+    if (query.gearId) params = params.set('gearId', query.gearId);
+    if (query.from) params = params.set('from', query.from);
+    if (query.to) params = params.set('to', query.to);
+    if (query.sort) params = params.set('sort', query.sort);
+    if (query.page) params = params.set('page', String(query.page));
+    if (query.pageSize) params = params.set('pageSize', String(query.pageSize));
+    return firstValueFrom(
+      this.http.get<ForumSearchResponse>(`${this.base}/forum/search`, {
+        params,
+      }),
+    );
+  }
+
+  searchGear(q: string): Promise<{ items: GearPickItem[] }> {
+    const params = new HttpParams().set('q', q).set('pageSize', '8');
+    return firstValueFrom(
+      this.http.get<{ items: GearPickItem[] }>(`${this.base}/tezaur`, {
+        params,
+      }),
+    );
+  }
+
+  listPendingPosts(page = 1): Promise<{
+    items: {
+      id: string;
+      threadId: string;
+      threadSlug: string;
+      threadTitle: string;
+      categorySlug: string;
+      bodyHtml: string;
+      authorId: string | null;
+      authorUsername: string | null;
+      authorFullName: string | null;
+      topLevelSeq: number;
+      subSeq: number | null;
+      createdAt: string;
+    }[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    return firstValueFrom(
+      this.http.get<never>(
+        `${this.base}/forum/mod/pending-posts?page=${page}`,
+        { withCredentials: true },
+      ),
     );
   }
 }

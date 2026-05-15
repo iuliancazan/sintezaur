@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -17,6 +18,8 @@ import {
   JwtAuthGuard,
   type AuthenticatedUser,
 } from '@sintezaur/auth';
+import type { Request } from 'express';
+import { AntiSpamService } from './anti-spam.service';
 import {
   CreateReplyDto,
   CreateThreadDto,
@@ -52,6 +55,7 @@ export class AuthForumController {
     private readonly forumUsers: ForumUsersService,
     private readonly likes: ForumLikesService,
     private readonly subscriptions: ForumSubscriptionsService,
+    private readonly antiSpam: AntiSpamService,
   ) {}
 
   @Get('mention-search')
@@ -133,8 +137,17 @@ export class AuthForumController {
   createThread(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateThreadDto,
+    @Req() req: Request,
   ) {
-    return this.threads.createWithOp(user.sub, dto);
+    this.antiSpam.enforce(req, { hp: dto.hp, formStartedAt: dto.formStartedAt });
+    return this.threads.createWithOp(user.sub, {
+      categoryId: dto.categoryId,
+      title: dto.title,
+      body: dto.body,
+      bodyHtml: dto.bodyHtml,
+      tags: dto.tags,
+      gearTag: dto.gearTag,
+    });
   }
 
   @Post('threads/:id/posts')
@@ -142,7 +155,9 @@ export class AuthForumController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) threadId: string,
     @Body() dto: CreateReplyDto,
+    @Req() req: Request,
   ) {
+    this.antiSpam.enforce(req, { hp: dto.hp, formStartedAt: dto.formStartedAt });
     return this.posts.createReply(user.sub, {
       threadId,
       parentPostId: dto.parentPostId ?? null,

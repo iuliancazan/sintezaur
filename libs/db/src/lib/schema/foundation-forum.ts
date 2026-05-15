@@ -120,6 +120,26 @@ export const forumThreads = pgTable(
     /** First post (OP) — set on thread create; populated by M5-B. */
     firstPostId: uuid('first_post_id'),
 
+    /**
+     * Free-text tags per spec §8.4 thread features. Lowercase, trimmed,
+     * deduplicated app-side. Indexed via GIN for ANY/ALL containment
+     * queries from the search facet.
+     */
+    tags: text('tags')
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::text[]`),
+
+    /**
+     * Structured gear references (FK app-side to `gear.id`). Cap a few
+     * per thread; lets the search facet "filter threads referencing
+     * the Korg MS-20" without heuristics on free tags.
+     */
+    gearTag: uuid('gear_tag')
+      .array()
+      .notNull()
+      .default(sql`ARRAY[]::uuid[]`),
+
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
       .defaultNow(),

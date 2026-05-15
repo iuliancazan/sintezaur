@@ -28,6 +28,9 @@ import { ForumCategory, ForumService } from './forum.service';
         </div>
         <div>
           <p class="fr-header__lede">{{ 'forum.page_lede' | t }}</p>
+          <a class="fr-header__cta" routerLink="/forum/cautare">
+            🔍 {{ 'forum.search.go' | t }}
+          </a>
         </div>
       </section>
 
@@ -125,6 +128,20 @@ import { ForumCategory, ForumService } from './forum.service';
         margin: 0 0 14px;
       }
       .fr-header__sub::before { content: '* '; color: var(--accent); }
+      .fr-header__cta {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 10px 16px;
+        background: var(--accent);
+        color: var(--accent-fg);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        text-decoration: none;
+        border: 1px solid var(--accent);
+      }
+      .fr-header__cta:hover { filter: brightness(1.1); }
       .fr-header__lede {
         color: var(--fg-muted);
         font-size: 15px;

@@ -2,12 +2,15 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { Public } from '@sintezaur/auth';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumPostsService } from './forum-posts.service';
+import {
+  ForumSearchService,
+  type ForumSearchQuery,
+} from './forum-search.service';
 import { ForumThreadsService } from './forum-threads.service';
 
 /**
@@ -25,11 +28,48 @@ export class PublicForumController {
     private readonly categories: ForumCategoriesService,
     private readonly threads: ForumThreadsService,
     private readonly posts: ForumPostsService,
+    private readonly search: ForumSearchService,
   ) {}
 
   @Get('categories')
   listCategories() {
     return this.categories.listAll();
+  }
+
+  @Get('search')
+  searchThreads(
+    @Query('q') q?: string,
+    @Query('categories') categories?: string | string[],
+    @Query('author') author?: string,
+    @Query('tag') tag?: string,
+    @Query('gearId') gearId?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('sort') sort?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    const cats = Array.isArray(categories)
+      ? categories
+      : categories
+        ? categories.split(',').filter(Boolean)
+        : undefined;
+    const safeSort: ForumSearchQuery['sort'] =
+      sort === 'newest' || sort === 'most_replies' || sort === 'relevance'
+        ? sort
+        : undefined;
+    return this.search.search({
+      q,
+      categories: cats,
+      authorUsername: author,
+      tag,
+      gearId,
+      from,
+      to,
+      sort: safeSort,
+      page: page ? Number(page) : undefined,
+      pageSize: pageSize ? Number(pageSize) : undefined,
+    });
   }
 
   @Get('categories/:slug/threads')

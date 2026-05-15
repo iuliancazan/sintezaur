@@ -21,6 +21,7 @@ import type {
   ContentReportTarget,
 } from '@sintezaur/db';
 import type { Request } from 'express';
+import { AntiSpamService } from './anti-spam.service';
 import { ContentReportsService } from './content-reports.service';
 import { CreateReportDto, ResolveReportDto } from './forum.dto';
 
@@ -43,13 +44,18 @@ function isMod(user: AuthenticatedUser): boolean {
 @Controller('content-reports')
 @UseGuards(JwtAuthGuard)
 export class ContentReportsController {
-  constructor(private readonly reports: ContentReportsService) {}
+  constructor(
+    private readonly reports: ContentReportsService,
+    private readonly antiSpam: AntiSpamService,
+  ) {}
 
   @Post()
   create(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: CreateReportDto,
+    @Req() req: Request,
   ) {
+    this.antiSpam.enforce(req, { hp: dto.hp, formStartedAt: dto.formStartedAt });
     return this.reports.create(user.sub, {
       targetType: dto.targetType,
       targetId: dto.targetId,

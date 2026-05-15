@@ -11,7 +11,6 @@ import {
   articles,
   DATABASE,
   forumCategories,
-  forumPosts,
   forumThreads,
   gear,
   users,
@@ -19,7 +18,7 @@ import {
   type SintezaurDb,
 } from '@sintezaur/db';
 import { slugFromParts, uniqueSlug } from '@sintezaur/shared';
-import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { ForumPostsService } from './forum-posts.service';
 
 const DEFAULT_PAGE_SIZE = 25;
@@ -31,6 +30,29 @@ export interface CreateThreadInput {
   title: string;
   body: Record<string, unknown>;
   bodyHtml: string;
+  /** Free-text tags. Lowercased, trimmed, deduped, max 6. */
+  tags?: string[];
+  /** Structured gear refs (FK app-side to gear.id). Max 5. */
+  gearTag?: string[];
+}
+
+const MAX_TAGS = 6;
+const MAX_GEAR_TAGS = 5;
+const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
+
+function normalizeTags(input: string[] | undefined): string[] {
+  if (!input) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of input) {
+    const t = raw.trim().toLowerCase();
+    if (!t || !TAG_RE.test(t)) continue;
+    if (seen.has(t)) continue;
+    seen.add(t);
+    out.push(t);
+    if (out.length >= MAX_TAGS) break;
+  }
+  return out;
 }
 
 export interface ThreadListItem {
@@ -89,6 +111,9 @@ export class ForumThreadsService {
       this.slugTaken(s),
     );
 
+    const tags = normalizeTags(input.tags);
+    const gearTagIds = await this.validateGearTags(input.gearTag ?? []);
+
     const [thread] = await this.db
       .insert(forumThreads)
       .values({
@@ -97,6 +122,8 @@ export class ForumThreadsService {
         authorId,
         title: input.title.trim(),
         postCount: 0,
+        tags,
+        gearTag: gearTagIds,
       })
       .returning({ id: forumThreads.id, slug: forumThreads.slug });
 
@@ -389,5 +416,15 @@ export class ForumThreadsService {
       )
       .limit(1);
     return rows.length > 0;
+  }
+
+  private async validateGearTags(ids: string[]): Promise<string[]> {
+    if (ids.length === 0) return [];
+    const trimmed = [...new Set(ids)].slice(0, MAX_GEAR_TAGS);
+    const rows = await this.db
+      .select({ id: gear.id })
+      .from(gear)
+      .where(and(inArray(gear.id, trimmed), isNull(gear.deletedAt)));
+    return rows.map((r) => r.id);
   }
 }

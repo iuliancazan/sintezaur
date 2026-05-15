@@ -570,6 +570,63 @@ export class ForumPostsService {
   }
 
   /**
+   * First-post approval queue per spec §8.4. Returns posts with
+   * `status='pending'`, oldest first (FIFO for mod attention). Joined
+   * with author + thread metadata for one-screen review.
+   */
+  async listPendingPosts(opts: { page?: number; pageSize?: number } = {}) {
+    const page = Math.max(1, opts.page ?? 1);
+    const pageSize = Math.min(opts.pageSize ?? 25, 100);
+
+    const rows = await this.db
+      .select({
+        id: forumPosts.id,
+        threadId: forumPosts.threadId,
+        threadSlug: forumThreads.slug,
+        threadTitle: forumThreads.title,
+        categorySlug: forumCategories.slug,
+        bodyHtml: forumPosts.bodyHtml,
+        authorId: forumPosts.authorId,
+        authorUsername: users.username,
+        authorFullName: users.fullName,
+        topLevelSeq: forumPosts.topLevelSeq,
+        subSeq: forumPosts.subSeq,
+        createdAt: forumPosts.createdAt,
+      })
+      .from(forumPosts)
+      .innerJoin(forumThreads, eq(forumThreads.id, forumPosts.threadId))
+      .innerJoin(
+        forumCategories,
+        eq(forumCategories.id, forumThreads.categoryId),
+      )
+      .leftJoin(users, eq(users.id, forumPosts.authorId))
+      .where(
+        and(
+          eq(forumPosts.status, 'pending'),
+          isNull(forumPosts.deletedAt),
+        ),
+      )
+      .orderBy(asc(forumPosts.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(forumPosts)
+      .where(
+        and(eq(forumPosts.status, 'pending'), isNull(forumPosts.deletedAt)),
+      );
+
+    return {
+      items: rows,
+      page,
+      pageSize,
+      totalCount: count,
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
+    };
+  }
+
+  /**
    * Returns the IDs of posts in `threadId` that `userId` has liked.
    * Used by the thread page to render the active state of the "Util"
    * button for the logged-in user (single round-trip after listPosts).

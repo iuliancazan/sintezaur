@@ -1,4 +1,6 @@
 import {
+  ArrayMaxSize,
+  IsArray,
   IsIn,
   IsInt,
   IsObject,
@@ -24,6 +26,38 @@ export class CreateThreadDto {
 
   @IsString()
   bodyHtml!: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(5)
+  @IsUUID('all', { each: true })
+  gearTag?: string[];
+
+  /** Anti-spam (M5-H): hidden field, must be empty. */
+  @IsOptional()
+  @IsString()
+  hp?: string;
+
+  /** Anti-spam (M5-H): epoch ms when the form was rendered. */
+  @IsOptional()
+  @IsInt()
+  formStartedAt?: number;
+}
+
+export class CreateReplyAntiSpamFieldsDto {
+  @IsOptional()
+  @IsString()
+  hp?: string;
+
+  @IsOptional()
+  @IsInt()
+  formStartedAt?: number;
 }
 
 export class CreateReplyDto {
@@ -36,6 +70,16 @@ export class CreateReplyDto {
 
   @IsString()
   bodyHtml!: string;
+
+  /** Anti-spam (M5-H): hidden field, must be empty. */
+  @IsOptional()
+  @IsString()
+  hp?: string;
+
+  /** Anti-spam (M5-H): epoch ms when the form was rendered. */
+  @IsOptional()
+  @IsInt()
+  formStartedAt?: number;
 }
 
 export class UpdatePostDto {
@@ -140,6 +184,14 @@ export class CreateReportDto {
   @IsString()
   @Length(10, 1000)
   reason!: string;
+
+  @IsOptional()
+  @IsString()
+  hp?: string;
+
+  @IsOptional()
+  @IsInt()
+  formStartedAt?: number;
 }
 
 export class ResolveReportDto {

@@ -131,6 +131,18 @@ const EMPTY_COMPOSER: ComposerState = {
             <span>{{ t.thread.postCount }} {{ 'forum.posts_count' | t }}</span>
           </div>
 
+          @if (t.thread.tags && t.thread.tags.length > 0) {
+            <div class="ft-header__tags">
+              @for (tag of t.thread.tags; track tag) {
+                <a
+                  class="ft-tag"
+                  [routerLink]="['/forum/cautare']"
+                  [queryParams]="{ tag: tag }"
+                >#{{ tag }}</a>
+              }
+            </div>
+          }
+
           <div class="ft-header__actions">
             @if (auth.currentUser()) {
               <app-forum-subscribe-bell
@@ -511,6 +523,22 @@ const EMPTY_COMPOSER: ComposerState = {
       }
       .ft-header__author { color: var(--accent); }
       .ft-header__meta .sep { color: var(--fg-subtle); }
+      .ft-header__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .ft-tag {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 3px 8px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--fg-muted);
+        text-decoration: none;
+      }
+      .ft-tag:hover { color: var(--accent); border-color: var(--accent); }
       .ft-master {
         display: flex;
         gap: 8px;
@@ -848,6 +876,11 @@ export class ForumThreadPage {
   readonly edit = signal<ComposerState>(EMPTY_COMPOSER);
   readonly general = signal<ComposerState>(EMPTY_COMPOSER);
 
+  /** Anti-spam time-on-form timestamps (set when each composer opens). */
+  private replyStartedAt = 0;
+  private generalStartedAt = 0;
+  private dialogStartedAt = 0;
+
   readonly replyError = signal<string | null>(null);
   readonly editError = signal<string | null>(null);
   readonly generalError = signal<string | null>(null);
@@ -995,6 +1028,7 @@ export class ForumThreadPage {
     this.replyingTo.set(p.id);
     this.reply.set(EMPTY_COMPOSER);
     this.replyError.set(null);
+    this.replyStartedAt = Date.now();
   }
 
   cancelReply(): void {
@@ -1022,6 +1056,8 @@ export class ForumThreadPage {
         parentPostId: p.id,
         body: this.reply().bodyJson,
         bodyHtml: this.reply().bodyHtml,
+        hp: '',
+        formStartedAt: this.replyStartedAt,
       });
       this.applyNewPost(newPost);
       this.cancelReply();
@@ -1044,6 +1080,7 @@ export class ForumThreadPage {
     this.generalOpen.set(true);
     this.general.set(EMPTY_COMPOSER);
     this.generalError.set(null);
+    this.generalStartedAt = Date.now();
   }
 
   cancelGeneral(): void {
@@ -1070,6 +1107,8 @@ export class ForumThreadPage {
       const newPost = await this.forum.createReply(t.thread.id, {
         body: this.general().bodyJson,
         bodyHtml: this.general().bodyHtml,
+        hp: '',
+        formStartedAt: this.generalStartedAt,
       });
       this.applyNewPost(newPost);
       this.cancelGeneral();
@@ -1328,6 +1367,7 @@ export class ForumThreadPage {
   ): void {
     this.dialogState.set({ mode, targetType, targetId });
     this.dialogError.set(null);
+    this.dialogStartedAt = Date.now();
   }
 
   closeDialog(): void {
@@ -1348,6 +1388,8 @@ export class ForumThreadPage {
           targetType: ds.targetType,
           targetId: ds.targetId,
           reason,
+          hp: '',
+          formStartedAt: this.dialogStartedAt,
         });
         this.flashToast(this.i18n.t('forum.report.thanks'));
       } else {

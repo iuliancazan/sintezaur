@@ -57,6 +57,13 @@
       "when": 1778797057721,
       "tag": "0009_forum_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1778803800000,
+      "tag": "0010_forum_thread_tags",
+      "breakpoints": true
     }
   ]
 }

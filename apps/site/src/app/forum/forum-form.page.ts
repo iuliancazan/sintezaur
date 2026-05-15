@@ -14,18 +14,27 @@ import {
 } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
-import { ForumCategory, ForumService } from './forum.service';
+import {
+  ForumCategory,
+  ForumService,
+  GearPickItem,
+} from './forum.service';
 
 interface FormState {
   title: string;
   bodyJson: Record<string, unknown>;
   bodyHtml: string;
   bodyText: string;
+  tagsInput: string;
+  gearTags: GearPickItem[];
 }
 
 const MIN_TITLE = 4;
 const MAX_TITLE = 200;
 const MIN_BODY_TEXT = 4;
+const MAX_TAGS = 6;
+const MAX_GEAR_TAGS = 5;
+const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
 
 @Component({
   selector: 'app-forum-form-page',
@@ -82,6 +91,69 @@ const MIN_BODY_TEXT = 4;
               (valueChange)="onBodyChange($event)"
             />
             <span class="ff-hint">{{ 'forum.compose.body_hint' | t }}</span>
+          </div>
+
+          <label class="ff-field">
+            <span class="ff-label">{{ 'forum.compose.tags_label' | t }}</span>
+            <input
+              type="text"
+              [ngModel]="state.tagsInput"
+              (ngModelChange)="onTagsInput($event)"
+              name="tags"
+              [placeholder]="i18n.t('forum.compose.tags_placeholder')"
+            />
+            <span class="ff-hint">{{ 'forum.compose.tags_hint' | t: { max: MAX_TAGS } }}</span>
+            @if (parsedTags().length > 0) {
+              <div class="ff-chips">
+                @for (t of parsedTags(); track t) {
+                  <span class="ff-chip">#{{ t }}</span>
+                }
+              </div>
+            }
+          </label>
+
+          <div class="ff-field">
+            <span class="ff-label">{{ 'forum.compose.gear_label' | t }}</span>
+            <input
+              type="search"
+              [ngModel]="gearQuery()"
+              (ngModelChange)="onGearQuery($event)"
+              [placeholder]="i18n.t('forum.compose.gear_placeholder')"
+              [disabled]="state.gearTags.length >= MAX_GEAR_TAGS"
+            />
+            @if (gearResults().length > 0) {
+              <ul class="ff-gear-pick">
+                @for (g of gearResults(); track g.id) {
+                  <li>
+                    <button type="button" (click)="addGearTag(g)">
+                      <strong>{{ g.brand }} {{ g.model }}</strong>
+                      <span>{{ g.category }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+            @if (state.gearTags.length > 0) {
+              <div class="ff-chips">
+                @for (g of state.gearTags; track g.id) {
+                  <button
+                    type="button"
+                    class="ff-chip ff-chip--gear"
+                    (click)="removeGearTag(g.id)"
+                  >
+                    {{ g.brand }} {{ g.model }} ✕
+                  </button>
+                }
+              </div>
+            }
+            <span class="ff-hint">
+              {{ state.gearTags.length }} / {{ MAX_GEAR_TAGS }} · {{ 'forum.compose.gear_hint' | t }}
+            </span>
+          </div>
+
+          <!-- honeypot -->
+          <div class="ff-honeypot" aria-hidden="true">
+            <label>Nu completa acest câmp <input type="text" name="hp" [(ngModel)]="state.hp" tabindex="-1" autocomplete="off" /></label>
           </div>
 
           @if (error()) {
@@ -173,7 +245,72 @@ const MIN_BODY_TEXT = 4;
         border: 1px solid var(--line-strong);
         color: var(--fg);
       }
-      .ff-field input[type='text']:focus { outline: none; border-color: var(--accent); }
+      .ff-field input[type='text']:focus,
+      .ff-field input[type='search']:focus { outline: none; border-color: var(--accent); }
+      .ff-field input[type='search'] {
+        font-family: inherit;
+        font-size: 14px;
+        padding: 10px 12px;
+        background: var(--bg);
+        border: 1px solid var(--line-strong);
+        color: var(--fg);
+      }
+      .ff-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .ff-chip {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        padding: 4px 10px;
+        background: var(--bg);
+        border: 1px solid var(--line-strong);
+        color: var(--fg-muted);
+      }
+      .ff-chip--gear {
+        cursor: pointer;
+        color: var(--accent);
+      }
+      .ff-chip--gear:hover { border-color: #e8665b; color: #e8665b; }
+      .ff-gear-pick {
+        list-style: none;
+        margin: 4px 0 0;
+        padding: 4px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line-strong);
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      .ff-gear-pick li button {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: 0;
+        padding: 8px 12px;
+        cursor: pointer;
+        color: var(--fg);
+      }
+      .ff-gear-pick li button:hover { background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%); }
+      .ff-gear-pick li button span {
+        font-family: var(--font-mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--fg-muted);
+      }
+      .ff-honeypot {
+        position: absolute;
+        left: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
       .ff-hint {
         font-family: var(--font-mono);
         font-size: 10px;
@@ -235,6 +372,8 @@ export class ForumFormPage {
   private readonly router = inject(Router);
 
   readonly MAX_TITLE = MAX_TITLE;
+  readonly MAX_TAGS = MAX_TAGS;
+  readonly MAX_GEAR_TAGS = MAX_GEAR_TAGS;
   readonly initialBody = '';
 
   readonly category = signal<ForumCategory | null>(null);
@@ -243,11 +382,20 @@ export class ForumFormPage {
   readonly submitting = signal(false);
   readonly error = signal<string | null>(null);
 
-  state: FormState = {
+  readonly gearQuery = signal('');
+  readonly gearResults = signal<GearPickItem[]>([]);
+  readonly parsedTags = signal<string[]>([]);
+  private readonly formStartedAt = Date.now();
+  private gearSearchTimer: ReturnType<typeof setTimeout> | null = null;
+
+  state: FormState & { hp: string } = {
     title: '',
     bodyJson: {},
     bodyHtml: '',
     bodyText: '',
+    tagsInput: '',
+    gearTags: [],
+    hp: '',
   };
 
   readonly mentionSuggest = async (
@@ -276,6 +424,56 @@ export class ForumFormPage {
     };
   }
 
+  onTagsInput(value: string): void {
+    this.state = { ...this.state, tagsInput: value };
+    const tags: string[] = [];
+    const seen = new Set<string>();
+    for (const raw of value.split(/[,\s]+/)) {
+      const t = raw.trim().toLowerCase().replace(/^#/, '');
+      if (!t || !TAG_RE.test(t)) continue;
+      if (seen.has(t)) continue;
+      seen.add(t);
+      tags.push(t);
+      if (tags.length >= MAX_TAGS) break;
+    }
+    this.parsedTags.set(tags);
+  }
+
+  onGearQuery(value: string): void {
+    this.gearQuery.set(value);
+    if (this.gearSearchTimer) clearTimeout(this.gearSearchTimer);
+    if (value.trim().length < 2) {
+      this.gearResults.set([]);
+      return;
+    }
+    this.gearSearchTimer = setTimeout(async () => {
+      try {
+        const res = await this.forum.searchGear(value.trim());
+        const selectedIds = new Set(this.state.gearTags.map((g) => g.id));
+        this.gearResults.set(
+          res.items.filter((g) => !selectedIds.has(g.id)).slice(0, 8),
+        );
+      } catch {
+        this.gearResults.set([]);
+      }
+    }, 250);
+  }
+
+  addGearTag(g: GearPickItem): void {
+    if (this.state.gearTags.length >= MAX_GEAR_TAGS) return;
+    if (this.state.gearTags.some((x) => x.id === g.id)) return;
+    this.state = { ...this.state, gearTags: [...this.state.gearTags, g] };
+    this.gearResults.set([]);
+    this.gearQuery.set('');
+  }
+
+  removeGearTag(id: string): void {
+    this.state = {
+      ...this.state,
+      gearTags: this.state.gearTags.filter((g) => g.id !== id),
+    };
+  }
+
   canSubmit(): boolean {
     const titleOk =
       this.state.title.trim().length >= MIN_TITLE &&
@@ -296,6 +494,10 @@ export class ForumFormPage {
         title: this.state.title.trim(),
         body: this.state.bodyJson,
         bodyHtml: this.state.bodyHtml,
+        tags: this.parsedTags(),
+        gearTag: this.state.gearTags.map((g) => g.id),
+        hp: this.state.hp,
+        formStartedAt: this.formStartedAt,
       });
       await this.router.navigate(['/forum', cat.slug, res.slug]);
     } catch (err) {

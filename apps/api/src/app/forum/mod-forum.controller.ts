@@ -2,11 +2,13 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -44,6 +46,19 @@ export class ModForumController {
     private readonly audit: AuditLogService,
     private readonly notifications: NotificationsService,
   ) {}
+
+  /* ============ first-post approval queue (M5-H) ============ */
+
+  @Get('pending-posts')
+  listPending(
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+  ) {
+    return this.posts.listPendingPosts({
+      page: page ? Number(page) : undefined,
+      pageSize: pageSize ? Number(pageSize) : undefined,
+    });
+  }
 
   /* ============ threads ============ */
 

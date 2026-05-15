@@ -56,6 +56,12 @@ export const appRoutes: Route[] = [
       import('./reports/reports-admin.page').then((m) => m.ReportsAdminPage),
   },
   {
+    path: 'forum-queue',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./forum-queue/forum-queue.page').then((m) => m.ForumQueuePage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

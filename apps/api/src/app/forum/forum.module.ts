@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AntiSpamService } from './anti-spam.service';
 import { AuthForumController } from './auth-forum.controller';
 import { BadgeAwardingService } from './badge-awarding.service';
 import { BadgesController } from './badges.controller';
@@ -8,6 +9,7 @@ import { ContentReportsService } from './content-reports.service';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumLikesService } from './forum-likes.service';
 import { ForumPostsService } from './forum-posts.service';
+import { ForumSearchService } from './forum-search.service';
 import { ForumSubscriptionsService } from './forum-subscriptions.service';
 import { ForumThreadsService } from './forum-threads.service';
 import { ForumUsersService } from './forum-users.service';
@@ -35,9 +37,11 @@ import { PublicForumController } from './public-forum.controller';
     ForumUsersService,
     ForumLikesService,
     ForumSubscriptionsService,
+    ForumSearchService,
     BadgesService,
     BadgeAwardingService,
     ContentReportsService,
+    AntiSpamService,
   ],
   exports: [
     ForumCategoriesService,
