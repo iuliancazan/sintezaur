@@ -8,6 +8,8 @@ import {
   PublicAuthorController,
   PublicRevistaController,
 } from './public-revista.controller';
+import { RevistaAttachmentsController } from './revista-attachments.controller';
+import { RevistaAttachmentsService } from './revista-attachments.service';
 
 /**
  * Revista — M4. Inline-on-site editorial composer + public reader.
@@ -20,8 +22,13 @@ import {
     EditorRevistaController,
     AdminRevistaController,
     RevistaFollowsController,
+    RevistaAttachmentsController,
   ],
-  providers: [ArticlesService, RevistaFollowsService],
-  exports: [ArticlesService],
+  providers: [
+    ArticlesService,
+    RevistaFollowsService,
+    RevistaAttachmentsService,
+  ],
+  exports: [ArticlesService, RevistaAttachmentsService],
 })
 export class RevistaModule {}

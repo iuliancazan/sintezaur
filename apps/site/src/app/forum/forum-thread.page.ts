@@ -34,6 +34,12 @@ import {
   type ReportSubmit,
 } from './report-dialog.component';
 import { SubscribeBellComponent } from './subscribe-bell.component';
+import {
+  AttachmentBoxComponent,
+  AttachmentListComponent,
+  AttachmentsService,
+  type AttachmentItem,
+} from '../storage';
 
 interface SubReplyVM extends PostListItem {
   numbering: string;
@@ -76,6 +82,8 @@ const EMPTY_COMPOSER: ComposerState = {
     SubscribeBellComponent,
     PostActionsMenuComponent,
     ReportDialogComponent,
+    AttachmentListComponent,
+    AttachmentBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -373,6 +381,18 @@ const EMPTY_COMPOSER: ComposerState = {
             <p class="ft-hidden">{{ 'forum.hidden_post' | t }}</p>
           } @else {
             <div class="ft-post__body" [innerHTML]="p.bodyHtml"></div>
+            @if (attachmentsByPost().get(p.id); as atts) {
+              @if (atts.length > 0) {
+                <app-attachment-list [items]="atts" />
+              }
+            }
+            @if (isOwnPost(p) && editingPost() !== p.id) {
+              <app-attachment-box
+                [target]="{ kind: 'forum-post', postId: p.id }"
+                [initial]="attachmentsByPost().get(p.id) ?? []"
+                (changed)="onAttachmentsChanged(p.id, $event)"
+              />
+            }
           }
 
           @if (!p.hiddenAt && editingPost() !== p.id && !isPending) {
@@ -845,6 +865,10 @@ export class ForumThreadPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
+  private readonly attachments = inject(AttachmentsService);
+
+  /** Attachments indexed by `postId` for O(1) lookups in the post template. */
+  readonly attachmentsByPost = signal<Map<string, AttachmentItem[]>>(new Map());
 
   readonly COLLAPSE_THRESHOLD = COLLAPSE_THRESHOLD;
   readonly currentUrl = this.router.url;
@@ -1517,11 +1541,13 @@ export class ForumThreadPage {
       this.pendingPosts.set([]);
       this.likedByMe.set(new Set());
       this.subLevel.set(null);
+      this.attachmentsByPost.set(new Map());
 
       if (this.auth.currentUser()) {
         // Fire-and-forget — don't block render if these fail.
         void this.loadUserAnnotations(t.thread.id);
       }
+      void this.loadAttachments(slug);
     } catch {
       this.error.set(true);
       this.thread.set(null);
@@ -1529,6 +1555,30 @@ export class ForumThreadPage {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private async loadAttachments(slug: string): Promise<void> {
+    try {
+      const items = await this.attachments.listForumAttachmentsByThread(slug);
+      const map = new Map<string, AttachmentItem[]>();
+      for (const a of items) {
+        const key = a.postId ?? '';
+        if (!key) continue;
+        const arr = map.get(key) ?? [];
+        arr.push(a);
+        map.set(key, arr);
+      }
+      this.attachmentsByPost.set(map);
+    } catch {
+      // Non-fatal — attachments stay empty on transient failures.
+    }
+  }
+
+  onAttachmentsChanged(postId: string, items: AttachmentItem[]): void {
+    const next = new Map(this.attachmentsByPost());
+    if (items.length === 0) next.delete(postId);
+    else next.set(postId, items);
+    this.attachmentsByPost.set(next);
   }
 
   private applySeo(t: ThreadDetail, op: PostListItem | null): void {

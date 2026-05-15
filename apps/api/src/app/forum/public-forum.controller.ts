@@ -5,6 +5,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { Public } from '@sintezaur/auth';
+import { ForumAttachmentsService } from './forum-attachments.service';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumPostsService } from './forum-posts.service';
 import {
@@ -29,6 +30,7 @@ export class PublicForumController {
     private readonly threads: ForumThreadsService,
     private readonly posts: ForumPostsService,
     private readonly search: ForumSearchService,
+    private readonly attachments: ForumAttachmentsService,
   ) {}
 
   @Get('categories')
@@ -101,5 +103,11 @@ export class PublicForumController {
       page: page ? Number(page) : undefined,
       pageSize: pageSize ? Number(pageSize) : undefined,
     });
+  }
+
+  @Get('threads/:slug/attachments')
+  async listAttachments(@Param('slug') slug: string) {
+    const t = await this.threads.findBySlug(slug);
+    return { items: await this.attachments.listForThread(t.thread.id) };
   }
 }

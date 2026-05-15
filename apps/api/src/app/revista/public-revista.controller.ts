@@ -7,12 +7,16 @@ import {
 } from '@nestjs/common';
 import { Public } from '@sintezaur/auth';
 import { ArticlesService } from './articles.service';
+import { RevistaAttachmentsService } from './revista-attachments.service';
 import { ListArticlesQueryDto } from './revista.dto';
 
 @Controller('revista')
 @Public()
 export class PublicRevistaController {
-  constructor(private readonly articles: ArticlesService) {}
+  constructor(
+    private readonly articles: ArticlesService,
+    private readonly attachments: RevistaAttachmentsService,
+  ) {}
 
   @Get()
   list(@Query() q: ListArticlesQueryDto) {
@@ -36,6 +40,13 @@ export class PublicRevistaController {
     }
     this.articles.bumpViewCount(data.article.id);
     return data;
+  }
+
+  @Get(':slug/attachments')
+  async listAttachments(@Param('slug') slug: string) {
+    const data = await this.articles.findBySlug(slug);
+    if (!data) throw new NotFoundException(`article ${slug} not found`);
+    return { items: await this.attachments.listForArticle(data.article.id) };
   }
 }
 

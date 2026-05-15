@@ -6,6 +6,8 @@ import { BadgesController } from './badges.controller';
 import { BadgesService } from './badges.service';
 import { ContentReportsController } from './content-reports.controller';
 import { ContentReportsService } from './content-reports.service';
+import { ForumAttachmentsController } from './forum-attachments.controller';
+import { ForumAttachmentsService } from './forum-attachments.service';
 import { ForumCategoriesService } from './forum-categories.service';
 import { ForumLikesService } from './forum-likes.service';
 import { ForumPostsService } from './forum-posts.service';
@@ -29,6 +31,7 @@ import { PublicForumController } from './public-forum.controller';
     ModForumController,
     BadgesController,
     ContentReportsController,
+    ForumAttachmentsController,
   ],
   providers: [
     ForumCategoriesService,
@@ -42,6 +45,7 @@ import { PublicForumController } from './public-forum.controller';
     BadgeAwardingService,
     ContentReportsService,
     AntiSpamService,
+    ForumAttachmentsService,
   ],
   exports: [
     ForumCategoriesService,
@@ -50,6 +54,7 @@ import { PublicForumController } from './public-forum.controller';
     ForumSubscriptionsService,
     BadgeAwardingService,
     BadgesService,
+    ForumAttachmentsService,
   ],
 })
 export class ForumModule {}

@@ -39,7 +39,8 @@ export const STORAGE_DEFAULT_CACHE_CONTROL =
 export interface StoragePutInput {
   /** Object key relative to bucket root. Must not start with `/`. */
   key: string;
-  body: Buffer;
+  /** Node `Buffer` extends `Uint8Array`; using the parent type keeps `libs/shared` browser-safe. */
+  body: Uint8Array;
   /** MIME type — written as `Content-Type` on the stored object. */
   contentType: string;
   /** Cache header. Defaults to long-immutable; mutable keys (avatar) override. */
@@ -53,8 +54,12 @@ export interface StoragePutResult {
 
 export interface StorageDriver {
   put(input: StoragePutInput): Promise<StoragePutResult>;
-  /** Buffer round-trip — used by tests and reconciliation only. */
-  get(key: string): Promise<Buffer>;
+  /**
+   * Round-trip read — used by tests and reconciliation only. The
+   * concrete drivers in `apps/api` return a Node `Buffer`, which is
+   * a `Uint8Array` subclass.
+   */
+  get(key: string): Promise<Uint8Array>;
   delete(key: string): Promise<void>;
   exists(key: string): Promise<boolean>;
   /** Public URL for the object. Always identical shape on both drivers. */

@@ -17,6 +17,12 @@ import {
   RevistaService,
   type ArticleDetail,
 } from './revista.service';
+import {
+  AttachmentBoxComponent,
+  AttachmentListComponent,
+  AttachmentsService,
+  type AttachmentItem,
+} from '../storage';
 
 @Component({
   selector: 'app-revista-detail-page',
@@ -27,6 +33,8 @@ import {
     TPipe,
     SzIconComponent,
     SzAvatarComponent,
+    AttachmentListComponent,
+    AttachmentBoxComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -88,6 +96,21 @@ import {
 
         <!-- BODY -->
         <div class="rd-body" [innerHTML]="d.article.bodyHtml"></div>
+
+        @if (attachments().length > 0) {
+          <section class="rd-attachments">
+            <h3>// {{ 'revista.attachments_label' | t }}</h3>
+            <app-attachment-list [items]="attachments()" />
+          </section>
+        }
+
+        @if (canEdit()) {
+          <app-attachment-box
+            [target]="{ kind: 'revista-article', articleId: d.article.id }"
+            [initial]="attachments()"
+            (changed)="onAttachmentsChanged($event)"
+          />
+        }
 
         @if (d.article.tags.length > 0) {
           <div class="rd-tags">
@@ -447,10 +470,16 @@ export class RevistaDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
+  private readonly attachmentsApi = inject(AttachmentsService);
 
   readonly detail = signal<ArticleDetail | null>(null);
+  readonly attachments = signal<AttachmentItem[]>([]);
   readonly loading = signal(true);
   readonly notFound = signal(false);
+
+  onAttachmentsChanged(items: AttachmentItem[]): void {
+    this.attachments.set(items);
+  }
 
   readonly canEdit = computed(() => {
     const u = this.auth.currentUser();
@@ -474,6 +503,8 @@ export class RevistaDetailPage {
       const d = await this.revista.detail(slug);
       this.detail.set(d);
       this.applySeo(d);
+      this.attachments.set([]);
+      void this.loadAttachments(slug);
     } catch (err) {
       // Spec §7.13: backend signals slug redirect via 404 body
       // `{ redirectTo, message: 'redirect' | 'gone' }`. Honor it
@@ -492,6 +523,15 @@ export class RevistaDetailPage {
       this.detail.set(null);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async loadAttachments(slug: string): Promise<void> {
+    try {
+      const items = await this.attachmentsApi.listRevistaAttachmentsBySlug(slug);
+      this.attachments.set(items);
+    } catch {
+      // Non-fatal — leave list empty if the network blips.
     }
   }
 
