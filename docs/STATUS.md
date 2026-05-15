@@ -149,7 +149,7 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | C   | `0227d3d` | done | `/cont/setari` shell cu 6 tab-uri peste paginile existente (Profil/Parolă/Email/Datele mele/Preferințe notificări/Utilizatori blocați). `AuthShell.embedded` mode pentru change-password / change-email când sunt în shell. 6 redirect-uri vechi (`/cont/profil` etc.) → noile tab-uri. i18n: `account.settings.*`. |
 | D   | `0627544` | done | `/cont/favorite` shell cu 3 tab-uri (Anunțuri salvate, Căutări salvate, Abonamente forum) peste paginile existente. 3 redirect-uri vechi. Heart click în topbar → `/cont/favorite`. i18n: `account.favorites.*`. |
 | E   | `25e8fba` | done | `/cont/mesaje` shell cu tab Bazar (inbox live) + Forum (placeholder „În curând" pentru viitoare PM-uri Forum). Threadul `:threadId` rămâne pe URL-ul vechi (acum copil al shell-ului). Default tab redirect la `bazar`. i18n: `account.messages_shell.*`. Future dev notat: unified inbox Bazar+Forum cu badge pe sursă. |
-| F   | _pending sync_ | done | Cleanup: `account-home.page.ts` șters, `/cont` redirect → `/cont/setari`, chei i18n orfane curățate (`my_watches`, `saved_searches`). `docs/testing/m10-testing.md` cu plan manual pentru toate 6 sub-faze + regresie + bookmark-uri vechi + known limitations. |
+| F   | `ea1f957` | done | Cleanup: `account-home.page.ts` șters, `/cont` redirect → `/cont/setari`, chei i18n orfane curățate (`my_watches`, `saved_searches`). `docs/testing/m10-testing.md` cu plan manual pentru toate 6 sub-faze + regresie + bookmark-uri vechi + known limitations. |
 
 ## Conventions (recap from memory)
 
