@@ -111,6 +111,45 @@ export interface SzTopbarUser {
             </button>
           }
 
+          @if (showFavorites) {
+            <button
+              class="sz-icon-btn sz-icon-btn--collapsible"
+              type="button"
+              [attr.aria-label]="favoritesAriaLabel"
+              (click)="favoritesClick.emit()"
+            >
+              <sz-icon name="heart" />
+            </button>
+          }
+
+          @if (showMessages) {
+            <button
+              class="sz-icon-btn sz-icon-btn--collapsible sz-bell-btn"
+              type="button"
+              [attr.aria-label]="messagesAriaLabel"
+              (click)="messagesClick.emit()"
+            >
+              <sz-icon name="mail" />
+              @if (messagesBadge > 0) {
+                <span class="sz-bell-badge">
+                  {{ messagesBadge > 99 ? '99+' : messagesBadge }}
+                </span>
+              }
+            </button>
+          }
+
+          @if (showBurger) {
+            <button
+              class="sz-icon-btn sz-burger-btn"
+              type="button"
+              [attr.aria-label]="burgerAriaLabel"
+              [attr.aria-expanded]="burgerOpen"
+              (click)="burgerClick.emit()"
+            >
+              <sz-icon name="menu" />
+            </button>
+          }
+
           @if (showThemeSwitch) {
             <div class="sz-theme-toggle" role="group" [attr.aria-label]="themeAriaLabel">
               <button
@@ -282,6 +321,7 @@ export interface SzTopbarUser {
         background: var(--bg-elev);
       }
       .sz-bell-btn { position: relative; }
+      .sz-burger-btn { display: none; }
       .sz-bell-badge {
         position: absolute;
         top: 2px;
@@ -399,10 +439,14 @@ export interface SzTopbarUser {
         }
         .sz-nav,
         .sz-theme-toggle,
-        .sz-btn-ghost {
+        .sz-btn-ghost,
+        .sz-icon-btn--collapsible {
           display: none;
         }
         .sz-account-trigger {
+          display: inline-grid;
+        }
+        .sz-burger-btn {
           display: inline-grid;
         }
       }
@@ -418,11 +462,19 @@ export class SzTopbarComponent {
 
   @Input() showSearch = true;
   @Input() showBell = true;
+  @Input() showFavorites = false;
+  @Input() showMessages = false;
+  @Input() showBurger = false;
   @Input() showThemeSwitch = true;
 
   @Input() searchAriaLabel = 'Search';
   @Input() bellAriaLabel = 'Notifications';
   @Input() bellBadge = 0;
+  @Input() favoritesAriaLabel = 'Favorites';
+  @Input() messagesAriaLabel = 'Messages';
+  @Input() messagesBadge = 0;
+  @Input() burgerAriaLabel = 'Menu';
+  @Input() burgerOpen = false;
   @Input() themeAriaLabel = 'Theme';
   @Input() themeAutoLabel = 'Auto';
   @Input() themeLightLabel = 'Light';
@@ -440,6 +492,9 @@ export class SzTopbarComponent {
 
   @Output() searchClick = new EventEmitter<void>();
   @Output() bellClick = new EventEmitter<void>();
+  @Output() favoritesClick = new EventEmitter<void>();
+  @Output() messagesClick = new EventEmitter<void>();
+  @Output() burgerClick = new EventEmitter<void>();
   @Output() accountClick = new EventEmitter<void>();
 
   readonly theme = inject(ThemeService);

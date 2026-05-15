@@ -10,6 +10,7 @@ import {
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AccountMenuComponent } from './account/account-menu.component';
+import { MobileMenuComponent } from './account/mobile-menu.component';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
@@ -37,6 +38,7 @@ import { ToastContainer } from './ui/toast-container.component';
     TPipe,
     NotificationsPanelComponent,
     AccountMenuComponent,
+    MobileMenuComponent,
     CookiesBanner,
     ToastContainer,
     FeedbackModal,
@@ -52,8 +54,15 @@ import { ToastContainer } from './ui/toast-container.component';
       [showBell]="auth.isLoggedIn()"
       [bellBadge]="notifications.unread()"
       [accountMenuOpen]="accountMenuOpen()"
+      [showFavorites]="auth.isLoggedIn()"
+      [showMessages]="auth.isLoggedIn()"
+      [showBurger]="auth.isLoggedIn()"
+      [burgerOpen]="mobileMenuOpen()"
       (bellClick)="toggleNotifications()"
       (accountClick)="toggleAccountMenu()"
+      (favoritesClick)="goToFavorites()"
+      (messagesClick)="goToMessages()"
+      (burgerClick)="toggleMobileMenu()"
       (searchClick)="goToSearch()"
       [loginHref]="'/login'"
       [signupHref]="'/signup'"
@@ -63,6 +72,9 @@ import { ToastContainer } from './ui/toast-container.component';
       [accountLabel]="accountLabel()"
       [searchAriaLabel]="searchAriaLabel()"
       [bellAriaLabel]="bellAriaLabel()"
+      [favoritesAriaLabel]="favoritesAriaLabel()"
+      [messagesAriaLabel]="messagesAriaLabel()"
+      [burgerAriaLabel]="burgerAriaLabel()"
       [themeAriaLabel]="themeAriaLabel()"
       [themeAutoLabel]="themeAutoLabel()"
       [themeLightLabel]="themeLightLabel()"
@@ -75,6 +87,10 @@ import { ToastContainer } from './ui/toast-container.component';
 
     @if (accountMenuOpen()) {
       <app-account-menu (closed)="accountMenuOpen.set(false)" />
+    }
+
+    @if (mobileMenuOpen()) {
+      <app-mobile-menu (closed)="mobileMenuOpen.set(false)" />
     }
 
     <router-outlet />
@@ -253,6 +269,7 @@ export class App {
 
   readonly notificationsOpen = signal(false);
   readonly accountMenuOpen = signal(false);
+  readonly mobileMenuOpen = signal(false);
 
   constructor() {
     effect(() => {
@@ -262,23 +279,42 @@ export class App {
         this.notifications.stopPolling();
         this.notificationsOpen.set(false);
         this.accountMenuOpen.set(false);
+        this.mobileMenuOpen.set(false);
       }
     });
   }
 
+  private closeAllPanels(): void {
+    this.notificationsOpen.set(false);
+    this.accountMenuOpen.set(false);
+    this.mobileMenuOpen.set(false);
+  }
+
   toggleNotifications(): void {
     const next = !this.notificationsOpen();
+    this.closeAllPanels();
     this.notificationsOpen.set(next);
-    if (next) {
-      this.accountMenuOpen.set(false);
-      void this.notifications.loadList();
-    }
+    if (next) void this.notifications.loadList();
   }
 
   toggleAccountMenu(): void {
     const next = !this.accountMenuOpen();
+    this.closeAllPanels();
     this.accountMenuOpen.set(next);
-    if (next) this.notificationsOpen.set(false);
+  }
+
+  toggleMobileMenu(): void {
+    const next = !this.mobileMenuOpen();
+    this.closeAllPanels();
+    this.mobileMenuOpen.set(next);
+  }
+
+  goToFavorites(): void {
+    void this.router.navigate(['/cont/salvate']);
+  }
+
+  goToMessages(): void {
+    void this.router.navigate(['/cont/mesaje']);
   }
 
   goToSearch(): void {
@@ -295,6 +331,9 @@ export class App {
   readonly accountLabel = computed(() => this.i18n.t('app.actions.account_menu'));
   readonly searchAriaLabel = computed(() => this.i18n.t('app.nav.search'));
   readonly bellAriaLabel = computed(() => this.i18n.t('app.nav.notifications'));
+  readonly favoritesAriaLabel = computed(() => this.i18n.t('app.topbar.favorites'));
+  readonly messagesAriaLabel = computed(() => this.i18n.t('app.topbar.messages'));
+  readonly burgerAriaLabel = computed(() => this.i18n.t('app.topbar.burger'));
   readonly themeAriaLabel = computed(() => this.i18n.t('app.nav.theme'));
   readonly themeAutoLabel = computed(() => this.i18n.t('app.nav.theme_auto'));
   readonly themeLightLabel = computed(() => this.i18n.t('app.nav.theme_light'));

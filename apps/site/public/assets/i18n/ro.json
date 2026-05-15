@@ -24,6 +24,17 @@
       "login_short": "Conectează-te",
       "account_short": "Cont",
       "account_menu": "Deschide meniu cont"
+    },
+    "topbar": {
+      "favorites": "Favorite",
+      "messages": "Mesaje",
+      "burger": "Deschide meniul"
+    },
+    "mobile_menu": {
+      "aria": "Meniu cont",
+      "title": "Meniu",
+      "close": "Închide meniul",
+      "shortcuts": "Scurtături"
     }
   },
   "footer": {
@@ -319,6 +330,7 @@
       "aria": "Meniu cont",
       "settings": "Setări",
       "dashboard": "Dashboard",
+      "favorites": "Favorite",
       "profile": "Profil",
       "password": "Parolă",
       "email": "Email",
