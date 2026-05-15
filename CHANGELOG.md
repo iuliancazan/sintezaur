@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
-#### M6-E3 — MVP foundation closure: audit log + curs valutar (`PENDING`)
+#### M6-E3 — MVP foundation closure: audit log + curs valutar (`0668be0`)
 
 - Backend:
   - `AuditLogService.list(opts)` nou — paginated + filterable
