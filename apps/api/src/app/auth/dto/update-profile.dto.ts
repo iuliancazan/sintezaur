@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsIn,
   IsOptional,
   IsString,
@@ -60,4 +61,8 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(80)
   socialBandcamp?: string | null;
+
+  @IsOptional()
+  @IsBoolean()
+  collectionPublic?: boolean;
 }

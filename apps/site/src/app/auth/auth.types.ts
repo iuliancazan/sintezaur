@@ -41,6 +41,7 @@ export interface AuthUser {
   socialInstagram: string | null;
   socialSoundcloud: string | null;
   socialBandcamp: string | null;
+  collectionPublic: boolean;
 }
 
 /** Does this user hold at least one of the requested roles? */

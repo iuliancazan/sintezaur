@@ -324,10 +324,56 @@
       "my_watches": "Anunțuri salvate",
       "saved_searches": "Căutări salvate",
       "forum_subscriptions": "Abonamente forum",
+      "notification_preferences": "Preferințe notificări",
       "feedback": "Trimite feedback"
     },
     "logged_in_as": "Conectat ca {{email}}",
+    "back": "← Înapoi la cont",
     "back_to_account": "← Înapoi la cont"
+  },
+  "common": {
+    "loading": "Se încarcă…",
+    "saving": "Se salvează…"
+  },
+  "prefs": {
+    "title": "Preferințe notificări",
+    "intro": "Bifează unde vrei să primești fiecare tip de notificare. Modificările se aplică imediat după salvare.",
+    "save": "Salvează preferințele",
+    "saved": "Preferințe salvate.",
+    "col": {
+      "trigger": "Trigger",
+      "in_app": "În aplicație",
+      "email": "Email"
+    },
+    "group": {
+      "bazar": "Bazar",
+      "tezaur": "Tezaur",
+      "revista": "Revista",
+      "forum": "Forum",
+      "system": "Sistem"
+    },
+    "kind": {
+      "bazar_new_message": "Mesaj nou pe anunț",
+      "bazar_new_offer": "Ofertă nouă primită",
+      "bazar_counter_offer": "Contra-ofertă primită",
+      "bazar_offer_accepted": "Ofertă acceptată",
+      "bazar_offer_rejected": "Ofertă respinsă",
+      "bazar_price_drop_watched": "Scădere de preț pe un anunț salvat",
+      "bazar_saved_search_match": "Anunț nou care se potrivește unei căutări salvate",
+      "bazar_listing_expiring": "Anunțul tău expiră curând",
+      "bazar_transaction_confirmed_by_other": "Cealaltă parte a confirmat tranzacția",
+      "bazar_review_submitted_on_me": "Recenzie nouă pe profil",
+      "tezaur_review_on_my_gear": "Recenzie nouă pe gear pe care îl dețin",
+      "revista_article_in_followed_category": "Articol nou într-o categorie urmărită",
+      "revista_reply_to_my_article": "Răspuns la articolul meu",
+      "forum_reply_in_subscribed": "Răspuns într-un thread abonat",
+      "forum_mention": "Cineva te-a menționat (@username)",
+      "forum_badge_earned": "Ai primit un badge nou",
+      "forum_mod_action_on_my_content": "Acțiune mod pe conținutul tău",
+      "forum_report_resolved": "Raport trimis de tine — rezolvat",
+      "admin_announcement": "Anunț de la admini",
+      "storage_quota_lifetime_reached": "Atinge limita totală de upload"
+    }
   },
   "bazar": {
     "page_eyebrow": "Bazar · Marketplace muzical",

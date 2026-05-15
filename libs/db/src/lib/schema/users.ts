@@ -78,6 +78,13 @@ export const users = pgTable(
     socialInstagram: text('social_instagram'),
     socialSoundcloud: text('social_soundcloud'),
     socialBandcamp: text('social_bandcamp'),
+    /**
+     * Whether the user's gear collection is visible on the public
+     * `/autor/:username` page. Per spec §11 foundation. Default `true`
+     * so existing users stay opted-in; off → /autor hides the
+     * Collection panel entirely.
+     */
+    collectionPublic: boolean('collection_public').notNull().default(true),
 
     /**
      * Forum first-post approval gate (spec §8.4). New users start with

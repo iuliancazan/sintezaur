@@ -220,6 +220,13 @@ export const appRoutes: Route[] = [
             (m) => m.AccountDataPage,
           ),
       },
+      {
+        path: 'preferinte',
+        loadComponent: () =>
+          import('./account/notification-preferences.page').then(
+            (m) => m.NotificationPreferencesPage,
+          ),
+      },
     ],
   },
   // Legal & informational static pages (M6-A). Five share one component;

@@ -18,6 +18,7 @@ import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { httpErrorInterceptor } from './ui/http-error.interceptor';
+import { UmamiService } from './analytics/umami.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -51,6 +52,9 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(async () => {
       const i18n = inject(I18nService);
       const auth = inject(AuthService);
+      const umami = inject(UmamiService);
+      // Umami is fire-and-forget — don't gate boot on its script load.
+      umami.init();
       await Promise.all([i18n.init('ro'), auth.loadCurrentUser()]);
     }),
   ],

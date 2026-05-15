@@ -218,4 +218,5 @@ export interface UpdateProfilePayload {
   socialInstagram?: string | null;
   socialSoundcloud?: string | null;
   socialBandcamp?: string | null;
+  collectionPublic?: boolean;
 }

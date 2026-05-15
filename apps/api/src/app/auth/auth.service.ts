@@ -61,6 +61,7 @@ export interface AuthUserPublic {
   socialInstagram: string | null;
   socialSoundcloud: string | null;
   socialBandcamp: string | null;
+  collectionPublic: boolean;
 }
 
 export interface UpdateProfileInput {
@@ -72,6 +73,7 @@ export interface UpdateProfileInput {
   socialInstagram?: string | null;
   socialSoundcloud?: string | null;
   socialBandcamp?: string | null;
+  collectionPublic?: boolean;
 }
 
 const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1_000; // 24h
@@ -439,6 +441,9 @@ export class AuthService {
     if (input.socialBandcamp !== undefined) {
       patch.socialBandcamp = sanitizeOptionalText(input.socialBandcamp, 80);
     }
+    if (input.collectionPublic !== undefined) {
+      patch.collectionPublic = input.collectionPublic;
+    }
 
     await this.db.update(users).set(patch).where(eq(users.id, userId));
     return this.getById(userId);
@@ -662,5 +667,6 @@ function toPublic(row: User, roles: UserRole[]): AuthUserPublic {
     socialInstagram: row.socialInstagram,
     socialSoundcloud: row.socialSoundcloud,
     socialBandcamp: row.socialBandcamp,
+    collectionPublic: row.collectionPublic,
   };
 }

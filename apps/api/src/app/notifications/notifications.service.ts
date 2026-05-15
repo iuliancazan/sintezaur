@@ -17,7 +17,7 @@ import { DATABASE_POOL } from '../db/db.module';
  * Default channel matrix per spec §7.5: most in-app on, email batched.
  * Missing preference rows fall back to these.
  */
-const DEFAULT_PREFS: Record<
+export const DEFAULT_PREFS: Record<
   NotificationKind,
   Partial<Record<NotificationChannel, NotificationPreferenceMode>>
 > = {
@@ -189,6 +189,86 @@ export class NotificationsService {
         ),
       );
     return row?.count ?? 0;
+  }
+
+  /**
+   * Effective preference matrix for the prefs page. Returns one row
+   * per (kind, channel) pair, with the user's saved value or the
+   * default if no row exists. Only `in_app` + `email` channels are
+   * exposed; `both` is a derived value, not user-editable.
+   */
+  async getPreferences(userId: string): Promise<
+    Array<{
+      kind: NotificationKind;
+      channel: 'in_app' | 'email';
+      mode: NotificationPreferenceMode;
+    }>
+  > {
+    const rows = await this.db
+      .select({
+        kind: notificationPreferences.kind,
+        channel: notificationPreferences.channel,
+        mode: notificationPreferences.mode,
+      })
+      .from(notificationPreferences)
+      .where(eq(notificationPreferences.userId, userId));
+
+    const saved = new Map<string, NotificationPreferenceMode>();
+    for (const r of rows) saved.set(`${r.kind}::${r.channel}`, r.mode);
+
+    const out: Array<{
+      kind: NotificationKind;
+      channel: 'in_app' | 'email';
+      mode: NotificationPreferenceMode;
+    }> = [];
+    for (const kind of Object.keys(DEFAULT_PREFS) as NotificationKind[]) {
+      for (const channel of ['in_app', 'email'] as const) {
+        const key = `${kind}::${channel}`;
+        const fallback = DEFAULT_PREFS[kind][channel] ?? 'off';
+        out.push({
+          kind,
+          channel,
+          mode: saved.get(key) ?? fallback,
+        });
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Bulk upsert. Caller sends a partial matrix — only rows present
+   * get persisted. Missing combos fall back to the default at
+   * resolve time, so deleting a row is equivalent to "reset to default".
+   */
+  async setPreferences(
+    userId: string,
+    updates: Array<{
+      kind: NotificationKind;
+      channel: 'in_app' | 'email';
+      mode: NotificationPreferenceMode;
+    }>,
+  ): Promise<void> {
+    if (updates.length === 0) return;
+    const now = new Date();
+    for (const u of updates) {
+      await this.db
+        .insert(notificationPreferences)
+        .values({
+          userId,
+          kind: u.kind,
+          channel: u.channel,
+          mode: u.mode,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: [
+            notificationPreferences.userId,
+            notificationPreferences.kind,
+            notificationPreferences.channel,
+          ],
+          set: { mode: u.mode, updatedAt: now },
+        });
+    }
   }
 
   private async resolveChannels(

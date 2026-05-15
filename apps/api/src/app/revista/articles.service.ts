@@ -610,6 +610,7 @@ export class ArticlesService {
       socialSoundcloud: string | null;
       socialBandcamp: string | null;
       createdAt: Date;
+      collectionPublic: boolean;
     };
     articles: PublicArticleListItem[];
   } | null> {
@@ -626,6 +627,7 @@ export class ArticlesService {
         socialSoundcloud: users.socialSoundcloud,
         socialBandcamp: users.socialBandcamp,
         createdAt: users.createdAt,
+        collectionPublic: users.collectionPublic,
       })
       .from(users)
       .where(and(eq(users.username, username), isNull(users.deletedAt)))

@@ -181,6 +181,24 @@ import { uploadUrl } from '../seo/seo.utils';
           </div>
         </fieldset>
 
+        <fieldset class="fieldset">
+          <legend>Confidențialitate</legend>
+          <div class="field field--inline">
+            <label class="checkbox-row">
+              <input
+                type="checkbox"
+                formControlName="collectionPublic"
+              />
+              <span>Arată colecția mea pe profilul public</span>
+            </label>
+            <p class="field__help">
+              Când e dezactivat, colecția ta nu se afișează pe
+              <code>/autor/&lt;username&gt;</code>. Tu o vezi în continuare
+              din <code>/cont</code>.
+            </p>
+          </div>
+        </fieldset>
+
         @if (formError()) {
           <div class="form-error">{{ formError() }}</div>
         }
@@ -347,6 +365,7 @@ export class ProfileEditPage {
     socialInstagram: ['', [Validators.maxLength(80)]],
     socialSoundcloud: ['', [Validators.maxLength(80)]],
     socialBandcamp: ['', [Validators.maxLength(80)]],
+    collectionPublic: [true],
   });
 
   constructor() {
@@ -382,6 +401,7 @@ export class ProfileEditPage {
       socialInstagram: u.socialInstagram ?? '',
       socialSoundcloud: u.socialSoundcloud ?? '',
       socialBandcamp: u.socialBandcamp ?? '',
+      collectionPublic: u.collectionPublic ?? true,
     });
   }
 
@@ -432,6 +452,7 @@ export class ProfileEditPage {
         socialInstagram: emptyToNull(v.socialInstagram),
         socialSoundcloud: emptyToNull(v.socialSoundcloud),
         socialBandcamp: emptyToNull(v.socialBandcamp),
+        collectionPublic: v.collectionPublic ?? true,
       });
       this.form.markAsPristine();
       this.toast.success('Profil salvat.');
