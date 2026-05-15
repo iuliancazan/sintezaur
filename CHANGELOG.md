@@ -88,7 +88,7 @@ redirect-uite ca bookmark-urile să meargă.
 - Default redirect `/cont/mesaje` → `/cont/mesaje/bazar`.
 - i18n: `account.messages_shell.*` (6 chei).
 
-#### M10-F — Cleanup + redirect `/cont` + testing doc
+#### M10-F — Cleanup + redirect `/cont` + testing doc (`ea1f957`)
 
 - `account-home.page.ts` șters (pagina-grid cu 12 link-uri).
 - `/cont` redirect → `/cont/setari` (→ `/cont/setari/profil`).
