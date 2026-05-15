@@ -9,6 +9,94 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M7 — Storage Refactor (Local → Cloudflare R2)
 
+#### M7-D — Admin /admin/storage panel + R2 setup docs + testing plan (`a81b883`)
+
+Închide M7. Admin-ii au vizibilitate + control complet asupra layer-ului
+storage din dashboard, iar Iulian are playbook pas-cu-pas pentru
+cutover R2.
+
+- Backend (`apps/api/src/app/admin-storage/`):
+  - `AdminStorageService` — toate agregările hit Postgres only
+    (niciodată R2), deci dashboard-ul rămâne ieftin + snappy:
+    - `listLimits()` cu join pe `users` pentru `updatedByUsername`.
+    - `updateLimit(id, maxBytes, actorId)` — single PUT, invalidează
+      cache-ul `StorageLimitsService` post-update.
+    - `overview()` — totalBytes/totalEvents + per-module + per-fileType
+      breakdowns din `storage_events`.
+    - `folders(module?, limit?)` — top resurse după bytes din
+      `storage_folder_stats`.
+    - `trends(granularity, from?, to?)` — `date_trunc` bucketed serie
+      temporală (day/week/month).
+    - `topUsers(from?, to?, limit?)` — sum per user + join pe `users`.
+    - `triggerReconcile()` — fires pg-boss one-shot `storage:reconcile`,
+      returnează `jobId`.
+    - `getUserQuota(userId)` — counter dump pentru user-detail drawer
+      viitor.
+  - `AdminStorageController` gated `@RolesAllowed('admin','superadmin')`
+    cu 7 endpoints:
+    - GET `/admin/storage/limits`
+    - PUT `/admin/storage/limits/:id` (DTO `{ maxBytes: int 1..10 GiB }`)
+    - GET `/admin/storage/overview`
+    - GET `/admin/storage/folders?module=&limit=`
+    - GET `/admin/storage/trends?granularity=&from=&to=`
+    - GET `/admin/storage/users?from=&to=&limit=`
+    - POST `/admin/storage/reconcile`
+    - GET `/admin/storage/users/:id/quota`
+  - `AdminStorageModule` cablat în `AppModule` între `AdminClosureModule`
+    și `AdminUsersModule`.
+- Dashboard (`apps/dashboard/src/app/storage/`):
+  - `AdminStorageDashboardService` HTTP client (mirror al backend-ului,
+    `providedIn: 'root'`, cookies pe fiecare request).
+  - `StorageAdminPage` la `/storage` (staffGuard) cu 5 tabs:
+    - **Limite**: tabel editabil cu inline number input + buton
+      „Salvează" per rând + toast confirm. Afișează `updatedAt` +
+      `updatedByUsername`. Edit propagă în ≤5min via cache invalidate.
+    - **Overview**: 2 metric cards (Total bytes + Total uploads) +
+      tabel per modul + tabel per tip fișier.
+    - **Folders**: top resurse după bytes, filter optional pe modul.
+    - **Trends**: switch granularitate (day/week/month) + date range
+      pickers, vedere tabelară (chart deferred).
+    - **Top useri**: sortat desc după bytes, limit 50.
+    - Buton „Reconcile acum" în tab bar — fires manual job, toast cu
+      jobId.
+  - Link card „Storage" pe home dashboard (după „Curs valutar").
+- `docs/devops/storage-r2.md` — playbook 10 pași pentru cutover:
+  1. Create bucket Cloudflare R2.
+  2. Connect domeniu `files.sintezaur.ro` (CNAME proxied automatic).
+  3. Generate API token scoped pe bucket (Object Read & Write).
+  4. Set env vars în Coolify Shared Variables.
+  5. Wipe local uploads pe VPS (spec „wipe & remake").
+  6. Redeploy + smoke test (upload + verify hash key + Cache-Control).
+  7. WAF hotlink protection (opțional, M7.5).
+  8. Backup strategy deferred (rclone sync sau accept users re-upload).
+  9. Cost estimate ~$1-2/lună anul 1 (R2 zero egress).
+  10. Rollback path: `STORAGE_DRIVER=local` în Coolify.
+  Plus anexă cu convențiile object key (`<module>/<resource>/...`).
+- `docs/testing/m7-testing.md` — plan manual de testare cu checkbox-style
+  steps, 5 secțiuni:
+  1. **Driver layer (M7-A)**: upload imagine Tezaur cu hash, avatar
+     pipeline, delete cu cleanup.
+  2. **Multi-type + quota (M7-B)**: magic-byte (pozitiv + fake rename
+     negativ), per-file cap 413, daily cap 429 + reset, lifetime alert
+     notification one-shot, public limits endpoint, crons trigger.
+  3. **Attachments + site UI (M7-C)**: forum max 3, revista uncapped,
+     client-side pre-check.
+  4. **Admin panel (M7-D)**: access gating, fiecare tab, edit limit
+     live propagation, buton reconcile.
+  5. **Prod cutover**: smoke post-`STORAGE_DRIVER=s3`, reconciliation
+     verifier, cost monitoring săptămânal.
+  Plus appendix cu comenzi psql + docker exec pentru debugging.
+  Director nou `docs/testing/` pentru viitoare plan-uri per milestone.
+- Verificări locale:
+  - `nx run api:typecheck` + `worker:typecheck` + `site:typecheck` +
+    `dashboard:typecheck` — clean.
+  - `pnpm tsx tools/scripts/smoke-storage.ts` — round-trip + 10
+    cazuri magic-byte + 9 limite seed OK.
+
+**Status M7:** ✅ shipped A/B/C/D. MVP storage e pe `LocalStorageDriver`
+local; cutover-ul la R2 e flip de env Coolify documentat și reversibil
+— fără modificări de cod necesare.
+
 #### M7-C — Forum + Revista attachment endpoints + site UI (`e246332`)
 
 - Backend (`apps/api/src/app/forum/`):
