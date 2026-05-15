@@ -6,7 +6,7 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-B (`<commit>`) — SEO mediu: `SeoService` global
+**Last shipped:** M6-B (`4f786ad`) — SEO mediu: `SeoService` global
 (title/description/OG/Twitter/canonical) cablat pe toate paginile
 publice + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/
 ProfilePage/WebSite) + sitemap.xml dinamic (129 URL-uri baseline) +
@@ -103,7 +103,7 @@ A legal ✅ → B SEO ✅ → C polish UI → D feedback widget).
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | A   | `83c6ba4` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
-| B   | `<commit>` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
+| B   | `4f786ad` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
 | C   | — | pending | polish UI pass: 404+410 brand pages, empty states peste tot, HTTP error interceptor global, skeleton loaders |
 | D   | — | pending | feedback widget în user menu + admin `/feedback` queue cu mark-read/archive |
 

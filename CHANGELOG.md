@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep
 
-#### M6-B — SEO mediu: meta + OG + JSON-LD + sitemap.xml (`<commit>`)
+#### M6-B — SEO mediu: meta + OG + JSON-LD + sitemap.xml (`4f786ad`)
 
 - `SeoService` (site, providedIn root): un singur loc pentru title (cu sufix
   „· Sintezaur"), description, canonical, OG (title/description/image/url/type/
