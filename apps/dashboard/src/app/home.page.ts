@@ -58,10 +58,14 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Feedback</span>
           <span class="module__desc">Bug-uri și sugestii din /cont · prioritar în beta</span>
         </a>
-        <span class="module is-disabled">
+        <a class="module" routerLink="/audit-log">
           <span class="module__name">Audit log</span>
-          <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>
-        </span>
+          <span class="module__desc">Acțiuni privilegiate · append-only · filter pe acțiune/target/perioadă</span>
+        </a>
+        <a class="module" routerLink="/currency-rates">
+          <span class="module__name">Curs valutar</span>
+          <span class="module__desc">Rate manuale EUR→RON · istoric · adaugă rată nouă</span>
+        </a>
       </nav>
 
       <button class="logout" (click)="logout()">

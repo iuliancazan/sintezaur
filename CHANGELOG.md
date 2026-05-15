@@ -9,6 +9,50 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
+#### M6-E3 — MVP foundation closure: audit log + curs valutar (`PENDING`)
+
+- Backend:
+  - `AuditLogService.list(opts)` nou — paginated + filterable
+    (action / targetType / actorId / from / to) cu LEFT JOIN pe users
+    pentru `actorUsername`. Întoarce `items + totalCount + page +
+    pageSize + totalPages`. Sortat newest-first.
+  - `AuditAction` union extins cu `update_currency_rate` (valoarea
+    exista deja în `audit_log_action` Postgres enum).
+  - `AdminClosureModule` nou (`apps/api/src/app/admin-closure/`):
+    `AdminClosureController` la `/admin/*` cu `@RolesAllowed('admin',
+    'superadmin')`. Endpoints:
+    - `GET /admin/audit-log` — filter + paginate
+    - `GET /admin/currency-rates` — istoric complet (newest first)
+    - `GET /admin/currency-rates/active` — rata curentă per monedă
+    - `POST /admin/currency-rates` — adaugă rată nouă (validare numerică
+      app-side: pozitiv, < 1000), audit-log `update_currency_rate`.
+  - `CurrencyRatesService` cu `history()` / `active()` / `create()`.
+    Fiecare insert e o linie nouă (`valid_from = now()`); istoric păstrat
+    fără update pe rândurile existente.
+- Migration:
+  - `9011_currency_rate_eur_seed.sql` (postflight, idempotent) — seed
+    inițial EUR→RON 5.0700 cu notă „Seed inițial M6-E3; BNR aprox.
+    mai 2026". `NOT EXISTS` guard: nu re-seedează dacă admin a pus deja
+    o rată.
+- Dashboard:
+  - `/audit-log` page nouă cu PrimeNG Table: filtre (acțiune dropdown
+    cu 18 opțiuni + target_type input + from/to date), expand-row cu
+    JSON pretty-print al `details`. Lazy-load 50/100/200 pe pagină,
+    server-side pagination.
+  - `/currency-rates` page nouă: card „Rată curentă" (1 EUR = X RON),
+    form pentru rată nouă (regex `\d{1,3}(\.\d{1,4})?` + notă optional),
+    p-table istoric complet. Submit creează linie nouă, prepended local.
+  - `home.page.ts`: 2 module noi cablate — „Audit log" (înlocuiește
+    placeholder „Land în M2.5") și „Curs valutar".
+  - `AdminClosureService` (site-side admin) wraps cele 3 endpoints.
+- Spec §11 foundation closing bullets — done:
+  - „Admin dashboard: ... audit log viewer" ✅
+  - „... currency rate updates" ✅
+  - „`currency_rate` seeded with EUR-to-RON manual entry" ✅
+- **MVP scope complete** — toate bullets `§11` (Foundation + Phase 1
+  Bazar + Phase 2 Revista + Phase 3 Forum) sunt cablate. Soft-launch
+  ready.
+
 #### M6-E2 — Block & report UI cablat pe Bazar + Profil (`ff5ef8c`)
 
 - Backend:

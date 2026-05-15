@@ -1,5 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DATABASE, type SintezaurDb, auditLog } from '@sintezaur/db';
+import {
+  DATABASE,
+  auditLog,
+  users,
+  type AuditLogAction,
+  type SintezaurDb,
+} from '@sintezaur/db';
+import { and, desc, eq, gte, lte, sql } from 'drizzle-orm';
 import type { Request } from 'express';
 
 /**
@@ -35,7 +42,9 @@ export type AuditAction =
   | 'pin_thread'
   | 'unpin_thread'
   | 'first_post_approve'
-  | 'first_post_reject';
+  | 'first_post_reject'
+  // Currency (M6-E3)
+  | 'update_currency_rate';
 
 interface RecordOptions {
   actorId: string;
@@ -68,6 +77,77 @@ export class AuditLogService {
       ipAddress: this.ipFromReq(opts.req),
       userAgent: opts.req?.get('user-agent') ?? null,
     });
+  }
+
+  async list(opts: {
+    action?: AuditLogAction;
+    targetType?: string;
+    actorId?: string;
+    from?: Date;
+    to?: Date;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{
+    items: Array<{
+      id: string;
+      actorId: string | null;
+      actorUsername: string | null;
+      action: AuditLogAction;
+      targetType: string | null;
+      targetId: string | null;
+      details: Record<string, unknown>;
+      ipAddress: string | null;
+      createdAt: Date;
+    }>;
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+  }> {
+    const page = Math.max(1, opts.page ?? 1);
+    const pageSize = Math.min(opts.pageSize ?? 50, 200);
+    const conds = [];
+    if (opts.action) conds.push(eq(auditLog.action, opts.action));
+    if (opts.targetType) conds.push(eq(auditLog.targetType, opts.targetType));
+    if (opts.actorId) conds.push(eq(auditLog.actorId, opts.actorId));
+    if (opts.from) conds.push(gte(auditLog.createdAt, opts.from));
+    if (opts.to) conds.push(lte(auditLog.createdAt, opts.to));
+    const where = conds.length > 0 ? and(...conds) : undefined;
+
+    const rows = await this.db
+      .select({
+        id: auditLog.id,
+        actorId: auditLog.actorId,
+        actorUsername: users.username,
+        action: auditLog.action,
+        targetType: auditLog.targetType,
+        targetId: auditLog.targetId,
+        details: auditLog.details,
+        ipAddress: auditLog.ipAddress,
+        createdAt: auditLog.createdAt,
+      })
+      .from(auditLog)
+      .leftJoin(users, eq(users.id, auditLog.actorId))
+      .where(where)
+      .orderBy(desc(auditLog.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(auditLog)
+      .where(where);
+
+    return {
+      items: rows.map((r) => ({
+        ...r,
+        details: (r.details ?? {}) as Record<string, unknown>,
+      })),
+      totalCount: count,
+      page,
+      pageSize,
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
+    };
   }
 
   private ipFromReq(req: Request | undefined): string | null {

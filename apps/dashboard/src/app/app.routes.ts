@@ -84,6 +84,20 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'audit-log',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./admin-closure/audit-log.page').then((m) => m.AuditLogPage),
+  },
+  {
+    path: 'currency-rates',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./admin-closure/currency-rates.page').then(
+        (m) => m.CurrencyRatesPage,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

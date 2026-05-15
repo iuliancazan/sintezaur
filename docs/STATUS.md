@@ -6,23 +6,21 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-E2 (`ff5ef8c`) — block + report UI pe Bazar:
-backend `BlocksModule` (GET/POST/DELETE `/me/blocks`) +
-`ContentReportsService.verifyTarget`/`snapshot` extins pentru
-listing/message/gear_review/user_profile, `listings.listPublic`
-filtrează vânzătorii blocați. Site: `BlocksService` cache,
-`<app-block-button>` + `<app-report-button>` reusable, wired pe
-bazar detail (seller card), chat thread (header), `/autor/:username`
-(safety actions row). `/cont/blocuri` list page cu unblock. Dashboard
-`/rapoarte` queue extins cu 4 target options noi + link-uri.
+**Last shipped:** M6-E3 (`PENDING`) — admin closure: backend
+`AuditLogService.list()` cu filtre (action+target+actor+from+to+page),
+nou `AdminClosureModule` cu `GET /admin/audit-log` +
+`GET/POST /admin/currency-rates` (admin+superadmin), `CurrencyRatesService`
+cu audit logging pe fiecare update. Seed `9011_currency_rate_eur_seed`
+inserează rata inițială EUR→RON (5.0700). Dashboard: `/audit-log`
+viewer cu filtre + expandable JSON details, `/currency-rates` admin
+cu form + istoric. Home: 2 module noi (Audit log activ, înlocuiește
+placeholder „Land în M2.5"; Curs valutar).
 
-**Next up:** **M6-E3** — admin closure: dashboard `/audit-log` viewer
-(filter action+target+date+actor) + seed EUR-RON în `currency_rates`
-(migration sau seed `9011`) + dashboard `/currency-rates` minimal CRUD.
-Închide ultimele 3 bullets din spec §11 foundation.
+**Next up:** **MVP complete** — toate bullets spec §11 foundation +
+Phase 1/2/3 sunt cablate. Soft-launch ready (deploy în Coolify + seed
+superadmin + curated gear) sau pornește **M7** (storage refactor R2).
 
-**Active milestone:** M6-E (MVP foundation closure) — E1 + E2 done,
-E3 next. Apoi M7.
+**Active milestone:** M6 ✅ complet (A/B/C/D + E1/E2/E3). MVP done.
 
 ## Milestones
 
@@ -111,7 +109,7 @@ E3 next. Apoi M7.
 | D   | `e663622` | done | schema `user_feedback` (migration 0013) + backend `FeedbackModule` (POST auth-only cu throttle + email notify operator, GET/PATCH admin) + site FeedbackService + FeedbackModal (mount root shell, link declanșator în `/cont`, auto-capture pathname+search) + dashboard `/feedback` queue cu filtre status+kind + expand-row + auto-mark-read |
 | E1  | `5e36ec7` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
 | E2  | `ff5ef8c` | done | block + report UI cablat: backend `BlocksModule` (`/me/blocks` GET/POST/DELETE) + `ContentReportsService.verifyTarget` + `snapshot` extins pe `listing`/`message`/`gear_review`/`user_profile` + `listings.listPublic` filtrează vânzători blocați; site `BlocksService` + `<app-block-button>` + `<app-report-button>` reusable, wired pe bazar detail (seller card), chat thread (header), `/autor/:username` (safety actions); `/cont/blocuri` list page; dashboard `/rapoarte` queue extins cu 4 target options noi + link-uri |
-| E3  | — | pending | admin closure: dashboard `/audit-log` viewer (filter action+target+date+actor) + seed EUR-RON în `currency_rates` + dashboard `/currency-rates` minimal CRUD |
+| E3  | `PENDING` | done | MVP foundation closure: backend `AuditLogService.list` cu filtre + `AdminClosureModule` (`GET /admin/audit-log`, `GET/POST /admin/currency-rates`) + `CurrencyRatesService` cu audit logging; seed `9011_currency_rate_eur_seed` (EUR→RON 5.0700); dashboard `/audit-log` viewer (filter action/target/perioadă + expand JSON), `/currency-rates` admin (form + istoric); home: 2 module noi (Audit log activ înlocuiește placeholder „Land în M2.5", Curs valutar) |
 
 ## Conventions (recap from memory)
 

@@ -17,6 +17,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { RealtimeModule } from './realtime/realtime.module';
 import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
+import { AdminClosureModule } from './admin-closure/admin-closure.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { LegalModule } from './legal/legal.module';
@@ -51,6 +52,7 @@ import { SeoModule } from './seo/seo.module';
     BlocksModule,
     RevistaModule,
     ForumModule,
+    AdminClosureModule,
     AdminUsersModule,
     LegalModule,
     SeoModule,
