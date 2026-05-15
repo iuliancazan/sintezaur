@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TPipe } from '../i18n/t.pipe';
 import { AuthService } from '../auth/auth.service';
+import { FeedbackService } from '../feedback/feedback.service';
 
 /**
  * Minimal "/cont" landing for M1 — confirms the session, links to
@@ -47,6 +48,13 @@ import { AuthService } from '../auth/auth.service';
         <a routerLink="/cont/email" class="account__link">
           {{ 'account.menu.email' | t }}
         </a>
+        <button
+          type="button"
+          class="account__link account__link--feedback"
+          (click)="openFeedback()"
+        >
+          {{ 'account.menu.feedback' | t }}
+        </button>
         <button class="account__logout" (click)="logout()">
           {{ 'account.menu.logout' | t }}
         </button>
@@ -113,9 +121,14 @@ import { AuthService } from '../auth/auth.service';
 export class AccountHomePage {
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly feedback = inject(FeedbackService);
 
   async logout(): Promise<void> {
     await this.auth.logout();
     await this.router.navigateByUrl('/');
+  }
+
+  openFeedback(): void {
+    this.feedback.open();
   }
 }

@@ -6,20 +6,20 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-C (`0f08502`) — polish UI pass: ToastService +
-HttpErrorInterceptor global (network/5xx/429/403 cu mesaje prietenoase),
-NotFoundPage brand-aware pentru 404 + 410 cu catch-all route, EmptyState
-component cablat pe 9 spoturi (Tezaur/Bazar/Revista/Forum search +
-category + 5 pagini account), Skeleton component aplicat pe legal page.
+**Last shipped:** M6-D (`<commit>`) — feedback widget: schema
+`user_feedback` (migration 0013) + backend module cu submit auth +
+admin queue + email notify, FeedbackService + FeedbackModal pe site
+(mount în root shell, link declanșator în `/cont`, auto-capture page
+URL), dashboard `/feedback` queue cu filtre status + kind + expand
+detail. **M6 complete (4/4 sub-faze) ✅**
 
-**Next up:** **M6-D** — feedback widget: schema `user_feedback` (bug/
-sugestie/altele × new/read/archived), link discret în user menu →
-modal cu textarea + select categorie + auto-capture URL + screenshot
-flag, admin dashboard `/feedback` queue cu mark-read/archive,
-notify superadmin.
+**Next up:** **M7 / Soft-launch** — momentul deschiderii. Recomandat:
+(a) deploy în Coolify cu env real, (b) seed superadmin + primele 10
+echipamente curate manual, (c) anunț prima undă de utilizatori. Sau
+post-MVP items din `docs/seo-todo.md` + analytics (Umami + Sentry).
+Discută la următoarea sesiune ce vrei prioritar.
 
-**Active milestone:** M6 — polish + soft-launch prep (4 sub-faze:
-A legal ✅ → B SEO ✅ → C polish UI ✅ → D feedback widget).
+**Active milestone:** M6 ✅ complet. Trecere la soft-launch / M7.
 
 ## Milestones
 
@@ -98,14 +98,14 @@ A legal ✅ → B SEO ✅ → C polish UI ✅ → D feedback widget).
 | H   | `1417fce` | done | faceted search `/forum/cautare` (text + category + author + date + tags + gear_tag, ts_headline snippets cu `<mark>`) + tags + gear_tag schema (migration 0010) + tag input + gear picker pe thread form + anti-spam stack (honeypot + time-on-form + IP rate-limit per-process) + dashboard `/forum-queue` first-post approval |
 | I   | `efd6b1c` | done | thread oficial per echipament (Tezaur toggle integration, reverse FK migration 0011) + auto-OP + toggle ON/OFF cu reuse pe re-enable + audit log + card oficial + listă related threads pe `/tezaur/:slug` forum tab + checkbox „Thread oficial" în dashboard tezaur edit |
 
-### M6 — Polish + Soft-launch prep (active)
+### M6 — Polish + Soft-launch prep ✅
 
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | A   | `83c6ba4` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
 | B   | `4f786ad` | done | SEO mediu: `SeoService` global (title+description+OG+Twitter+canonical) cablat pe Home/Tezaur/Bazar/Revista/Forum/Autor/Legal + JSON-LD per tip (Product/Article/ClassifiedAd/DiscussionForumPosting/ProfilePage/WebSite) + `GET /sitemap.xml` dinamic (129 URL baseline) + `GET /robots.txt` dinamic + `docs/seo-todo.md` |
 | C   | `0f08502` | done | polish UI pass: ToastService + ToastContainer + HttpErrorInterceptor global (network/5xx/429/403) + NotFoundPage brand-aware pentru 404 + 410 catch-all + EmptyStateComponent cablat pe 9 spoturi (Tezaur/Bazar/Revista lists, Forum cautare + category, 5 account pages) + SkeletonComponent CSS-only aplicat pe legal page |
-| D   | — | pending | feedback widget în user menu + admin `/feedback` queue cu mark-read/archive |
+| D   | `<commit>` | done | schema `user_feedback` (migration 0013) + backend `FeedbackModule` (POST auth-only cu throttle + email notify operator, GET/PATCH admin) + site FeedbackService + FeedbackModal (mount root shell, link declanșator în `/cont`, auto-capture pathname+search) + dashboard `/feedback` queue cu filtre status+kind + expand-row + auto-mark-read |
 
 ## Conventions (recap from memory)
 

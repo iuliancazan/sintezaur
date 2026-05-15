@@ -12,6 +12,7 @@ import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
+import { FeedbackModal } from './feedback/feedback-modal.component';
 import { CookiesBanner } from './legal/cookies-banner.component';
 import { NotificationsPanelComponent } from './notifications/notifications-panel.component';
 import { NotificationsService } from './notifications/notifications.service';
@@ -36,6 +37,7 @@ import { ToastContainer } from './ui/toast-container.component';
     NotificationsPanelComponent,
     CookiesBanner,
     ToastContainer,
+    FeedbackModal,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -69,6 +71,7 @@ import { ToastContainer } from './ui/toast-container.component';
     <router-outlet />
     <app-cookies-banner />
     <app-toast-container />
+    <app-feedback-modal />
 
     <footer class="app-foot">
       <div class="shell">

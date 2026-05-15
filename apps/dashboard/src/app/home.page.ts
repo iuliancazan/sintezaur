@@ -54,6 +54,10 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Mesaje contact</span>
           <span class="module__desc">Coadă formular public · marchează / arhivează</span>
         </a>
+        <a class="module" routerLink="/feedback">
+          <span class="module__name">Feedback</span>
+          <span class="module__desc">Bug-uri și sugestii din /cont · prioritar în beta</span>
+        </a>
         <span class="module is-disabled">
           <span class="module__name">Audit log</span>
           <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>

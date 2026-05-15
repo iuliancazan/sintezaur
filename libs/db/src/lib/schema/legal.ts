@@ -101,9 +101,13 @@ export type ContactMessage = typeof contactMessages.$inferSelect;
 export type NewContactMessage = typeof contactMessages.$inferInsert;
 
 /**
- * In-app feedback submissions per M6-D (placeholder schema, wired later).
- * Distinct from `contact_messages`: feedback is in-product (link in
- * user menu + auto-captured page URL), contact is a public-page form.
+ * In-app feedback submissions per M6-D. Distinct from `contact_messages`:
+ * feedback is in-product (link in user menu, auto-captured `page_url` +
+ * user-agent, only authenticated users), contact is a public-page form.
+ *
+ * `page_url` captures whatever page the user was on when they clicked
+ * "Trimite feedback" — the most valuable single piece of context when
+ * triaging bug reports. Admins read in `/feedback` dashboard queue.
  */
 export const userFeedbackKindEnum = pgEnum('user_feedback_kind', [
   'bug',
@@ -120,3 +124,34 @@ export const userFeedbackStatusEnum = pgEnum('user_feedback_status', [
 ]);
 export type UserFeedbackStatus =
   (typeof userFeedbackStatusEnum.enumValues)[number];
+
+export const userFeedback = pgTable(
+  'user_feedback',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    kind: userFeedbackKindEnum('kind').notNull(),
+    body: text('body').notNull(),
+    /** Path + query the user was on when they opened the feedback modal. */
+    pageUrl: text('page_url'),
+    userAgent: text('user_agent'),
+    ipAddress: text('ip_address'),
+    status: userFeedbackStatusEnum('status').notNull().default('new'),
+    readByUserId: uuid('read_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    readAt: timestamp('read_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index('user_feedback_status_idx').on(t.status, t.createdAt),
+    index('user_feedback_kind_idx').on(t.kind, t.createdAt),
+    index('user_feedback_user_idx').on(t.userId, t.createdAt),
+  ],
+);
+export type UserFeedback = typeof userFeedback.$inferSelect;
+export type NewUserFeedback = typeof userFeedback.$inferInsert;

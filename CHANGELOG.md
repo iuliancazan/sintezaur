@@ -7,7 +7,47 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
-### M6 — Polish + Soft-launch prep
+### M6 — Polish + Soft-launch prep · M6 complete ✅
+
+#### M6-D — Feedback widget + admin queue (`<commit>`)
+
+- Schema `user_feedback` (M6-A enums activate aici, tabela în migration
+  `0013_user_feedback`): user_id NOT NULL (auth-only), kind (bug/sugestie/
+  altele), body, page_url, user_agent, ip_address, status (new/read/
+  archived), read_by_user_id + read_at, 3 indexuri (status+created,
+  kind+created, user+created).
+- Backend `FeedbackModule`:
+  - `POST /api/feedback` — auth required, throttle 10/min/IP, capture
+    page_url + UA + IP. Email notification către `CONTACT_OPERATOR_EMAIL`
+    cu kind + user + page + body (fire-and-forget, fail-soft).
+  - `GET /api/admin/feedback?status&kind&page&pageSize` — admin queue
+    cu join pe users pentru username + email + fullName.
+  - `PATCH /api/admin/feedback/:id` — read/archived + audit prin
+    read_by_user_id + read_at.
+  - `GET /api/admin/feedback/unread` — count pentru viitor badge sidebar.
+- Site:
+  - `FeedbackService` (singleton): signal `open$` + metode `open()` /
+    `close()` / `submit()`. Pattern shared-modal: link declanșează,
+    modal-ul (mount în root shell) ascultă signal-ul.
+  - `<app-feedback-modal>` montat în root shell — radio group cu 3
+    categorii (cu hint inline pentru fiecare), textarea cu min 10 chars,
+    auto-capture `window.location.pathname + search` afișat în hint.
+    Submit → toast success + ecran „Mulțumim!" cu CTA „Trimite alt
+    feedback" / „Închide". 401 → toast warn + close.
+  - Link „Trimite feedback" în `/cont` (account-home page) ca buton
+    discret între „Email" și „Ieși din cont". i18n key
+    `account.menu.feedback`.
+- Dashboard:
+  - `/feedback` queue cu filtre pe status + kind (cu chips top), expand-row
+    cu body + page_url + IP + UA + reply-link `mailto:`, auto-mark-read
+    la prima expansiune, optimistic update, severity tags (bug=danger,
+    sugestie=warn, altele=secondary).
+  - Home: 1 modul nou „Feedback".
+- TODO post-M6: notification kind dedicat `admin_user_feedback` în loc
+  de email fallback (când vom avea volume mai mare); attachments
+  (screenshot) — discutat ca placeholder, dar nu implementat.
+
+**M6 complete (4/4):** A legal ✅ · B SEO ✅ · C polish ✅ · D feedback ✅.
 
 #### M6-C — Polish UI: toast + interceptor + 404/410 + empty states + skeleton (`0f08502`)
 

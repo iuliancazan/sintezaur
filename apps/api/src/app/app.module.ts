@@ -17,6 +17,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { LegalModule } from './legal/legal.module';
 import { SeoModule } from './seo/seo.module';
 
@@ -51,6 +52,7 @@ import { SeoModule } from './seo/seo.module';
     AdminUsersModule,
     LegalModule,
     SeoModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [

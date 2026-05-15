@@ -76,6 +76,14 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'feedback',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./feedback/feedback-admin.page').then(
+        (m) => m.FeedbackAdminPage,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],
