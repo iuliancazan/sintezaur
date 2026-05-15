@@ -6,22 +6,25 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M9-B (`9f0e604`) — unified cross-module search
-`/cautare` per spec §7.6. Backend `UnifiedSearchService` fan-out
-paralel la `TezaurService.listPublic` + `ListingsService.listPublic`
-+ `ArticlesService.listPublic` + `ForumSearchService.search` (fiecare
-wrapped în try/catch). Public `GET /api/search?q=&limit=`, min 2
-chars, max 20 per section. Site `SearchPage` cu input debounced
-300ms sync la `?q=` URL param, 4 secțiuni grouped cu top 5 +
-„Vezi toate" deep-link per modul. App shell topbar search button
-cablat prin `goToSearch()`. Homepage `WebSite` SearchAction target
-swap `/forum/cautare` → `/cautare`. i18n block nou `search.*`.
+**Last shipped:** M9-C (`1b5762a`) — observability. **Sentry**
+(`@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1`) wired în api +
+worker via side-effect import în `instrument.ts` înainte de
+`NestFactory.create` (catch boot errors) + `SentryModule.forRoot()`
+în AppModule (per-request integration). Worker tagged `service: 'worker'`.
+4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`),
+no-op pe dev. **Daily pg_dump backup**: nou `PgDumpBackupJob` cu
+cron `backup:pg-dump` @ 02:30 UTC — `pg_dump --format=custom
+--compress=9` la `BACKUP_DIR` (default `./storage/backups`) +
+prune fișiere > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md`
+cu 3 layers (local + Hetzner Storage Box rclone + restore drill
+trimestrial). Tech-stack.md updated cu Sentry.
 
-**Next up:** **M9-C** — observability: `@sentry/nestjs` integration
-în api + worker, pg-boss cron pentru `pg_dump` zilnic la Hetzner
-Storage Box. Apoi `docs/testing/m9-testing.md` + close M9.
+**Next up:** **M9 close** — `docs/testing/m9-testing.md` cu plan
+manual pentru A/B/C, apoi MVP feature-complete 100% spec. Restul
+e operațional (Iulian configurează SENTRY_DSN + rclone + ce mai trebuie
+în Coolify).
 
-**Active milestone:** M9 — A ✅, B ✅, C (last).
+**Active milestone:** M9 — A ✅, B ✅, C ✅, testing doc + close.
 
 ## Milestones
 
@@ -134,6 +137,7 @@ Storage Box. Apoi `docs/testing/m9-testing.md` + close M9.
 |-----|--------|--------|-------|
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
+| C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
 
 ## Conventions (recap from memory)
 
