@@ -6,21 +6,30 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-E4 (`2cc2ceb`) — pre-launch hardening:
-GDPR `GET /auth/me/export` (JSON dump cu 19 secțiuni) +
-`DELETE /auth/me/account` (anonimizare PII + soft-delete listings +
-hide forum posts + cookie clear). `/cont/date` page cu confirm
-magic-phrase pe delete. slug_redirect INSERT pe rename article publicat
-+ lookup pe revista 404 (gone/redirect distinction). Tezaur lookup
-upgrade — returnează `expired:true` în loc să dispară silent → 410.
-`user_email_history` INSERT pe `verifyEmail` când email-ul se schimbă.
-Audit action nou: `gdpr_self_delete` (migration `9012`).
+**Last shipped:** M7-A (`6341d09`) — storage driver layer +
+schema pentru cutover R2. `StorageDriver` interface în
+`libs/shared/storage` + `LocalStorageDriver` + `S3StorageDriver` în
+`apps/api/storage/`, ales la bootstrap din `STORAGE_DRIVER` env.
+Schema nouă (migration `9013`): `storage_limits` + `user_upload_quota`
++ `storage_events` + `storage_folder_stats` + `forum_post_attachments`
++ `revista_article_attachments` + 4 enums noi. Seed limite default
+(migration `9014`, ON CONFLICT DO NOTHING): 8/10/20/10/20 MB per-file +
+50 MB/zi/user + 1 GB alert lifetime. `StorageService` refactat să
+delege I/O la driver. Obiectele primesc chei content-addressate
+(`<module>/<resource>/<source>/<variant>-<sha256-12>.jpg`). Callers
+Tezaur/Bazar/Revista trec la `deleteObjects(keys[])`; avatar pipeline
+trece prin driver cu cache mutable. Env nou: `STORAGE_DRIVER` +
+`STORAGE_PUBLIC_BASE_URL` + `R2_*`. `@aws-sdk/client-s3@^3.1047.0`
+adăugat. Smoke script `tools/scripts/smoke-storage.ts` rulează
+round-trip put/exists/get/delete + verifică seed-ul.
 
-**Next up:** **MVP complete + GDPR ready.** Soft-launch poate porni:
-deploy Coolify, seed superadmin + 10 curated gear, anunț prima undă
-utilizatori. Sau **M7** (storage refactor R2).
+**Next up:** **M7-B** — multi-type pipeline (audio/PDF/ZIP cu
+magic-byte detection), `UploadQuotaGuard` cu cache 5min, pg-boss
+crons (daily reset 00:00 UTC + reconciliation 03:00 UTC), public
+`GET /api/storage/limits`, UI Forum attachments (max 3/post) + UI
+Revista attachments (no cap), notification `storage_quota_lifetime_reached`.
 
-**Active milestone:** M6 ✅ complet (A/B/C/D + E1/E2/E3/E4). MVP done.
+**Active milestone:** M7 — A ✅, B (next), C (admin panel + docs).
 
 ## Milestones
 
@@ -111,6 +120,12 @@ utilizatori. Sau **M7** (storage refactor R2).
 | E2  | `ff5ef8c` | done | block + report UI cablat: backend `BlocksModule` (`/me/blocks` GET/POST/DELETE) + `ContentReportsService.verifyTarget` + `snapshot` extins pe `listing`/`message`/`gear_review`/`user_profile` + `listings.listPublic` filtrează vânzători blocați; site `BlocksService` + `<app-block-button>` + `<app-report-button>` reusable, wired pe bazar detail (seller card), chat thread (header), `/autor/:username` (safety actions); `/cont/blocuri` list page; dashboard `/rapoarte` queue extins cu 4 target options noi + link-uri |
 | E3  | `0668be0` | done | MVP foundation closure: backend `AuditLogService.list` cu filtre + `AdminClosureModule` (`GET /admin/audit-log`, `GET/POST /admin/currency-rates`) + `CurrencyRatesService` cu audit logging; seed `9011_currency_rate_eur_seed` (EUR→RON 5.0700); dashboard `/audit-log` viewer (filter action/target/perioadă + expand JSON), `/currency-rates` admin (form + istoric); home: 2 module noi (Audit log activ înlocuiește placeholder „Land în M2.5", Curs valutar) |
 | E4  | `2cc2ceb` | done | pre-launch hardening: GDPR `GET /auth/me/export` (JSON dump 19 secțiuni) + `DELETE /auth/me/account` (PII anonymize + soft-delete listings + hide forum posts + clear cookies); site `/cont/date` cu magic-phrase confirm; slug_redirect INSERT pe rename article publicat + lookup pe revista 404 (gone vs redirect); Tezaur lookup returnează `expired` (410 path); `user_email_history` INSERT pe verifyEmail când email schimbat; nou `gdpr_self_delete` audit action (migration `9012`) |
+
+### M7 — Storage Refactor (Local → Cloudflare R2)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `6341d09` | done | StorageDriver interface (libs/shared) + Local/S3 drivers (apps/api/storage) + StorageModule env-driven; schema migration `9013` (storage_limits + user_upload_quota + storage_events + storage_folder_stats + forum_post_attachments + revista_article_attachments + 4 enums); seed migration `9014` (limite default per spec, idempotent); StorageService refactat la driver I/O cu chei content-addressed (`<module>/<resource>/<source>/<variant>-<hash12>.jpg`); refactor callers Tezaur/Bazar/Revista la `deleteObjects(keys[])`; avatar pipeline pe driver cu cache mutable; env nou (`STORAGE_DRIVER` + `STORAGE_PUBLIC_BASE_URL` + `R2_*`); `@aws-sdk/client-s3@^3.1047.0` adăugat; smoke script `tools/scripts/smoke-storage.ts` |
 
 ## Conventions (recap from memory)
 

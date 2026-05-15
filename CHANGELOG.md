@@ -7,6 +7,88 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M7 — Storage Refactor (Local → Cloudflare R2)
+
+#### M7-A — Driver layer + schema + refactor existent (`6341d09`)
+
+- StorageDriver interface (`libs/shared/src/lib/storage.ts`):
+  - `StorageDriver` cu `put / get / delete / exists / url`.
+  - Literali partajați (`STORAGE_MODULES`, `STORAGE_FILE_TYPES`,
+    `STORAGE_DEFAULT_CACHE_CONTROL`). Pure TypeScript, fără import-uri
+    Nest sau Node-only — păstrează `libs/shared` browser-safe.
+- Drivers (`apps/api/src/app/storage/`):
+  - `LocalStorageDriver` — scrie pe disc sub `UPLOADS_DIR` (default
+    `./storage/uploads`), servit prin middleware-ul static existent la
+    `/uploads/<key>`. Guard împotriva `..` în key.
+  - `S3StorageDriver` — folosește `@aws-sdk/client-s3@^3.1047.0`
+    împotriva Cloudflare R2 (`region='auto'`, `forcePathStyle=false`).
+    Crap-uie cu mesaj clar dacă lipsește un `R2_*` var când
+    `STORAGE_DRIVER=s3`.
+  - `StorageModule` (`@Global()`) alege driver-ul la bootstrap din
+    `STORAGE_DRIVER` env (`local` default | `s3`).
+- Schema (migration `9013_storage_schema.sql`, raw postflight
+  idempotent conform pattern repo `9XXX`):
+  - `storage_limits` — caps editabile per `(scope × file_type × module)`
+    cu fallback wildcard `*`. Read-heavy, write-rare — cachable.
+  - `user_upload_quota` — counters per user (`daily_bytes`,
+    `lifetime_bytes`, `last_reset_at`, `notified_lifetime_at`).
+  - `storage_events` — audit log append-only al fiecărui `put`,
+    indexat pe `(module, created_at)` + `(user_id, created_at)` +
+    `(module, resource_id)` pentru agregările din admin panel M7-C.
+  - `storage_folder_stats` — rollup incremental keyed pe
+    `(module × resource_id)`, sursa de adevăr pentru Overview totals.
+  - `forum_post_attachments` — audio/PDF/ZIP per Forum post
+    (max 3 enforced service-side în M7-B).
+  - `revista_article_attachments` — audio/PDF/ZIP per articol Revista
+    (fără cap pe articol, doar quota personală).
+  - 4 enum-uri noi: `storage_limit_scope`, `storage_file_type`,
+    `storage_module`, `storage_attachment_kind`.
+- Seed (migration `9014_storage_limits_seed.sql`, idempotent
+  `ON CONFLICT DO NOTHING`) match-uiește execution-plan.md §M7:
+  - Image 8 MB (toate modulele) / Audio 10 MB (Forum/Tezaur/Bazar) /
+    Audio 20 MB (Revista) / PDF 10 MB / ZIP 20 MB per-file.
+  - 50 MB/zi rolling per user.
+  - 1 GB alert lifetime per user.
+- `StorageService` refactat:
+  - I/O delegată la driver — zero `writeFile` rămas.
+  - Obiecte content-addressate:
+    `<module>/<resource-id>/<source-id>/<variant>-<sha256-12>.jpg`
+    pentru imagini (cache-safe immutable).
+  - Avatar la cheie mutable `avatar/<user-id>.webp` cu
+    `Cache-Control: public, max-age=60, must-revalidate`.
+  - Vechiul `deleteSource(scope, entityId, sourceId, variants)`
+    înlocuit cu `deleteObjects(keys[])` — callers query `path` din DB
+    și pasează listă, fără convenții de reconstrucție.
+- Callers refactați:
+  - `TezaurService.detachImage` — select `path` din `gear_images`.
+  - `ListingsService.detachPhoto` — select `path` din `listing_photos`.
+  - `ArticlesService.detachImage` — select `path` din `article_images`.
+  - `AuthService.setAvatar / removeAvatar` — neschimbat (signatures
+    `processAvatar` / `deleteAvatar` păstrate).
+- Wiring: `StorageModule` în `AppModule` înainte de `CommonModule` ca
+  `StorageService` să-l poată injecta.
+- Env (`.env.example` + `.env`):
+  - `STORAGE_DRIVER` (`local|s3`, default `local`).
+  - `STORAGE_PUBLIC_BASE_URL` (`http://localhost:3000/uploads` dev,
+    `https://files.sintezaur.ro` prod).
+  - `R2_ENDPOINT`, `R2_BUCKET=sintezaur-uploads`, `R2_ACCESS_KEY_ID`,
+    `R2_SECRET_ACCESS_KEY` — populate doar pe Coolify la cutover.
+- Dep nou: `@aws-sdk/client-s3@^3.1047.0` (root). `docs/devops/tech-stack.md`
+  mutat din tabela „deliberate exclusions" în secțiunea activă.
+- Smoke check standalone (`tools/scripts/smoke-storage.ts`):
+  exersează put → exists → get → url → delete pe driver-ul activ +
+  verifică seed-ul `storage_limits`. Rulează cu
+  `pnpm tsx tools/scripts/smoke-storage.ts`. Repo-ul nu are
+  infrastructură Jest cablată — script-ul ăsta e check-ul de regresie
+  side-effect-free.
+- Verificări locale:
+  - `pnpm migrate` aplică `9013` + `9014` curat, idempotent pe rerun.
+  - `pnpm tsx tools/scripts/smoke-storage.ts` — round-trip OK, 9 rânduri
+    seed prezente.
+  - `nx run api:typecheck` — clean pe api + shared + db + auth.
+  - `nx serve api` — bootstrap ajunge la `app.listen()` fără erori DI
+    (singur error e port conflict cu API-ul dev deja pornit).
+
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
 #### M6-E4 — Pre-launch hardening: GDPR + slug redirect + email history (`2cc2ceb`)
