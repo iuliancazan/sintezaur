@@ -57,7 +57,7 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
       }
 
       <nav class="mm__group" [attr.aria-label]="'app.mobile_menu.shortcuts' | t">
-        <a class="mm__item" routerLink="/cont/salvate" (click)="close()">
+        <a class="mm__item" routerLink="/cont/favorite" (click)="close()">
           {{ 'account.menu.favorites' | t }}
         </a>
         <a class="mm__item" routerLink="/cont/mesaje" (click)="close()">

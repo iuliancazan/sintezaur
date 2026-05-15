@@ -351,6 +351,12 @@
       "tabs_aria": "Secțiuni setări",
       "my_data": "Datele mele",
       "blocked_users": "Utilizatori blocați"
+    },
+    "favorites": {
+      "title": "Favorite",
+      "tabs_aria": "Secțiuni favorite",
+      "tab_listings": "Anunțuri",
+      "tab_searches": "Căutări"
     }
   },
   "common": {

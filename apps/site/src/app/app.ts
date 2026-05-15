@@ -310,7 +310,7 @@ export class App {
   }
 
   goToFavorites(): void {
-    void this.router.navigate(['/cont/salvate']);
+    void this.router.navigate(['/cont/favorite']);
   }
 
   goToMessages(): void {

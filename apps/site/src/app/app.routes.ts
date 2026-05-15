@@ -232,24 +232,42 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/my-listings.page').then((m) => m.MyListingsPage),
       },
-      {
-        path: 'salvate',
-        loadComponent: () =>
-          import('./account/my-watches.page').then((m) => m.MyWatchesPage),
-      },
+      // M10-D: legacy favorites paths redirect into the new shell.
+      { path: 'salvate', redirectTo: 'favorite/anunturi', pathMatch: 'full' },
       {
         path: 'cautari-salvate',
-        loadComponent: () =>
-          import('./account/saved-searches.page').then(
-            (m) => m.SavedSearchesPage,
-          ),
+        redirectTo: 'favorite/cautari',
+        pathMatch: 'full',
       },
+      { path: 'abonamente', redirectTo: 'favorite/abonamente', pathMatch: 'full' },
       {
-        path: 'abonamente',
+        path: 'favorite',
         loadComponent: () =>
-          import('./account/forum-subscriptions.page').then(
-            (m) => m.ForumSubscriptionsPage,
+          import('./account/favorites-shell.page').then(
+            (m) => m.FavoritesShellPage,
           ),
+        children: [
+          { path: '', redirectTo: 'anunturi', pathMatch: 'full' },
+          {
+            path: 'anunturi',
+            loadComponent: () =>
+              import('./account/my-watches.page').then((m) => m.MyWatchesPage),
+          },
+          {
+            path: 'cautari',
+            loadComponent: () =>
+              import('./account/saved-searches.page').then(
+                (m) => m.SavedSearchesPage,
+              ),
+          },
+          {
+            path: 'abonamente',
+            loadComponent: () =>
+              import('./account/forum-subscriptions.page').then(
+                (m) => m.ForumSubscriptionsPage,
+              ),
+          },
+        ],
       },
     ],
   },
