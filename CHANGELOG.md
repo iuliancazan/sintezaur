@@ -9,6 +9,54 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M9 — SEO closure + unified search + observability
 
+#### M9-C — Observability: Sentry + daily pg_dump backup (`1b5762a`)
+
+Spec §M6 deliverable — error tracking + offsite-able backup pipeline,
+left over după soft-launch deploy.
+
+- **Sentry** — `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1`
+  adăugate la root package.json.
+  - `apps/api/src/instrument.ts` + `apps/worker/src/instrument.ts` —
+    side-effect-only imports care fac `Sentry.init` ÎNAINTE de
+    `NestFactory.create`, ca să prindă erorile de boot.
+  - Worker variant tagged `service: 'worker'` ca dashboard să poată
+    split events.
+  - `SentryModule.forRoot()` în api + worker AppModule pentru
+    per-request integration (Nest exception filter chain).
+  - 4 env vars opționale: `SENTRY_DSN`, `SENTRY_ENVIRONMENT`,
+    `SENTRY_TRACES_SAMPLE_RATE` (default 0.1), `SENTRY_RELEASE`.
+    DSN gol = SDK init no-op (dev / CI no-warnings).
+- **Daily pg_dump backup**:
+  - `apps/worker/src/app/jobs/pg-dump.job.ts` — rulează
+    `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default
+    `./storage/backups`) cu nume timestamped, apoi prune fișiere
+    mai vechi de `BACKUP_RETAIN_DAYS` (default 14).
+  - Cron pg-boss `backup:pg-dump` @ `30 2 * * *` (02:30 UTC, before
+    storage:reconcile la 03:00).
+  - Necesită `postgresql-client` în imaginea worker — vezi
+    `docs/devops/backups.md`.
+- Env vars (.env.example + .env): `BACKUP_DIR`, `BACKUP_RETAIN_DAYS`,
+  `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`,
+  `SENTRY_RELEASE`.
+- `docs/devops/backups.md` (nou) — 3-layer strategy:
+  - Layer 1 (automatic): pg-boss cron de mai sus.
+  - Layer 2 (manual offsite): rclone/rsync zilnic la Hetzner Storage
+    Box BX11 (~€3.20/lună), configurat pe Coolify host cron.
+  - Layer 3 (quarterly restore drill): checklist verificare că
+    dump-ul cel mai recent poate fi restaurat pe un DB fresh.
+  - Retention policy + security notes + open follow-ups.
+- `docs/devops/tech-stack.md` — Sentry section nou cu cele 2 packages.
+- `docs/testing/m9-testing.md` (nou) — plan manual pentru toate 3
+  sub-faze (SEO closure / unified search / observability), 5
+  secțiuni + appendix debugging commands.
+- Verificări:
+  - `nx run-many --target=typecheck --projects=api,worker,site,dashboard`
+    — clean across all 4 apps.
+
+**M9 ✅ complet** (A/B/C). Spec MVP feature-complete per gap
+analysis. Mai rămân doar operational items pe Coolify (populate
+SENTRY_DSN, configurează rclone, rulează manual test plan).
+
 #### M9-B — Unified cross-module search `/cautare` (`9f0e604`)
 
 Spec §7.6 — „One unified search page + per-section filtered search".
