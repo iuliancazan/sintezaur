@@ -6,30 +6,30 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M7-A (`6341d09`) — storage driver layer +
-schema pentru cutover R2. `StorageDriver` interface în
-`libs/shared/storage` + `LocalStorageDriver` + `S3StorageDriver` în
-`apps/api/storage/`, ales la bootstrap din `STORAGE_DRIVER` env.
-Schema nouă (migration `9013`): `storage_limits` + `user_upload_quota`
-+ `storage_events` + `storage_folder_stats` + `forum_post_attachments`
-+ `revista_article_attachments` + 4 enums noi. Seed limite default
-(migration `9014`, ON CONFLICT DO NOTHING): 8/10/20/10/20 MB per-file +
-50 MB/zi/user + 1 GB alert lifetime. `StorageService` refactat să
-delege I/O la driver. Obiectele primesc chei content-addressate
-(`<module>/<resource>/<source>/<variant>-<sha256-12>.jpg`). Callers
-Tezaur/Bazar/Revista trec la `deleteObjects(keys[])`; avatar pipeline
-trece prin driver cu cache mutable. Env nou: `STORAGE_DRIVER` +
-`STORAGE_PUBLIC_BASE_URL` + `R2_*`. `@aws-sdk/client-s3@^3.1047.0`
-adăugat. Smoke script `tools/scripts/smoke-storage.ts` rulează
-round-trip put/exists/get/delete + verifică seed-ul.
+**Last shipped:** M7-B (`d23661f`) — multi-type pipeline + quota
+infra + storage crons. Magic-byte detector zero-dep (JPEG/PNG/WebP/
+MP3/WAV/OGG/PDF/ZIP). `StorageLimitsService` cu wildcard fallback +
+cache 5min. `UploadQuotaService` cu `check()` (413/429 pre-upload) +
+`track()` (storage_events / user_upload_quota / storage_folder_stats
++ notification one-shot la threshold lifetime). `StorageService`
+extins cu `processAudio` / `processPdf` / `processZip` + integrare
+quota pe imagine/avatar. Public `GET /api/storage/limits` (cache
+300s). Nou notification kind `storage_quota_lifetime_reached`
+(migration `9015`). pg-boss crons în worker:
+`storage:reset-daily-quota` @ 00:00 UTC + `storage:reconcile` @
+03:00 UTC (skeleton paginat 1000 keys/page + 200ms sleep, no-op pe
+LocalDriver). DB type rename: `StorageFileType` (db) →
+`StorageFileTypeValue` ca să nu colideze cu cel din `@sintezaur/shared`.
+Smoke check extins cu 10 cazuri magic-byte (toate pass).
 
-**Next up:** **M7-B** — multi-type pipeline (audio/PDF/ZIP cu
-magic-byte detection), `UploadQuotaGuard` cu cache 5min, pg-boss
-crons (daily reset 00:00 UTC + reconciliation 03:00 UTC), public
-`GET /api/storage/limits`, UI Forum attachments (max 3/post) + UI
-Revista attachments (no cap), notification `storage_quota_lifetime_reached`.
+**Next up:** **M7-C** — attachment endpoints (Forum max 3/post,
+Revista uncapped): backend CRUD + frontend uploaders (audio inline
+player, PDF link, ZIP download) integrate în composer Forum
+(`new-thread` + `reply`) și editor Revista. Plus client-side
+pre-check pe limite via `/api/storage/limits`.
 
-**Active milestone:** M7 — A ✅, B (next), C (admin panel + docs).
+**Active milestone:** M7 — A ✅, B ✅, C (UI uploaders), D (admin
+panel + docs/testing/m7-testing.md + cutover docs).
 
 ## Milestones
 
@@ -126,6 +126,7 @@ Revista attachments (no cap), notification `storage_quota_lifetime_reached`.
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | A   | `6341d09` | done | StorageDriver interface (libs/shared) + Local/S3 drivers (apps/api/storage) + StorageModule env-driven; schema migration `9013` (storage_limits + user_upload_quota + storage_events + storage_folder_stats + forum_post_attachments + revista_article_attachments + 4 enums); seed migration `9014` (limite default per spec, idempotent); StorageService refactat la driver I/O cu chei content-addressed (`<module>/<resource>/<source>/<variant>-<hash12>.jpg`); refactor callers Tezaur/Bazar/Revista la `deleteObjects(keys[])`; avatar pipeline pe driver cu cache mutable; env nou (`STORAGE_DRIVER` + `STORAGE_PUBLIC_BASE_URL` + `R2_*`); `@aws-sdk/client-s3@^3.1047.0` adăugat; smoke script `tools/scripts/smoke-storage.ts` |
+| B   | `d23661f` | done | Magic-byte detector (8 formats, zero-dep); `StorageLimitsService` (wildcard fallback + cache 5min); `UploadQuotaService` (`check()` 413/429 pre-upload + `track()` storage_events/user_upload_quota/storage_folder_stats + lifetime alert notification); StorageService extins cu `processAudio`/`processPdf`/`processZip` + integrare quota pe image/avatar; public `GET /api/storage/limits` (cache 300s); migration `9015` adaugă `storage_quota_lifetime_reached` în `notification_kind`; pg-boss crons în worker — `storage:reset-daily-quota` @ 00:00 UTC + `storage:reconcile` @ 03:00 UTC (paginat 1000 keys/page + 200ms sleep, no-op pe LocalDriver); DB type rename `StorageFileType` → `StorageFileTypeValue`; smoke check extins cu 10 cazuri magic-byte |
 
 ## Conventions (recap from memory)
 

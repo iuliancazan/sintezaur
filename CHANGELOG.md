@@ -9,6 +9,79 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M7 — Storage Refactor (Local → Cloudflare R2)
 
+#### M7-B — Multi-type pipeline + quota infra + storage crons (`d23661f`)
+
+- Magic-byte detector (`apps/api/src/app/storage/file-type-detector.ts`):
+  - Zero-dep sniffer pentru 8 formate: JPEG, PNG, WebP, MP3 (cu sau
+    fără ID3v2), WAV, OGG, PDF, ZIP.
+  - Client-supplied `Content-Type` devine advisory only — fiecare
+    upload e validat pe primii 16 bytes înainte să ajungă la driver.
+- `StorageLimitsService`:
+  - Sursa unică de adevăr pentru caps. Resolution cu wildcard fallback:
+    exact `(scope, file_type, module)` → `(scope, file_type, *)` →
+    `(scope, *, module)` → `(scope, *, *)`.
+  - Cache in-memory 5 min cu `invalidate()` hook pentru editare admin
+    în M7-D.
+  - `list()` pentru endpoint-ul public `GET /api/storage/limits`.
+- `UploadQuotaService`:
+  - Pre-upload `check()` aruncă `413 Payload Too Large` (per-file cap
+    depășit) sau `429 Too Many Requests` (daily cap user) înainte ca
+    byte-urile să ajungă la driver.
+  - Post-upload `track()` într-o tranzacție:
+    INSERT `storage_events` (audit append-only) +
+    UPSERT `user_upload_quota` (`daily_bytes` + `lifetime_bytes`) +
+    UPSERT `storage_folder_stats` (rollup `(module × resource_id)`).
+  - Lifetime-alert notification one-shot: când user-ul depășește prima
+    oară `per_user_lifetime_alert` threshold, primește notificare +
+    fan-out la toți admin-ii. `notifiedLifetimeAt` stamp + UPDATE
+    condițional ca să previn double-fire pe race conditions.
+  - `untrack()` revine `storage_folder_stats` corect pe deletes
+    (lifetime_bytes NU scade — reprezintă „ever uploaded").
+  - Lazy same-day reset pe daily counter: primul request după 00:00
+    UTC vede counter-ul reset, chiar înainte ca cron-ul să ruleze.
+- `StorageService` extins:
+  - `processAudio(module, resourceId, file, actorId)`,
+    `processPdf(...)`, `processZip(...)` — magic-byte vet →
+    `driver.put` → `quota.track`. Stored as-is, fără re-encode.
+    Object keys: `<module>/<resource>/attachment-<sha256-12>.<ext>`.
+  - `processImage` și `processAvatar` integrează acum `quota.check`
+    + `quota.track`. Callers Tezaur/Bazar/Revista trimit `actorId`
+    pentru ca uploads să intre în counters per-user.
+- `StorageController` + `GET /api/storage/limits` (public, no auth,
+  `Cache-Control: public, max-age=300`). Frontend pre-check source —
+  aceleași date pe care le folosește backend-ul, deci edit din admin
+  panel se propagă în ≤5 min.
+- `StorageModule` extins (toate `@Global()`):
+  - `StorageLimitsService` + `UploadQuotaService` + `StorageController`.
+- Notification enum:
+  - `storage_quota_lifetime_reached` adăugat în `notification_kind`
+    (migration `9015_storage_notification_kinds.sql`, idempotent
+    `ADD VALUE IF NOT EXISTS`).
+  - `NotificationsService.DEFAULT_PREFS` extins cu noul kind
+    (`in_app: 'on', email: 'on'`).
+- pg-boss crons noi în `apps/worker/src/app/jobs/`:
+  - `storage:reset-daily-quota` @ `0 0 * * *` (00:00 UTC) —
+    `UPDATE user_upload_quota SET daily_bytes=0, last_reset_at=now()
+    WHERE daily_bytes > 0`. Cheap + idempotent, fără churn pe useri
+    dormanți.
+  - `storage:reconcile` @ `0 3 * * *` (03:00 UTC) — paginat
+    `ListObjectsV2` per module prefix (1000 keys/page, 200 ms sleep
+    între pagini) vs `storage_events` aggregate. Logs drift > 1 MB.
+    No-op când `STORAGE_DRIVER != s3` ca dev să stea quiet. Audit-log
+    emission lands în M7-D.
+- DB type rename: `StorageFileType` (din `@sintezaur/db`) →
+  `StorageFileTypeValue`, ca să nu colideze cu `StorageFileType` din
+  `@sintezaur/shared` (cel din DB include wildcard `'*'`; cel din
+  shared e doar cele 4 valori reale).
+- Smoke check extins (`tools/scripts/smoke-storage.ts`):
+  10 cazuri magic-byte (8 positive + 1 frame-sync alternativ + 1
+  negativ unknown). Toate pass.
+- Verificări locale:
+  - `pnpm migrate` aplică `9015` idempotent pe rerun.
+  - `pnpm tsx tools/scripts/smoke-storage.ts` — driver round-trip
+    + 10 cazuri magic-byte + 9 limite seed all OK.
+  - `nx run api:typecheck` + `nx run worker:typecheck` — clean.
+
 #### M7-A — Driver layer + schema + refactor existent (`6341d09`)
 
 - StorageDriver interface (`libs/shared/src/lib/storage.ts`):
