@@ -22,7 +22,18 @@ export class PublicRevistaController {
   @Get(':slug')
   async detail(@Param('slug') slug: string) {
     const data = await this.articles.findBySlug(slug);
-    if (!data) throw new NotFoundException(`article ${slug} not found`);
+    if (!data) {
+      // Spec §7.13: try a 30-day slug redirect. On expiry the row stays
+      // but `expired=true` → site router decides 301 vs 410.
+      const redirect = await this.articles.lookupSlugRedirect(slug);
+      if (redirect) {
+        throw new NotFoundException({
+          message: redirect.expired ? 'gone' : 'redirect',
+          redirectTo: `/revista/${redirect.newSlug}`,
+        });
+      }
+      throw new NotFoundException(`article ${slug} not found`);
+    }
     this.articles.bumpViewCount(data.article.id);
     return data;
   }

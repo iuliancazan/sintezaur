@@ -9,6 +9,65 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep + MVP foundation closure
 
+#### M6-E4 — Pre-launch hardening: GDPR + slug redirect + email history (`PENDING`)
+
+- Schema (additive, idempotent):
+  - Migration `9012_audit_action_gdpr_delete.sql` — `ALTER TYPE
+    audit_log_action ADD VALUE IF NOT EXISTS 'gdpr_self_delete'`.
+    `AuditAction` TS union sincronizat.
+- GDPR (spec §11 foundation, RGPD Art. 15 + 17):
+  - `GdprModule` nou (`apps/api/src/app/gdpr/`):
+    - `GET /auth/me/export` — JSON dump cu 19 secțiuni: profile (PII
+      filtered: no password_hash / failed_login_count / locked_until),
+      roles, emailHistory, listings, messagesSent, savedSearches,
+      listingWatches, transactionsAsBuyer/Seller, transactionReviews
+      Given/Received, gearCollection, gearReviews, forumPosts,
+      forumLikes, threadSubscriptions, categorySubscriptions, articles,
+      notificationPreferences, notifications, blocksMade,
+      contentReportsFiled. Content-Disposition attachment cu nume
+      `sintezaur-export-<YYYY-MM-DD>.json`.
+    - `DELETE /auth/me/account` — tranzacție:
+      1. `users` row anonimizat: email → `deleted-<id8>@sintezaur.local`,
+         username → `deleted-<id8>`, fullName → `[utilizator șters]`,
+         passwordHash, bio, location, avatar, website, 3× social,
+         phone, verifications → NULL, `deletedAt = now()`.
+      2. `refresh_tokens` / `email_verification_tokens` /
+         `password_reset_tokens` → DELETE (session revoke).
+      3. Listings active → status `removed` + `removed_at` (păstrează
+         istoricul tranzacțiilor pentru cealaltă parte).
+      4. Forum posts → `hidden_at` + `hidden_reason='account_deleted_by_user'`.
+      Audit `gdpr_self_delete`. Cookies clear pe response.
+  - Site `/cont/date` (`account-data.page.ts`) — 2 carduri:
+    - **Export**: 1-click → download Blob JSON local (no server roundtrip
+      for file write).
+    - **Delete**: gated cu magic-phrase „ȘTERGE CONTUL" (input border
+      flips la roșu pe match). Cancel button. Post-success navighează
+      la `/`.
+  - Link „Datele tale (RGPD)" în meniul `/cont`.
+  - `AuthService.exportMyData()` + `deleteAccount()` site-side.
+- slug_redirect (spec §7.13):
+  - `ArticlesService.renameSlug` — INSERT în `slug_redirects` cu
+    `targetType='article'` când slug-ul se schimbă pe articol PUBLICAT
+    (pre-publish rename nu produce redirect — nimic public încă).
+    Conflict pe UNIQUE swallowed (existing redirect kept).
+  - `ArticlesService.lookupSlugRedirect` — returnează `newSlug +
+    targetId + expired` (30-day TTL).
+  - `PublicRevistaController.detail` — pe 404 verifică redirect; throw
+    `NotFoundException({ message: 'redirect'|'gone', redirectTo })`.
+  - `RevistaDetailPage` (site) — interceptează body 404 pentru
+    `redirectTo`: `'gone'` → `/gone`, altminteri `navigateByUrl(
+    redirectTo, { replaceUrl: true })`.
+  - `TezaurService.lookupSlugRedirect` — refactored să returneze
+    `expired:true` în loc să dispară silent → public-tezaur trimite
+    `/gone` pentru expiry (era 404 plat înainte).
+- user_email_history (spec §9):
+  - `AuthService.verifyEmail` — în transacție capturează `users.email`
+    curent ÎNAINTE de update; dacă diferă de noul email (i.e. e un
+    flow `change-email`, nu signup confirmation), INSERT în
+    `user_email_history` cu old/new + timestamp.
+- **MVP scope locked + GDPR ready**: soft-launch sigur pe EU traffic,
+  privacy policy livrabilă, slug-rename SEO-safe.
+
 #### M6-E3 — MVP foundation closure: audit log + curs valutar (`0668be0`)
 
 - Backend:

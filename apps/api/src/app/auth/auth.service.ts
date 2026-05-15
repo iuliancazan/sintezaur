@@ -12,6 +12,7 @@ import {
   DATABASE,
   emailVerificationTokens,
   passwordResetTokens,
+  userEmailHistory,
   userRoles,
   users,
   type SintezaurDb,
@@ -171,6 +172,18 @@ export class AuthService {
     }
 
     await this.db.transaction(async (tx) => {
+      // Capture old email for audit trail BEFORE the update so we can
+      // log to `user_email_history` per spec §9. Initial signup
+      // verifications (row.email == current users.email) skip the
+      // history row — nothing changed.
+      const [current] = await tx
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.id, row.userId))
+        .limit(1);
+      const isEmailChange =
+        current && current.email.toLowerCase() !== row.email.toLowerCase();
+
       await tx
         .update(users)
         .set({
@@ -184,6 +197,14 @@ export class AuthService {
         .update(emailVerificationTokens)
         .set({ usedAt: new Date() })
         .where(eq(emailVerificationTokens.id, row.id));
+
+      if (isEmailChange && current) {
+        await tx.insert(userEmailHistory).values({
+          userId: row.userId,
+          oldEmail: current.email,
+          newEmail: row.email,
+        });
+      }
     });
 
     return { verified: true };

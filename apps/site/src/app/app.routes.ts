@@ -213,6 +213,13 @@ export const appRoutes: Route[] = [
             (m) => m.BlocksListPage,
           ),
       },
+      {
+        path: 'date',
+        loadComponent: () =>
+          import('./account/account-data.page').then(
+            (m) => m.AccountDataPage,
+          ),
+      },
     ],
   },
   // Legal & informational static pages (M6-A). Five share one component;

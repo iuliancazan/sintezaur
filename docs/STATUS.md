@@ -6,21 +6,21 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M6-E3 (`0668be0`) — admin closure: backend
-`AuditLogService.list()` cu filtre (action+target+actor+from+to+page),
-nou `AdminClosureModule` cu `GET /admin/audit-log` +
-`GET/POST /admin/currency-rates` (admin+superadmin), `CurrencyRatesService`
-cu audit logging pe fiecare update. Seed `9011_currency_rate_eur_seed`
-inserează rata inițială EUR→RON (5.0700). Dashboard: `/audit-log`
-viewer cu filtre + expandable JSON details, `/currency-rates` admin
-cu form + istoric. Home: 2 module noi (Audit log activ, înlocuiește
-placeholder „Land în M2.5"; Curs valutar).
+**Last shipped:** M6-E4 (`PENDING`) — pre-launch hardening:
+GDPR `GET /auth/me/export` (JSON dump cu 19 secțiuni) +
+`DELETE /auth/me/account` (anonimizare PII + soft-delete listings +
+hide forum posts + cookie clear). `/cont/date` page cu confirm
+magic-phrase pe delete. slug_redirect INSERT pe rename article publicat
++ lookup pe revista 404 (gone/redirect distinction). Tezaur lookup
+upgrade — returnează `expired:true` în loc să dispară silent → 410.
+`user_email_history` INSERT pe `verifyEmail` când email-ul se schimbă.
+Audit action nou: `gdpr_self_delete` (migration `9012`).
 
-**Next up:** **MVP complete** — toate bullets spec §11 foundation +
-Phase 1/2/3 sunt cablate. Soft-launch ready (deploy în Coolify + seed
-superadmin + curated gear) sau pornește **M7** (storage refactor R2).
+**Next up:** **MVP complete + GDPR ready.** Soft-launch poate porni:
+deploy Coolify, seed superadmin + 10 curated gear, anunț prima undă
+utilizatori. Sau **M7** (storage refactor R2).
 
-**Active milestone:** M6 ✅ complet (A/B/C/D + E1/E2/E3). MVP done.
+**Active milestone:** M6 ✅ complet (A/B/C/D + E1/E2/E3/E4). MVP done.
 
 ## Milestones
 
@@ -110,6 +110,7 @@ superadmin + curated gear) sau pornește **M7** (storage refactor R2).
 | E1  | `5e36ec7` | done | profil public: `users.location` (migration `9010`) + `AuthUserPublic` extins (bio/location/avatar/website/3× social) + `PATCH /auth/me/profile` + `POST/DELETE /auth/me/avatar` (256×256 WebP dedicat) + site `/cont/profil` cu uploader + form complet + link „Profil" în meniul `/cont` + `/autor/:username` afișează location |
 | E2  | `ff5ef8c` | done | block + report UI cablat: backend `BlocksModule` (`/me/blocks` GET/POST/DELETE) + `ContentReportsService.verifyTarget` + `snapshot` extins pe `listing`/`message`/`gear_review`/`user_profile` + `listings.listPublic` filtrează vânzători blocați; site `BlocksService` + `<app-block-button>` + `<app-report-button>` reusable, wired pe bazar detail (seller card), chat thread (header), `/autor/:username` (safety actions); `/cont/blocuri` list page; dashboard `/rapoarte` queue extins cu 4 target options noi + link-uri |
 | E3  | `0668be0` | done | MVP foundation closure: backend `AuditLogService.list` cu filtre + `AdminClosureModule` (`GET /admin/audit-log`, `GET/POST /admin/currency-rates`) + `CurrencyRatesService` cu audit logging; seed `9011_currency_rate_eur_seed` (EUR→RON 5.0700); dashboard `/audit-log` viewer (filter action/target/perioadă + expand JSON), `/currency-rates` admin (form + istoric); home: 2 module noi (Audit log activ înlocuiește placeholder „Land în M2.5", Curs valutar) |
+| E4  | `PENDING` | done | pre-launch hardening: GDPR `GET /auth/me/export` (JSON dump 19 secțiuni) + `DELETE /auth/me/account` (PII anonymize + soft-delete listings + hide forum posts + clear cookies); site `/cont/date` cu magic-phrase confirm; slug_redirect INSERT pe rename article publicat + lookup pe revista 404 (gone vs redirect); Tezaur lookup returnează `expired` (410 path); `user_email_history` INSERT pe verifyEmail când email schimbat; nou `gdpr_self_delete` audit action (migration `9012`) |
 
 ## Conventions (recap from memory)
 

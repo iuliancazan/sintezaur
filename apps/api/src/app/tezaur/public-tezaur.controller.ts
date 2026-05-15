@@ -38,7 +38,7 @@ export class PublicTezaurController {
       const redirect = await this.tezaur.lookupSlugRedirect('gear', slug);
       if (redirect) {
         throw new NotFoundException({
-          message: 'redirect',
+          message: redirect.expired ? 'gone' : 'redirect',
           redirectTo: `/tezaur/${redirect.newSlug}`,
         });
       }

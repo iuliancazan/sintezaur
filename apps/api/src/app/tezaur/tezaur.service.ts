@@ -965,7 +965,7 @@ export class TezaurService {
   async lookupSlugRedirect(
     targetType: 'gear' | 'article' | 'forum_thread',
     oldSlug: string,
-  ): Promise<{ newSlug: string; targetId: string } | null> {
+  ): Promise<{ newSlug: string; targetId: string; expired: boolean } | null> {
     const [row] = await this.db
       .select({
         newSlug: slugRedirects.newSlug,
@@ -981,10 +981,9 @@ export class TezaurService {
       )
       .limit(1);
     if (!row) return null;
-    if (row.expiresAt && new Date(row.expiresAt).getTime() < Date.now()) {
-      return null;
-    }
-    return { newSlug: row.newSlug, targetId: row.targetId };
+    const expired =
+      !!row.expiresAt && new Date(row.expiresAt).getTime() < Date.now();
+    return { newSlug: row.newSlug, targetId: row.targetId, expired };
   }
 
   /* ============================================================

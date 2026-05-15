@@ -48,6 +48,9 @@ import { FeedbackService } from '../feedback/feedback.service';
         <a routerLink="/cont/blocuri" class="account__link">
           Utilizatori blocați
         </a>
+        <a routerLink="/cont/date" class="account__link">
+          Datele tale (RGPD)
+        </a>
         <a routerLink="/cont/parola" class="account__link">
           {{ 'account.menu.password' | t }}
         </a>

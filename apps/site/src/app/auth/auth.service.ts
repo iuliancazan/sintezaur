@@ -188,6 +188,25 @@ export class AuthService {
     this._currentUser.set(res.user);
     return res.user;
   }
+
+  /** GDPR Art. 15 — returns the full export as a JS object. */
+  async exportMyData(): Promise<unknown> {
+    return firstValueFrom(
+      this.http.get(`${this.base}/auth/me/export`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  /** GDPR Art. 17 — soft-deletes account, server clears cookies. */
+  async deleteAccount(): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<void>(`${this.base}/auth/me/account`, {
+        withCredentials: true,
+      }),
+    );
+    this._currentUser.set(null);
+  }
 }
 
 export interface UpdateProfilePayload {

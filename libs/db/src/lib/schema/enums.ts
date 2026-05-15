@@ -241,6 +241,7 @@ export const auditLogActionEnum = pgEnum('audit_log_action', [
   'resolve_content_report',
   'first_post_approve',
   'first_post_reject',
+  'gdpr_self_delete',
 ]);
 export type AuditLogAction = (typeof auditLogActionEnum.enumValues)[number];
 

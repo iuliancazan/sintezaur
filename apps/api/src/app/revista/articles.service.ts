@@ -16,6 +16,7 @@ import {
   forumCategories,
   forumThreads,
   gear,
+  slugRedirects,
   type Article,
   type ArticleCategory,
   type SintezaurDb,
@@ -166,6 +167,33 @@ export class ArticlesService {
     return { id, slug: existing.slug };
   }
 
+  async lookupSlugRedirect(oldSlug: string): Promise<{
+    newSlug: string;
+    targetId: string;
+    expired: boolean;
+  } | null> {
+    const [row] = await this.db
+      .select({
+        newSlug: slugRedirects.newSlug,
+        targetId: slugRedirects.targetId,
+        expiresAt: slugRedirects.expiresAt,
+      })
+      .from(slugRedirects)
+      .where(
+        and(
+          eq(slugRedirects.targetType, 'article'),
+          eq(slugRedirects.oldSlug, oldSlug),
+        ),
+      )
+      .limit(1);
+    if (!row) return null;
+    return {
+      newSlug: row.newSlug,
+      targetId: row.targetId,
+      expired: row.expiresAt <= new Date(),
+    };
+  }
+
   async renameSlug(
     actorId: string,
     actorIsAdmin: boolean,
@@ -183,10 +211,28 @@ export class ArticlesService {
       throw new BadRequestException('Slug invalid (3–80 caractere).');
     }
     const safe = await uniqueSlug(candidate, (s) => this.slugTaken(s, id));
+    const previousSlug = existing.slug;
     await this.db
       .update(articles)
       .set({ slug: safe, updatedAt: new Date() })
       .where(eq(articles.id, id));
+
+    // Spec §7.13: record a 30-day 301 from old→new when admin renames a
+    // published article. Pre-publish renames don't matter (no public URLs
+    // are out there yet). Conflict-on-INSERT (same old_slug already
+    // pointing somewhere) is swallowed — the existing redirect stays.
+    if (previousSlug !== safe && existing.status === 'published') {
+      try {
+        await this.db.insert(slugRedirects).values({
+          targetType: 'article',
+          targetId: id,
+          oldSlug: previousSlug,
+          newSlug: safe,
+        });
+      } catch (err) {
+        if ((err as { code?: string }).code !== '23505') throw err;
+      }
+    }
     return { slug: safe };
   }
 

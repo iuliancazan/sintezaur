@@ -44,7 +44,9 @@ export type AuditAction =
   | 'first_post_approve'
   | 'first_post_reject'
   // Currency (M6-E3)
-  | 'update_currency_rate';
+  | 'update_currency_rate'
+  // GDPR (M6-E4)
+  | 'gdpr_self_delete';
 
 interface RecordOptions {
   actorId: string;

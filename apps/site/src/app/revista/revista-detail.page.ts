@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
@@ -445,6 +445,7 @@ export class RevistaDetailPage {
   readonly revista = inject(RevistaService);
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly seo = inject(SeoService);
 
   readonly detail = signal<ArticleDetail | null>(null);
@@ -474,6 +475,18 @@ export class RevistaDetailPage {
       this.detail.set(d);
       this.applySeo(d);
     } catch (err) {
+      // Spec §7.13: backend signals slug redirect via 404 body
+      // `{ redirectTo, message: 'redirect' | 'gone' }`. Honor it
+      // client-side (no SSR 301 yet — site is SPA-first).
+      const body = (err as { error?: { redirectTo?: string; message?: string } })?.error;
+      if (body?.redirectTo) {
+        if (body.message === 'gone') {
+          void this.router.navigate(['/gone']);
+        } else {
+          void this.router.navigateByUrl(body.redirectTo, { replaceUrl: true });
+        }
+        return;
+      }
       console.error('[revista] detail failed', err);
       this.notFound.set(true);
       this.detail.set(null);
