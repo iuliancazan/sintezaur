@@ -18,7 +18,7 @@ overview, Useri list, User Edit), plus theme + density toggles
 persistate via localStorage. Restul paginilor admin moștenesc
 chrome-ul + tokens prin fallback global `main.admin`.
 
-#### M12 — single commit (_pending SHA_)
+#### M12 — single commit (`b641f85`)
 
 - **Shell admin inline** sub `apps/dashboard/src/app/shell/`:
   - `AdminShellService` — signals `theme()` (default `light`),
