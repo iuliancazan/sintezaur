@@ -6,28 +6,26 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M8 (`931561c`) — MVP gap closure pentru cele 3
-items promise în spec dar nelivrate în M6:
-1) **Notification preferences UI** §7.5 — `/cont/preferinte` cu
-   matrix grupat pe modul (Bazar/Tezaur/Revista/Forum/Sistem) ×
-   2 channels (in-app/email). Backend `GET/PUT /me/notifications/
-   preferences` cu DEFAULT_PREFS merged server-side.
-2) **Toggle public/privat colecție** §11 — `users.collection_public`
-   (migration `9016`, default true), expus pe `AuthUserPublic` +
-   `authorProfile()`, toggle în `/cont/profil` sub fieldset
-   „Confidențialitate".
-3) **Umami Cloud analytics** §M6 — `UmamiService` la APP_INITIALIZER
-   injectează script tag-ul când `environment.umamiWebsiteId` +
-   `environment.umamiScriptUrl` sunt populate. No-op pe dev.
-i18n: 20 kind labels noi în `ro.json` pentru prefs page.
+**Last shipped:** M9-A (`4e2103c`) — SEO closure final pass.
+**Forum 410 Gone path** §7.13 — `ForumThreadsService.lookupSlugRedirect`
+mirror la Tezaur/Revista, `PublicForumController.handleSlugMiss`
+helper catch+redirect, site `forum-thread.page` honors `gone`/`redirect`.
+**BreadcrumbList JSON-LD** pe toate 4 detail pages (Tezaur/Bazar/
+Revista/Forum) via nou `SeoService.breadcrumbList(items)` static
+helper + array form `setJsonLd([primary, breadcrumb])`.
+**Homepage Organization + WebSite SearchAction** — unlock sitelinks
+search box în Google SERP. **Brand placeholders** — script
+`tools/scripts/generate-brand-assets.ts` (Sharp) generează
+`og-default.png` (1200×630) + `logo.png` (512×512); fix share previews
+pe Facebook/iMessage/Slack. **Build warnings cleanup** — NG8107/8102
++ 2× NG8113 (unused imports) + bundle budget bumped la 1500kb
+warning (Angular's mb parser trunchiază 1.5mb → 1mb).
 
-**Next up:** **MVP feature-complete pentru launch.** Mai rămân DevOps
-items din §M6 (Sentry, backup cron, status page, Lighthouse audit
-manual). Sau pornești cutover-ul R2 per `docs/devops/storage-r2.md`.
-Sau M9 (TBD).
+**Next up:** **M9-B** — Unified search `/cautare` (§7.6). Cross-module
+text search backend + site page. Apoi M9-C observability (Sentry +
+pg_dump backup cron) + `docs/testing/m9-testing.md` final sync.
 
-**Active milestone:** M8 ✅. MVP foundation + storage + UI prefs
-complete.
+**Active milestone:** M9 în lucru — A ✅, B (next), C (last).
 
 ## Milestones
 
@@ -133,6 +131,12 @@ complete.
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | —   | `931561c` | done | Notification preferences UI `/cont/preferinte` (§7.5) cu matrix grupat pe modul × 2 channels (in-app/email); backend `GET/PUT /me/notifications/preferences` cu DEFAULT_PREFS merged + bulk upsert. Toggle public/privat colecție §11 (`users.collection_public` migration `9016` default true, expus pe AuthUserPublic + authorProfile, checkbox în `/cont/profil` sub Confidențialitate). Umami Cloud analytics §M6 — `UmamiService` la APP_INITIALIZER injectează script tag când env-urile populate (no-op pe dev). i18n: 20 kind labels noi + grupuri + col headers + common.loading/saving. AuthUser type extins cu collectionPublic. |
+
+### M9 — SEO closure + unified search + observability
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 
 ## Conventions (recap from memory)
 

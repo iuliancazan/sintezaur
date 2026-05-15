@@ -7,6 +7,54 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M9 — SEO closure + unified search + observability
+
+#### M9-A — SEO closure (`4e2103c`)
+
+Final polish pass pe SEO surface promise în spec §7.7/§7.13 + items
+deferred în `docs/seo-todo.md`. Plus build warnings cleanup.
+
+- **Forum 410 Gone path** (spec §7.13):
+  - `ForumThreadsService.lookupSlugRedirect(oldSlug)` mirror la
+    Tezaur + Revista — returnează `{ newSlug, targetId, expired }`
+    din `slug_redirects` pentru `targetType='forum_thread'`.
+  - `PublicForumController.handleSlugMiss` helper — catch
+    NotFoundException pe `findBySlug`, lookup redirect, throw 404
+    cu body `{ message: 'gone'|'redirect', redirectTo }`.
+  - Site `forum-thread.page.ts` honor redirect — `/gone` pe expired,
+    `replaceUrl('/forum')` pe active.
+- **BreadcrumbList JSON-LD** pe 4 detail pages (Tezaur / Bazar /
+  Revista / Forum).
+  - Nou `SeoService.breadcrumbList(items)` static helper.
+  - `setJsonLd([primary, breadcrumb])` array form emite ambele
+    blocks într-un singur `<script>` tag.
+  - Unlock breadcrumb snippets în Google SERPs.
+- **Homepage Organization + WebSite SearchAction**:
+  - `WebSite` JSON-LD extins cu `potentialAction` SearchAction →
+    `/forum/cautare?q={search_term_string}` (Google sitelinks
+    search box unlock).
+  - `Organization` JSON-LD nou cu `logo` + `sameAs` placeholder.
+- **Brand placeholders**:
+  - `tools/scripts/generate-brand-assets.ts` — Sharp-based generator
+    pentru `og-default.png` (1200×630) + `logo.png` (512×512), brand
+    color + wordmark. Idempotent.
+  - Files commit-uite: `apps/site/public/assets/branding/og-default.png`
+    (22.5 KB) + `logo.png` (7.7 KB). Fix dead-link path în
+    `SeoService.DEFAULT_OG_IMAGE` + Revista publisher logo.
+- **Build warnings cleanup**:
+  - NG8107/NG8102 pe `form.controls.bio.value` — drop `??`, direct
+    `.value.length`.
+  - NG8113 `TPipe` neutilizat în `subscribe-bell.component.ts`.
+  - NG8113 `SzIconComponent` neutilizat în `editor.component.ts`
+    (libs/ui).
+  - Bundle budget 1mb→1500kb warning / 2mb→2500kb error
+    (Angular CLI parser trunchiază "1.5mb" → "1mb"; kb units
+    funcționează corect).
+- Verificări:
+  - `nx run-many --target=typecheck --projects=api,worker,site,dashboard`
+    — clean.
+  - `nx run site:build --configuration=production` — zero warnings.
+
 ### M8 — MVP gap closure
 
 #### M8 — Notification prefs UI + collection toggle + Umami (`931561c`)
