@@ -357,6 +357,14 @@
       "tabs_aria": "Secțiuni favorite",
       "tab_listings": "Anunțuri",
       "tab_searches": "Căutări"
+    },
+    "messages_shell": {
+      "title": "Mesaje",
+      "tabs_aria": "Surse mesaje",
+      "tab_bazar": "Bazar",
+      "tab_forum": "Forum",
+      "forum_soon_title": "În curând",
+      "forum_soon_body": "Mesajele private din Forum vor apărea aici. Plănuim să le unim cu cele din Bazar într-un singur inbox, cu o etichetă vizibilă pe sursă."
     }
   },
   "common": {

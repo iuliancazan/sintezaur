@@ -214,18 +214,37 @@ export const appRoutes: Route[] = [
       },
       {
         path: 'mesaje',
-        pathMatch: 'full',
         loadComponent: () =>
-          import('./account/messages-inbox.page').then(
-            (m) => m.MessagesInboxPage,
+          import('./account/messages-shell.page').then(
+            (m) => m.MessagesShellPage,
           ),
-      },
-      {
-        path: 'mesaje/:threadId',
-        loadComponent: () =>
-          import('./account/messages-thread.page').then(
-            (m) => m.MessagesThreadPage,
-          ),
+        children: [
+          { path: '', redirectTo: 'bazar', pathMatch: 'full' },
+          {
+            path: 'bazar',
+            pathMatch: 'full',
+            loadComponent: () =>
+              import('./account/messages-inbox.page').then(
+                (m) => m.MessagesInboxPage,
+              ),
+          },
+          {
+            path: 'forum',
+            loadComponent: () =>
+              import('./account/forum-messages-placeholder.page').then(
+                (m) => m.ForumMessagesPlaceholderPage,
+              ),
+          },
+          // Legacy /cont/mesaje/:threadId — kept inside the shell so
+          // bookmarks and notification deep-links keep working.
+          {
+            path: ':threadId',
+            loadComponent: () =>
+              import('./account/messages-thread.page').then(
+                (m) => m.MessagesThreadPage,
+              ),
+          },
+        ],
       },
       {
         path: 'anunturi',
