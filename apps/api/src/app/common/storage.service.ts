@@ -1,18 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import 'multer';
-import { mkdir, stat, unlink, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import sharp from 'sharp';
 import {
   IMAGE_VARIANTS,
   IMAGE_VARIANT_SIZES,
   type ImageVariantLiteral,
+  type StorageDriver,
 } from '@sintezaur/shared';
+import { STORAGE_DRIVER } from '../storage/storage-driver.token';
 
 export interface ProcessedVariant {
   variant: ImageVariantLiteral;
+  /** Driver-relative object key. Stored verbatim in DB `path` columns. */
   path: string;
   width: number;
   height: number;
@@ -26,26 +26,24 @@ export interface ProcessedUpload {
 }
 
 /**
- * Image pipeline for Tezaur (and later Bazar) uploads.
+ * Image-pipeline orchestrator. Sharp does the encoding; the active
+ * `StorageDriver` does the I/O (local FS in dev, Cloudflare R2 in prod).
  *
  * Each source image produces 7 variants — 3 aspect ratios × 2 sizes,
- * plus the original. EXIF is stripped on every variant. Files land
- * under `<UPLOADS_DIR>/<scope>/<entity-id>/<source-id>/<variant>.jpg`.
+ * plus the original. EXIF is stripped on every variant. Object keys are
+ * `<module>/<resource-id>/<source-id>/<variant>-<sha256-12>.jpg` so each
+ * variant is content-addressed and safe to cache forever.
  *
- * `original` is re-encoded (not byte-copied) so EXIF strips on it too;
- * we keep it for future re-cropping needs.
+ * `original` is re-encoded (not byte-copied) so EXIF strips on it too.
+ * Avatars are mutable (single key per user) since the cache TTL is short.
  */
 @Injectable()
 export class StorageService {
   private readonly logger = new Logger(StorageService.name);
-  private readonly uploadsDir: string;
 
-  constructor(private readonly config: ConfigService) {
-    this.uploadsDir = resolve(
-      process.cwd(),
-      this.config.get<string>('UPLOADS_DIR') ?? './storage/uploads',
-    );
-  }
+  constructor(
+    @Inject(STORAGE_DRIVER) private readonly driver: StorageDriver,
+  ) {}
 
   /** Allow-list of input mime types (Sharp tolerates more; we narrow defensively). */
   private static readonly ALLOWED_INPUT_MIMES = new Set([
@@ -67,47 +65,54 @@ export class StorageService {
     }
 
     const sourceId = randomUUID();
-    const dir = join(this.uploadsDir, scope, entityId, sourceId);
-    await mkdir(dir, { recursive: true });
-
-    // Pre-load + auto-rotate (uses EXIF Orientation then strips it). All
-    // downstream variants share this base so we re-decode JPEG once.
     const base = sharp(file.buffer).rotate();
 
     const variants: ProcessedVariant[] = [];
     for (const variant of IMAGE_VARIANTS) {
-      const out = await this.renderVariant(base, variant, dir);
+      const rendered = await StorageService.renderVariant(base, variant);
+      const hash = StorageService.shortHash(rendered.data);
+      const key = `${scope}/${entityId}/${sourceId}/${variant}-${hash}.jpg`;
+      const put = await this.driver.put({
+        key,
+        body: rendered.data,
+        contentType: 'image/jpeg',
+      });
       variants.push({
         variant,
-        path: this.relativePath(scope, entityId, sourceId, variant),
-        ...out,
+        path: key,
+        width: rendered.width,
+        height: rendered.height,
+        sizeBytes: put.size,
+        mimeType: 'image/jpeg',
       });
     }
 
     return { sourceId, variants };
   }
 
-  async deleteSource(
-    scope: 'gear' | 'listing' | 'article',
-    entityId: string,
-    sourceId: string,
-    variants: ImageVariantLiteral[],
-  ): Promise<void> {
-    for (const variant of variants) {
-      const abs = join(this.uploadsDir, scope, entityId, sourceId, this.fileName(variant));
+  /**
+   * Delete a batch of stored objects by key. Callers pass the `path`
+   * values they have in DB (one row per variant). Failures are logged
+   * but don't throw — DB rows are the source of truth for "what's gone".
+   */
+  async deleteObjects(keys: string[]): Promise<void> {
+    for (const key of keys) {
       try {
-        await unlink(abs);
+        await this.driver.delete(key);
       } catch (err) {
-        // Missing files aren't fatal — the DB row is the source of truth.
-        this.logger.warn(`failed to unlink ${abs}: ${(err as Error).message}`);
+        this.logger.warn(
+          `failed to delete ${key}: ${(err as Error).message}`,
+        );
       }
     }
   }
 
   /**
    * Avatar pipeline: one 256×256 WebP centered crop. Returns the
-   * relative path under `<UPLOADS_DIR>/avatar/<user-id>.webp`. EXIF
-   * stripped on re-encode. Replaces any existing avatar for the user.
+   * driver-relative object key (stored verbatim in `users.avatar_url`
+   * by the auth service, which then resolves it via `url()` for the
+   * client). EXIF stripped on re-encode. Mutable key — same upload
+   * slot reused on every change.
    */
   async processAvatar(
     userId: string,
@@ -116,51 +121,48 @@ export class StorageService {
     if (!StorageService.ALLOWED_INPUT_MIMES.has(file.mimetype)) {
       throw new Error(`Unsupported avatar mime type: ${file.mimetype}`);
     }
-    const dir = join(this.uploadsDir, 'avatar');
-    await mkdir(dir, { recursive: true });
-    const path = join(dir, `${userId}.webp`);
     const { data, info } = await sharp(file.buffer)
       .rotate()
       .resize(256, 256, { fit: 'cover', position: 'attention' })
       .webp({ quality: 86 })
       .withMetadata({})
       .toBuffer({ resolveWithObject: true });
-    await writeFile(path, data);
+    const key = `avatar/${userId}.webp`;
+    // Avatars are mutable — short cache TTL so an edit shows up quickly.
+    const put = await this.driver.put({
+      key,
+      body: data,
+      contentType: 'image/webp',
+      cacheControl: 'public, max-age=60, must-revalidate',
+    });
     return {
-      relativePath: `avatar/${userId}.webp`,
-      sizeBytes: info.size ?? data.byteLength,
+      relativePath: key,
+      sizeBytes: put.size > 0 ? put.size : info.size ?? data.byteLength,
     };
   }
 
   async deleteAvatar(userId: string): Promise<void> {
-    const abs = join(this.uploadsDir, 'avatar', `${userId}.webp`);
     try {
-      await unlink(abs);
+      await this.driver.delete(`avatar/${userId}.webp`);
     } catch {
       // ignore — DB row is source of truth
     }
   }
 
-  absolutePath(relPath: string): string {
-    return join(this.uploadsDir, relPath);
+  /** Public URL for a stored object. Thin pass-through to the driver. */
+  url(key: string): string {
+    return this.driver.url(key);
   }
 
-  async exists(relPath: string): Promise<boolean> {
-    try {
-      await stat(join(this.uploadsDir, relPath));
-      return true;
-    } catch {
-      return false;
-    }
+  /** Existence check — used by smoke tests + future reconciliation. */
+  async exists(key: string): Promise<boolean> {
+    return this.driver.exists(key);
   }
 
-  private async renderVariant(
+  private static async renderVariant(
     base: sharp.Sharp,
     variant: ImageVariantLiteral,
-    dir: string,
-  ): Promise<{ width: number; height: number; sizeBytes: number; mimeType: string }> {
-    const path = join(dir, this.fileName(variant));
-
+  ): Promise<{ data: Buffer; width: number; height: number }> {
     let pipeline: sharp.Sharp;
     if (variant === 'original') {
       // Re-encode original to strip EXIF + ensure JPEG (consistent format
@@ -168,35 +170,23 @@ export class StorageService {
       pipeline = base.clone().jpeg({ quality: 92, mozjpeg: true });
     } else {
       const size = IMAGE_VARIANT_SIZES[variant];
-      pipeline = base.clone().resize(size.width, size.height, {
-        fit: 'cover',
-        position: 'attention',
-      }).jpeg({ quality: 84, mozjpeg: true });
+      pipeline = base
+        .clone()
+        .resize(size.width, size.height, {
+          fit: 'cover',
+          position: 'attention',
+        })
+        .jpeg({ quality: 84, mozjpeg: true });
     }
 
     const { data, info } = await pipeline
       .withMetadata({}) // strip EXIF; keep ICC for color fidelity
       .toBuffer({ resolveWithObject: true });
-
-    await writeFile(path, data);
-    return {
-      width: info.width,
-      height: info.height,
-      sizeBytes: data.byteLength,
-      mimeType: 'image/jpeg',
-    };
+    return { data, width: info.width, height: info.height };
   }
 
-  private fileName(variant: ImageVariantLiteral): string {
-    return `${variant}.jpg`;
-  }
-
-  private relativePath(
-    scope: 'gear' | 'listing' | 'article',
-    entityId: string,
-    sourceId: string,
-    variant: ImageVariantLiteral,
-  ): string {
-    return `${scope}/${entityId}/${sourceId}/${this.fileName(variant)}`;
+  /** First 12 hex chars of SHA-256(buffer) — collision-safe for our scale. */
+  private static shortHash(buffer: Buffer): string {
+    return createHash('sha256').update(buffer).digest('hex').slice(0, 12);
   }
 }

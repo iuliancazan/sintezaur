@@ -9,3 +9,4 @@
 export * from './lib/slug';
 export * from './lib/tezaur-taxonomy';
 export * from './lib/bazar-taxonomy';
+export * from './lib/storage';

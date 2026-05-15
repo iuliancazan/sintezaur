@@ -563,7 +563,7 @@ export class TezaurService {
 
   async detachImage(gearId: string, sourceId: string): Promise<void> {
     const rows = await this.db
-      .select({ variant: gearImages.variant })
+      .select({ path: gearImages.path })
       .from(gearImages)
       .where(
         and(eq(gearImages.gearId, gearId), eq(gearImages.sourceId, sourceId)),
@@ -571,12 +571,7 @@ export class TezaurService {
     if (!rows.length)
       throw new NotFoundException(`image source ${sourceId} not found`);
 
-    await this.storage.deleteSource(
-      'gear',
-      gearId,
-      sourceId,
-      rows.map((r) => r.variant),
-    );
+    await this.storage.deleteObjects(rows.map((r) => r.path));
     await this.db
       .delete(gearImages)
       .where(

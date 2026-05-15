@@ -23,6 +23,7 @@ import { FeedbackModule } from './feedback/feedback.module';
 import { GdprModule } from './gdpr/gdpr.module';
 import { LegalModule } from './legal/legal.module';
 import { SeoModule } from './seo/seo.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SeoModule } from './seo/seo.module';
      */
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 60 }]),
     DbModule,
+    StorageModule,
     CommonModule,
     RealtimeModule,
     NotificationsModule,

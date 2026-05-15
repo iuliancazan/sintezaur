@@ -128,11 +128,15 @@ Note: `passport-google-oauth20` is installed but Google OAuth is **NOT wired** i
 "rxjs":             "^7.8.0"
 ```
 
-### File handling — Multer + Sharp
+### File handling — Multer + Sharp + R2 (S3)
+
 ```json
-"multer": "^2.1.1",
-"sharp":  "^0.33.5"
+"@aws-sdk/client-s3": "^3.1047.0",
+"multer":             "^2.1.1",
+"sharp":              "^0.33.5"
 ```
+
+`@aws-sdk/client-s3` lands in M7 — drives the `S3StorageDriver` against Cloudflare R2 in prod. Dev defaults to `LocalStorageDriver` (no R2 creds needed). Used both by the API process and the worker (reconciliation cron).
 
 ### Email — Nodemailer
 ```json
@@ -284,8 +288,7 @@ These were considered and explicitly rejected per spec §10. Do not install:
 |------|---------|
 | Redis | Postgres + LISTEN/NOTIFY + in-memory throttler are sufficient at MVP scale (see spec §10). |
 | Meilisearch / Typesense / Elasticsearch | Postgres FT + `pg_trgm` is sufficient. Add only if a concrete UX bottleneck appears. |
-| AWS SDK / S3 client | Storage stays on Hetzner local volume (Coolify-mounted). Future: Hetzner Storage Box (S3-compatible) — at that point install `@aws-sdk/client-s3`. |
-| Backblaze SDK | Same reason. |
+| Backblaze SDK | Cloudflare R2 (S3-compatible) chosen instead from M7 — see `@aws-sdk/client-s3` in the deps list. |
 | Stripe / payment SDK | No payments in MVP. |
 | BullMQ / Bull | Replaced by `pg-boss` (Postgres-native). |
 | Socket.io standalone | Use `@nestjs/websockets` which wraps Socket.io — but we don't add `socket.io` directly; let NestJS pull the right version. |

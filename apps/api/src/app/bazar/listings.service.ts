@@ -418,7 +418,7 @@ export class ListingsService {
       throw new ForbiddenException('Not your listing.');
 
     const rows = await this.db
-      .select({ variant: listingPhotos.variant })
+      .select({ path: listingPhotos.path })
       .from(listingPhotos)
       .where(
         and(
@@ -429,12 +429,7 @@ export class ListingsService {
     if (!rows.length)
       throw new NotFoundException(`photo source ${sourceId} not found`);
 
-    await this.storage.deleteSource(
-      'listing',
-      listingId,
-      sourceId,
-      rows.map((r) => r.variant) as any,
-    );
+    await this.storage.deleteObjects(rows.map((r) => r.path));
     await this.db
       .delete(listingPhotos)
       .where(

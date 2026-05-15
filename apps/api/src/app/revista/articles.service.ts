@@ -398,7 +398,7 @@ export class ArticlesService {
   ): Promise<void> {
     const existing = await this.requireOwnable(articleId, actorId, actorIsAdmin);
     const rows = await this.db
-      .select({ variant: articleImages.variant })
+      .select({ path: articleImages.path })
       .from(articleImages)
       .where(
         and(
@@ -408,12 +408,7 @@ export class ArticlesService {
       );
     if (!rows.length)
       throw new NotFoundException(`image source ${sourceId} not found`);
-    await this.storage.deleteSource(
-      'article',
-      articleId,
-      sourceId,
-      rows.map((r) => r.variant) as any,
-    );
+    await this.storage.deleteObjects(rows.map((r) => r.path));
     await this.db
       .delete(articleImages)
       .where(

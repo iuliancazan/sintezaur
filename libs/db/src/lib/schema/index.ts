@@ -41,3 +41,6 @@ export * from './forum';
 
 // Legal pages + contact (M6-A)
 export * from './legal';
+
+// Storage refactor (M7)
+export * from './storage';
