@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
+import { ForumService, type UserBadgeItem } from '../forum/forum.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
 import {
@@ -68,6 +69,23 @@ import {
             </p>
           </div>
         </header>
+
+        @if (badges().length > 0) {
+          <section class="ap-badges">
+            <h2 class="ap-badges__title">// {{ 'forum.badges.title' | t }}</h2>
+            <ul class="ap-badges__list">
+              @for (b of badges(); track b.key) {
+                <li class="ap-badge" [title]="b.descriptionRo ?? b.nameRo">
+                  <span class="ap-badge__dot" [attr.data-cat]="b.category"></span>
+                  <span class="ap-badge__name">{{ b.nameRo }}</span>
+                  <span class="ap-badge__cat">
+                    {{ 'forum.badges.cat_' + b.category | t }}
+                  </span>
+                </li>
+              }
+            </ul>
+          </section>
+        }
 
         <section class="ap-articles">
           <h2 class="ap-articles__title">
@@ -269,15 +287,65 @@ import {
         .ap-head { grid-template-columns: 1fr; gap: 14px; }
         .ap-row { grid-template-columns: 1fr; }
       }
+
+      .ap-badges {
+        margin: 0 0 32px;
+      }
+      .ap-badges__title {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--fg-muted);
+        margin: 0 0 12px;
+      }
+      .ap-badges__title::before { content: ''; }
+      .ap-badges__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .ap-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--line-strong);
+        background: var(--bg-elev);
+        font-family: var(--font-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .ap-badge__dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      .ap-badge__dot[data-cat='activity'] { background: #6ec6ff; }
+      .ap-badge__dot[data-cat='content'] { background: #ffd166; }
+      .ap-badge__dot[data-cat='membership'] { background: #06d6a0; }
+      .ap-badge__dot[data-cat='collection'] { background: #c084fc; }
+      .ap-badge__dot[data-cat='trade'] { background: #f59e0b; }
+      .ap-badge__dot[data-cat='trust'] { background: #ef4444; }
+      .ap-badge__name { color: var(--fg); }
+      .ap-badge__cat { color: var(--fg-subtle); font-size: 10px; }
     `,
   ],
 })
 export class AuthorProfilePage {
   readonly i18n = inject(I18nService);
   readonly revista = inject(RevistaService);
+  private readonly forum = inject(ForumService);
   private readonly route = inject(ActivatedRoute);
 
   readonly profile = signal<AuthorProfile | null>(null);
+  readonly badges = signal<UserBadgeItem[]>([]);
   readonly loading = signal(true);
   readonly notFound = signal(false);
 
@@ -291,9 +359,14 @@ export class AuthorProfilePage {
   private async load(username: string): Promise<void> {
     this.loading.set(true);
     this.notFound.set(false);
+    this.badges.set([]);
     try {
-      const data = await this.revista.author(username);
+      const [data, badges] = await Promise.all([
+        this.revista.author(username),
+        this.forum.listBadgesForUsername(username).catch(() => []),
+      ]);
       this.profile.set(data);
+      this.badges.set(badges);
     } catch (err) {
       console.error('[revista] author load failed', err);
       this.notFound.set(true);

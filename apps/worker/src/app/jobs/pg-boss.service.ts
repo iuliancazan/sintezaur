@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import PgBoss from 'pg-boss';
+import { BadgeSweepJob } from './badge-sweep.job';
 import { ListingExpiryJob } from './listing-expiry.job';
 import { ListingExpiringSoonJob } from './listing-expiring-soon.job';
 import { ListingCleanupJob } from './listing-cleanup.job';
@@ -22,6 +23,7 @@ export class PgBossService implements OnModuleInit, OnApplicationShutdown {
     private readonly expiry: ListingExpiryJob,
     private readonly expiringSoon: ListingExpiringSoonJob,
     private readonly cleanup: ListingCleanupJob,
+    private readonly badgeSweep: BadgeSweepJob,
   ) {}
 
   async onModuleInit() {
@@ -42,13 +44,17 @@ export class PgBossService implements OnModuleInit, OnApplicationShutdown {
       this.expiringSoon.run(),
     );
     await this.boss.work('listing:cleanup', () => this.cleanup.run());
+    await this.boss.work('badges:sweep', () => this.badgeSweep.run());
 
     // Schedule daily crons. pg-boss uses node-cron syntax (min hr dom mon dow).
     // Times below in UTC; daily window before Romanian morning traffic.
     await this.boss.schedule('listing:expire', '15 3 * * *');
     await this.boss.schedule('listing:expiring-soon', '30 3 * * *');
     await this.boss.schedule('listing:cleanup', '45 3 * * *');
-    this.logger.log('listing crons scheduled (03:15 / 03:30 / 03:45 UTC)');
+    await this.boss.schedule('badges:sweep', '0 4 * * *');
+    this.logger.log(
+      'crons scheduled (listings 03:15/03:30/03:45 + badges 04:00 UTC)',
+    );
   }
 
   async onApplicationShutdown() {

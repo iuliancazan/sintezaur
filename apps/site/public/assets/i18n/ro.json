@@ -809,6 +809,15 @@
       "no_threads": "Nu ai niciun thread urmărit.",
       "no_categories": "Nu ai nicio categorie urmărită."
     },
+    "badges": {
+      "title": "Insigne",
+      "cat_activity": "Activitate",
+      "cat_membership": "Vechime",
+      "cat_content": "Conținut",
+      "cat_collection": "Colecție",
+      "cat_trade": "Comerț",
+      "cat_trust": "Încredere"
+    },
     "source": {
       "article": "Articol original",
       "gear": "Echipament asociat"

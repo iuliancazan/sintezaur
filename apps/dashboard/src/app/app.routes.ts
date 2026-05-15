@@ -44,6 +44,12 @@ export const appRoutes: Route[] = [
       import('./users/users-admin.page').then((m) => m.UsersAdminPage),
   },
   {
+    path: 'badges',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./badges/badges-admin.page').then((m) => m.BadgesAdminPage),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

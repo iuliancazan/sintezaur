@@ -84,3 +84,84 @@ export class SetSubscriptionDto {
   @IsIn(['watching', 'tracking', 'mentioned_only', 'muted'])
   level!: 'watching' | 'tracking' | 'mentioned_only' | 'muted' | null;
 }
+
+export class BadgeCriteriaDto {
+  @IsIn(['post_count', 'account_age_days', 'likes_received'])
+  kind!: 'post_count' | 'account_age_days' | 'likes_received';
+
+  @IsInt()
+  @Min(1)
+  threshold!: number;
+}
+
+export class CreateBadgeDto {
+  @IsString()
+  @Length(2, 64)
+  key!: string;
+
+  @IsString()
+  @Length(2, 80)
+  nameRo!: string;
+
+  @IsString()
+  @Length(2, 80)
+  nameEn!: string;
+
+  @IsString()
+  @Length(2, 32)
+  category!: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  descriptionRo?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  descriptionEn?: string;
+
+  @IsObject()
+  criteria!: { kind: string; threshold: number };
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  position?: number;
+}
+
+export class UpdateBadgeDto {
+  @IsOptional()
+  @IsString()
+  @Length(2, 80)
+  nameRo?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 80)
+  nameEn?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(2, 32)
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  descriptionRo?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 500)
+  descriptionEn?: string | null;
+
+  @IsOptional()
+  @IsObject()
+  criteria?: { kind: string; threshold: number };
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  position?: number;
+}

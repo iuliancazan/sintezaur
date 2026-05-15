@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -11,6 +12,7 @@ import {
   type SintezaurDb,
 } from '@sintezaur/db';
 import { and, eq, sql } from 'drizzle-orm';
+import { BadgeAwardingService } from './badge-awarding.service';
 
 export interface LikeResult {
   liked: boolean;
@@ -27,7 +29,12 @@ export interface LikeResult {
  */
 @Injectable()
 export class ForumLikesService {
-  constructor(@Inject(DATABASE) private readonly db: SintezaurDb) {}
+  private readonly logger = new Logger(ForumLikesService.name);
+
+  constructor(
+    @Inject(DATABASE) private readonly db: SintezaurDb,
+    private readonly badgeAwarding: BadgeAwardingService,
+  ) {}
 
   async toggle(userId: string, postId: string): Promise<LikeResult> {
     const [post] = await this.db
@@ -85,6 +92,17 @@ export class ForumLikesService {
       })
       .where(eq(forumPosts.id, postId))
       .returning({ likeCount: forumPosts.likeCount });
+    // Badge instant award — `likes_received` threshold may have flipped
+    // for the post author (not the liker).
+    if (post.authorId) {
+      this.badgeAwarding
+        .evaluateForUsers([post.authorId])
+        .catch((err) =>
+          this.logger.warn(
+            `badge evaluate (like) failed for ${post.authorId}: ${(err as Error).message}`,
+          ),
+        );
+    }
     return { liked: true, likeCount: bumped.likeCount };
   }
 

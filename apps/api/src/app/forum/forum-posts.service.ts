@@ -22,6 +22,7 @@ import {
 } from '@sintezaur/db';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { NotificationsService } from '../notifications/notifications.service';
+import { BadgeAwardingService } from './badge-awarding.service';
 import { ForumSubscriptionsService } from './forum-subscriptions.service';
 
 /** UUID v4 regex used to extract mention IDs from cached bodyHtml. */
@@ -81,6 +82,7 @@ export class ForumPostsService {
     config: ConfigService,
     private readonly notifications: NotificationsService,
     private readonly subscriptions: ForumSubscriptionsService,
+    private readonly badgeAwarding: BadgeAwardingService,
   ) {
     this.editWindowMinutes = Number(
       config.get('FORUM_EDIT_WINDOW_MINUTES') ?? 30,
@@ -150,6 +152,14 @@ export class ForumPostsService {
         actorId,
         mentionedIds,
       });
+      // Badge instant award (post_count threshold may have flipped).
+      await this.badgeAwarding
+        .evaluateForUsers([actorId])
+        .catch((err) =>
+          this.logger.warn(
+            `badge evaluate (reply) failed for ${actorId}: ${(err as Error).message}`,
+          ),
+        );
     }
 
     return post;
@@ -184,6 +194,14 @@ export class ForumPostsService {
       await this.bumpApprovedPostCount(actorId);
       // Thread author auto-watches their own thread.
       await this.subscriptions.ensureWatchingThread(actorId, threadId);
+      // Badge instant award (post_count + maybe thread author achievements).
+      await this.badgeAwarding
+        .evaluateForUsers([actorId])
+        .catch((err) =>
+          this.logger.warn(
+            `badge evaluate (op) failed for ${actorId}: ${(err as Error).message}`,
+          ),
+        );
     }
 
     return post;

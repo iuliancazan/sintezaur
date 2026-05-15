@@ -34,6 +34,10 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Useri</span>
           <span class="module__desc">Roluri · grant editor / curator / moderator</span>
         </a>
+        <a class="module" routerLink="/badges">
+          <span class="module__name">Badges</span>
+          <span class="module__desc">Definiții badge-uri · cron nightly + sweep manual</span>
+        </a>
         <span class="module is-disabled">
           <span class="module__name">Audit log</span>
           <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>

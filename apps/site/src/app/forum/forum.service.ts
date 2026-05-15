@@ -158,6 +158,17 @@ export interface MySubscriptionsResponse {
   categories: CategorySubscriptionItem[];
 }
 
+export interface UserBadgeItem {
+  key: string;
+  nameRo: string;
+  nameEn: string;
+  category: string;
+  descriptionRo: string | null;
+  descriptionEn: string | null;
+  awardedAt: string;
+  position: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ForumService {
   private readonly http = inject(HttpClient);
@@ -328,6 +339,16 @@ export class ForumService {
       this.http.get<MySubscriptionsResponse>(
         `${this.base}/forum/subscriptions/me`,
         { withCredentials: true },
+      ),
+    );
+  }
+
+  /* ============ badges (M5-F) ============ */
+
+  listBadgesForUsername(username: string): Promise<UserBadgeItem[]> {
+    return firstValueFrom(
+      this.http.get<UserBadgeItem[]>(
+        `${this.base}/badges/users/${encodeURIComponent(username)}`,
       ),
     );
   }

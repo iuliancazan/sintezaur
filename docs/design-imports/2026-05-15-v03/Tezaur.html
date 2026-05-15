@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tezaur — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="02 Tezaur — list">
+
+  <!-- SVG sprite (subset from Home) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-caret-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ====================== TOP BAR ====================== -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link is-active" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <button class="btn-ghost" type="button">Înregistrare</button>
+        <button class="btn-login" type="button">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ====================== PAGE HEADER ====================== -->
+    <section class="tez-header crosses" aria-labelledby="tez-title">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+
+      <div>
+        <p class="tez-header__sub">Tezaur · Enciclopedia gear-ului</p>
+        <h1 class="tez-header__title" id="tez-title">Tezaur<span class="dot">.</span></h1>
+      </div>
+
+      <div>
+        <p class="tez-header__lede">
+          Catalogul complet de sintetizatoare, drum machines, samplere și sequencere — fiecare cu istoric,
+          specs, recenzii și prețuri de piață. Curat și verificat de comunitate.
+        </p>
+        <div class="tez-header__stats">
+          <div class="tez-header__stat">
+            <span class="k">// Piese</span>
+            <span class="v">2 418</span>
+          </div>
+          <div class="tez-header__stat">
+            <span class="k">// Branduri</span>
+            <span class="v">186</span>
+          </div>
+          <div class="tez-header__stat">
+            <span class="k">// Categorii</span>
+            <span class="v">14</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================== TOOLBAR ====================== -->
+    <div class="tez-toolbar crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="tez-search">
+        <svg><use href="#i-search"/></svg>
+        <input type="search" placeholder="Caută gear, brand, an…" />
+        <kbd>⌘ K</kbd>
+      </div>
+      <div class="tez-sort">
+        <span class="tez-sort__label">// Sortează</span>
+        <select aria-label="Sortează">
+          <option>Cele mai populare</option>
+          <option>Alfabetic</option>
+          <option>Cele mai noi</option>
+          <option>Cele mai discutate</option>
+          <option>An lansare ↑</option>
+          <option>An lansare ↓</option>
+        </select>
+        <svg class="tez-sort__caret" width="14" height="14"><use href="#i-caret-down"/></svg>
+      </div>
+      <div class="tez-view" role="group" aria-label="Vizualizare">
+        <button class="is-active" aria-label="Grid">Grid</button>
+        <button aria-label="Listă">Listă</button>
+      </div>
+    </div>
+
+    <!-- ====================== ACTIVE FILTER CHIPS ====================== -->
+    <div class="tez-chips" id="tez-chips">
+      <span class="tez-chips__label">Filtre active</span>
+      <span class="tez-chip">Sintetizator <button aria-label="Elimină"><svg><use href="#i-x"/></svg></button></span>
+      <span class="tez-chip">Polifonic <button aria-label="Elimină"><svg><use href="#i-x"/></svg></button></span>
+      <span class="tez-chip">1980–2000 <button aria-label="Elimină"><svg><use href="#i-x"/></svg></button></span>
+      <button class="tez-chip__clear">Curăță toate ×</button>
+    </div>
+
+    <!-- ====================== MAIN (rail + grid) ====================== -->
+    <div class="tez-main">
+
+      <!-- ---------- Filter rail ---------- -->
+      <aside class="tez-rail" aria-label="Filtre">
+        <section class="tez-rail__sec">
+          <header class="tez-rail__head">Categorie <span class="count">6</span></header>
+          <div class="tez-rail__body">
+            <label class="tez-check"><input type="checkbox" checked /><span class="box"></span><span class="lbl">Sintetizator</span><span class="num">1 842</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Drum machine</span><span class="num">198</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Sampler</span><span class="num">142</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Groovebox</span><span class="num">98</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Eurorack</span><span class="num">86</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Efecte hw</span><span class="num">52</span></label>
+          </div>
+        </section>
+
+        <section class="tez-rail__sec">
+          <header class="tez-rail__head">Tip <span class="count">7</span></header>
+          <div class="tez-rail__body">
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Monofonic</span><span class="num">412</span></label>
+            <label class="tez-check"><input type="checkbox" checked /><span class="box"></span><span class="lbl">Polifonic</span><span class="num">894</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Parafonic</span><span class="num">38</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Hibrid</span><span class="num">102</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">FM</span><span class="num">71</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Wavetable</span><span class="num">52</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Semi-modular</span><span class="num">94</span></label>
+          </div>
+        </section>
+
+        <section class="tez-rail__sec">
+          <header class="tez-rail__head">Brand <span class="count">13</span></header>
+          <div class="tez-rail__body" id="brand-list"></div>
+        </section>
+
+        <section class="tez-rail__sec">
+          <header class="tez-rail__head">An lansare <span class="count">1980–2000</span></header>
+          <div class="tez-rail__body">
+            <div class="tez-range">
+              <div class="tez-range__bar">
+                <span class="dot l"></span>
+                <span class="dot r"></span>
+              </div>
+              <div class="tez-range__ends">
+                <span>1980</span>
+                <span>2000</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tez-rail__sec">
+          <header class="tez-rail__head">Status <span class="count">2</span></header>
+          <div class="tez-rail__body">
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">În producție</span><span class="num">1 086</span></label>
+            <label class="tez-check"><input type="checkbox" /><span class="box"></span><span class="lbl">Discontinuat</span><span class="num">1 332</span></label>
+          </div>
+        </section>
+      </aside>
+
+      <!-- ---------- Gear grid + count ---------- -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:baseline; padding-bottom:14px; font-family:var(--font-mono); font-size:11px; letter-spacing:0.08em; color:var(--fg-muted); text-transform:uppercase;">
+          <span><span style="color:var(--accent)">// </span>97 rezultate <span style="color:var(--fg-subtle)">din 2 418</span></span>
+          <span>Pagina 1 / 5</span>
+        </div>
+
+        <div class="tez-grid crosses" id="gear-grid">
+          <span class="crosses-tl"></span><span class="crosses-tr"></span>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="tez-pag" aria-label="Pagini">
+          <span>Afișează 24 din 97</span>
+          <div class="tez-pag__nums">
+            <a class="tez-pag__num is-disabled">‹</a>
+            <a class="tez-pag__num is-active">1</a>
+            <a class="tez-pag__num">2</a>
+            <a class="tez-pag__num">3</a>
+            <span class="tez-pag__num is-ellipsis">…</span>
+            <a class="tez-pag__num">5</a>
+            <a class="tez-pag__num">›</a>
+          </div>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================== FOOTER ====================== -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidențialitate</a></li>
+            <li><a href="#">RSS</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ====================== DATA + BEHAVIOR ====================== -->
+  <script>
+    // ---------- THEME TOGGLE (shared with Home) ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      function apply(mode) { root.setAttribute('data-theme', mode); }
+      const saved = localStorage.getItem(KEY) || 'dark';
+      apply(saved);
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // ---------- GEAR DATA ----------
+    const GEAR = [
+      { brand: "Roland", model: "Juno-60", key: "juno-60", photo: "https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg", tags: ["Synth", "Poly", "Analog"], year: 1982, owners: 87, detail: "Tezaur - Roland Juno-60.html" },
+      { brand: "Roland", model: "Jupiter-8", key: "jupiter-8", photo: "https://cdn.gearnews.com/wp-content/uploads/2024/02/roland-jupiter-8-ft.jpg", tags: ["Synth", "Poly", "Flagship"], year: 1981, owners: 14 },
+      { brand: "Roland", model: "TB-303", key: "tb-303", tags: ["Bassline", "Mono"], year: 1982, owners: 32 },
+      { brand: "Roland", model: "TR-808", key: "tr-808", photo: "https://www.drumcollector.com/wp-content/uploads/2018/03/Roland_TR-808_Rhythm_Composer_01_Header.jpg", tags: ["Drum machine", "Vintage"], year: 1980, owners: 64 },
+      { brand: "Roland", model: "TR-909", key: "tr-909", tags: ["Drum machine", "Hybrid"], year: 1983, owners: 41 },
+      { brand: "Roland", model: "SH-101", key: "sh-101", tags: ["Synth", "Mono"], year: 1982, owners: 28 },
+      { brand: "Korg", model: "MS-20", key: "ms-20", tags: ["Synth", "Mono", "Semi-modular"], year: 1978, owners: 53 },
+      { brand: "Korg", model: "Minilogue XD", key: "minilogue-xd", photo: "https://korgusshop.com/cdn/shop/files/minilogue_xd_inverted_image.jpg?v=1720030025&width=1200", tags: ["Synth", "Poly", "Hybrid"], year: 2019, owners: 142 },
+      { brand: "Korg", model: "Volca FM", key: "volca-fm", photo: "https://cdn.korg.com/ro/products/upload/497a8c904235c795605923a8d6860810_sp.jpg", tags: ["Groovebox", "FM"], year: 2016, owners: 96 },
+      { brand: "Moog", model: "Subsequent 37", key: "subsequent-37", tags: ["Synth", "Para", "Mono"], year: 2017, owners: 67 },
+      { brand: "Moog", model: "Matriarch", key: "matriarch", tags: ["Synth", "Semi-modular"], year: 2019, owners: 38 },
+      { brand: "Moog", model: "One", key: "generic-poly", tags: ["Synth", "Poly", "Flagship"], year: 2018, owners: 4 },
+      { brand: "Sequential", model: "Prophet-6", key: "prophet-6", photo: "https://i.ytimg.com/vi/m65rAfsjllw/maxresdefault.jpg", tags: ["Synth", "Poly", "Analog"], year: 2015, owners: 34 },
+      { brand: "Sequential", model: "Prophet-5 Rev 4", key: "prophet-5", tags: ["Synth", "Poly", "Reissue"], year: 2020, owners: 19 },
+      { brand: "Sequential", model: "Take 5", key: "take-5", tags: ["Synth", "Poly"], year: 2021, owners: 47 },
+      { brand: "Yamaha", model: "DX7", key: "dx7", tags: ["Synth", "FM", "Vintage"], year: 1983, owners: 71 },
+      { brand: "Yamaha", model: "CS-80", key: "cs-80", tags: ["Synth", "Poly", "Holy grail"], year: 1977, owners: 3 },
+      { brand: "Oberheim", model: "OB-X8", key: "ob-x8", tags: ["Synth", "Poly", "Flagship"], year: 2022, owners: 11 },
+      { brand: "Elektron", model: "Digitakt II", key: "digitakt-ii", photo: "https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg", tags: ["Sampler", "Digital"], year: 2024, owners: 134 },
+      { brand: "Elektron", model: "Octatrack MKII", key: "octatrack-mk2", tags: ["Sampler", "Performance"], year: 2017, owners: 56 },
+      { brand: "Arturia", model: "PolyBrute", key: "polybrute", tags: ["Synth", "Poly", "Analog"], year: 2020, owners: 27 },
+      { brand: "Arturia", model: "MicroFreak", key: "microfreak", tags: ["Synth", "Hybrid", "Mono"], year: 2019, owners: 188 },
+      { brand: "Behringer", model: "Model D", key: "model-d", photo: "https://dt7v1i9vyp3mf.cloudfront.net/styles/news_large/s3/imagelibrary/B/BehringerModelD_01-KpMPqNs9xNDsKI7jXXKkQy5HsOTdEOOF.jpg", tags: ["Synth", "Mono", "Clone"], year: 2017, owners: 92 },
+      { brand: "Behringer", model: "Pro-1", key: "pro-1", photo: "https://cdn.mos.cms.futurecdn.net/Kf8saVxuLCi9ZDaTZVypj4.jpg", tags: ["Synth", "Mono", "Clone"], year: 2023, owners: 73 }
+    ];
+
+    // ---------- BRAND list (sidebar) ----------
+    const BRANDS = [
+      ["Roland", 412], ["Korg", 326], ["Moog", 184], ["Sequential", 96],
+      ["Yamaha", 198], ["Oberheim", 32], ["Elektron", 78], ["Arturia", 112],
+      ["Behringer", 154], ["Make Noise", 58], ["Teenage Eng.", 42], ["Novation", 86],
+      ["Waldorf", 64]
+    ];
+    document.getElementById('brand-list').innerHTML = BRANDS.map(([n, c], i) => `
+      <label class="tez-check">
+        <input type="checkbox" ${i === 0 || i === 6 ? 'checked' : ''} />
+        <span class="box"></span>
+        <span class="lbl">${n}</span>
+        <span class="num">${c}</span>
+      </label>
+    `).join('');
+
+    // ---------- GRID render ----------
+    function gearMedia(g) {
+      const img = g.photo ? `<img class="gear-fill__photo" src="${g.photo}" alt="${g.brand} ${g.model}" loading="lazy" onerror="this.remove()" />` : '';
+      return `<div class="gear-fill" data-gear="${g.key}">${img}</div>`;
+    }
+    document.getElementById('gear-grid').insertAdjacentHTML('beforeend', GEAR.map(g => `
+      <a class="tez-card" href="${g.detail || '#'}">
+        <div class="tez-card__media">${gearMedia(g)}</div>
+        <div class="tez-card__brand">// ${g.brand}</div>
+        <div class="tez-card__model">${g.model}</div>
+        <div class="tez-card__tags">${g.tags.map(t => `<span class="tez-card__tag">${t}</span>`).join('')}</div>
+        <div class="tez-card__foot">
+          <span><b>${g.owners}</b> dețin</span>
+          <span class="tez-card__year">${g.year}</span>
+        </div>
+      </a>
+    `).join(''));
+
+    // Inject the SVG illustrations into the [data-gear] containers
+    (function fillGears() {
+      document.querySelectorAll('[data-gear]').forEach(el => {
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+        }
+      });
+    })();
+
+    // Active chip — clicking the × removes it
+    document.querySelectorAll('.tez-chip button').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault();
+        btn.closest('.tez-chip').remove();
+      });
+    });
+
+    // Checkbox toggle (already works natively; nothing JS-side needed)
+  </script>
+
+</body>
+</html>

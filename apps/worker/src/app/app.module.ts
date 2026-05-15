@@ -11,6 +11,7 @@ import {
 import type { Pool } from 'pg';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BadgeSweepJob } from './jobs/badge-sweep.job';
 import { ListingCleanupJob } from './jobs/listing-cleanup.job';
 import { ListingExpiringSoonJob } from './jobs/listing-expiring-soon.job';
 import { ListingExpiryJob } from './jobs/listing-expiry.job';
@@ -49,6 +50,7 @@ import { PgBossService } from './jobs/pg-boss.service';
     ListingExpiryJob,
     ListingExpiringSoonJob,
     ListingCleanupJob,
+    BadgeSweepJob,
     PgBossService,
   ],
 })
