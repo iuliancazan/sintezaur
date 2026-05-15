@@ -6,27 +6,28 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M7-D (`a81b883`) — închiderea M7. Backend
-`AdminStorageService` + `AdminStorageController` cu 7 endpoints
-admin-gated (`/admin/storage/limits/{,/:id}` GET+PUT,
-`/overview`, `/folders`, `/trends`, `/users`, `/reconcile`,
-`/users/:id/quota`). Dashboard `/storage` cu 5 tabs (Limits
-editabil + Overview cards + Folders drill-down + Trends date-range
-+ Top users) + buton „Reconcile acum" (trigger pg-boss one-shot).
-PUT limits invalidează cache-ul `StorageLimitsService` — edit
-propagă în <5min. Card „Storage" pe home dashboard.
-`docs/devops/storage-r2.md` — 10 pași complete pentru cutover R2
-(bucket → domeniu → token → env Coolify → wipe → redeploy →
-smoke → WAF → cost → rollback). `docs/testing/m7-testing.md` —
-plan manual de testare 5 secțiuni (driver / quota / attachments /
-admin panel / cutover prod) + appendix debugging.
+**Last shipped:** M8 (`931561c`) — MVP gap closure pentru cele 3
+items promise în spec dar nelivrate în M6:
+1) **Notification preferences UI** §7.5 — `/cont/preferinte` cu
+   matrix grupat pe modul (Bazar/Tezaur/Revista/Forum/Sistem) ×
+   2 channels (in-app/email). Backend `GET/PUT /me/notifications/
+   preferences` cu DEFAULT_PREFS merged server-side.
+2) **Toggle public/privat colecție** §11 — `users.collection_public`
+   (migration `9016`, default true), expus pe `AuthUserPublic` +
+   `authorProfile()`, toggle în `/cont/profil` sub fieldset
+   „Confidențialitate".
+3) **Umami Cloud analytics** §M6 — `UmamiService` la APP_INITIALIZER
+   injectează script tag-ul când `environment.umamiWebsiteId` +
+   `environment.umamiScriptUrl` sunt populate. No-op pe dev.
+i18n: 20 kind labels noi în `ro.json` pentru prefs page.
 
-**Next up:** **MVP storage complete + R2 cutover ready.** Soft-launch
-poate continua. Cumperi R2 de la Cloudflare, urmezi
-`docs/devops/storage-r2.md`, comuti `STORAGE_DRIVER=s3` în Coolify,
-redeploy. Sau pornești **M8** (TBD — vezi `docs/planning/execution-plan.md`).
+**Next up:** **MVP feature-complete pentru launch.** Mai rămân DevOps
+items din §M6 (Sentry, backup cron, status page, Lighthouse audit
+manual). Sau pornești cutover-ul R2 per `docs/devops/storage-r2.md`.
+Sau M9 (TBD).
 
-**Active milestone:** M7 ✅ complet (A/B/C/D). MVP + storage R2-ready.
+**Active milestone:** M8 ✅. MVP foundation + storage + UI prefs
+complete.
 
 ## Milestones
 
@@ -126,6 +127,12 @@ redeploy. Sau pornești **M8** (TBD — vezi `docs/planning/execution-plan.md`).
 | B   | `d23661f` | done | Magic-byte detector (8 formats, zero-dep); `StorageLimitsService` (wildcard fallback + cache 5min); `UploadQuotaService` (`check()` 413/429 pre-upload + `track()` storage_events/user_upload_quota/storage_folder_stats + lifetime alert notification); StorageService extins cu `processAudio`/`processPdf`/`processZip` + integrare quota pe image/avatar; public `GET /api/storage/limits` (cache 300s); migration `9015` adaugă `storage_quota_lifetime_reached` în `notification_kind`; pg-boss crons în worker — `storage:reset-daily-quota` @ 00:00 UTC + `storage:reconcile` @ 03:00 UTC (paginat 1000 keys/page + 200ms sleep, no-op pe LocalDriver); DB type rename `StorageFileType` → `StorageFileTypeValue`; smoke check extins cu 10 cazuri magic-byte |
 | C   | `e246332` | done | Forum attachments backend (`POST/DELETE /forum/posts/:postId/attachments` cu max 3 enforce + `GET /forum/threads/:slug/attachments` public) + Revista attachments backend (uncapped, optional caption); site `AttachmentsService` HTTP client cu cache 5min limite + wildcard fallback; site `AttachmentBoxComponent` (uploader + delete) + `AttachmentListComponent` (audio `<audio controls>` inline / PDF link / ZIP download); wire pe `forum-thread.page` (per post pentru autor) + `revista-detail.page` (sub article body pentru autor/editor/admin); i18n key `revista.attachments_label`; `StorageDriver` interface: `Buffer` → `Uint8Array` ca să rămână libs/shared browser-safe |
 | D   | `a81b883` | done | Backend `AdminStorageService` + `AdminStorageController` cu 7 endpoints (GET limits/overview/folders/trends/users + PUT limits/:id + POST reconcile + GET users/:id/quota); admin-gated `@RolesAllowed('admin','superadmin')`; PUT invalidează cache-ul `StorageLimitsService`; reconcile fires pg-boss one-shot. Dashboard `/storage` cu 5 tabs (Limits editabil cu inline number input + Salvează + toast / Overview 2 metric cards + per-modul + per-tip / Folders drill-down + module filter / Trends granularity+date range / Top users limit 50) + buton „Reconcile acum". Card „Storage" pe home dashboard. `docs/devops/storage-r2.md` (10 pași cutover R2). `docs/testing/m7-testing.md` (5 secțiuni manual test plan + debugging appendix). Director nou `docs/testing/`. |
+
+### M8 — MVP gap closure
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| —   | `931561c` | done | Notification preferences UI `/cont/preferinte` (§7.5) cu matrix grupat pe modul × 2 channels (in-app/email); backend `GET/PUT /me/notifications/preferences` cu DEFAULT_PREFS merged + bulk upsert. Toggle public/privat colecție §11 (`users.collection_public` migration `9016` default true, expus pe AuthUserPublic + authorProfile, checkbox în `/cont/profil` sub Confidențialitate). Umami Cloud analytics §M6 — `UmamiService` la APP_INITIALIZER injectează script tag când env-urile populate (no-op pe dev). i18n: 20 kind labels noi + grupuri + col headers + common.loading/saving. AuthUser type extins cu collectionPublic. |
 
 ## Conventions (recap from memory)
 

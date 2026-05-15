@@ -7,6 +7,68 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M8 — MVP gap closure
+
+#### M8 — Notification prefs UI + collection toggle + Umami (`931561c`)
+
+Închide cele 3 items promise în spec dar nelivrate în M6.
+
+- Backend `users.collection_public` boolean (migration `9016`,
+  default `true` ca user-ii existenți să rămână opted-in). Expus pe:
+  - `AuthUserPublic` (returnat din `/auth/me`).
+  - `authorProfile()` din `ArticlesService` (în payload-ul
+    `/autor/:username`).
+  - `UpdateProfileDto.collectionPublic?: boolean` + auth.service
+    patch via `PATCH /auth/me/profile`.
+- `NotificationsService` extins:
+  - `DEFAULT_PREFS` exportat (era privat).
+  - `getPreferences(userId)` — returnează full matrix cu fallback
+    la default merged server-side. Doar `in_app` + `email` channels
+    expuse user-ului; `both` rămâne service-internal.
+  - `setPreferences(userId, updates[])` — bulk UPSERT pe
+    `(user_id, kind, channel)`. Missing rows = reset la default la
+    resolve time.
+- `NotificationsController` endpoints noi (auth-required):
+  - `GET  /me/notifications/preferences`
+  - `PUT  /me/notifications/preferences` — DTO validează toate 20
+    kinds + 3 modes + 2 channels via `@IsIn`.
+- Site `/cont/preferinte` page (`NotificationPreferencesPage`):
+  - Matrix grupat pe modul (Bazar / Tezaur / Revista / Forum /
+    Sistem), one row per kind + checkbox per channel.
+  - Local edit buffer; Save batește toate change-urile într-un PUT.
+  - Toast pe success; error message pe failure.
+  - `NotificationPreferencesService` HTTP client (providedIn root).
+- Site `/cont/profil`:
+  - Fieldset nou „Confidențialitate" cu checkbox
+    `collectionPublic` + help text.
+  - `AuthUser` + `UpdateProfilePayload` types extinse cu
+    `collectionPublic`.
+- Site account-home menu: link nou la `/cont/preferinte` între
+  „Abonamente forum" și „Feedback".
+- `UmamiService` analytics (apps/site/src/app/analytics/):
+  - Inject script tag la APP_INITIALIZER, idempotent.
+  - Citește `environment.umamiWebsiteId` + `environment.umamiScriptUrl`.
+  - No-op dacă oricare e gol — dev nu poluează prod stats.
+  - Fire-and-forget; boot-ul nu așteaptă script load.
+  - `environment.ts` + `environment.prod.ts` extinse cu cele două
+    field-uri (goale by default).
+- i18n (`ro.json`) extins:
+  - `account.menu.notification_preferences = "Preferințe notificări"`.
+  - `account.back` shared back-arrow.
+  - `common.loading` + `common.saving`.
+  - `prefs.*` block: title, intro, save, col headers (trigger / in_app
+    / email), 5 group labels (bazar / tezaur / revista / forum /
+    system), 20 kind labels (matching `NotificationKind` enum exact).
+- Verificări locale:
+  - `pnpm migrate` aplică `9016` curat, idempotent.
+  - `nx run-many --target=typecheck --projects=api,worker,site,dashboard`
+    — clean across all 4 apps.
+- Notă: `userGearStatuses.is_public` (per-row) preservat
+  ne-modificat — noul toggle la nivel de user e controlul MVP
+  simplu per spec §11. Rendering-ul colecției pe `/autor/:username`
+  e în afara scope-ului M8 (câmpul e expus în API pentru cine îl ia
+  ulterior).
+
 ### M7 — Storage Refactor (Local → Cloudflare R2)
 
 #### M7-D — Admin /admin/storage panel + R2 setup docs + testing plan (`a81b883`)
