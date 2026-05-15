@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### Forum (M5)
 
-#### M5-G — Moderation inline + content_reports queue (HEAD)
+#### M5-G — Moderation inline + content_reports queue (`6899eb3`)
 - Kebab `⋮` reutilizabil pe orice post și thread (componentă `<app-post-actions-menu>`):
   - „Raportează" pentru orice utilizator autentificat (nu pe propriul conținut).
   - Mod actions pentru `moderator|admin|superadmin`: Hide/Unhide post, Approve/Reject pending, Lock/Unlock + Pin/Unpin + Delete thread.
