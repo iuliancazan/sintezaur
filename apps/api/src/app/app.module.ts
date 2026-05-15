@@ -18,6 +18,7 @@ import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { LegalModule } from './legal/legal.module';
+import { SeoModule } from './seo/seo.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { LegalModule } from './legal/legal.module';
     ForumModule,
     AdminUsersModule,
     LegalModule,
+    SeoModule,
   ],
   controllers: [AppController],
   providers: [

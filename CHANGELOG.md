@@ -9,6 +9,52 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ### M6 — Polish + Soft-launch prep
 
+#### M6-B — SEO mediu: meta + OG + JSON-LD + sitemap.xml (`<commit>`)
+
+- `SeoService` (site, providedIn root): un singur loc pentru title (cu sufix
+  „· Sintezaur"), description, canonical, OG (title/description/image/url/type/
+  site_name/locale `ro_RO`), Twitter cards (summary_large_image), JSON-LD.
+  API simplă: `set({...})` + `setJsonLd(data)` + `clearJsonLd()`.
+  `setJsonLd` injectează un singur
+  `<script type="application/ld+json" id="sintezaur-jsonld">` în `<head>`,
+  înlocuit la fiecare navigare. SSR-safe (`isPlatformBrowser` guards).
+- Helper `seo.utils.ts`: `uploadUrl()`, `stripHtml()`, `clampDescription()` —
+  refolosite de toate paginile detail pentru OG image + description.
+- Pagini cu meta tags + JSON-LD:
+  - **Home** — `WebSite` schema.
+  - **Tezaur** list (description statică) + detail cu `Product` schema
+    (brand, model, releaseDate, aggregateRating când există recenzii,
+    AggregateOffer cu Discontinued/InStock).
+  - **Bazar** list + detail cu `Product` schema (Offer cu price/currency/
+    areaServed RO/itemCondition mapat din condition enum).
+  - **Revista** list + detail cu `Article` schema (headline, datePublished,
+    dateModified, author Person cu URL, publisher Organization, mainEntityOfPage).
+  - **Forum** index + categorie (titlu dinamic per `res.category.name`) +
+    thread cu `DiscussionForumPosting` schema (postCount → InteractionCounter).
+  - **Autor** (`/autor/:username`) cu `ProfilePage` schema (Person + bio + avatar).
+  - **Legal pages** (5) + **Contact** — switch de la `document.title = ...`
+    la `seo.set()`.
+- API `SeoModule`:
+  - `GET /sitemap.xml` — XML cu toate URL-urile publice (11 statice + gear
+    published+non-deleted + listings active + articles published + forum
+    categories + non-deleted threads + legal pages cu lastmod din DB).
+    Cache in-memory 1h, content-type `application/xml`, cache-control 1h.
+    Baseline curent: 129 URL-uri.
+  - `GET /robots.txt` — generat dinamic cu disallow pentru pagini private
+    (cont, login, signup, forgot/reset password, verify-email) + linia
+    `Sitemap: ${SITE_BASE_URL}/sitemap.xml`.
+  - Ambele înregistrate la root via `setGlobalPrefix({ exclude: [...] })`
+    care era deja configurat în M1.
+- `apps/site/public/robots.txt` static actualizat să facă cross-domain spre
+  `https://api.sintezaur.ro/sitemap.xml` (mențiune în comentariu că prod
+  ideal e reverse-proxy în Coolify — vezi `docs/seo-todo.md`).
+- `docs/seo-todo.md` — listă completă cu ce e deferred pentru SEO max:
+  SSR/pre-render, slug_redirect verify pe articole + forum_threads, 410
+  Gone după expirare, og-default.png asset, hreflang când vine EN,
+  sitemap index split, BreadcrumbList/Review/FAQPage/SearchAction.
+- TODO M6-C: pagini 404+410 brand-aware, empty states peste tot, HTTP
+  error interceptor global, skeleton loaders pe paginile list+detail.
+
 #### M6-A — Pagini legale + formular contact + cookies banner (`83c6ba4`)
 
 - Migration `0012_legal_pages.sql` (schema) + `9009_legal_pages_seed.sql` (postflight seed). Două tabele noi:

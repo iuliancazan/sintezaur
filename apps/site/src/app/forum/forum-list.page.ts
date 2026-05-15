@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
 import { TPipe } from '../i18n/t.pipe';
 import { ForumCategory, ForumService } from './forum.service';
 
@@ -245,6 +246,7 @@ import { ForumCategory, ForumService } from './forum.service';
 export class ForumListPage {
   readonly i18n = inject(I18nService);
   private readonly forum = inject(ForumService);
+  private readonly seo = inject(SeoService);
 
   readonly categories = signal<ForumCategory[]>([]);
   readonly loading = signal(true);
@@ -258,6 +260,12 @@ export class ForumListPage {
   );
 
   constructor() {
+    this.seo.set({
+      title: 'Forum — discuții despre producția muzicală',
+      description:
+        'Comunitatea producătorilor de muzică din România: gear, producție, live, business. Discuții pe categorii, fără spam, fără marketing.',
+      canonicalPath: '/forum',
+    });
     void this.fetch();
   }
 

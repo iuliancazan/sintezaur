@@ -19,6 +19,8 @@ import { SzAvatarComponent, SzBadgeComponent, SzButtonComponent, SzIconComponent
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
+import { clampDescription, stripHtml, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
 import { TezaurService, type TezaurDetail } from './tezaur.service';
 
@@ -1201,6 +1203,7 @@ export class TezaurDetailPage {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
+  private readonly seo = inject(SeoService);
 
   readonly statusFlags = USER_GEAR_STATUS_FLAGS;
   readonly tabKeys = TAB_KEYS;
@@ -1272,6 +1275,7 @@ export class TezaurDetailPage {
     try {
       const d = await this.tezaur.detail(slug);
       this.detail.set(d);
+      this.applySeo(d);
       this.galleryIndex.set(0);
       this.reviewsLoaded.set(false);
       this.reviews.set(null);
@@ -1291,6 +1295,64 @@ export class TezaurDetailPage {
         console.error('[tezaur-detail] fetch failed', err);
       }
     }
+  }
+
+  private applySeo(d: TezaurDetail): void {
+    const g = d.gear;
+    const title = `${g.brand} ${g.model}`;
+    const yearStr =
+      g.yearReleased
+        ? ` (${g.yearReleased}${g.yearDiscontinued ? `–${g.yearDiscontinued}` : ''})`
+        : '';
+    const descSource =
+      d.description?.bodyHtml
+        ? stripHtml(d.description.bodyHtml)
+        : `${title}${yearStr} — specificații, fotografii, recenzii, prețuri și anunțuri pe Sintezaur.`;
+    const description = clampDescription(descSource);
+    const hero = d.images[0]?.path;
+    const ogImage = uploadUrl(hero);
+    const origin = window.location.origin;
+
+    this.seo.set({
+      title,
+      description,
+      ogImage,
+      canonicalPath: `/tezaur/${g.slug}`,
+      ogType: 'product',
+    });
+
+    const productData: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: title,
+      brand: { '@type': 'Brand', name: g.brand },
+      model: g.model,
+      category: g.category,
+      url: `${origin}/tezaur/${g.slug}`,
+    };
+    if (ogImage) productData['image'] = [ogImage];
+    if (g.yearReleased) productData['releaseDate'] = String(g.yearReleased);
+    if (g.reviewCount > 0 && g.avgRating) {
+      productData['aggregateRating'] = {
+        '@type': 'AggregateRating',
+        ratingValue: g.avgRating,
+        reviewCount: g.reviewCount,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+    if (g.msrpAtLaunchEur) {
+      productData['offers'] = {
+        '@type': 'AggregateOffer',
+        priceCurrency: 'EUR',
+        lowPrice: g.msrpAtLaunchEur,
+        availability:
+          g.yearDiscontinued != null
+            ? 'https://schema.org/Discontinued'
+            : 'https://schema.org/InStock',
+      };
+    }
+    this.seo.setJsonLd(productData);
   }
 
   async loadReviews(slug: string): Promise<void> {

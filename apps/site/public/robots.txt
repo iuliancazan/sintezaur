@@ -1,4 +1,14 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sintezaur.ro/sitemap.xml
+Disallow: /cont/
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Cross-domain sitemap — served by the API host. Production deployment
+# should reverse-proxy /sitemap.xml from sintezaur.ro to the API to
+# keep it same-origin (see docs/seo-todo.md "deferred" notes).
+Sitemap: https://api.sintezaur.ro/sitemap.xml

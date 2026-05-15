@@ -14,6 +14,7 @@ import {
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { marked } from 'marked';
 import { AuthService } from '../auth/auth.service';
+import { SeoService } from '../seo/seo.service';
 import {
   ContactCategory,
   LegalPage as LegalPageRow,
@@ -282,6 +283,7 @@ export class ContactPage {
   private readonly legal = inject(LegalService);
   private readonly auth = inject(AuthService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly seo = inject(SeoService);
 
   readonly categories = CATEGORY_OPTIONS;
 
@@ -327,9 +329,12 @@ export class ContactPage {
   });
 
   constructor() {
-    if (typeof document !== 'undefined') {
-      document.title = 'Contact · Sintezaur';
-    }
+    this.seo.set({
+      title: 'Contact',
+      description:
+        'Trimite-ne un mesaj — întrebări, sugestii, raportări sau colaborări. Răspundem în maxim 3 zile lucrătoare.',
+      canonicalPath: '/contact',
+    });
     this.loadIntro();
     this.prefillFromAuth();
   }

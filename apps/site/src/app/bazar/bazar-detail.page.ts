@@ -17,6 +17,8 @@ import {
 } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
+import { clampDescription, stripHtml, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
 import {
   BazarService,
@@ -756,6 +758,7 @@ export class BazarDetailPage {
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly detail = signal<BazarListingDetail | null>(null);
   readonly recentlySold = signal<BazarListItem[]>([]);
@@ -864,6 +867,7 @@ export class BazarDetailPage {
     try {
       const d = await this.bazar.detail(slug);
       this.detail.set(d);
+      this.applySeo(d);
       this.isWatched.set(d.isWatched);
       const firstSourceId = this.photos()[0]?.sourceId ?? null;
       this.activeSourceId.set(firstSourceId);
@@ -926,6 +930,56 @@ export class BazarDetailPage {
     } finally {
       this.contactPending.set(false);
     }
+  }
+
+  private applySeo(d: BazarListingDetail): void {
+    const l = d.listing;
+    const description = clampDescription(
+      stripHtml(l.descriptionHtml) || `${l.title} — anunț Bazar Sintezaur`,
+    );
+    const heroPath = d.photos[0]?.path;
+    const ogImage = uploadUrl(heroPath);
+    const origin = window.location.origin;
+
+    this.seo.set({
+      title: `${l.title} · ${l.price} ${l.currency.toUpperCase()}`,
+      description,
+      ogImage,
+      canonicalPath: `/bazar/${l.slug}`,
+      ogType: 'product',
+    });
+
+    const conditionMap: Record<string, string> = {
+      new: 'https://schema.org/NewCondition',
+      mint: 'https://schema.org/NewCondition',
+      very_good: 'https://schema.org/UsedCondition',
+      good: 'https://schema.org/UsedCondition',
+      fair: 'https://schema.org/UsedCondition',
+      for_parts: 'https://schema.org/DamagedCondition',
+    };
+    const availability =
+      l.status === 'active'
+        ? 'https://schema.org/InStock'
+        : l.status === 'sold'
+          ? 'https://schema.org/SoldOut'
+          : 'https://schema.org/OutOfStock';
+
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: l.title,
+      description,
+      image: ogImage ? [ogImage] : undefined,
+      itemCondition: conditionMap[l.condition] ?? 'https://schema.org/UsedCondition',
+      offers: {
+        '@type': 'Offer',
+        price: l.price,
+        priceCurrency: l.currency.toUpperCase(),
+        availability,
+        url: `${origin}/bazar/${l.slug}`,
+        areaServed: { '@type': 'Country', name: 'Romania' },
+      },
+    });
   }
 
   shippingCarriersLabel(carriers: string[]): string {

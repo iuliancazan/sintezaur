@@ -11,6 +11,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SzIconComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ARTICLE_CATEGORIES,
@@ -546,6 +547,7 @@ export class RevistaListPage {
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly categories = ARTICLE_CATEGORIES;
   readonly sortOptions = SORT_OPTIONS;
@@ -586,6 +588,12 @@ export class RevistaListPage {
   private debounce: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    this.seo.set({
+      title: 'Revista — articole despre tehnologie muzicală',
+      description:
+        'Recenzii, tutoriale, interviuri și ghiduri de cumpărare despre sintetizatoare, plug-in-uri, hardware și producție muzicală — în limba română.',
+      canonicalPath: '/revista',
+    });
     this.route.queryParamMap.subscribe((params) => {
       this.qText.set(params.get('q') ?? '');
       this.category.set(

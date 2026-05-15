@@ -9,6 +9,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
 import { ForumService, type UserBadgeItem } from '../forum/forum.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
+import { clampDescription, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
 import {
   RevistaService,
@@ -343,6 +345,7 @@ export class AuthorProfilePage {
   readonly revista = inject(RevistaService);
   private readonly forum = inject(ForumService);
   private readonly route = inject(ActivatedRoute);
+  private readonly seo = inject(SeoService);
 
   readonly profile = signal<AuthorProfile | null>(null);
   readonly badges = signal<UserBadgeItem[]>([]);
@@ -367,6 +370,7 @@ export class AuthorProfilePage {
       ]);
       this.profile.set(data);
       this.badges.set(badges);
+      this.applySeo(data);
     } catch (err) {
       console.error('[revista] author load failed', err);
       this.notFound.set(true);
@@ -374,6 +378,34 @@ export class AuthorProfilePage {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private applySeo(p: AuthorProfile): void {
+    const a = p.author;
+    const displayName = a.fullName || a.username;
+    const description = clampDescription(
+      a.bio ??
+        `Profil autor pe Sintezaur — ${p.articles.length} articole publicate.`,
+    );
+    const avatarUrl = uploadUrl(a.avatarUrl);
+    this.seo.set({
+      title: displayName,
+      description,
+      ogImage: avatarUrl,
+      canonicalPath: `/autor/${a.username}`,
+      ogType: 'article',
+    });
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      mainEntity: {
+        '@type': 'Person',
+        name: displayName,
+        alternateName: a.username,
+        description: a.bio,
+        image: avatarUrl,
+      },
+    });
   }
 
   formatDate(iso: string): string {

@@ -11,6 +11,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { marked } from 'marked';
+import { SeoService } from '../seo/seo.service';
 import { LegalService } from './legal.service';
 
 /**
@@ -133,6 +134,7 @@ export class LegalPage {
   private readonly route = inject(ActivatedRoute);
   private readonly legal = inject(LegalService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly seo = inject(SeoService);
 
   private readonly slug = toSignal(
     this.route.data.pipe(map((d) => (d['slug'] as string) ?? '')),
@@ -178,9 +180,11 @@ export class LegalPage {
     try {
       const page = await this.legal.getPage(slug);
       this.page.set(page);
-      if (typeof document !== 'undefined') {
-        document.title = `${page.title} · Sintezaur`;
-      }
+      this.seo.set({
+        title: page.title,
+        description: page.metaDescription ?? undefined,
+        canonicalPath: `/${slug}`,
+      });
     } catch (err) {
       this.error.set(
         err && typeof err === 'object' && 'status' in err

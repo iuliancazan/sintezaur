@@ -10,6 +10,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
+import { clampDescription, stripHtml, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
 import {
   RevistaService,
@@ -443,6 +445,7 @@ export class RevistaDetailPage {
   readonly revista = inject(RevistaService);
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
+  private readonly seo = inject(SeoService);
 
   readonly detail = signal<ArticleDetail | null>(null);
   readonly loading = signal(true);
@@ -469,6 +472,7 @@ export class RevistaDetailPage {
     try {
       const d = await this.revista.detail(slug);
       this.detail.set(d);
+      this.applySeo(d);
     } catch (err) {
       console.error('[revista] detail failed', err);
       this.notFound.set(true);
@@ -476,6 +480,48 @@ export class RevistaDetailPage {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private applySeo(d: ArticleDetail): void {
+    const a = d.article;
+    const description = clampDescription(a.excerpt ?? stripHtml(a.bodyHtml));
+    const heroUrl = uploadUrl(d.heroImage?.path);
+    const origin = window.location.origin;
+    this.seo.set({
+      title: a.title,
+      description,
+      ogImage: heroUrl,
+      canonicalPath: `/revista/${a.slug}`,
+      ogType: 'article',
+    });
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: a.title,
+      description,
+      image: heroUrl ? [heroUrl] : undefined,
+      datePublished: a.publishedAt ?? a.createdAt,
+      dateModified: a.updatedAt,
+      author: {
+        '@type': 'Person',
+        name: d.author.fullName || d.author.username,
+        url: `${origin}/autor/${d.author.username}`,
+      },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Sintezaur',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${origin}/assets/branding/logo.png`,
+        },
+      },
+      mainEntityOfPage: {
+        '@type': 'WebPage',
+        '@id': `${origin}/revista/${a.slug}`,
+      },
+      articleSection: a.category,
+      keywords: a.tags.join(', '),
+    });
   }
 
   formatDate(iso: string): string {

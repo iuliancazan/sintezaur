@@ -25,6 +25,7 @@ import {
 } from '@sintezaur/shared';
 import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
 import { TPipe } from '../i18n/t.pipe';
 import { AuthService } from '../auth/auth.service';
 import { BazarService, type BazarListResponse } from './bazar.service';
@@ -906,6 +907,7 @@ export class BazarListPage {
   readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly categories = GEAR_CATEGORIES;
   readonly conditions = LISTING_CONDITIONS;
@@ -944,6 +946,12 @@ export class BazarListPage {
   private locationDebounce: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    this.seo.set({
+      title: 'Bazar — anunțuri de echipamente muzicale',
+      description:
+        'Cumpără, vinde sau schimbă echipamente muzicale în România. Sintetizatoare, drum machines, module, microfoane, plăci de sunet — anunțuri de la pasionați, pentru pasionați.',
+      canonicalPath: '/bazar',
+    });
     this.route.queryParamMap.subscribe((params) => {
       this.qText.set(params.get('q') ?? '');
       this.category.set(

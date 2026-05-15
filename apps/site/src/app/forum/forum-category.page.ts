@@ -9,6 +9,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ForumService,
@@ -329,6 +330,7 @@ export class ForumCategoryPage {
   private readonly forum = inject(ForumService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   canCompose(r: ThreadListResponse): boolean {
     return r.category.kind === 'user' && !!this.auth.currentUser();
@@ -429,6 +431,11 @@ export class ForumCategoryPage {
         pageSize: PAGE_SIZE,
       });
       this.response.set(res);
+      this.seo.set({
+        title: `Forum · ${res.category.name}`,
+        description: `Discuții pe forum în categoria ${res.category.name}. ${res.totalCount} thread-uri.`,
+        canonicalPath: `/forum/${slug}`,
+      });
       this.subLevel.set(null);
       if (this.auth.currentUser()) {
         void this.loadSub(res.category.id);

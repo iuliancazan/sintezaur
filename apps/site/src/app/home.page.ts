@@ -8,6 +8,7 @@ import {
 } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
+import { SeoService } from './seo/seo.service';
 import { TPipe } from './i18n/t.pipe';
 
 /**
@@ -229,4 +230,24 @@ import { TPipe } from './i18n/t.pipe';
 export class HomePage {
   readonly auth = inject(AuthService);
   readonly i18n = inject(I18nService);
+  private readonly seo = inject(SeoService);
+
+  constructor() {
+    this.seo.set({
+      title: 'Sintezaur — gear, bazar, revista, forum',
+      description:
+        'Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Cont gratuit, comunitate de producători din România.',
+      canonicalPath: '/',
+    });
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'Sintezaur',
+      url:
+        typeof window !== 'undefined'
+          ? window.location.origin
+          : 'https://sintezaur.ro',
+      inLanguage: 'ro-RO',
+    });
+  }
 }

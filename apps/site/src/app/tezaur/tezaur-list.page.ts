@@ -14,6 +14,7 @@ import {
 } from '@sintezaur/shared';
 import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
 import { TPipe } from '../i18n/t.pipe';
 import {
   TezaurService,
@@ -717,6 +718,7 @@ export class TezaurListPage {
   readonly tezaur = inject(TezaurService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly categories = GEAR_CATEGORIES;
   readonly sortOptions = SORT_OPTIONS;
@@ -734,6 +736,12 @@ export class TezaurListPage {
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
+    this.seo.set({
+      title: 'Tezaur — catalog de echipamente muzicale',
+      description:
+        'Enciclopedia echipamentelor muzicale: sintetizatoare, drum machines, module Eurorack, software și mai mult. Specificații, fotografii, recenzii și anunțuri în România.',
+      canonicalPath: '/tezaur',
+    });
     // Sync from URL on init + any back/forward.
     this.route.queryParamMap.subscribe((params) => {
       const q = params.get('q') ?? '';

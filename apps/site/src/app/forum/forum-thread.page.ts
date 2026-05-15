@@ -14,6 +14,8 @@ import {
 } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
+import { SeoService } from '../seo/seo.service';
+import { clampDescription, stripHtml } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
 import {
   ForumService,
@@ -842,6 +844,7 @@ export class ForumThreadPage {
   private readonly forum = inject(ForumService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly seo = inject(SeoService);
 
   readonly COLLAPSE_THRESHOLD = COLLAPSE_THRESHOLD;
   readonly currentUrl = this.router.url;
@@ -1509,6 +1512,7 @@ export class ForumThreadPage {
       ]);
       this.thread.set(t);
       this.posts.set(p);
+      this.applySeo(t, p.op);
       this.expandedMap.set(new Map());
       this.pendingPosts.set([]);
       this.likedByMe.set(new Set());
@@ -1525,6 +1529,43 @@ export class ForumThreadPage {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  private applySeo(t: ThreadDetail, op: PostListItem | null): void {
+    const lede = op?.bodyHtml
+      ? clampDescription(stripHtml(op.bodyHtml))
+      : `Discuție pe Forum Sintezaur · categoria ${t.category.name} · ${t.thread.postCount} răspunsuri.`;
+    this.seo.set({
+      title: t.thread.title,
+      description: lede,
+      canonicalPath: `/forum/${t.category.slug}/${t.thread.slug}`,
+      ogType: 'article',
+    });
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'DiscussionForumPosting',
+      headline: t.thread.title,
+      articleBody: lede,
+      datePublished: t.thread.createdAt,
+      dateModified: t.thread.updatedAt,
+      author: t.author
+        ? {
+            '@type': 'Person',
+            name: t.author.fullName || t.author.username,
+            url: `${window.location.origin}/autor/${t.author.username}`,
+          }
+        : undefined,
+      interactionStatistic: {
+        '@type': 'InteractionCounter',
+        interactionType: 'https://schema.org/CommentAction',
+        userInteractionCount: Math.max(0, t.thread.postCount - 1),
+      },
+      isPartOf: {
+        '@type': 'WebPage',
+        name: t.category.name,
+        url: `${window.location.origin}/forum/${t.category.slug}`,
+      },
+    });
   }
 
   private async loadUserAnnotations(threadId: string): Promise<void> {
