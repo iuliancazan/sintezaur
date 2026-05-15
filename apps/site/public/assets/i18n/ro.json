@@ -317,7 +317,8 @@
       "messages": "Mesaje",
       "my_listings": "Anunțurile mele",
       "my_watches": "Anunțuri salvate",
-      "saved_searches": "Căutări salvate"
+      "saved_searches": "Căutări salvate",
+      "forum_subscriptions": "Abonamente forum"
     },
     "logged_in_as": "Conectat ca {{email}}",
     "back_to_account": "← Înapoi la cont"
@@ -787,6 +788,27 @@
     "confirm_delete": "Sigur ștergi această postare?",
     "locked_notice": "Thread-ul este blocat. Nu se pot adăuga răspunsuri noi.",
     "login_to_reply": "Loghează-te ca să răspunzi.",
+    "sub": {
+      "label_watching": "Urmărești",
+      "label_tracking": "Sumar zilnic",
+      "label_mentioned_only": "Doar mențiuni",
+      "label_muted": "Tăcere",
+      "label_off": "Abonează-te",
+      "desc_watching": "Primești notificare la fiecare răspuns nou.",
+      "desc_tracking": "Sumar zilnic cu activitate nouă (în curând).",
+      "desc_mentioned_only": "Notificare doar când ești @-menționat.",
+      "desc_muted": "Suprimat — fără notificări de aici.",
+      "desc_off": "Fără abonament.",
+      "changed_toast": "Abonament actualizat."
+    },
+    "account": {
+      "title": "Abonamentele mele",
+      "lede": "Gestionează abonamentele la thread-uri și categorii din forum.",
+      "threads": "Thread-uri urmărite",
+      "categories": "Categorii urmărite",
+      "no_threads": "Nu ai niciun thread urmărit.",
+      "no_categories": "Nu ai nicio categorie urmărită."
+    },
     "source": {
       "article": "Articol original",
       "gear": "Echipament asociat"

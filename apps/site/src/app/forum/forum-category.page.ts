@@ -10,14 +10,19 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
-import { ForumService, ThreadListResponse } from './forum.service';
+import {
+  ForumService,
+  SubscriptionLevel,
+  ThreadListResponse,
+} from './forum.service';
+import { SubscribeBellComponent } from './subscribe-bell.component';
 
 const PAGE_SIZE = 25;
 
 @Component({
   selector: 'app-forum-category-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe],
+  imports: [CommonModule, RouterLink, TPipe, SubscribeBellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
@@ -37,14 +42,23 @@ const PAGE_SIZE = 25;
                 <p class="fc-header__desc">{{ r.category.description }}</p>
               }
             </div>
-            @if (canCompose(r)) {
-              <a
-                class="fc-header__cta"
-                [routerLink]="['/forum', r.category.slug, 'nou']"
-              >
-                + {{ 'forum.compose.new_thread' | t }}
-              </a>
-            }
+            <div class="fc-header__actions">
+              @if (auth.currentUser()) {
+                <app-forum-subscribe-bell
+                  [level]="subLevel()"
+                  [busy]="subBusy()"
+                  (levelChange)="onSubChange($event, r)"
+                />
+              }
+              @if (canCompose(r)) {
+                <a
+                  class="fc-header__cta"
+                  [routerLink]="['/forum', r.category.slug, 'nou']"
+                >
+                  + {{ 'forum.compose.new_thread' | t }}
+                </a>
+              }
+            </div>
           </div>
         </section>
 
@@ -183,6 +197,12 @@ const PAGE_SIZE = 25;
         white-space: nowrap;
       }
       .fc-header__cta:hover { filter: brightness(1.1); }
+      .fc-header__actions {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
 
       .fc-results {
         display: flex;
@@ -320,6 +340,9 @@ export class ForumCategoryPage {
   readonly categorySlug = signal<string>('');
   readonly page = signal(1);
 
+  readonly subLevel = signal<SubscriptionLevel | null>(null);
+  readonly subBusy = signal(false);
+
   readonly paginationPages = computed<(number | '…')[]>(() => {
     const total = this.response()?.totalPages ?? 1;
     const current = this.page();
@@ -378,6 +401,23 @@ export class ForumCategoryPage {
     });
   }
 
+  async onSubChange(
+    level: SubscriptionLevel | null,
+    r: ThreadListResponse,
+  ): Promise<void> {
+    if (this.subBusy()) return;
+    const prev = this.subLevel();
+    this.subBusy.set(true);
+    this.subLevel.set(level);
+    try {
+      await this.forum.setCategorySubscription(r.category.id, level);
+    } catch {
+      this.subLevel.set(prev);
+    } finally {
+      this.subBusy.set(false);
+    }
+  }
+
   private async fetch(): Promise<void> {
     const slug = this.categorySlug();
     if (!slug) return;
@@ -389,6 +429,10 @@ export class ForumCategoryPage {
         pageSize: PAGE_SIZE,
       });
       this.response.set(res);
+      this.subLevel.set(null);
+      if (this.auth.currentUser()) {
+        void this.loadSub(res.category.id);
+      }
     } catch {
       this.error.set(true);
       this.response.set(null);
@@ -397,4 +441,12 @@ export class ForumCategoryPage {
     }
   }
 
+  private async loadSub(categoryId: string): Promise<void> {
+    try {
+      const res = await this.forum.getCategorySubscription(categoryId);
+      this.subLevel.set(res.level);
+    } catch {
+      // silent
+    }
+  }
 }

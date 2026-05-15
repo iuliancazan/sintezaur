@@ -19,8 +19,10 @@ import {
   ForumService,
   PostListItem,
   PostsResponse,
+  SubscriptionLevel,
   ThreadDetail,
 } from './forum.service';
+import { SubscribeBellComponent } from './subscribe-bell.component';
 
 interface SubReplyVM extends PostListItem {
   numbering: string;
@@ -55,7 +57,7 @@ const EMPTY_COMPOSER: ComposerState = {
 @Component({
   selector: 'app-forum-thread-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe, SzEditorComponent],
+  imports: [CommonModule, RouterLink, TPipe, SzEditorComponent, SubscribeBellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (thread(); as t) {
@@ -112,16 +114,25 @@ const EMPTY_COMPOSER: ComposerState = {
             <span>{{ t.thread.postCount }} {{ 'forum.posts_count' | t }}</span>
           </div>
 
-          @if (groups().length > 0) {
-            <div class="ft-master">
-              <button type="button" (click)="setAllExpanded(true)">
-                {{ 'forum.expand_all' | t }}
-              </button>
-              <button type="button" (click)="setAllExpanded(false)">
-                {{ 'forum.collapse_all' | t }}
-              </button>
-            </div>
-          }
+          <div class="ft-header__actions">
+            @if (auth.currentUser()) {
+              <app-forum-subscribe-bell
+                [level]="subLevel()"
+                [busy]="subBusy()"
+                (levelChange)="onSubChange($event)"
+              />
+            }
+            @if (groups().length > 0) {
+              <div class="ft-master">
+                <button type="button" (click)="setAllExpanded(true)">
+                  {{ 'forum.expand_all' | t }}
+                </button>
+                <button type="button" (click)="setAllExpanded(false)">
+                  {{ 'forum.collapse_all' | t }}
+                </button>
+              </div>
+            }
+          </div>
         </header>
 
         <!-- OP -->
@@ -322,7 +333,12 @@ const EMPTY_COMPOSER: ComposerState = {
                   ↩ {{ 'forum.action.reply' | t }}
                 </button>
               }
-              <button type="button" class="ft-action ft-action--like" (click)="onLike(p)">
+              <button
+                type="button"
+                class="ft-action ft-action--like"
+                [class.is-liked]="likedByMe().has(p.id)"
+                (click)="onLike(p)"
+              >
                 👍 {{ 'forum.action.like' | t }} · {{ p.likeCount }}
               </button>
               @if (canEditPost(p)) {
@@ -466,6 +482,13 @@ const EMPTY_COMPOSER: ComposerState = {
         cursor: pointer;
       }
       .ft-master button:hover { color: var(--accent); border-color: var(--accent); }
+      .ft-header__actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
 
       .ft-post {
         background: var(--bg-elev);
@@ -586,6 +609,11 @@ const EMPTY_COMPOSER: ComposerState = {
       }
       .ft-action:hover { color: var(--accent); border-color: var(--accent); }
       .ft-action--danger:hover { color: #e8665b; border-color: #e8665b; }
+      .ft-action--like.is-liked {
+        background: color-mix(in oklab, var(--accent) 18%, transparent);
+        color: var(--accent);
+        border-color: var(--accent);
+      }
 
       .ft-strip {
         display: block;
@@ -747,9 +775,13 @@ export class ForumThreadPage {
   readonly thread = signal<ThreadDetail | null>(null);
   readonly posts = signal<PostsResponse | null>(null);
   readonly pendingPosts = signal<PostListItem[]>([]);
+  readonly likedByMe = signal<Set<string>>(new Set());
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly toast = signal<string | null>(null);
+
+  readonly subLevel = signal<SubscriptionLevel | null>(null);
+  readonly subBusy = signal(false);
 
   readonly expandedMap = signal<Map<string, boolean>>(new Map());
 
@@ -1056,16 +1088,92 @@ export class ForumThreadPage {
     }
   }
 
-  /* ============ like (rămâne stub până la M5-E) ============ */
+  /* ============ like ============ */
 
-  onLike(_p: PostListItem): void {
+  async onLike(p: PostListItem): Promise<void> {
     if (!this.auth.currentUser()) {
       void this.router.navigate(['/login'], {
         queryParams: { returnUrl: this.router.url },
       });
       return;
     }
-    this.flashToast(this.i18n.t('forum.coming_soon'));
+    const currentlyLiked = this.likedByMe().has(p.id);
+    // Optimistic flip.
+    this.applyLikeOptimistic(p.id, !currentlyLiked);
+    try {
+      const res = await this.forum.toggleLike(p.id);
+      this.applyLikeAuthoritative(p.id, res.liked, res.likeCount);
+    } catch (err) {
+      // Rollback.
+      this.applyLikeOptimistic(p.id, currentlyLiked);
+      this.flashToast(this.errorMessage(err, 'forum.compose.submit_error'));
+    }
+  }
+
+  private applyLikeOptimistic(postId: string, liked: boolean): void {
+    const next = new Set(this.likedByMe());
+    const delta = liked && !next.has(postId) ? 1 : !liked && next.has(postId) ? -1 : 0;
+    if (liked) next.add(postId);
+    else next.delete(postId);
+    this.likedByMe.set(next);
+    if (delta !== 0) this.bumpLikeCount(postId, delta);
+  }
+
+  private applyLikeAuthoritative(
+    postId: string,
+    liked: boolean,
+    count: number,
+  ): void {
+    const next = new Set(this.likedByMe());
+    if (liked) next.add(postId);
+    else next.delete(postId);
+    this.likedByMe.set(next);
+    this.setLikeCount(postId, count);
+  }
+
+  private bumpLikeCount(postId: string, delta: number): void {
+    const cur = this.posts();
+    if (!cur) return;
+    const apply = (p: PostListItem): PostListItem =>
+      p.id === postId
+        ? { ...p, likeCount: Math.max(0, p.likeCount + delta) }
+        : p;
+    this.posts.set({
+      ...cur,
+      op: cur.op ? apply(cur.op) : cur.op,
+      replies: cur.replies.map(apply),
+    });
+  }
+
+  private setLikeCount(postId: string, count: number): void {
+    const cur = this.posts();
+    if (!cur) return;
+    const apply = (p: PostListItem): PostListItem =>
+      p.id === postId ? { ...p, likeCount: count } : p;
+    this.posts.set({
+      ...cur,
+      op: cur.op ? apply(cur.op) : cur.op,
+      replies: cur.replies.map(apply),
+    });
+  }
+
+  /* ============ subscription ============ */
+
+  async onSubChange(level: SubscriptionLevel | null): Promise<void> {
+    const t = this.thread();
+    if (!t || this.subBusy()) return;
+    const prev = this.subLevel();
+    this.subBusy.set(true);
+    this.subLevel.set(level);
+    try {
+      await this.forum.setThreadSubscription(t.thread.id, level);
+      this.flashToast(this.i18n.t('forum.sub.changed_toast'));
+    } catch (err) {
+      this.subLevel.set(prev);
+      this.flashToast(this.errorMessage(err, 'forum.compose.submit_error'));
+    } finally {
+      this.subBusy.set(false);
+    }
   }
 
   /* ============ helpers ============ */
@@ -1143,12 +1251,32 @@ export class ForumThreadPage {
       this.posts.set(p);
       this.expandedMap.set(new Map());
       this.pendingPosts.set([]);
+      this.likedByMe.set(new Set());
+      this.subLevel.set(null);
+
+      if (this.auth.currentUser()) {
+        // Fire-and-forget — don't block render if these fail.
+        void this.loadUserAnnotations(t.thread.id);
+      }
     } catch {
       this.error.set(true);
       this.thread.set(null);
       this.posts.set(null);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  private async loadUserAnnotations(threadId: string): Promise<void> {
+    try {
+      const [likes, sub] = await Promise.all([
+        this.forum.listMyLikes(threadId),
+        this.forum.getThreadSubscription(threadId),
+      ]);
+      this.likedByMe.set(new Set(likes.postIds));
+      this.subLevel.set(sub.level);
+    } catch (err) {
+      console.warn('[forum] load user annotations failed', err);
     }
   }
 }

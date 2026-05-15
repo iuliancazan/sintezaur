@@ -129,6 +129,35 @@ export interface MentionUser {
   fullName: string;
 }
 
+export type SubscriptionLevel =
+  | 'watching'
+  | 'tracking'
+  | 'mentioned_only'
+  | 'muted';
+
+export interface ThreadSubscriptionItem {
+  threadId: string;
+  threadSlug: string;
+  threadTitle: string;
+  categorySlug: string;
+  categoryName: string;
+  level: SubscriptionLevel;
+  updatedAt: string;
+}
+
+export interface CategorySubscriptionItem {
+  categoryId: string;
+  categorySlug: string;
+  categoryName: string;
+  level: SubscriptionLevel;
+  updatedAt: string;
+}
+
+export interface MySubscriptionsResponse {
+  threads: ThreadSubscriptionItem[];
+  categories: CategorySubscriptionItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ForumService {
   private readonly http = inject(HttpClient);
@@ -224,6 +253,82 @@ export class ForumService {
         params: { q: query },
         withCredentials: true,
       }),
+    );
+  }
+
+  /* ============ likes (M5-E) ============ */
+
+  toggleLike(postId: string): Promise<{ liked: boolean; likeCount: number }> {
+    return firstValueFrom(
+      this.http.post<{ liked: boolean; likeCount: number }>(
+        `${this.base}/forum/posts/${postId}/like`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  listMyLikes(threadId: string): Promise<{ postIds: string[] }> {
+    return firstValueFrom(
+      this.http.get<{ postIds: string[] }>(
+        `${this.base}/forum/threads/${threadId}/my-likes`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /* ============ subscriptions (M5-E) ============ */
+
+  getThreadSubscription(threadId: string): Promise<{ level: SubscriptionLevel | null }> {
+    return firstValueFrom(
+      this.http.get<{ level: SubscriptionLevel | null }>(
+        `${this.base}/forum/threads/${threadId}/subscription`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  setThreadSubscription(
+    threadId: string,
+    level: SubscriptionLevel | null,
+  ): Promise<{ level: SubscriptionLevel | null }> {
+    return firstValueFrom(
+      this.http.patch<{ level: SubscriptionLevel | null }>(
+        `${this.base}/forum/threads/${threadId}/subscription`,
+        { level },
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  getCategorySubscription(categoryId: string): Promise<{ level: SubscriptionLevel | null }> {
+    return firstValueFrom(
+      this.http.get<{ level: SubscriptionLevel | null }>(
+        `${this.base}/forum/categories/${categoryId}/subscription`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  setCategorySubscription(
+    categoryId: string,
+    level: SubscriptionLevel | null,
+  ): Promise<{ level: SubscriptionLevel | null }> {
+    return firstValueFrom(
+      this.http.patch<{ level: SubscriptionLevel | null }>(
+        `${this.base}/forum/categories/${categoryId}/subscription`,
+        { level },
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  listMySubscriptions(): Promise<MySubscriptionsResponse> {
+    return firstValueFrom(
+      this.http.get<MySubscriptionsResponse>(
+        `${this.base}/forum/subscriptions/me`,
+        { withCredentials: true },
+      ),
     );
   }
 }

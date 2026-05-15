@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  articles,
   DATABASE,
+  forumCategories,
+  forumPostLikes,
   forumPostMentions,
   forumPosts,
   forumThreads,
@@ -18,6 +21,8 @@ import {
   type SintezaurDb,
 } from '@sintezaur/db';
 import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ForumSubscriptionsService } from './forum-subscriptions.service';
 
 /** UUID v4 regex used to extract mention IDs from cached bodyHtml. */
 const MENTION_ID_RE =
@@ -74,6 +79,8 @@ export class ForumPostsService {
   constructor(
     @Inject(DATABASE) private readonly db: SintezaurDb,
     config: ConfigService,
+    private readonly notifications: NotificationsService,
+    private readonly subscriptions: ForumSubscriptionsService,
   ) {
     this.editWindowMinutes = Number(
       config.get('FORUM_EDIT_WINDOW_MINUTES') ?? 30,
@@ -125,11 +132,24 @@ export class ForumPostsService {
       })
       .returning();
 
-    await this.syncMentions(post.id, actorId, input.bodyHtml);
+    const mentionedIds = await this.syncMentions(
+      post.id,
+      actorId,
+      input.bodyHtml,
+    );
 
     if (status === 'approved') {
       await this.bumpThreadCountersOnApprovedInsert(input.threadId);
       await this.bumpApprovedPostCount(actorId);
+      // Auto-watch on reply (idempotent — never overwrites explicit mute).
+      await this.subscriptions.ensureWatchingThread(actorId, input.threadId);
+      // Real-time notification fan-out (mention > reply per spec dedup).
+      await this.fanOutReplyNotifications({
+        postId: post.id,
+        threadId: input.threadId,
+        actorId,
+        mentionedIds,
+      });
     }
 
     return post;
@@ -162,6 +182,8 @@ export class ForumPostsService {
     if (status === 'approved') {
       await this.bumpThreadCountersOnApprovedInsert(threadId);
       await this.bumpApprovedPostCount(actorId);
+      // Thread author auto-watches their own thread.
+      await this.subscriptions.ensureWatchingThread(actorId, threadId);
     }
 
     return post;
@@ -215,13 +237,13 @@ export class ForumPostsService {
     postId: string,
     authorId: string | null,
     bodyHtml: string,
-  ): Promise<void> {
+  ): Promise<string[]> {
     await this.db
       .delete(forumPostMentions)
       .where(eq(forumPostMentions.postId, postId));
 
     const rawIds = parseMentionIds(bodyHtml).filter((id) => id !== authorId);
-    if (rawIds.length === 0) return;
+    if (rawIds.length === 0) return [];
 
     const real = await this.db
       .select({ id: users.id })
@@ -232,7 +254,7 @@ export class ForumPostsService {
           isNull(users.deletedAt),
         ),
       );
-    if (real.length === 0) return;
+    if (real.length === 0) return [];
 
     await this.db
       .insert(forumPostMentions)
@@ -243,6 +265,118 @@ export class ForumPostsService {
         })),
       )
       .onConflictDoNothing();
+    return real.map((r) => r.id);
+  }
+
+  /* ============================================================
+     Fan-out — orchestrates real-time notifications for a new reply.
+     Order per spec §7.5 + interview decision:
+       1. `forum_mention` for each mentioned user (highest priority)
+       2. `revista_reply_to_my_article` for the article author when the
+          reply lands in `discutii_articole`
+       3. `forum_reply_in_subscribed` for thread watchers — EXCLUDING
+          users who are already getting a mention notification (mention
+          wins) and the article author (revista wins for that case)
+     Each notification carries a stable dedup_key; NotificationsService
+     enforces the dedup window.
+     ============================================================ */
+
+  private async fanOutReplyNotifications(args: {
+    postId: string;
+    threadId: string;
+    actorId: string;
+    mentionedIds: string[];
+  }): Promise<void> {
+    const { postId, threadId, actorId, mentionedIds } = args;
+
+    // Look up thread + category context once.
+    const [ctx] = await this.db
+      .select({
+        threadSlug: forumThreads.slug,
+        threadTitle: forumThreads.title,
+        categoryKey: forumCategories.key,
+        categorySlug: forumCategories.slug,
+      })
+      .from(forumThreads)
+      .innerJoin(
+        forumCategories,
+        eq(forumCategories.id, forumThreads.categoryId),
+      )
+      .where(eq(forumThreads.id, threadId))
+      .limit(1);
+    if (!ctx) return;
+
+    const basePayload = {
+      threadId,
+      threadSlug: ctx.threadSlug,
+      threadTitle: ctx.threadTitle,
+      categorySlug: ctx.categorySlug,
+      postId,
+    };
+
+    const suppressed = new Set<string>([actorId]);
+
+    // 1. Mentions.
+    for (const recipientId of mentionedIds) {
+      if (suppressed.has(recipientId)) continue;
+      await this.notifications.post({
+        recipientId,
+        actorId,
+        kind: 'forum_mention',
+        dedupKey: `forum_mention:${postId}:${recipientId}`,
+        targetType: 'forum_post',
+        targetId: postId,
+        payload: basePayload,
+      });
+      suppressed.add(recipientId);
+    }
+
+    // 2. Revista author when in `discutii_articole`.
+    if (ctx.categoryKey === 'discutii_articole') {
+      const [art] = await this.db
+        .select({
+          authorId: articles.authorId,
+          articleSlug: articles.slug,
+          articleTitle: articles.title,
+        })
+        .from(articles)
+        .where(eq(articles.threadId, threadId))
+        .limit(1);
+      if (art && art.authorId && !suppressed.has(art.authorId)) {
+        await this.notifications.post({
+          recipientId: art.authorId,
+          actorId,
+          kind: 'revista_reply_to_my_article',
+          dedupKey: `revista_reply:${postId}:${art.authorId}`,
+          targetType: 'forum_post',
+          targetId: postId,
+          payload: {
+            ...basePayload,
+            articleSlug: art.articleSlug,
+            articleTitle: art.articleTitle,
+          },
+        });
+        suppressed.add(art.authorId);
+      }
+    }
+
+    // 3. Thread watchers (real-time level only).
+    const watchers = await this.subscriptions.watchersForRealtime(
+      threadId,
+      actorId,
+    );
+    for (const recipientId of watchers) {
+      if (suppressed.has(recipientId)) continue;
+      await this.notifications.post({
+        recipientId,
+        actorId,
+        kind: 'forum_reply_in_subscribed',
+        dedupKey: `forum_reply:${postId}:${recipientId}`,
+        targetType: 'forum_post',
+        targetId: postId,
+        payload: basePayload,
+      });
+    }
   }
 
   /* ============================================================
@@ -415,6 +549,28 @@ export class ForumPostsService {
 
   async findById(id: string): Promise<ForumPost> {
     return this.requirePost(id);
+  }
+
+  /**
+   * Returns the IDs of posts in `threadId` that `userId` has liked.
+   * Used by the thread page to render the active state of the "Util"
+   * button for the logged-in user (single round-trip after listPosts).
+   */
+  async listMyLikedPostIds(
+    userId: string,
+    threadId: string,
+  ): Promise<{ postIds: string[] }> {
+    const rows = await this.db
+      .select({ postId: forumPostLikes.postId })
+      .from(forumPostLikes)
+      .innerJoin(forumPosts, eq(forumPosts.id, forumPostLikes.postId))
+      .where(
+        and(
+          eq(forumPostLikes.userId, userId),
+          eq(forumPosts.threadId, threadId),
+        ),
+      );
+    return { postIds: rows.map((r) => r.postId) };
   }
 
   /* ============================================================

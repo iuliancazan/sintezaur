@@ -186,6 +186,13 @@ export const appRoutes: Route[] = [
             (m) => m.SavedSearchesPage,
           ),
       },
+      {
+        path: 'abonamente',
+        loadComponent: () =>
+          import('./account/forum-subscriptions.page').then(
+            (m) => m.ForumSubscriptionsPage,
+          ),
+      },
     ],
   },
 ];

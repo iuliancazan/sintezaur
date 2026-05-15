@@ -1,4 +1,5 @@
 import {
+  IsIn,
   IsInt,
   IsObject,
   IsOptional,
@@ -7,6 +8,7 @@ import {
   Length,
   Max,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateThreadDto {
@@ -74,4 +76,11 @@ export class ListPostsQueryDto {
   @Min(1)
   @Max(200)
   pageSize?: number;
+}
+
+export class SetSubscriptionDto {
+  /** `null` clears the subscription entirely (unsubscribe). */
+  @ValidateIf((_, value) => value !== null)
+  @IsIn(['watching', 'tracking', 'mentioned_only', 'muted'])
+  level!: 'watching' | 'tracking' | 'mentioned_only' | 'muted' | null;
 }

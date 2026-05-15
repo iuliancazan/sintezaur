@@ -6,14 +6,14 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-D (`b204883`) — posting + reply + `@mentions` + edit window +
-pending state UI.
+**Last shipped:** M5-E (HEAD) — likes („Util") + subscriptions (thread +
+category, 4 leveluri) + notification fan-out (`forum_mention` > `revista_reply_to_my_article` > `forum_reply_in_subscribed`) + `/cont/abonamente`.
 
-**Next up:** **M5-E** — subscriptions + likes ("Util") + notification fan-out
-(`forum_reply_in_subscribed` + `forum_mention` + `revista_reply_to_my_article`).
-Începe cu o rundă interview (5-8 întrebări) per regula spec-first.
+**Next up:** **M5-F** — badges cron + dashboard editor pentru badge
+definitions. Începe cu o rundă interview (5-8 întrebări) per regula
+spec-first.
 
-**Active milestone:** M5 Forum (walking skeleton complet, 9 sub-faze A-I; 4/9 done).
+**Active milestone:** M5 Forum (walking skeleton complet, 9 sub-faze A-I; 5/9 done).
 
 ## Milestones
 
@@ -86,7 +86,8 @@ pending state UI.
 | B   | `eb57245` | done | backend: 3 services (Categories/Threads/Posts) + 3 controllers (Public/Auth/Mod) |
 | C   | `31b5b99` | done | site read pages: `/forum` index + `/forum/:category` listă + `/forum/:category/:slug` thread cu 2-level threading + sourceLink pentru system threads |
 | D   | `b204883` | done | posting (new thread page + inline reply + general reply + edit window + delete) + `@mention` autocomplete (server parsing) + pending state UI + mention-search endpoint |
-| E   |  —      | **next** | subscriptions + likes ("Util") + notification fan-out (`forum_reply_in_subscribed` + `forum_mention` + `revista_reply_to_my_article`) |
+| E   | HEAD    | done | likes toggle + 4-level subscriptions (thread + category) + bell dropdown UI + auto-watch on reply + notification fan-out (mention > revista-author > thread-watcher) + `/cont/abonamente` |
+| F   |  —      | **next** | badges cron + dashboard editor pentru badge definitions |
 | F   |  —      | pending | badges cron + dashboard editor pentru badge definitions |
 | G   |  —      | pending | moderation tools inline + `content_report` queue în dashboard |
 | H   |  —      | pending | faceted search + anti-spam stack (honeypot + time-on-form + rate limit + first-post queue UI) |
