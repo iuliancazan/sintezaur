@@ -147,12 +147,9 @@ export const appRoutes: Route[] = [
     path: 'cont',
     canActivate: [authGuard],
     children: [
-      {
-        path: '',
-        pathMatch: 'full',
-        loadComponent: () =>
-          import('./account/account-home.page').then((m) => m.AccountHomePage),
-      },
+      // M10-F: the old per-link grid landing is retired. Hitting
+      // `/cont` now lands on the first Setări tab.
+      { path: '', redirectTo: 'setari', pathMatch: 'full' },
       // M10-C: legacy paths redirect into the new /cont/setari shell.
       { path: 'profil', redirectTo: 'setari/profil', pathMatch: 'full' },
       { path: 'parola', redirectTo: 'setari/parola', pathMatch: 'full' },

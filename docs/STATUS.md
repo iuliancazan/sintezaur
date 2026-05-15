@@ -6,25 +6,26 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M9-C (`1b5762a`) — observability. **Sentry**
-(`@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1`) wired în api +
-worker via side-effect import în `instrument.ts` înainte de
-`NestFactory.create` (catch boot errors) + `SentryModule.forRoot()`
-în AppModule (per-request integration). Worker tagged `service: 'worker'`.
-4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`),
-no-op pe dev. **Daily pg_dump backup**: nou `PgDumpBackupJob` cu
-cron `backup:pg-dump` @ 02:30 UTC — `pg_dump --format=custom
---compress=9` la `BACKUP_DIR` (default `./storage/backups`) +
-prune fișiere > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md`
-cu 3 layers (local + Hetzner Storage Box rclone + restore drill
-trimestrial). Tech-stack.md updated cu Sentry.
+**Last shipped:** M10-F — post-launch UX iteration #1. Vechea pagină-grid
+`/cont` cu 12 link-uri e dezasamblată în topbar nou (avatar dropdown
+role-gated, ❤️ favorite, ✉️ mesaje, burger pe mobil) + 3 tab-shell-uri
+(`/cont/setari` × 6 tab-uri, `/cont/favorite` × 3, `/cont/mesaje` × 2 cu
+Forum placeholder). Avatar fallback cu inițiale colorate determinist
+din `user.id` via `oklch(0.55 0.12 hue)`. AccountMenuComponent +
+MobileMenuComponent ambele cu outside-click + Esc + role-gated
+Dashboard. AuthShell gains `embedded` mode pentru change-password /
+change-email când sunt în shell. Toate URL-urile vechi (`/cont/profil`,
+`/cont/salvate`, etc.) redirect-uite. `account-home.page.ts` șters.
 
-**Next up:** **M9 close** — `docs/testing/m9-testing.md` cu plan
-manual pentru A/B/C, apoi MVP feature-complete 100% spec. Restul
-e operațional (Iulian configurează SENTRY_DSN + rclone + ce mai trebuie
-în Coolify).
+**Next up:** **M11** — Tezaur contributor flow per spec §7.2: rol
+`contributor` (auto-promote la 100 forum posts) și `curator` (manual
+de admin) primesc capacitatea de a propune / edita echipamente direct
+de pe site (`/tezaur/propune`, „Editează" inline pe `/tezaur/:slug`),
+cu coadă moderare pentru status `pending_review`. Cod existent
+pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
+relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** M9 — A ✅, B ✅, C ✅, testing doc + close.
+**Active milestone:** M10 — A ✅, B ✅, C ✅, D ✅, E ✅, F ✅, testing doc + close.
 
 ## Milestones
 
@@ -138,6 +139,17 @@ e operațional (Iulian configurează SENTRY_DSN + rclone + ce mai trebuie
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M10 — Post-launch UX iteration #1 (cont reorg)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `f7a1008` | done | Topbar avatar dropdown role-gated înlocuiește butonul „CONT". `SzAvatarComponent` cu `seed` (oklch hue determinist din `user.id`); `SzTopbarComponent` cu accountClick emit + accountMenuOpen border-state. Nouă `AccountMenuComponent` în site (fixed panel à la notifications, outside-click + Esc, item-uri: Setări, Anunțurile mele, Trimite feedback, Dashboard pentru admin/superadmin, Ieși din cont). i18n: 3 chei. Dashboard wired la goHome ca să păstreze comportamentul vechi. |
+| B   | `ee939ac` | done | Iconițe ❤️ ✉️ în topbar + burger mobile. Sprite gains `mail` icon; topbar primește 3 inputs (showFavorites/Messages/Burger) + badge slot pe ✉️ + class `.sz-icon-btn--collapsible` care ascunde iconițele sub 640px. Nouă `MobileMenuComponent` slide-in din dreapta cu favorite/mesaje/theme/setări/anunțuri/feedback/dashboard/logout. App shell juggle 3 panouri mutually exclusive. |
+| C   | `0227d3d` | done | `/cont/setari` shell cu 6 tab-uri peste paginile existente (Profil/Parolă/Email/Datele mele/Preferințe notificări/Utilizatori blocați). `AuthShell.embedded` mode pentru change-password / change-email când sunt în shell. 6 redirect-uri vechi (`/cont/profil` etc.) → noile tab-uri. i18n: `account.settings.*`. |
+| D   | `0627544` | done | `/cont/favorite` shell cu 3 tab-uri (Anunțuri salvate, Căutări salvate, Abonamente forum) peste paginile existente. 3 redirect-uri vechi. Heart click în topbar → `/cont/favorite`. i18n: `account.favorites.*`. |
+| E   | `25e8fba` | done | `/cont/mesaje` shell cu tab Bazar (inbox live) + Forum (placeholder „În curând" pentru viitoare PM-uri Forum). Threadul `:threadId` rămâne pe URL-ul vechi (acum copil al shell-ului). Default tab redirect la `bazar`. i18n: `account.messages_shell.*`. Future dev notat: unified inbox Bazar+Forum cu badge pe sursă. |
+| F   | _pending sync_ | done | Cleanup: `account-home.page.ts` șters, `/cont` redirect → `/cont/setari`, chei i18n orfane curățate (`my_watches`, `saved_searches`). `docs/testing/m10-testing.md` cu plan manual pentru toate 6 sub-faze + regresie + bookmark-uri vechi + known limitations. |
 
 ## Conventions (recap from memory)
 

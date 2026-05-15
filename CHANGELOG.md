@@ -7,6 +7,98 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M10 — Post-launch UX iteration #1 (cont reorg)
+
+Vechea pagină-grid `/cont` cu 12 link-uri dispare. În locul ei: un
+topbar cu avatar dropdown role-gated, două iconițe noi pentru
+favorite și mesaje, burger panel pe mobil, și trei tab-shell-uri
+(`/cont/setari`, `/cont/favorite`, `/cont/mesaje`) care reorganizează
+cele 12 secțiuni în grupuri logice. Toate URL-urile vechi
+redirect-uite ca bookmark-urile să meargă.
+
+#### M10-A — Topbar avatar dropdown (`f7a1008`)
+
+- `SzAvatarComponent.seed` input — fundal `oklch(0.55 0.12 hue)`
+  generat determinist din `user.id` (FNV-1a → hue 0–359). Fiecare
+  user vede aceeași culoare stabilă pe orice device.
+- `SzTopbarComponent` renderează avatarul pentru user logat (în loc
+  de butonul „Cont" cu text) și emite `accountClick`. Input
+  `accountMenuOpen` accent border când dropdown-ul e deschis.
+- Nou `AccountMenuComponent` în `apps/site` — meniu flotant cu
+  outside-click + Esc + role gating. Item-uri: Setări, Anunțurile
+  mele, Trimite feedback (modal), Dashboard (admin/superadmin),
+  Ieși din cont. Mutually exclusive cu panoul de notificări.
+- Dashboard preia `accountClick` la `goHome()` ca să păstreze
+  comportamentul vechi (avatarul navighează la `/`).
+- i18n: `account.menu.{aria,settings,dashboard}` +
+  `app.actions.account_menu`.
+
+#### M10-B — Iconițe favorite + mesaje + burger mobile (`ee939ac`)
+
+- Sprite icon `mail` (envelope) adăugat.
+- `SzTopbarComponent` cu 3 inputs noi (`showFavorites`,
+  `showMessages`, `showBurger`) + badge slot pe ✉️ +
+  `.sz-icon-btn--collapsible` care ascunde ❤️ ✉️ sub 640px.
+- Nou `MobileMenuComponent` slide-in din dreapta, conține
+  favorite, mesaje, theme toggle, și tot dropdown-ul avatar
+  (inclusiv role-gating). Backdrop + Esc închid.
+- App shell juggle 3 panouri (notifications, account, mobile)
+  mutually exclusive.
+- i18n: `app.topbar.{favorites,messages,burger}` +
+  `app.mobile_menu.{aria,title,close,shortcuts}` +
+  `account.menu.favorites`.
+
+#### M10-C — `/cont/setari` cu 6 tab-uri (`0227d3d`)
+
+- Nou `SettingsShellPage` cu horizontal tab strip (Profil,
+  Parolă, Email, Datele mele, Preferințe notificări, Utilizatori
+  blocați). Tab-urile sunt scrollabile pe mobil.
+- Fiecare tab încarcă componenta existentă neschimbată ca child
+  `<router-outlet>`. Selectorii back-link interni
+  (`.profile__back` etc.) ascunși în shell.
+- `AuthShellComponent.embedded` mode: change-password și
+  change-email drop full-page chrome (logo + min-height +
+  back-home footer) când sunt în shell.
+- Routes: 6 redirect-uri vechi (`/cont/profil` etc.) →
+  `/cont/setari/...`; `/cont/setari` redirect la `/profil`.
+- i18n: `account.settings.{title,tabs_aria,my_data,blocked_users}`.
+
+#### M10-D — `/cont/favorite` cu 3 tab-uri (`0627544`)
+
+- Nou `FavoritesShellPage` cu tab-uri Anunțuri, Căutări,
+  Abonamente forum. Reuse `MyWatchesPage`, `SavedSearchesPage`,
+  `ForumSubscriptionsPage`.
+- Topbar ❤️ click acum navighează la `/cont/favorite` (default
+  redirect la `/anunturi`).
+- Routes: 3 redirect-uri vechi (`/cont/salvate`,
+  `/cont/cautari-salvate`, `/cont/abonamente`).
+- i18n: `account.favorites.{title,tabs_aria,tab_listings,tab_searches}`.
+
+#### M10-E — `/cont/mesaje` cu Bazar + Forum placeholder (`25e8fba`)
+
+- Nou `MessagesShellPage` cu 2 tab-uri: Bazar (inbox live cu
+  realtime) și Forum (placeholder „În curând").
+- Forum tab afișează `ForumMessagesPlaceholderPage` cu copy
+  explicativ — Forum PMs vor fi implementate în viitor, plan e
+  să fie unite cu Bazar într-un singur inbox cu badge pe sursă
+  (notat ca future development).
+- `/cont/mesaje/:threadId` rămâne pe URL-ul vechi, acum copil al
+  shell-ului, așa că notification deep-links și inbox row clicks
+  rămân funcționale.
+- Default redirect `/cont/mesaje` → `/cont/mesaje/bazar`.
+- i18n: `account.messages_shell.*` (6 chei).
+
+#### M10-F — Cleanup + redirect `/cont` + testing doc
+
+- `account-home.page.ts` șters (pagina-grid cu 12 link-uri).
+- `/cont` redirect → `/cont/setari` (→ `/cont/setari/profil`).
+- Chei i18n orfane curățate: `account.menu.my_watches`,
+  `account.menu.saved_searches` (eliminate).
+- `docs/testing/m10-testing.md` cu plan manual: avatar dropdown,
+  burger mobile, 3 tab-shells, redirect-uri, regresie, known
+  limitations (Forum PMs, unified inbox, Tezaur contributor =
+  M11).
+
 ### M9 — SEO closure + unified search + observability
 
 #### M9-C — Observability: Sentry + daily pg_dump backup (`1b5762a`)
