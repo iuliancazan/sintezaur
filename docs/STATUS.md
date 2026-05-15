@@ -6,14 +6,17 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** M5-I (`efd6b1c`) — thread oficial per echipament (Tezaur toggle
-integration). **M5 Forum walking skeleton complet ✅ (9/9 sub-faze).**
+**Last shipped:** M6-A (`<commit>`) — pagini legale (6 slug-uri) +
+formular contact + cookies banner + admin dashboard CRUD. Soft-launch
+ready pe latura GDPR.
 
-**Next up:** **M6** — polish + soft-launch prep. Vezi
-`docs/spec/spec.md` §11 Phase 4 pentru scope. Începe cu interview pe
-prioritățile M6 când reluăm.
+**Next up:** **M6-B** — SEO base: `MetaService` global per pagină
+(title/description/OG/Twitter), `sitemap.xml` dinamic din DB, JSON-LD
+schema.org pe Tezaur/Revista/Bazar. TODO file pentru SEO max
+(slug_redirect verify pe articol+forum_thread + 410 Gone după expirare).
 
-**Active milestone:** trecere M5 → M6.
+**Active milestone:** M6 — polish + soft-launch prep (4 sub-faze:
+A legal ✅ → B SEO → C polish UI → D feedback widget).
 
 ## Milestones
 
@@ -78,7 +81,7 @@ prioritățile M6 când reluăm.
 | E   | `553821b` | done | dashboard moderare articole + grant roluri (editor/curator/moderator) |
 | F   | `49b520a` | done | revista category follow + publish fan-out (`revista_article_in_followed_category` §7.5) |
 
-### M5 — Forum (active)
+### M5 — Forum
 
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
@@ -91,6 +94,15 @@ prioritățile M6 când reluăm.
 | G   | `6899eb3` | done | mod inline kebab (hide/lock/pin/delete/approve/reject) + report dialog cu 5 categorii + content_reports CRUD + `/rapoarte` queue cu acțiuni combinate (hide+resolve / lock+resolve / delete+resolve) + audit_log per acțiune + notify (`forum_mod_action_on_my_content` + `forum_report_resolved`) |
 | H   | `1417fce` | done | faceted search `/forum/cautare` (text + category + author + date + tags + gear_tag, ts_headline snippets cu `<mark>`) + tags + gear_tag schema (migration 0010) + tag input + gear picker pe thread form + anti-spam stack (honeypot + time-on-form + IP rate-limit per-process) + dashboard `/forum-queue` first-post approval |
 | I   | `efd6b1c` | done | thread oficial per echipament (Tezaur toggle integration, reverse FK migration 0011) + auto-OP + toggle ON/OFF cu reuse pe re-enable + audit log + card oficial + listă related threads pe `/tezaur/:slug` forum tab + checkbox „Thread oficial" în dashboard tezaur edit |
+
+### M6 — Polish + Soft-launch prep (active)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `<commit>` | done | pagini legale (6 slug-uri seed RO) + admin `/legal` CRUD + formular contact public cu honeypot + admin `/contact-messages` queue + cookies banner + footer extins + migration `0012_legal_pages` + seed `9009_legal_pages_seed` + `marked` lib pentru render markdown |
+| B   | — | pending | SEO mediu: `MetaService` global per pagină, `sitemap.xml` dinamic, JSON-LD Product/Article/ClassifiedAd + TODO max-level |
+| C   | — | pending | polish UI pass: 404+410 brand pages, empty states peste tot, HTTP error interceptor global, skeleton loaders |
+| D   | — | pending | feedback widget în user menu + admin `/feedback` queue cu mark-read/archive |
 
 ## Conventions (recap from memory)
 

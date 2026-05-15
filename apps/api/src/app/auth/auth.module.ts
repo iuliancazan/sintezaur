@@ -8,6 +8,6 @@ import { EmailService } from './email.service';
   imports: [SintezaurAuthModule],
   controllers: [AuthController],
   providers: [AuthService, EmailService],
-  exports: [AuthService],
+  exports: [AuthService, EmailService],
 })
 export class AuthModule {}

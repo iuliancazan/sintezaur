@@ -38,3 +38,6 @@ export * from './articles';
 
 // Forum (M5)
 export * from './forum';
+
+// Legal pages + contact (M6-A)
+export * from './legal';

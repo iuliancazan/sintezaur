@@ -46,6 +46,14 @@ import { AuthService } from './auth/auth.service';
           <span class="module__name">Forum queue</span>
           <span class="module__desc">Prima postare a userilor noi · approve / reject</span>
         </a>
+        <a class="module" routerLink="/legal">
+          <span class="module__name">Pagini legale</span>
+          <span class="module__desc">Termeni · GDPR · Cookies · Regulament · Despre · Contact</span>
+        </a>
+        <a class="module" routerLink="/contact-messages">
+          <span class="module__name">Mesaje contact</span>
+          <span class="module__desc">Coadă formular public · marchează / arhivează</span>
+        </a>
         <span class="module is-disabled">
           <span class="module__name">Audit log</span>
           <span class="module__desc">Land în M2.5 (vizualizare audit_log)</span>

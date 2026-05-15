@@ -126,6 +126,7 @@
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.36.4",
     "helmet": "^8.0.0",
+    "marked": "^18.0.3",
     "multer": "^2.1.1",
     "nestjs-pino": "^4.6.1",
     "nodemailer": "^8.0.7",

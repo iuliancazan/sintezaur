@@ -7,6 +7,33 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M6 — Polish + Soft-launch prep
+
+#### M6-A — Pagini legale + formular contact + cookies banner (`<commit>`)
+
+- Migration `0012_legal_pages.sql` (schema) + `9009_legal_pages_seed.sql` (postflight seed). Două tabele noi:
+  - `legal_pages (slug unique, title, body_md, meta_description, updated_by_user_id, timestamps)` — 6 slug-uri canonice: `termeni`, `confidentialitate`, `cookies`, `regulament-forum`, `despre`, `contact`.
+  - `contact_messages (user_id?, name, email, category, subject, body, status, ip, ua, read_at, read_by_user_id, created_at)` cu 2 enums: `contact_message_category` (5 valori) + `contact_message_status` (new/read/archived).
+  - Enums placeholder pentru M6-D: `user_feedback_kind` + `user_feedback_status` (tabela propriu-zisă creată în M6-D).
+- Drafturi RO seedate pentru toate 6 paginile (Iulian Cazan persoană fizică, RO, Hetzner+Brevo ca data processors, mențiune ANSPDCP, retention 30 zile/3 ani/2 ani).
+- Backend `LegalModule`:
+  - Public: `GET /api/legal` (sumar pentru footer/sitemap) + `GET /api/legal/:slug` (body complet, cache pe slug client).
+  - Admin: `GET /api/admin/legal` (cu body) + `PUT /api/admin/legal/:slug` (upsert, audit prin `updated_by_user_id`).
+  - Public form: `POST /api/contact` (anonymous-friendly) cu honeypot + time-on-form (3s..6h) + throttle 5/min/IP peste global 60/min. Email notification către `CONTACT_OPERATOR_EMAIL` (fire-and-forget, fail-soft).
+  - Admin queue: `GET /api/admin/contact-messages?status=&category=&page=&pageSize=` + `PATCH /:id` (read/archived) + `GET /unread` pentru badge.
+- Site:
+  - Rute noi: `/termeni`, `/confidentialitate`, `/cookies`, `/regulament-forum`, `/despre` (5 reutilizează `LegalPage` cu slug în `route.data`) + `/contact` (componentă proprie cu form).
+  - Markdown render client-side via `marked` (instalat la rădăcină) + `DomSanitizer.bypassSecurityTrustHtml` (input din DB admin-edited, trust acceptat).
+  - Formular contact: 5 categorii (cumpărător/vânzător/editor/juridic/altele), prefill name+email pentru utilizatorii autentificați, honeypot hidden via CSS, `formStartedAt` capturat la mount.
+  - `<app-cookies-banner>` montat în root shell: notice discret bottom, dismiss persistă în `localStorage` (sintezaur.cookies.dismissed.v1), SSR-safe.
+  - Footer extins cu `Cookies` + `Regulament forum` (RSS scos — nu există încă); link-urile mutate de pe `href` pe `routerLink` pentru navigare SPA.
+- Dashboard:
+  - `/legal` — tabel cu 6 rânduri + modal de editare (titlu, meta description, body markdown). Hint despre sintaxă în label.
+  - `/contact-messages` — coadă cu filtre status (Noi/Citite/Arhivate/Toate), expand-row pe click cu body + IP + UA + reply link `mailto:`, auto-mark-read la prima expansiune, optimistic update.
+  - Home: 2 module noi (`Pagini legale`, `Mesaje contact`).
+- i18n: chei noi `footer.cookies` + `footer.forum_rules`.
+- TODO M6-B: SEO meta + sitemap + slug_redirect verify (gear/article/thread) + 410 Gone după expirare.
+
 ### Forum (M5) — walking skeleton complet ✅
 
 #### M5-I — Thread oficial per echipament (`efd6b1c`)

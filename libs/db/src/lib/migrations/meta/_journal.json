@@ -71,6 +71,13 @@
       "when": 1778807400000,
       "tag": "0011_canonical_gear_thread",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1778839376551,
+      "tag": "0012_legal_pages",
+      "breakpoints": true
     }
   ]
 }

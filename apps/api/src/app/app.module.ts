@@ -17,6 +17,7 @@ import { RealtimeModule } from './realtime/realtime.module';
 import { RevistaModule } from './revista/revista.module';
 import { TezaurModule } from './tezaur/tezaur.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
+import { LegalModule } from './legal/legal.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
     RevistaModule,
     ForumModule,
     AdminUsersModule,
+    LegalModule,
   ],
   controllers: [AppController],
   providers: [

@@ -201,4 +201,42 @@ export const appRoutes: Route[] = [
       },
     ],
   },
+  // Legal & informational static pages (M6-A). Five share one component;
+  // the slug travels via route `data`. Contact has its own component
+  // because it hosts the submit form.
+  {
+    path: 'termeni',
+    data: { slug: 'termeni' },
+    loadComponent: () =>
+      import('./legal/legal-page.component').then((m) => m.LegalPage),
+  },
+  {
+    path: 'confidentialitate',
+    data: { slug: 'confidentialitate' },
+    loadComponent: () =>
+      import('./legal/legal-page.component').then((m) => m.LegalPage),
+  },
+  {
+    path: 'cookies',
+    data: { slug: 'cookies' },
+    loadComponent: () =>
+      import('./legal/legal-page.component').then((m) => m.LegalPage),
+  },
+  {
+    path: 'regulament-forum',
+    data: { slug: 'regulament-forum' },
+    loadComponent: () =>
+      import('./legal/legal-page.component').then((m) => m.LegalPage),
+  },
+  {
+    path: 'despre',
+    data: { slug: 'despre' },
+    loadComponent: () =>
+      import('./legal/legal-page.component').then((m) => m.LegalPage),
+  },
+  {
+    path: 'contact',
+    loadComponent: () =>
+      import('./legal/contact-page.component').then((m) => m.ContactPage),
+  },
 ];

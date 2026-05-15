@@ -62,6 +62,20 @@ export const appRoutes: Route[] = [
       import('./forum-queue/forum-queue.page').then((m) => m.ForumQueuePage),
   },
   {
+    path: 'legal',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./legal/legal-admin.page').then((m) => m.LegalAdminPage),
+  },
+  {
+    path: 'contact-messages',
+    canActivate: [staffGuard],
+    loadComponent: () =>
+      import('./legal/contact-messages.page').then(
+        (m) => m.ContactMessagesPage,
+      ),
+  },
+  {
     path: '',
     pathMatch: 'full',
     canActivate: [staffGuard],

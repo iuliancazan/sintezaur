@@ -12,6 +12,7 @@ import { SzNavLink, SzTopbarComponent, SzTopbarUser } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
+import { CookiesBanner } from './legal/cookies-banner.component';
 import { NotificationsPanelComponent } from './notifications/notifications-panel.component';
 import { NotificationsService } from './notifications/notifications.service';
 
@@ -32,6 +33,7 @@ import { NotificationsService } from './notifications/notifications.service';
     SzTopbarComponent,
     TPipe,
     NotificationsPanelComponent,
+    CookiesBanner,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -63,6 +65,7 @@ import { NotificationsService } from './notifications/notifications.service';
     }
 
     <router-outlet />
+    <app-cookies-banner />
 
     <footer class="app-foot">
       <div class="shell">
@@ -86,11 +89,12 @@ import { NotificationsService } from './notifications/notifications.service';
           <div class="app-foot__col">
             <h4>// {{ 'footer.col_about' | t }}</h4>
             <ul>
-              <li><a href="/despre">{{ 'footer.about' | t }}</a></li>
-              <li><a href="/contact">{{ 'footer.contact' | t }}</a></li>
-              <li><a href="/termeni">{{ 'footer.terms' | t }}</a></li>
-              <li><a href="/confidentialitate">{{ 'footer.privacy' | t }}</a></li>
-              <li><a href="/rss">{{ 'footer.rss' | t }}</a></li>
+              <li><a routerLink="/despre">{{ 'footer.about' | t }}</a></li>
+              <li><a routerLink="/contact">{{ 'footer.contact' | t }}</a></li>
+              <li><a routerLink="/termeni">{{ 'footer.terms' | t }}</a></li>
+              <li><a routerLink="/confidentialitate">{{ 'footer.privacy' | t }}</a></li>
+              <li><a routerLink="/cookies">{{ 'footer.cookies' | t }}</a></li>
+              <li><a routerLink="/regulament-forum">{{ 'footer.forum_rules' | t }}</a></li>
             </ul>
           </div>
           <div class="app-foot__col">
