@@ -78,7 +78,7 @@ import { uploadUrl } from '../seo/seo.utils';
             }
           </div>
           <input
-            #fileInput
+            #fileInputEl
             type="file"
             accept="image/jpeg,image/png,image/webp"
             hidden
@@ -350,7 +350,7 @@ export class ProfileEditPage {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly toast = inject(ToastService);
-  readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
+  readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInputEl');
 
   readonly saving = signal(false);
   readonly avatarPending = signal(false);
