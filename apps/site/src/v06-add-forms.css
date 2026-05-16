@@ -721,6 +721,13 @@
 }
 .ta-cta--primary { background: var(--accent); color: var(--accent-fg); border: 1px solid var(--accent); }
 .ta-cta--primary:hover { filter: brightness(1.1); }
+.ta-cta--primary.is-not-ready {
+  background: color-mix(in oklab, var(--accent) 30%, var(--bg));
+  border-color: color-mix(in oklab, var(--accent) 40%, var(--line));
+  color: color-mix(in oklab, var(--accent-fg) 70%, var(--fg-muted));
+  cursor: help;
+}
+.ta-cta--primary.is-not-ready:hover { filter: none; }
 .ta-cta--ghost {
   background: var(--bg);
   color: var(--fg);

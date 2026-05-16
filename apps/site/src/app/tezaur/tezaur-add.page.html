@@ -986,9 +986,11 @@
             <div class="ta-cta-row">
               <button
                 class="ta-cta ta-cta--primary"
+                [class.is-not-ready]="!canSubmit()"
                 type="button"
-                [disabled]="!canSubmit() || submitting()"
+                [disabled]="submitting()"
                 (click)="submitForModeration()"
+                [attr.aria-disabled]="!canSubmit() ? 'true' : null"
               >
                 {{ submitting() ? ('tezaur.add.submitting' | t) : ('tezaur.add.submit' | t) }} →
               </button>

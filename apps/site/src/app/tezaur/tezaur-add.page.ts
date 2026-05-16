@@ -19,6 +19,7 @@ import { AuthService } from '../auth/auth.service';
 import { hasAnyRole } from '../auth/auth.types';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
+import { ToastService } from '../ui/toast.service';
 import {
   TezaurService,
   type GearState,
@@ -330,6 +331,7 @@ export class TezaurAddPage {
   private readonly router = inject(Router);
   readonly i18n = inject(I18nService);
   readonly auth = inject(AuthService);
+  private readonly toast = inject(ToastService);
 
   /* ---------- option tables for the template ---------- */
   readonly categoryOptions = CATEGORY_OPTIONS;
@@ -691,10 +693,29 @@ export class TezaurAddPage {
     }
   }
 
-  /** Manual save — fires immediately, skipping the debounce. */
-  async saveDraftNow(): Promise<void> {
+  /**
+   * Manual save — fires immediately, skipping the debounce. When called
+   * from a user-facing button (no args), shows a toast with the outcome.
+   * Pass `{ silent: true }` from internal flows (submit, mod approve) that
+   * surface their own outcome toast.
+   */
+  async saveDraftNow(opts: { silent?: boolean } = {}): Promise<void> {
     if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    const wasDirty = this.dirty;
     await this.persistDraft();
+    if (opts.silent) return;
+    if (this.saveStatus() === 'saved') {
+      this.toast.success(
+        wasDirty
+          ? this.i18n.t('tezaur.add.toast.saved')
+          : this.i18n.t('tezaur.add.toast.already_saved'),
+      );
+    } else if (this.saveStatus() === 'error') {
+      this.toast.error(
+        this.i18n.t('tezaur.add.toast.save_error_title'),
+        { detail: this.i18n.t('tezaur.add.toast.save_error_body') },
+      );
+    }
   }
 
   private collectPayload(): TezaurDraftPayload {
@@ -846,7 +867,7 @@ export class TezaurAddPage {
       return;
     }
     if (!this.draftId()) {
-      await this.saveDraftNow();
+      await this.saveDraftNow({ silent: true });
     }
     const id = this.draftId();
     if (!id) {
@@ -1007,7 +1028,7 @@ export class TezaurAddPage {
     const row = this.linkRows()[idx];
     if (!row.url) return;
     if (!this.draftId()) {
-      await this.saveDraftNow();
+      await this.saveDraftNow({ silent: true });
     }
     const id = this.draftId();
     if (!id) return;
@@ -1076,7 +1097,7 @@ export class TezaurAddPage {
     if (!row.brand || !row.model) return;
 
     if (!this.draftId()) {
-      await this.saveDraftNow();
+      await this.saveDraftNow({ silent: true });
     }
     const parentId = this.draftId();
     if (!parentId) return;
@@ -1092,9 +1113,17 @@ export class TezaurAddPage {
           g.model.toLowerCase() === row.model.toLowerCase(),
       );
       if (!match) {
-        // Soft fail — keep row, surface tip
-        this.submitError.set(
-          `Nu am găsit „${row.brand} ${row.model}" în Tezaur. Verifică ortografia sau lasă relația pentru curator.`,
+        // Soft fail — surface as a transient toast so it auto-dismisses
+        // and doesn't stick around after the user fixes the row.
+        this.toast.warn(
+          this.i18n.t('tezaur.add.toast.relation_not_found_title'),
+          {
+            detail: this.i18n.t('tezaur.add.toast.relation_not_found_body', {
+              brand: row.brand,
+              model: row.model,
+            }),
+            ttlMs: 7000,
+          },
         );
         return;
       }
@@ -1127,14 +1156,17 @@ export class TezaurAddPage {
     this.modAction.set('approving');
     try {
       // Persist any pending field edits before publishing.
-      await this.saveDraftNow();
+      await this.saveDraftNow({ silent: true });
       await this.tezaur.approveModerationItem(id);
       this.draftState.set('approved');
     } catch (err) {
       console.error('[tezaur-add] mod approve failed', err);
-      alert(this.i18n.t('tezaur.add.mod.action_error'));
+      this.toast.error(this.i18n.t('tezaur.add.mod.action_error'));
     } finally {
       this.modAction.set('idle');
+    }
+    if (this.draftState() === 'approved') {
+      this.toast.success(this.i18n.t('tezaur.add.toast.mod_approved'));
     }
   }
 
@@ -1152,15 +1184,18 @@ export class TezaurAddPage {
     this.modAction.set('rejecting');
     try {
       // Persist any pending field edits first so the contributor sees them.
-      await this.saveDraftNow();
+      await this.saveDraftNow({ silent: true });
       await this.tezaur.rejectModerationItem(id, trimmed);
       this.draftState.set('rejected');
       this.rejectionReason.set(trimmed);
     } catch (err) {
       console.error('[tezaur-add] mod reject failed', err);
-      alert(this.i18n.t('tezaur.add.mod.action_error'));
+      this.toast.error(this.i18n.t('tezaur.add.mod.action_error'));
     } finally {
       this.modAction.set('idle');
+    }
+    if (this.draftState() === 'rejected') {
+      this.toast.success(this.i18n.t('tezaur.add.toast.mod_rejected'));
     }
   }
 
@@ -1168,10 +1203,35 @@ export class TezaurAddPage {
 
   async submitForModeration(): Promise<void> {
     if (this.submitting() || this.isLocked()) return;
-    await this.saveDraftNow();
+    if (!this.canSubmit()) {
+      const missing = this.checklist()
+        .slice(0, 5)
+        .filter((i) => !i.done)
+        .map((i) => i.label);
+      this.toast.warn(
+        this.i18n.t('tezaur.add.toast.cannot_submit_title'),
+        {
+          detail: missing.length
+            ? this.i18n.t('tezaur.add.toast.cannot_submit_body_missing', {
+                fields: missing.join(', '),
+              })
+            : this.i18n.t('tezaur.add.toast.cannot_submit_body_generic'),
+          ttlMs: 8000,
+        },
+      );
+      return;
+    }
+    // Persist any pending edits via the manual save (also shows a toast on
+    // failure). If saveDraftNow ended with status 'error', bail before submit.
+    if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+    await this.persistDraft();
+    if (this.saveStatus() === 'error') {
+      this.toast.error(this.i18n.t('tezaur.add.toast.save_error_title'));
+      return;
+    }
     const id = this.draftId();
     if (!id) {
-      this.submitError.set('Salvează draftul mai întâi.');
+      this.toast.error(this.i18n.t('tezaur.add.toast.save_first'));
       return;
     }
     this.submitting.set(true);
@@ -1180,18 +1240,22 @@ export class TezaurAddPage {
     try {
       await this.tezaur.submitDraft(id);
       this.draftState.set('submitted');
-      // Stay on the page — the form will be locked + a success banner shows.
+      this.toast.success(this.i18n.t('tezaur.add.toast.submitted'));
     } catch (err) {
       if (err instanceof HttpErrorResponse) {
         const errBody = err.error as
           | { message?: string; missing?: string[] }
           | undefined;
-        this.submitError.set(
-          errBody?.message ?? 'Nu am putut trimite la moderare.',
-        );
+        const msg = errBody?.message ?? 'Nu am putut trimite la moderare.';
+        this.submitError.set(msg);
         this.submitMissing.set(errBody?.missing ?? []);
+        this.toast.error(
+          this.i18n.t('tezaur.add.toast.submit_error_title'),
+          { detail: msg },
+        );
       } else {
         this.submitError.set('Eroare neașteptată. Încearcă din nou.');
+        this.toast.error(this.i18n.t('tezaur.add.toast.submit_error_title'));
       }
     } finally {
       this.submitting.set(false);

@@ -393,6 +393,22 @@
       "save_draft": "Salvează ca draft",
       "discard": "Renunță & întoarce-te",
       "moderation_note": "Moderarea durează 1–3 zile lucrătoare. Vei primi notificare când e publicat.",
+      "toast": {
+        "saved": "Modificările au fost salvate.",
+        "already_saved": "Totul e deja salvat — nicio modificare în așteptare.",
+        "save_error_title": "Nu am putut salva draftul",
+        "save_error_body": "Verifică conexiunea și încearcă din nou. Modificările tale rămân în formular.",
+        "save_first": "Salvează draftul mai întâi, apoi trimite-l la moderare.",
+        "submitted": "Trimis la moderare. Vei primi notificare la decizie.",
+        "submit_error_title": "Nu am putut trimite la moderare",
+        "cannot_submit_title": "Nu poți trimite încă",
+        "cannot_submit_body_missing": "Completează: {{fields}}.",
+        "cannot_submit_body_generic": "Verifică checklist-ul din dreapta — sunt câmpuri obligatorii necompletate.",
+        "mod_approved": "Draft aprobat și publicat.",
+        "mod_rejected": "Cerere de modificări trimisă către contribuitor.",
+        "relation_not_found_title": "Piesa nu există în Tezaur",
+        "relation_not_found_body": "Nu am găsit {{brand}} {{model}}. Verifică ortografia sau lasă relația pentru curator."
+      },
       "mod": {
         "banner_head": "Vezi acest draft ca moderator.",
         "banner_body_submitted": "Poți corecta orice câmp înainte de aprobare. Modificările sunt salvate în audit log și sunt vizibile la cererea de audit.",
