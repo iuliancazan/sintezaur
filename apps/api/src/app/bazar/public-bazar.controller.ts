@@ -45,6 +45,10 @@ export class PublicBazarController {
     const viewerId = (req as { user?: { sub?: string } }).user?.sub;
     const data = await this.listings.findBySlug(slug, viewerId);
     if (!data) throw new NotFoundException(`listing ${slug} not found`);
+    // Drafts are private — only the seller may see them via the
+    // dedicated /me/bazar/listings/:id form endpoint.
+    if (data.listing.status === 'draft' && data.listing.sellerId !== viewerId)
+      throw new NotFoundException(`listing ${slug} not found`);
     return data;
   }
 }

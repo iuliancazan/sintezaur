@@ -26,6 +26,7 @@ import type { Request } from 'express';
 import { AuditLogService } from '../common/audit-log.service';
 import { StorageService } from '../common/storage.service';
 import type {
+  CreateListingDraftDto,
   CreateListingDto,
   ListListingsQueryDto,
   UpdateListingDto,
@@ -139,12 +140,14 @@ export class ListingsService {
         rawModel: dto.gearId ? null : dto.rawModel ?? null,
         rawYear: dto.rawYear ?? null,
         title: dto.title,
+        tagline: dto.tagline ?? null,
         description: dto.description,
         descriptionHtml: dto.descriptionHtml ?? '',
         price: dto.price.toString(),
         currency: dto.currency,
         condition: dto.condition,
         conditionNote: dto.conditionNote ?? null,
+        defects: dto.defects ?? null,
         kind: dto.kind,
         lookingFor: dto.lookingFor ?? null,
         delivery: dto.delivery,
@@ -205,7 +208,20 @@ export class ListingsService {
     await this.db
       .update(listings)
       .set({
+        ...(dto.gearId !== undefined && {
+          gearId: dto.gearId,
+          rawMake: dto.gearId ? null : dto.rawMake ?? existing.rawMake,
+          rawModel: dto.gearId ? null : dto.rawModel ?? existing.rawModel,
+        }),
+        ...(dto.gearId === undefined && dto.rawMake !== undefined && {
+          rawMake: dto.rawMake ?? null,
+        }),
+        ...(dto.gearId === undefined && dto.rawModel !== undefined && {
+          rawModel: dto.rawModel ?? null,
+        }),
+        ...(dto.rawYear !== undefined && { rawYear: dto.rawYear ?? null }),
         ...(dto.title !== undefined && { title: dto.title }),
+        ...(dto.tagline !== undefined && { tagline: dto.tagline ?? null }),
         ...(dto.description !== undefined && {
           description: dto.description,
           descriptionHtml: dto.descriptionHtml ?? existing.descriptionHtml,
@@ -216,6 +232,7 @@ export class ListingsService {
         ...(dto.conditionNote !== undefined && {
           conditionNote: dto.conditionNote ?? null,
         }),
+        ...(dto.defects !== undefined && { defects: dto.defects ?? null }),
         ...(dto.kind !== undefined && { kind: dto.kind }),
         ...(dto.lookingFor !== undefined && {
           lookingFor: dto.lookingFor ?? null,
@@ -322,6 +339,158 @@ export class ListingsService {
         updatedAt: now,
       })
       .where(eq(listings.id, id));
+  }
+
+  /**
+   * Create an empty draft listing the auto-save flow can write into.
+   * Most columns default; `title` defaults to a placeholder if absent
+   * so the NOT NULL constraint is satisfied. Slug uses a short random
+   * token until publish, when we re-slug from brand+model+title.
+   */
+  async createDraft(
+    sellerId: string,
+    dto: CreateListingDraftDto,
+  ): Promise<{ id: string; slug: string }> {
+    const placeholder = dto.title?.trim() || 'Draft anunț';
+    const seedParts =
+      dto.rawMake || dto.rawModel
+        ? [dto.rawMake ?? '', dto.rawModel ?? '', placeholder]
+        : ['draft', placeholder, Math.random().toString(36).slice(2, 8)];
+    const slug = await uniqueSlug(slugFromParts(...seedParts), (s) =>
+      this.slugExists(s),
+    );
+
+    let resolvedGearId: string | null = null;
+    if (dto.gearId) {
+      const [g] = await this.db
+        .select({ id: gear.id })
+        .from(gear)
+        .where(and(eq(gear.id, dto.gearId), isNull(gear.deletedAt)))
+        .limit(1);
+      if (!g) throw new NotFoundException(`gear ${dto.gearId} not found`);
+      resolvedGearId = g.id;
+    }
+
+    const [row] = await this.db
+      .insert(listings)
+      .values({
+        slug,
+        sellerId,
+        gearId: resolvedGearId,
+        rawMake: resolvedGearId ? null : dto.rawMake ?? null,
+        rawModel: resolvedGearId ? null : dto.rawModel ?? null,
+        rawYear: dto.rawYear ?? null,
+        title: placeholder,
+        description: {},
+        descriptionHtml: '',
+        // Schema requires NOT NULL — use a sentinel zero until publish.
+        price: '0',
+        currency: 'ron',
+        condition: 'very_good',
+        kind: 'sell',
+        delivery: 'pickup_only',
+        shippingCarriers: [],
+        acceptsOffers: true,
+        location: '',
+        status: 'draft',
+        expiresAt: null,
+      })
+      .returning({ id: listings.id, slug: listings.slug });
+
+    return row;
+  }
+
+  /**
+   * Flip a draft into `active`. Revalidates the strict CreateListingDto
+   * via service-side checks (the DTO does its job at the controller for
+   * fresh `create` calls; here we only have a row, so we re-check the
+   * same shape manually).
+   */
+  async publishDraft(
+    sellerId: string,
+    id: string,
+  ): Promise<{ id: string; slug: string }> {
+    const [existing] = await this.db
+      .select()
+      .from(listings)
+      .where(and(eq(listings.id, id), isNull(listings.removedAt)))
+      .limit(1);
+    if (!existing) throw new NotFoundException(`listing ${id} not found`);
+    if (existing.sellerId !== sellerId)
+      throw new ForbiddenException('You can only publish your own listings.');
+    if (existing.status !== 'draft')
+      throw new ConflictException('Only draft listings can be published.');
+
+    const errors: string[] = [];
+    if (!existing.gearId && (!existing.rawMake || !existing.rawModel))
+      errors.push('gear_or_raw_make_model');
+    if (!existing.title || existing.title === 'Draft anunț')
+      errors.push('title');
+    if (!existing.location || existing.location.length < 2) errors.push('location');
+    if (Number(existing.price) <= 0) errors.push('price');
+    if (existing.condition === 'mint' && (!existing.conditionNote || existing.conditionNote.length < 50))
+      errors.push('condition_note');
+    if (existing.kind !== 'sell' && (!existing.lookingFor || existing.lookingFor.length < 5))
+      errors.push('looking_for');
+    if (errors.length)
+      throw new ConflictException({
+        message: 'Draft is not ready to publish.',
+        missing: errors,
+      });
+
+    // Re-slug now that brand+model+title are stable.
+    let slugSource = existing.slug;
+    let brand = existing.rawMake ?? '';
+    let model = existing.rawModel ?? '';
+    if (existing.gearId) {
+      const [g] = await this.db
+        .select({ brand: gear.brand, model: gear.model })
+        .from(gear)
+        .where(eq(gear.id, existing.gearId))
+        .limit(1);
+      if (g) {
+        brand = g.brand;
+        model = g.model;
+      }
+    }
+    const desired = slugFromParts(brand, model, existing.title);
+    if (desired && desired !== existing.slug) {
+      slugSource = await uniqueSlug(desired, (s) => this.slugExists(s));
+    }
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + LISTING_DEFAULT_TTL_MS);
+    await this.db
+      .update(listings)
+      .set({
+        slug: slugSource,
+        status: 'active',
+        expiresAt,
+        updatedAt: now,
+      })
+      .where(eq(listings.id, id));
+
+    void this.savedSearch
+      .evaluateForListing({
+        id,
+        slug: slugSource,
+        sellerId,
+        gearId: existing.gearId,
+        title: existing.title,
+        price: existing.price,
+        currency: existing.currency,
+        condition: existing.condition,
+        kind: existing.kind,
+        delivery: existing.delivery,
+        location: existing.location,
+      })
+      .catch((err) =>
+        this.logger.warn(
+          `saved-search evaluator failed for ${id}: ${(err as Error).message}`,
+        ),
+      );
+
+    return { id, slug: slugSource };
   }
 
   async removeOwn(sellerId: string, id: string): Promise<void> {
@@ -729,6 +898,25 @@ export class ListingsService {
       },
       isWatched,
     };
+  }
+
+  /**
+   * Owner-only fetch by id. Returns drafts too. Used by the V07 sell
+   * page when the seller resumes a draft.
+   */
+  async findOwnById(
+    sellerId: string,
+    id: string,
+  ): Promise<Awaited<ReturnType<typeof this.findBySlug>>> {
+    const [row] = await this.db
+      .select({ slug: listings.slug, sellerId: listings.sellerId })
+      .from(listings)
+      .where(and(eq(listings.id, id), isNull(listings.removedAt)))
+      .limit(1);
+    if (!row) throw new NotFoundException(`listing ${id} not found`);
+    if (row.sellerId !== sellerId)
+      throw new ForbiddenException('Not your listing.');
+    return this.findBySlug(row.slug, sellerId);
   }
 
   /* ============================================================

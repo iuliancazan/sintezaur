@@ -23,6 +23,7 @@ import {
 } from '@sintezaur/auth';
 import { StorageService } from '../common/storage.service';
 import {
+  CreateListingDraftDto,
   CreateListingDto,
   CreateSavedSearchDto,
   MakeOfferDto,
@@ -69,6 +70,30 @@ export class MeBazarController {
     @Body() dto: CreateListingDto,
   ) {
     return this.listings.create(user.sub, dto);
+  }
+
+  @Post('listings/draft')
+  createDraft(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateListingDraftDto,
+  ) {
+    return this.listings.createDraft(user.sub, dto);
+  }
+
+  @Post('listings/:id/publish')
+  publish(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.listings.publishDraft(user.sub, id);
+  }
+
+  @Get('listings/:id')
+  findOwn(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.listings.findOwnById(user.sub, id);
   }
 
   @Patch('listings/:id')

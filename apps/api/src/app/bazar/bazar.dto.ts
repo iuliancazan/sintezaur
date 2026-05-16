@@ -76,6 +76,12 @@ export class CreateListingDto {
   @Length(3, 140)
   title!: string;
 
+  /** Optional one-line subtitle (V07 "Subtitlu"). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  tagline?: string;
+
   /** Tiptap JSON body. Service derives `descriptionHtml` server-side. */
   @IsObject()
   description!: Record<string, unknown>;
@@ -103,6 +109,12 @@ export class CreateListingDto {
   @MinLength(50)
   @MaxLength(500)
   conditionNote?: string;
+
+  /** Free-form known-defects note (V07 "Defecte cunoscute"). */
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  defects?: string;
 
   @IsEnum(LISTING_KINDS)
   kind!: ListingKind;
@@ -143,6 +155,39 @@ export class CreateListingDto {
 }
 
 export class UpdateListingDto extends PartialType(CreateListingDto) {}
+
+/**
+ * Body for "start a new draft" — everything is optional so the user
+ * can land on the V07 sell page and start typing into any field; the
+ * very first save creates the row. The publish step revalidates the
+ * full DTO before flipping `status='active'`.
+ */
+export class CreateListingDraftDto {
+  @IsOptional()
+  @IsUUID()
+  gearId?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  rawMake?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 120)
+  rawModel?: string;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1900)
+  @Max(2100)
+  rawYear?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(140)
+  title?: string;
+}
 
 /* ============================================================
    List / browse

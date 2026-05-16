@@ -11,6 +11,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import {
   displayCurrencyEnum,
@@ -60,9 +61,13 @@ export const listings = pgTable(
     rawYear: integer('raw_year'),
 
     title: text('title').notNull(),
+    /** Optional one-line subtitle ("what's different about this exemplar") shown above the description in the V07 sell page. */
+    tagline: varchar('tagline', { length: 200 }),
     /** Tiptap JSON document; rendered to bodyHtml at write time. */
     description: jsonb('description').notNull().default(sql`'{}'::jsonb`),
     descriptionHtml: text('description_html').notNull().default(''),
+    /** Free-form "known defects" note. Distinct from conditionNote (which is only required for `condition='mint'`). */
+    defects: text('defects'),
 
     price: decimal('price', { precision: 12, scale: 2 }).notNull(),
     currency: displayCurrencyEnum('currency').notNull().default('ron'),
