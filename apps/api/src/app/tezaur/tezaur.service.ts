@@ -169,6 +169,10 @@ export class TezaurService {
         yearReleased: dto.yearReleased,
         yearDiscontinued: dto.yearDiscontinued,
         msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString(),
+        msrpAtLaunchUsd: dto.msrpAtLaunchUsd?.toString(),
+        msrpSourceUrl: dto.msrpSourceUrl,
+        taglineRo: dto.taglineRo,
+        taglineEn: dto.taglineEn,
         latestFirmwareVersion: dto.latestFirmwareVersion,
         firmwareNotesUrl: dto.firmwareNotesUrl,
         specs: dto.specs ?? {},
@@ -235,6 +239,18 @@ export class TezaurService {
         }),
         ...(dto.msrpAtLaunchEur !== undefined && {
           msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString() ?? null,
+        }),
+        ...(dto.msrpAtLaunchUsd !== undefined && {
+          msrpAtLaunchUsd: dto.msrpAtLaunchUsd?.toString() ?? null,
+        }),
+        ...(dto.msrpSourceUrl !== undefined && {
+          msrpSourceUrl: dto.msrpSourceUrl ?? null,
+        }),
+        ...(dto.taglineRo !== undefined && {
+          taglineRo: dto.taglineRo ?? null,
+        }),
+        ...(dto.taglineEn !== undefined && {
+          taglineEn: dto.taglineEn ?? null,
         }),
         ...(dto.latestFirmwareVersion !== undefined && {
           latestFirmwareVersion: dto.latestFirmwareVersion ?? null,
@@ -956,6 +972,7 @@ export class TezaurService {
   async findBySlug(
     slug: string,
     lang: 'ro' | 'en' = 'ro',
+    opts: { includeUnpublished?: boolean } = {},
   ): Promise<{
     gear: typeof gear.$inferSelect;
     family: { id: string; slug: string; name: string } | null;
@@ -977,8 +994,24 @@ export class TezaurService {
      */
     tagline: { value: string | null; isTranslated: boolean };
     relationships: {
-      parent: { id: string; slug: string; brand: string; model: string; type: string }[];
-      child: { id: string; slug: string; brand: string; model: string; type: string }[];
+      parent: {
+        id: string;
+        slug: string;
+        brand: string;
+        model: string;
+        type: string;
+        relId: string;
+        note: string | null;
+      }[];
+      child: {
+        id: string;
+        slug: string;
+        brand: string;
+        model: string;
+        type: string;
+        relId: string;
+        note: string | null;
+      }[];
     };
     /** Canonical (official) forum thread (spec §8.1), null when toggle OFF. */
     officialThread: {
@@ -996,7 +1029,7 @@ export class TezaurService {
       .where(
         and(
           eq(gear.slug, slug),
-          eq(gear.published, true),
+          ...(opts.includeUnpublished ? [] : [eq(gear.published, true)]),
           isNull(gear.deletedAt),
         ),
       )
@@ -1111,6 +1144,8 @@ export class TezaurService {
         brand: gear.brand,
         model: gear.model,
         type: gearRelationships.type,
+        relId: gearRelationships.id,
+        note: gearRelationships.note,
       })
       .from(gearRelationships)
       .innerJoin(gear, eq(gear.id, gearRelationships.childGearId))
@@ -1129,6 +1164,8 @@ export class TezaurService {
         brand: gear.brand,
         model: gear.model,
         type: gearRelationships.type,
+        relId: gearRelationships.id,
+        note: gearRelationships.note,
       })
       .from(gearRelationships)
       .innerJoin(gear, eq(gear.id, gearRelationships.parentGearId))
@@ -1230,6 +1267,20 @@ export class TezaurService {
       .update(gear)
       .set({ ownersPublicCount: count })
       .where(eq(gear.id, gearId));
+  }
+
+  /** Admin lookup by id — resolves slug and delegates to findBySlug with
+   *  `includeUnpublished` set so newly-created drafts can be loaded by the
+   *  dashboard edit page right after create.
+   */
+  async findByIdForAdmin(id: string, lang: 'ro' | 'en' = 'ro') {
+    const [row] = await this.db
+      .select({ slug: gear.slug })
+      .from(gear)
+      .where(and(eq(gear.id, id), isNull(gear.deletedAt)))
+      .limit(1);
+    if (!row) return null;
+    return this.findBySlug(row.slug, lang, { includeUnpublished: true });
   }
 
   /* ============================================================

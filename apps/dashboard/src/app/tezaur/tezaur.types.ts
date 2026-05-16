@@ -34,6 +34,10 @@ export interface TezaurDetail {
     yearReleased: number | null;
     yearDiscontinued: number | null;
     msrpAtLaunchEur: string | null;
+    msrpAtLaunchUsd: string | null;
+    msrpSourceUrl: string | null;
+    taglineRo: string | null;
+    taglineEn: string | null;
     ownersPublicCount: number;
     avgRating: string | null;
     reviewCount: number;
@@ -50,7 +54,7 @@ export interface TezaurDetail {
   links: { id: string; kind: string; url: string; label: string | null; vendor: string | null }[];
   description: { body: unknown; bodyHtml: string } | null;
   relationships: {
-    parent: { id: string; slug: string; brand: string; model: string; type: string }[];
-    child: { id: string; slug: string; brand: string; model: string; type: string }[];
+    parent: { id: string; slug: string; brand: string; model: string; type: string; relId: string; note: string | null }[];
+    child: { id: string; slug: string; brand: string; model: string; type: string; relId: string; note: string | null }[];
   };
 }

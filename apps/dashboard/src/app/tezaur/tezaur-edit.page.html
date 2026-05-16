@@ -1,0 +1,807 @@
+<main class="admin">
+  <header class="admin__head">
+    <a routerLink="/tezaur" class="admin__back">← Înapoi la listă</a>
+    <h1>
+      @if (isEdit()) {
+        {{ form().brand }} {{ form().model }}
+      } @else {
+        Gear nou
+      }
+    </h1>
+  </header>
+
+  @if (loadError()) {
+    <p class="error">{{ loadError() }}</p>
+  }
+
+  <form class="admin__form" (submit)="save($event)">
+    <!-- ===== JSON drop-zone ===== -->
+    <section class="admin__sec admin__sec--drop">
+      <h2>Import JSON</h2>
+      <div
+        class="admin__drop"
+        [class.is-hover]="dropHover()"
+        (click)="jsonFileInput.click()"
+        (dragenter)="onJsonDragOver($event)"
+        (dragover)="onJsonDragOver($event)"
+        (dragleave)="onJsonDragLeave($event)"
+        (drop)="onJsonDrop($event)"
+      >
+        <p class="admin__drop-primary">
+          Drag &amp; drop un <code>.json</code> sau click pentru a alege un fișier
+        </p>
+        <p class="admin__drop-sub">
+          Câmpurile vor fi completate automat. Conflictele cu valorile deja
+          completate sunt confirmate într-un modal.
+        </p>
+      </div>
+      <input
+        type="file"
+        accept="application/json"
+        style="display:none"
+        (change)="onJsonFileSelected($event)"
+        #jsonFileInput
+      />
+      <details class="admin__paste">
+        <summary>... sau paste JSON inline</summary>
+        <textarea
+          rows="6"
+          placeholder='{ "brand": "Korg", "model": "ARP 2600 FS", ... }'
+          #jsonText
+        ></textarea>
+        <button
+          type="button"
+          class="admin__paste-btn"
+          (click)="onJsonPaste(jsonText.value); jsonText.value = ''"
+        >
+          Parsează &amp; aplică
+        </button>
+      </details>
+      @if (jsonError()) {
+        <span class="admin__err">{{ jsonError() }}</span>
+      }
+    </section>
+
+    <!-- ===== General ===== -->
+    <section class="admin__sec">
+      <h2>General</h2>
+      <div class="admin__row">
+        <label>
+          <span>Brand *</span>
+          <input
+            type="text"
+            [ngModel]="form().brand"
+            (ngModelChange)="setField('brand', $event)"
+            name="brand"
+            required
+          />
+        </label>
+        <label>
+          <span>Model *</span>
+          <input
+            type="text"
+            [ngModel]="form().model"
+            (ngModelChange)="setField('model', $event)"
+            name="model"
+            required
+          />
+        </label>
+      </div>
+      <div class="admin__row">
+        <label>
+          <span>Categorie *</span>
+          <select
+            [ngModel]="form().category"
+            (ngModelChange)="setField('category', $event)"
+            name="category"
+            required
+          >
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ humanize(cat) }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Form factor</span>
+          <select
+            [ngModel]="form().formFactor"
+            (ngModelChange)="setField('formFactor', $event)"
+            name="formFactor"
+          >
+            <option [ngValue]="null">—</option>
+            @for (ff of formFactors; track ff) {
+              <option [ngValue]="ff">{{ humanize(ff) }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <div class="admin__row">
+        <label>
+          <span>Familie</span>
+          <select
+            [ngModel]="form().familyId"
+            (ngModelChange)="setField('familyId', $event)"
+            name="familyId"
+          >
+            <option [ngValue]="null">—</option>
+            @for (f of families(); track f.id) {
+              <option [ngValue]="f.id">{{ f.name }}</option>
+            }
+          </select>
+          @if (familyWarning()) {
+            <span class="admin__warn">{{ familyWarning() }}</span>
+          }
+        </label>
+        <label>
+          <span>Slug (auto din brand + model dacă lipsește)</span>
+          <input
+            type="text"
+            [ngModel]="form().slug"
+            (ngModelChange)="setField('slug', $event)"
+            name="slug"
+          />
+        </label>
+      </div>
+      <div class="admin__row">
+        <label>
+          <span>An lansare</span>
+          <input
+            type="number"
+            [ngModel]="form().yearReleased"
+            (ngModelChange)="setField('yearReleased', $event)"
+            name="yearReleased"
+          />
+        </label>
+        <label>
+          <span>An discontinuare (gol = în producție)</span>
+          <input
+            type="number"
+            [ngModel]="form().yearDiscontinued"
+            (ngModelChange)="setField('yearDiscontinued', $event)"
+            name="yearDiscontinued"
+          />
+        </label>
+      </div>
+
+      <label class="admin__check">
+        <input
+          type="checkbox"
+          [ngModel]="form().published"
+          (ngModelChange)="setField('published', $event)"
+          name="published"
+        />
+        <span>Publicat (vizibil public). Slug-ul se blochează la prima publicare.</span>
+      </label>
+
+      @if (isEdit()) {
+        <label class="admin__check">
+          <input
+            type="checkbox"
+            [ngModel]="form().officialThreadOn"
+            (ngModelChange)="onOfficialToggle($event)"
+            [disabled]="officialBusy()"
+            name="officialThreadOn"
+          />
+          <span>
+            <strong>Thread oficial pe forum</strong> — creează un thread unic
+            pentru acest gear în „Discuții echipamente".
+            @if (officialBusy()) { <em>· se aplică...</em> }
+            @if (officialError()) {
+              <span class="admin__err">{{ officialError() }}</span>
+            }
+          </span>
+        </label>
+      } @else {
+        <p class="admin__hint">
+          💡 După prima salvare, vei putea activa „Thread oficial".
+        </p>
+      }
+    </section>
+
+    <!-- ===== MSRP ===== -->
+    <section class="admin__sec">
+      <h2>MSRP &amp; comerț</h2>
+      <div class="admin__row">
+        <label>
+          <span>MSRP la lansare (EUR)</span>
+          <input
+            type="number"
+            step="0.01"
+            [ngModel]="form().msrpAtLaunchEur"
+            (ngModelChange)="setField('msrpAtLaunchEur', $event)"
+            name="msrpAtLaunchEur"
+          />
+        </label>
+        <label>
+          <span>MSRP la lansare (USD)</span>
+          <input
+            type="number"
+            step="0.01"
+            [ngModel]="form().msrpAtLaunchUsd"
+            (ngModelChange)="setField('msrpAtLaunchUsd', $event)"
+            name="msrpAtLaunchUsd"
+          />
+        </label>
+      </div>
+      <label>
+        <span>Sursă MSRP (URL)</span>
+        <input
+          type="url"
+          [ngModel]="form().msrpSourceUrl"
+          (ngModelChange)="setField('msrpSourceUrl', $event)"
+          name="msrpSourceUrl"
+          placeholder="https://..."
+        />
+      </label>
+    </section>
+
+    <!-- ===== Tagline & firmware ===== -->
+    <section class="admin__sec">
+      <h2>Tagline &amp; firmware</h2>
+      <label>
+        <span>Tagline RO</span>
+        <input
+          type="text"
+          maxlength="200"
+          [ngModel]="form().taglineRo"
+          (ngModelChange)="setField('taglineRo', $event)"
+          name="taglineRo"
+        />
+      </label>
+      <label>
+        <span>Tagline EN</span>
+        <input
+          type="text"
+          maxlength="200"
+          [ngModel]="form().taglineEn"
+          (ngModelChange)="setField('taglineEn', $event)"
+          name="taglineEn"
+        />
+      </label>
+      <div class="admin__row">
+        <label>
+          <span>Versiune firmware</span>
+          <input
+            type="text"
+            [ngModel]="form().latestFirmwareVersion"
+            (ngModelChange)="setField('latestFirmwareVersion', $event)"
+            name="latestFirmwareVersion"
+          />
+        </label>
+        <label>
+          <span>Note firmware (URL)</span>
+          <input
+            type="url"
+            [ngModel]="form().firmwareNotesUrl"
+            (ngModelChange)="setField('firmwareNotesUrl', $event)"
+            name="firmwareNotesUrl"
+          />
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== Specs — Sinteză ===== -->
+    <section class="admin__sec">
+      <h2>Specs — Sinteză</h2>
+      <div class="admin__row">
+        <label>
+          <span>Tip sinteză</span>
+          <select
+            [ngModel]="form().synthType"
+            (ngModelChange)="setField('synthType', $event)"
+            name="synthType"
+          >
+            @for (s of synthTypeOptions; track s.value) {
+              <option [value]="s.value">{{ s.label }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Polifonie (voci)</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="form().polyphony"
+            (ngModelChange)="setField('polyphony', $event)"
+            name="polyphony"
+          />
+        </label>
+      </div>
+      <div class="admin__row">
+        <label>
+          <span>Osc / voce</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="form().oscPerVoice"
+            (ngModelChange)="setField('oscPerVoice', $event)"
+            name="oscPerVoice"
+          />
+        </label>
+        <label>
+          <span>Tip filtru</span>
+          <input
+            type="text"
+            [ngModel]="form().filterType"
+            (ngModelChange)="setField('filterType', $event)"
+            name="filterType"
+          />
+        </label>
+      </div>
+      <div class="admin__row">
+        <label class="admin__check">
+          <input
+            type="checkbox"
+            [ngModel]="form().hasArpeggiator"
+            (ngModelChange)="setField('hasArpeggiator', $event)"
+            name="hasArpeggiator"
+          />
+          <span>Are arpegiator</span>
+        </label>
+        <label class="admin__check">
+          <input
+            type="checkbox"
+            [ngModel]="form().hasSequencer"
+            (ngModelChange)="setField('hasSequencer', $event)"
+            name="hasSequencer"
+          />
+          <span>Are sequencer</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== Specs — Keyboard ===== -->
+    <section class="admin__sec">
+      <h2>Specs — Keyboard</h2>
+      <div class="admin__row">
+        <label class="admin__check">
+          <input
+            type="checkbox"
+            [ngModel]="form().hasKeys"
+            (ngModelChange)="setField('hasKeys', $event)"
+            name="hasKeys"
+          />
+          <span>Are claviatură</span>
+        </label>
+        <label>
+          <span>Nr. clape</span>
+          <input
+            type="number"
+            min="1"
+            [ngModel]="form().numKeys"
+            (ngModelChange)="setField('numKeys', $event)"
+            name="numKeys"
+          />
+        </label>
+      </div>
+      <label>
+        <span>Aftertouch</span>
+        <select
+          [ngModel]="form().aftertouch"
+          (ngModelChange)="setField('aftertouch', $event)"
+          name="aftertouch"
+        >
+          @for (a of aftertouchOptions; track a.value) {
+            <option [value]="a.value">{{ a.label }}</option>
+          }
+        </select>
+      </label>
+    </section>
+
+    <!-- ===== Specs — Conectivitate ===== -->
+    <section class="admin__sec">
+      <h2>Specs — Conectivitate</h2>
+      <label>
+        <span>MIDI I/O</span>
+        <div class="admin__chips">
+          @for (m of midiIoOptions; track m.value) {
+            <label class="admin__chip">
+              <input
+                type="checkbox"
+                [checked]="isMidiChecked(m.value)"
+                (change)="toggleArrayValue('midiIo', m.value)"
+              />
+              <span>{{ m.label }}</span>
+            </label>
+          }
+        </div>
+      </label>
+      <label>
+        <span>Ieșiri audio</span>
+        <div class="admin__chips">
+          @for (a of audioOutOptions; track a.value) {
+            <label class="admin__chip">
+              <input
+                type="checkbox"
+                [checked]="isAudioOutChecked(a.value)"
+                (change)="toggleArrayValue('audioOut', a.value)"
+              />
+              <span>{{ a.label }}</span>
+            </label>
+          }
+        </div>
+      </label>
+      <label class="admin__check">
+        <input
+          type="checkbox"
+          [ngModel]="form().cvGate"
+          (ngModelChange)="setField('cvGate', $event)"
+          name="cvGate"
+        />
+        <span>CV / Gate</span>
+      </label>
+      <div class="admin__row">
+        <label>
+          <span>Pedale</span>
+          <input
+            type="text"
+            [ngModel]="form().pedalsLabel"
+            (ngModelChange)="setField('pedalsLabel', $event)"
+            name="pedalsLabel"
+            placeholder="ex. 2× footswitch · 1× expression"
+          />
+        </label>
+        <label>
+          <span>Memorie patch-uri</span>
+          <input
+            type="text"
+            [ngModel]="form().patchMemoryLabel"
+            (ngModelChange)="setField('patchMemoryLabel', $event)"
+            name="patchMemoryLabel"
+          />
+        </label>
+      </div>
+    </section>
+
+    <!-- ===== Specs — Fizic ===== -->
+    <section class="admin__sec">
+      <h2>Specs — Fizic</h2>
+      <div class="admin__row">
+        <label>
+          <span>Greutate (kg)</span>
+          <input
+            type="number"
+            step="0.1"
+            [ngModel]="form().weightKg"
+            (ngModelChange)="setField('weightKg', $event)"
+            name="weightKg"
+          />
+        </label>
+        <label>
+          <span>Dimensiuni</span>
+          <input
+            type="text"
+            [ngModel]="form().dimensionsLabel"
+            (ngModelChange)="setField('dimensionsLabel', $event)"
+            name="dimensionsLabel"
+            placeholder="ex. 109 × 39 × 12 cm"
+          />
+        </label>
+      </div>
+      <label>
+        <span>Alimentare</span>
+        <input
+          type="text"
+          [ngModel]="form().powerLabel"
+          (ngModelChange)="setField('powerLabel', $event)"
+          name="powerLabel"
+          placeholder="ex. 100–240 V AC, intern"
+        />
+      </label>
+    </section>
+
+    <!-- ===== Specs — Extra (raw JSON) ===== -->
+    <section class="admin__sec">
+      <h2>Specs — chei nemapate (raw JSON)</h2>
+      <label>
+        <span>
+          Aici ajung cheile de specs care nu au input dedicat (ex.
+          <code>scraping_meta</code>, <code>family_summary</code>). Editare
+          liberă, JSON valid.
+        </span>
+        <textarea
+          rows="6"
+          [(ngModel)]="specsExtraText"
+          name="specsExtra"
+          (input)="onSpecsExtraInput()"
+        ></textarea>
+        @if (specsError()) {
+          <span class="admin__err">{{ specsError() }}</span>
+        }
+      </label>
+    </section>
+
+    <!-- ===== Linkuri ===== -->
+    <section class="admin__sec">
+      <h2>Linkuri</h2>
+      <div class="admin__rows">
+        @for (row of linkRows(); track $index; let i = $index) {
+          <div class="admin__rowinline">
+            <select
+              [ngModel]="row.kind"
+              (ngModelChange)="updateLinkRow(i, { kind: $event })"
+              [name]="'link-kind-' + i"
+            >
+              @for (k of linkKindOptions; track k.value) {
+                <option [value]="k.value">{{ k.label }}</option>
+              }
+            </select>
+            <input
+              type="text"
+              [ngModel]="row.label"
+              (ngModelChange)="updateLinkRow(i, { label: $event })"
+              [name]="'link-label-' + i"
+              placeholder="Etichetă"
+            />
+            <input
+              type="url"
+              [ngModel]="row.url"
+              (ngModelChange)="updateLinkRow(i, { url: $event })"
+              [name]="'link-url-' + i"
+              placeholder="https://..."
+            />
+            <button type="button" class="admin__rowdel" (click)="removeLinkRow(i)">
+              ×
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="admin__addrow" (click)="addLinkRow()">
+        + Adaugă link
+      </button>
+    </section>
+
+    <!-- ===== Videos ===== -->
+    <section class="admin__sec">
+      <h2>Videos</h2>
+      <div class="admin__rows">
+        @for (row of videoRows(); track $index; let i = $index) {
+          <div class="admin__rowinline">
+            <select
+              [ngModel]="row.provider"
+              (ngModelChange)="updateVideoRow(i, { provider: $event })"
+              [name]="'video-provider-' + i"
+            >
+              @for (p of videoProviderOptions; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+            <input
+              type="text"
+              [ngModel]="row.externalId"
+              (ngModelChange)="updateVideoRow(i, { externalId: $event })"
+              [name]="'video-id-' + i"
+              placeholder="External ID"
+            />
+            <input
+              type="text"
+              [ngModel]="row.title"
+              (ngModelChange)="updateVideoRow(i, { title: $event })"
+              [name]="'video-title-' + i"
+              placeholder="Titlu (opțional)"
+            />
+            <button type="button" class="admin__rowdel" (click)="removeVideoRow(i)">
+              ×
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="admin__addrow" (click)="addVideoRow()">
+        + Adaugă video
+      </button>
+    </section>
+
+    <!-- ===== Relații ===== -->
+    <section class="admin__sec">
+      <h2>Relații</h2>
+      <p class="admin__hint">
+        Țintele relațiilor (brand + model) trebuie să existe deja publicate în
+        catalog. La salvare facem lookup; cele care nu se găsesc se sar peste cu
+        mesaj.
+      </p>
+      <div class="admin__rows">
+        @for (row of relRows(); track $index; let i = $index) {
+          <div class="admin__rowinline admin__rowinline--rel">
+            <select
+              [ngModel]="row.type"
+              (ngModelChange)="updateRelRow(i, { type: $event })"
+              [name]="'rel-type-' + i"
+            >
+              @for (t of relationshipTypeOptions; track t.value) {
+                <option [value]="t.value">{{ t.label }}</option>
+              }
+            </select>
+            <input
+              type="text"
+              [ngModel]="row.brand"
+              (ngModelChange)="updateRelRow(i, { brand: $event })"
+              [name]="'rel-brand-' + i"
+              placeholder="Brand"
+            />
+            <input
+              type="text"
+              [ngModel]="row.model"
+              (ngModelChange)="updateRelRow(i, { model: $event })"
+              [name]="'rel-model-' + i"
+              placeholder="Model"
+            />
+            <input
+              type="text"
+              [ngModel]="row.note"
+              (ngModelChange)="updateRelRow(i, { note: $event })"
+              [name]="'rel-note-' + i"
+              placeholder="Notă"
+            />
+            <button type="button" class="admin__rowdel" (click)="removeRelRow(i)">
+              ×
+            </button>
+          </div>
+        }
+      </div>
+      <button type="button" class="admin__addrow" (click)="addRelRow()">
+        + Adaugă relație
+      </button>
+    </section>
+
+    @if (isEdit()) {
+      <!-- ===== Descriere (RO) ===== -->
+      <section class="admin__sec">
+        <h2>Descriere (RO)</h2>
+        <label>
+          <span>HTML — Tiptap editor land în M4. Pentru M2, HTML raw.</span>
+          <textarea
+            rows="10"
+            [(ngModel)]="descriptionHtml"
+            name="descriptionHtml"
+          ></textarea>
+        </label>
+      </section>
+
+      <!-- ===== Imagini ===== -->
+      <section class="admin__sec">
+        <h2>Imagini</h2>
+        @if (detail(); as d) {
+          <div class="admin__images">
+            @for (img of squareThumbs(d); track img.sourceId) {
+              <div class="admin__image">
+                <img [src]="tezaur.imageUrl(img.path)" [alt]="img.caption ?? ''" />
+                <button type="button" (click)="deleteImage(img.sourceId)">×</button>
+              </div>
+            }
+            @if (squareThumbs(d).length === 0) {
+              <p class="muted">Nicio imagine încărcată.</p>
+            }
+          </div>
+        }
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="uploadImage($event)"
+        />
+        @if (uploadError()) {
+          <span class="admin__err">{{ uploadError() }}</span>
+        }
+        @if (uploading()) {
+          <p class="muted">Se procesează imaginea (Sharp generează 7 variante)...</p>
+        }
+      </section>
+    }
+
+    @if (saveError()) {
+      <p class="error">{{ saveError() }}</p>
+    }
+
+    <div class="admin__actions">
+      <button sz-button variant="primary" type="submit" [disabled]="saving()">
+        @if (isEdit()) { Salvează } @else { Creează }
+      </button>
+      <a sz-button variant="ghost" routerLink="/tezaur">Anulează</a>
+      @if (isEdit()) {
+        <button
+          sz-button
+          variant="ghost"
+          type="button"
+          (click)="softDelete()"
+          [disabled]="saving()"
+          style="margin-left: auto"
+        >
+          Șterge
+        </button>
+      }
+    </div>
+  </form>
+
+  <!-- ===== Conflict modal ===== -->
+  @if (conflictOpen()) {
+    <div class="modal-backdrop" (click)="cancelConflictModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <header class="modal__head">
+          <h3>JSON-ul ar suprascrie câmpuri completate</h3>
+          <p>
+            Bifează ce vrei să fie înlocuit. Cele debifate rămân cu valoarea
+            curentă.
+          </p>
+          <div class="modal__bulk">
+            <button type="button" (click)="conflictSelectAll(true)">
+              Bifează tot
+            </button>
+            <button type="button" (click)="conflictSelectAll(false)">
+              Debifează tot
+            </button>
+          </div>
+        </header>
+        <div class="modal__body">
+          @if (conflictScalars().length > 0) {
+            <table class="modal__table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Câmp</th>
+                  <th>Acum</th>
+                  <th>Din JSON</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of conflictScalars(); track row.key) {
+                  <tr>
+                    <td>
+                      <input
+                        type="checkbox"
+                        [checked]="row.apply"
+                        (change)="toggleConflictScalar($any(row.key))"
+                      />
+                    </td>
+                    <td>{{ row.label }}</td>
+                    <td class="modal__old">{{ row.oldVal }}</td>
+                    <td class="modal__new">{{ row.newVal }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+          @if (conflictLists().length > 0) {
+            <p class="modal__sub">Liste (înlocuire totală):</p>
+            <table class="modal__table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Listă</th>
+                  <th>Acum</th>
+                  <th>Din JSON</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of conflictLists(); track row.key) {
+                  <tr>
+                    <td>
+                      <input
+                        type="checkbox"
+                        [checked]="row.apply"
+                        (change)="toggleConflictList(row.key)"
+                      />
+                    </td>
+                    <td>{{ row.label }}</td>
+                    <td class="modal__old">{{ row.oldCount }} rânduri</td>
+                    <td class="modal__new">{{ row.newCount }} rânduri</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+        <footer class="modal__foot">
+          <button type="button" (click)="cancelConflictModal()">
+            Anulează
+          </button>
+          <button
+            type="button"
+            class="modal__primary"
+            (click)="applyConflictSelection()"
+          >
+            Aplică selecția
+          </button>
+        </footer>
+      </div>
+    </div>
+  }
+</main>

@@ -129,6 +129,10 @@ export const gear = pgTable(
 
     /** MSRP at launch, EUR (numeric per spec §7.12). NULL when unknown. */
     msrpAtLaunchEur: decimal('msrp_at_launch_eur', { precision: 12, scale: 2 }),
+    /** MSRP at launch, USD — scraped imports often list USD only. */
+    msrpAtLaunchUsd: decimal('msrp_at_launch_usd', { precision: 12, scale: 2 }),
+    /** Pointer to the source page the MSRP figures were lifted from. */
+    msrpSourceUrl: text('msrp_source_url'),
 
     /**
      * Per-category structured fields. Application-side DTOs validate

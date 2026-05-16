@@ -15,6 +15,10 @@ export interface CreateGearPayload {
   yearReleased?: number;
   yearDiscontinued?: number;
   msrpAtLaunchEur?: number;
+  msrpAtLaunchUsd?: number;
+  msrpSourceUrl?: string;
+  taglineRo?: string;
+  taglineEn?: string;
   latestFirmwareVersion?: string;
   firmwareNotesUrl?: string;
   specs?: Record<string, unknown>;
@@ -22,6 +26,25 @@ export interface CreateGearPayload {
 }
 
 export type UpdateGearPayload = Partial<CreateGearPayload>;
+
+export interface CreateVideoPayload {
+  provider: 'youtube' | 'vimeo' | 'soundcloud' | 'bandcamp';
+  externalId: string;
+  title?: string;
+}
+
+export interface CreateLinkPayload {
+  kind: string;
+  url: string;
+  label?: string;
+  vendor?: string;
+}
+
+export interface CreateRelationshipPayload {
+  childGearId: string;
+  type: string;
+  note?: string;
+}
 
 export interface GearFamily {
   id: string;
@@ -129,6 +152,17 @@ export class TezaurAdminService {
     );
   }
 
+  /** Admin-only detail — bypasses the `published=true` filter so newly
+   *  created drafts can be loaded immediately after `POST gear`.
+   */
+  detailById(id: string): Promise<TezaurDetail> {
+    return firstValueFrom(
+      this.http.get<TezaurDetail>(`${this.base}/admin/tezaur/gear/${id}`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
   create(payload: CreateGearPayload): Promise<{ id: string; slug: string }> {
     return firstValueFrom(
       this.http.post<{ id: string; slug: string }>(
@@ -222,6 +256,72 @@ export class TezaurAdminService {
         `${this.base}/admin/tezaur/gear/${gearId}/images/${sourceId}`,
         { withCredentials: true },
       ) as any,
+    );
+  }
+
+  /* ---------- gear videos ---------- */
+
+  addVideo(gearId: string, payload: CreateVideoPayload): Promise<{ id: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string }>(
+        `${this.base}/admin/tezaur/gear/${gearId}/videos`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteVideo(gearId: string, videoId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/admin/tezaur/gear/${gearId}/videos/${videoId}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /* ---------- gear links ---------- */
+
+  addLink(gearId: string, payload: CreateLinkPayload): Promise<{ id: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string }>(
+        `${this.base}/admin/tezaur/gear/${gearId}/links`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteLink(gearId: string, linkId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/admin/tezaur/gear/${gearId}/links/${linkId}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /* ---------- gear relationships ---------- */
+
+  addRelationship(
+    parentGearId: string,
+    payload: CreateRelationshipPayload,
+  ): Promise<{ id: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string }>(
+        `${this.base}/admin/tezaur/gear/${parentGearId}/relationships`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteRelationship(relId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/admin/tezaur/relationships/${relId}`,
+        { withCredentials: true },
+      ),
     );
   }
 

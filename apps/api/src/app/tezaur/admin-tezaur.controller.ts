@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -77,6 +78,18 @@ export class AdminTezaurController {
     @Req() req: Request,
   ) {
     return this.tezaur.createGear(dto, user.sub, req);
+  }
+
+  /**
+   * Admin detail by id — bypasses the `published=true` filter so the
+   * dashboard edit page can load drafts and unpublished entries right
+   * after they are created via JSON paste / manual entry.
+   */
+  @Get('gear/:id')
+  async getGear(@Param('id', ParseUUIDPipe) id: string) {
+    const data = await this.tezaur.findByIdForAdmin(id, 'ro');
+    if (!data) throw new NotFoundException(`gear ${id} not found`);
+    return data;
   }
 
   @Patch('gear/:id')

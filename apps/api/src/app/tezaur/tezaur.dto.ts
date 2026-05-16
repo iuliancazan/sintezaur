@@ -81,6 +81,25 @@ export class CreateGearDto {
   msrpAtLaunchEur?: number;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  msrpAtLaunchUsd?: number;
+
+  @IsOptional()
+  @IsUrl({ require_tld: false })
+  msrpSourceUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taglineRo?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taglineEn?: string;
+
+  @IsOptional()
   @IsString()
   @MaxLength(40)
   latestFirmwareVersion?: string;
