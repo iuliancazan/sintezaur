@@ -25,7 +25,7 @@ import {
   userGearStatuses,
 } from '@sintezaur/db';
 import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
-import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
 import type { Request } from 'express';
 import { AuditLogService } from '../common/audit-log.service';
 import { StorageService, type ProcessedUpload } from '../common/storage.service';
@@ -48,30 +48,20 @@ const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
 
 /**
- * SQL fragment that picks one thumb path for a given gear row. It prefers
- * `square_thumb`, then `square_medium`, then any landscape variant, then
- * `original` — so if the sharp pipeline ever produced a partial set (e.g.
- * one variant put failed mid-loop) we still surface SOMETHING in cards.
- * Use as: `thumb: gearThumbSql()`
+ * Variant priority for thumb selection — lower = preferred. We pick
+ * `square_thumb` first, fall back to `square_medium`, then landscapes,
+ * then `original`. Keeps cards working even if the sharp pipeline ever
+ * produced a partial variant set.
  */
-function gearThumbSql() {
-  return sql<string | null>`(
-    SELECT path FROM ${gearImages}
-    WHERE ${gearImages.gearId} = ${gear.id}
-    ORDER BY ${gearImages.position} ASC,
-      CASE ${gearImages.variant}
-        WHEN 'square_thumb' THEN 0
-        WHEN 'square_medium' THEN 1
-        WHEN 'landscape_4x3_medium' THEN 2
-        WHEN 'landscape_4x3_large' THEN 3
-        WHEN 'landscape_16x9_medium' THEN 4
-        WHEN 'landscape_16x9_large' THEN 5
-        WHEN 'original' THEN 6
-        ELSE 9
-      END ASC
-    LIMIT 1
-  )`;
-}
+const THUMB_VARIANT_PRIORITY: Record<string, number> = {
+  square_thumb: 0,
+  square_medium: 1,
+  landscape_4x3_medium: 2,
+  landscape_4x3_large: 3,
+  landscape_16x9_medium: 4,
+  landscape_16x9_large: 5,
+  original: 6,
+};
 
 const MODERATOR_ROLES = ['curator', 'admin', 'superadmin'] as const;
 function isModerator(roles: readonly string[]): boolean {
@@ -114,6 +104,44 @@ export class TezaurService {
     private readonly storage: StorageService,
     private readonly audit: AuditLogService,
   ) {}
+
+  /**
+   * Resolve a thumb path per gear id. Done as a separate query + JS merge
+   * instead of a correlated subquery — the correlated form was returning
+   * `null` in prod for gears that demonstrably had `square_thumb` rows,
+   * suggesting a Drizzle template rendering issue we couldn't pin down.
+   */
+  private async fetchThumbs(gearIds: string[]): Promise<Map<string, string>> {
+    if (gearIds.length === 0) return new Map();
+    const rows = await this.db
+      .select({
+        gearId: gearImages.gearId,
+        path: gearImages.path,
+        position: gearImages.position,
+        variant: gearImages.variant,
+      })
+      .from(gearImages)
+      .where(inArray(gearImages.gearId, gearIds));
+
+    const best = new Map<
+      string,
+      { position: number; priority: number; path: string }
+    >();
+    for (const r of rows) {
+      const priority = THUMB_VARIANT_PRIORITY[r.variant] ?? 99;
+      const cur = best.get(r.gearId);
+      if (
+        !cur ||
+        r.position < cur.position ||
+        (r.position === cur.position && priority < cur.priority)
+      ) {
+        best.set(r.gearId, { position: r.position, priority, path: r.path });
+      }
+    }
+    const out = new Map<string, string>();
+    for (const [k, v] of best) out.set(k, v.path);
+    return out;
+  }
 
   /* ============================================================
      gear CRUD
@@ -894,7 +922,6 @@ export class TezaurService {
         avgRating: gear.avgRating,
         reviewCount: gear.reviewCount,
         type: sql<string | null>`${gear.specs}->>'type'`,
-        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(whereClause)
@@ -902,13 +929,19 @@ export class TezaurService {
       .limit(pageSize)
       .offset(offset);
 
+    const thumbs = await this.fetchThumbs(items.map((i) => i.id));
+    const itemsWithThumb = items.map((i) => ({
+      ...i,
+      thumb: thumbs.get(i.id) ?? null,
+    }));
+
     const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)::int` })
       .from(gear)
       .where(whereClause);
 
     return {
-      items: items as PublicGearListItem[],
+      items: itemsWithThumb as PublicGearListItem[],
       page,
       pageSize,
       totalCount: count,
@@ -1551,7 +1584,7 @@ export class TezaurService {
       thumb: string | null;
     }[]
   > {
-    return this.db
+    const rows = await this.db
       .select({
         id: gear.id,
         slug: gear.slug,
@@ -1562,11 +1595,12 @@ export class TezaurService {
         rejectionReason: gear.rejectionReason,
         submittedAt: gear.submittedAt,
         updatedAt: gear.updatedAt,
-        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(and(eq(gear.createdBy, userId), isNull(gear.deletedAt)))
       .orderBy(desc(gear.updatedAt));
+    const thumbs = await this.fetchThumbs(rows.map((r) => r.id));
+    return rows.map((r) => ({ ...r, thumb: thumbs.get(r.id) ?? null }));
   }
 
   /* ---------- me/images ---------- */
@@ -1928,7 +1962,7 @@ export class TezaurService {
 
     const where = and(eq(gear.state, state), isNull(gear.deletedAt));
 
-    const items = await this.db
+    const baseItems = await this.db
       .select({
         id: gear.id,
         slug: gear.slug,
@@ -1938,13 +1972,18 @@ export class TezaurService {
         state: gear.state,
         submittedAt: gear.submittedAt,
         createdBy: gear.createdBy,
-        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(where)
       .orderBy(asc(gear.submittedAt))
       .limit(pageSize)
       .offset(offset);
+
+    const thumbs = await this.fetchThumbs(baseItems.map((i) => i.id));
+    const items = baseItems.map((i) => ({
+      ...i,
+      thumb: thumbs.get(i.id) ?? null,
+    }));
 
     const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)::int` })
@@ -2015,7 +2054,7 @@ export class TezaurService {
     }
     const whereClause = conditions.length ? and(...conditions) : undefined;
 
-    const items = await this.db
+    const baseItems = await this.db
       .select({
         id: gear.id,
         slug: gear.slug,
@@ -2030,13 +2069,18 @@ export class TezaurService {
         createdAt: gear.createdAt,
         updatedAt: gear.updatedAt,
         deletedAt: gear.deletedAt,
-        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(whereClause)
       .orderBy(desc(gear.updatedAt))
       .limit(pageSize)
       .offset(offset);
+
+    const thumbs = await this.fetchThumbs(baseItems.map((i) => i.id));
+    const items = baseItems.map((i) => ({
+      ...i,
+      thumb: thumbs.get(i.id) ?? null,
+    }));
 
     const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)::int` })
