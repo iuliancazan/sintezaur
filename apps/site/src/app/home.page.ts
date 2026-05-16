@@ -45,19 +45,6 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
   imports: [CommonModule, RouterLink, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (auth.isLoggedIn()) {
-      <div class="welcome">
-        <span>
-          <span class="accent">// {{ 'home.welcome_eyebrow' | t }}</span>
-          &nbsp;{{ 'home.welcome_greeting' | t: { name: welcomeFirstName() } }}
-        </span>
-        <div class="welcome__actions">
-          <a class="btn-ghost" routerLink="/bazar/nou">{{ 'home.welcome_action_listing' | t }} →</a>
-          <a class="btn-ghost" routerLink="/forum">{{ 'home.welcome_action_thread' | t }} →</a>
-        </div>
-      </div>
-    }
-
     <div class="shell">
       <!-- ============== HERO (featured article) ============== -->
       <section class="hero crosses" aria-labelledby="hero-title">
@@ -428,13 +415,6 @@ export class HomePage implements OnInit {
     () => this.revistaArticles()[1] ?? null,
   );
   readonly revistaSide = computed(() => this.revistaArticles().slice(2, 4));
-  readonly welcomeFirstName = computed(() => {
-    const u = this.auth.currentUser();
-    if (!u) return '';
-    const full = (u.fullName || '').trim();
-    if (full) return full.split(/\s+/)[0];
-    return u.username;
-  });
 
   readonly spotlight = computed(() => this.tezaurList()[0] ?? null);
   readonly catalog = computed(() => this.tezaurList().slice(1, 7));

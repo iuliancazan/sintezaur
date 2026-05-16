@@ -58,19 +58,18 @@ const STORAGE_KEY = 'sintezaur.cookies.dismissed.v1';
         display: flex;
         align-items: center;
         gap: 16px;
-        padding: 12px 16px;
+        padding: 14px 18px;
         max-width: 880px;
         margin: 0 auto;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        background: var(--bg-elev);
+        border: 1px solid var(--line-strong);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
       }
       .cookies__text {
         margin: 0;
         font-size: 13px;
         line-height: 1.5;
-        color: var(--ink);
+        color: var(--fg);
         flex: 1;
       }
       .cookies__text a {
@@ -80,13 +79,16 @@ const STORAGE_KEY = 'sintezaur.cookies.dismissed.v1';
       .cookies__dismiss {
         flex-shrink: 0;
         background: var(--accent);
-        color: var(--accent-ink, #fff);
+        color: var(--accent-fg);
         border: none;
-        padding: 8px 14px;
-        font-size: 13px;
+        padding: 10px 16px;
+        font-family: var(--font-mono);
+        font-size: 11px;
         font-weight: 600;
-        border-radius: 6px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
         cursor: pointer;
+        min-height: auto;
       }
       @media (max-width: 600px) {
         .cookies {

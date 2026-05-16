@@ -151,35 +151,15 @@ export interface SzTopbarUser {
           }
 
           @if (showThemeSwitch) {
-            <div class="sz-theme-toggle" role="group" [attr.aria-label]="themeAriaLabel">
-              <button
-                type="button"
-                [class.is-active]="theme.mode() === 'auto'"
-                [attr.aria-pressed]="theme.mode() === 'auto'"
-                [attr.aria-label]="themeAutoLabel"
-                (click)="setTheme('auto')"
-              >
-                <sz-icon name="auto" [size]="14" />
-              </button>
-              <button
-                type="button"
-                [class.is-active]="theme.mode() === 'light'"
-                [attr.aria-pressed]="theme.mode() === 'light'"
-                [attr.aria-label]="themeLightLabel"
-                (click)="setTheme('light')"
-              >
-                <sz-icon name="sun" [size]="14" />
-              </button>
-              <button
-                type="button"
-                [class.is-active]="theme.mode() === 'dark'"
-                [attr.aria-pressed]="theme.mode() === 'dark'"
-                [attr.aria-label]="themeDarkLabel"
-                (click)="setTheme('dark')"
-              >
-                <sz-icon name="moon" [size]="14" />
-              </button>
-            </div>
+            <button
+              class="sz-icon-btn sz-theme-btn"
+              type="button"
+              [attr.aria-label]="themeAriaLabel"
+              (click)="toggleTheme()"
+            >
+              <sz-icon class="sz-theme-btn__sun" name="sun" />
+              <sz-icon class="sz-theme-btn__moon" name="moon" />
+            </button>
           }
 
           @if (user) {
@@ -196,8 +176,8 @@ export interface SzTopbarUser {
                 size="sm"
                 [photo]="user.photo"
                 [name]="user.displayName ?? user.username ?? user.email"
-                [seed]="user.id ?? user.email"
               />
+              <sz-icon class="sz-account-trigger__caret" name="caret-down" [size]="12" />
             </button>
           } @else {
             @if (signupHref) {
@@ -340,33 +320,21 @@ export interface SzTopbarUser {
         line-height: 1;
       }
 
-      .sz-theme-toggle {
-        display: inline-flex;
-        border: 1px solid var(--line);
-        background: var(--bg-elev);
+      /* V05 single-button theme toggle: sun visible on dark theme
+         (click to switch to light), moon visible on light (click to
+         switch to dark). One icon visible at a time, swapped via
+         attribute selector on the document root. */
+      .sz-theme-btn { position: relative; }
+      .sz-theme-btn .sz-theme-btn__sun,
+      .sz-theme-btn .sz-theme-btn__moon {
+        transition: opacity 0.15s ease;
       }
-      .sz-theme-toggle button {
-        width: 32px;
-        height: 30px;
-        min-width: 32px;
-        min-height: 30px;
-        display: grid;
-        place-items: center;
-        color: var(--fg-muted);
-        border-right: 1px solid var(--line);
-        transition:
-          background 0.12s ease,
-          color 0.12s ease;
-      }
-      .sz-theme-toggle button:last-child {
-        border-right: 0;
-      }
-      .sz-theme-toggle button.is-active {
-        background: var(--accent);
-        color: var(--accent-fg);
-      }
-      .sz-theme-toggle button:not(.is-active):hover {
-        color: var(--fg);
+      :root[data-theme='dark'] .sz-theme-btn .sz-theme-btn__moon,
+      :root[data-theme='light'] .sz-theme-btn .sz-theme-btn__sun {
+        opacity: 0;
+        position: absolute;
+        inset: 50% auto auto 50%;
+        transform: translate(-50%, -50%);
       }
 
       .sz-btn-login,
@@ -406,16 +374,20 @@ export interface SzTopbarUser {
         border-color: var(--fg-muted);
       }
 
+      /* V05 avatar pill trigger: rounded shape, avatar + caret, hover +
+         expanded states match the design (see Home - Logat.html inline
+         styles for the canonical look). */
       .sz-account-trigger {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 8px 2px 2px;
         min-height: 36px;
-        padding: 0;
+        min-width: auto;
         background: transparent;
         border: 1px solid transparent;
-        display: inline-grid;
-        place-items: center;
+        border-radius: 999px;
+        cursor: pointer;
         transition:
           border-color 0.15s ease,
           background 0.15s ease;
@@ -425,7 +397,15 @@ export interface SzTopbarUser {
         background: var(--bg-elev);
       }
       .sz-account-trigger[aria-expanded='true'] {
-        border-color: var(--accent);
+        border-color: var(--line-strong);
+        background: var(--bg-elev);
+      }
+      .sz-account-trigger__caret {
+        color: var(--fg-muted);
+        transition: transform 0.18s ease;
+      }
+      .sz-account-trigger[aria-expanded='true'] .sz-account-trigger__caret {
+        transform: rotate(180deg);
       }
 
       @media (max-width: 1100px) {
@@ -501,5 +481,10 @@ export class SzTopbarComponent {
 
   setTheme(mode: ThemeMode): void {
     this.theme.setMode(mode);
+  }
+
+  /** V05 single-button toggle: dark ⇄ light. */
+  toggleTheme(): void {
+    this.theme.setMode(this.theme.resolved() === 'dark' ? 'light' : 'dark');
   }
 }

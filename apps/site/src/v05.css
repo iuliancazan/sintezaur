@@ -37,7 +37,7 @@
   --fg-subtle: #5c5b58;
   --grid-dots: rgba(235, 176, 35, 0.16);
   --shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
-  --logo-filter: invert(1) brightness(1.05);
+  --logo-filter: none;
 }
 
 /* ---- LIGHT ---- */
@@ -53,7 +53,7 @@
   --fg-subtle: #948a6c;
   --grid-dots: rgba(60, 50, 20, 0.16);
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.04) inset;
-  --logo-filter: none;
+  --logo-filter: invert(1) brightness(0.95);
   --accent-fg: #0b0905;
 }
 
