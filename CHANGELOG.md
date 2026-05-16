@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-F — Forum foundation + list rewrite to V05 (single commit, _SHA TBD_)
+#### M13-F — Forum foundation + list rewrite to V05 (single commit `137f4d4`)
 
 - **V05 forum stylesheet imported globally**: copied
   `docs/design-imports/2026-05-16-v05/styles.forum.css` (1952
