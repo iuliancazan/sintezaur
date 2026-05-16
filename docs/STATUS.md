@@ -6,7 +6,24 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13-F** — Forum foundation + list rewrite la V05.
+**Last shipped:** **M13** ✅ — Site design import v05 complete.
+Toate sub-fazele A–G livrate pe `main` (vezi tabelul M13 de mai
+jos). `docs/testing/m13-testing.md` scris cu plan complet de
+testare manuală pe stack-ul deployed (foundation + 5 secțiuni +
+regression + smoke build + known limitations). Cont shells
+(Setari / Favorite / Mesaje) păstrate pe scoped `.settings/.favorites/
+.messages` styles din M10 — funcționează curat cu tokens v05; rewrite
+la V05's `.acc-*` = polish pass viitor.
+
+Per total M13 a livrat: ~7000+ linii noi (v05.css 4503 + v05-forum.css
+1952 + page templates rewrites + sprite component cu 58 simboluri),
+~3500+ linii de scoped styles șterse (dead code eliminat din
+bazar-list/-detail, tezaur-list/-detail, revista-list, forum-list).
+CSS global creste cu ~70 kB nemin (most rules unused până la adoptarea
+markup-ului `.fl-*/.fm-*` pe forum thread + `.ad-*` pe revista detail
++ `.acc-*` pe cont — toate planificate ca polish pass viitor).
+
+**Last shipped (previous):** **M13-F** — Forum foundation + list rewrite la V05.
 V05 `styles.forum.css` (1952 linii) copiat la `apps/site/src/v05-forum.css`
 și importat din `apps/site/src/styles.scss` după `v05.css`. Asta dă
 disponibilitate globală pentru `.fl-*` / `.fm-*` / `.ft-*` / `.fp-*`
@@ -143,9 +160,13 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M13-G** — Cont pages (Favorite, Mesaje, Setari shells
-+ sub-tabs) + close M13 cu `docs/testing/m13-testing.md`. După aceea,
-revenim la **M11** Tezaur contributor flow per spec §7.2.
+**Next up:** **M11** — Tezaur contributor flow per spec §7.2.
+Cont shells (Favorite/Mesaje/Setari) păstrate pe scoped din M10 —
+nu au nevoie de rewrite imediat. Polish-pass-uri V05 pentru forum
+thread/category/search/new, revista detail (`.ad-*`), tezaur detail
+SzComponents → sprite sunt notate ca _Known limitations_ în
+`docs/testing/m13-testing.md`, programabile între milestones.
+_M13-G_ = close + testing doc fără sub-faze noi.
 
 **Skipped from earlier plan:** _M13-F legacy_ — Forum 5 pages per
 `docs/design-imports/2026-05-16-v05/Forum.html` + `Forum -
@@ -192,9 +213,7 @@ cu coadă moderare pentru status `pending_review`. Cod existent
 pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
 relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** M13 — site design import v05; sub-faze
-A (foundation) ✅ / B (Home) / C (Bazar) / D (Tezaur) /
-E (Revistă) / F (Forum) / G (Cont + close).
+**Active milestone:** none — M13 closed, M11 (Tezaur contributor) next.
 
 ## Milestones
 
@@ -326,6 +345,7 @@ E (Revistă) / F (Forum) / G (Cont + close).
 | D   | `cafb77f` | done | Tezaur list + detail re-aligned la V05. Ambele foloseau deja `.tez-*`/`.td-*` — work a fost trim de styles + SzIcon → sprite V05. List: stiluri 404→6 reguli (`.tez-results-row`, `.tez-empty`), bundle 23.6→13.0 kB, kbd ⌘K. Detail: stiluri 663→13 reguli (`.muted`, `.td-empty`, gallery photo/ph, `.td-buy*`, `.td-official*`), bundle 40.0→26.4 kB. SzBadge/Avatar/Button păstrate pe panourile Detalii/Specs/Recenzii. |
 | E   | `2529bfe` | done | Revista list rewrite V05 1:1: `.rev-header` (title+lede), `.rev-tabs` pillar tabs, `.rev-hero` cu overlay gradient (featured `articles[0]` doar pe "all"+page1), `.rev-main` 2-col cu `.rev-grid` (`.is-big` span-2 + small) + `.rev-side` (Top 5 + newsletter). `gear-fill` cards. 8 chei i18n noi. Bundle 18→15.6 kB. Detail: doar `SzIconComponent` scos; layout `.rd-*` scoped păstrat (rewrite la V05's `.ad-*` = polish pass viitor). |
 | F   | `137f4d4` | done | Forum foundation: V05 `styles.forum.css` (1952 linii) copiat la `apps/site/src/v05-forum.css` + importat din `styles.scss`. `forum-list.page.ts` rescris la V05's `.fm-*` (header + actions tabs + `.fm-cats` cu `.fm-cat` rows). 3 chei i18n noi. Thread/category/search/form rămân pe scoped `.fc-*/.ff-*` (rewrite = polish pass viitor; foundation V05 ready pentru pickup). |
+| G   | _TBD_ | done | Close M13 + `docs/testing/m13-testing.md` (plan manual de testare pe 11 secțiuni: foundation, Home guest/logat, Bazar list+detail, Tezaur list+detail, Revista list+detail, Forum list+legacy, Cont shells, regression, known limitations, smoke build). Cont shells (Setari/Favorite/Mesaje) păstrate pe scoped din M10 — funcționează curat cu tokens v05, rewrite la `.acc-*` = polish pass viitor. |
 | D   | _TBD_ | pending | Tezaur list + detail. |
 | E   | _TBD_ | pending | Revista list + detail. |
 | F   | _TBD_ | pending | Forum (list, thread, category, new, search). |

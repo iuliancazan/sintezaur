@@ -14,6 +14,67 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-G — Close M13 + testing doc (single commit, _SHA TBD_)
+
+Closes the M13 milestone. No new code rewrites in this sub-phase.
+
+- **`docs/testing/m13-testing.md` written** with 11-section
+  manual testing plan for the deployed stack:
+  1. Foundation (token swap, sprite render, footer markup).
+  2. Home page (guest + logged-in shells, all 6 sections).
+  3. Bazar list (header, action row, sticky toolbar, chips,
+     rail, .listing cards, pagination).
+  4. Bazar detail (breadcrumb, .bd-hero gallery+info, .bd-main
+     description+sidebar with seller/safety).
+  5. Tezaur list + detail.
+  6. Revista list + detail (rd-* legacy kept).
+  7. Forum list (V05 .fm-cats) + thread/category/search/new
+     (legacy scoped, foundation V05 loaded).
+  8. Cont shells (Setari/Favorite/Mesaje — M10 layout retained,
+     polish pass deferred).
+  9. Regression check (topbar, login, panels, footer, build).
+  10. Known limitations (forum recent threads endpoint,
+      platform-stats, hero rotator JS, revista detail .ad-*
+      rewrite, forum legacy pages, cont .acc-* rewrite, tezaur
+      detail SzComponent migration).
+  11. Smoke build commands + expected bundle deltas.
+
+- **Cont shells not rewritten** in M13-G — they keep the
+  scoped `.settings/.favorites/.messages` styles from M10. They
+  work correctly with v05 tokens (inherit `--bg/--fg/--accent`).
+  Full V05 `.acc-*` rewrite is a deferred polish pass; not
+  blocking M13 close.
+
+- **STATUS.md** updated: M13 marked closed, Active milestone
+  cleared, Next up = **M11** (Tezaur contributor flow per spec
+  §7.2 — auto-promote contributor at 100 forum posts + curator
+  manual, gear propose/edit flow with `pending_review` queue).
+
+- **M13 totals** (sub-faze A–G):
+  - 7 commits aligned: 84dda78, 044fd5a, 5d5c541, a635f18,
+    cafb77f, 2529bfe, 137f4d4 (+ sync commits + M13-G).
+  - ~7000+ lines added: v05.css 4503 + v05-forum.css 1952 +
+    sprite component (58 symbols) + V05 markup rewrites for
+    home/bazar list/bazar detail/revista list/forum list.
+  - ~3500+ lines of duplicate scoped CSS removed across
+    bazar-list/-detail, tezaur-list/-detail, revista-list,
+    forum-list.
+  - 90+ new i18n keys for V05-spec strings (home 60 + bazar
+    detail 21 + revista 8 + forum 3 + bazar list 3).
+
+- **What's V05-canonical now**: foundation tokens (dark =
+  v2-neutral hex, light = warm cream); footer markup; Home page
+  (full); Bazar list + detail (full); Tezaur list + detail
+  (structural + style trim); Revista list (full); Forum list
+  (full).
+
+- **What's still scoped legacy**: Revista detail (.rd-*), Forum
+  thread/category/search/new (.fc-*/.ff-*/.ft-*), Cont shells
+  (.settings/.favorites/.messages), Tezaur detail
+  Detalii/Specs/Recenzii panels (SzBadge/Avatar/Button still
+  in use 9 spots). All flagged in m13-testing.md §10 for future
+  polish passes.
+
 #### M13-F — Forum foundation + list rewrite to V05 (single commit `137f4d4`)
 
 - **V05 forum stylesheet imported globally**: copied
