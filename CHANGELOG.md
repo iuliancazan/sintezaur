@@ -14,6 +14,82 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-C2 — Bazar detail rewrite V05 1:1 (single commit, _SHA TBD_)
+
+`apps/site/src/app/bazar/bazar-detail.page.ts` complete rewrite to
+match V05's `Bazar - Roland Juno-60.html` layout. Class logic
+(signals, fetch, watch toggle, contact form, SEO Product +
+BreadcrumbList JSON-LD) preserved verbatim; template + styles
+restructured to V05 markup.
+
+- **Breadcrumb** `.td-crumb` (back arrow + sep · Bazar / brand /
+  current title).
+
+- **Hero block** `.bd-hero crosses` (grid 1.4fr + 1fr, ~580px
+  min-height):
+  - Left `.bd-gallery`: `.bd-gallery__main` with chip badge
+    top-left (condition label), photo via `gear-fill__photo`,
+    counter `01 / N` bottom-left + prev/next nav bottom-right.
+    Below it `.bd-gallery__thumbs` grid (5-col, `.bd-thumb`
+    with `is-active` border).
+  - Right `.bd-info`:
+    - `.bd-info__topline`: brand link to Tezaur + kind label,
+      `.bd-info__status` with pulse dot for `Listing activ`.
+    - `.bd-info__title` (gear model) + `.bd-info__sub`
+      (listing title).
+    - `.bd-info__price-row` huge accent price + optional
+      `.bd-info__price-side` (delta when offers welcome).
+    - `.bd-info__chips`: location (pin icon), delivery (truck),
+      accent „Negociabil ↕" when acceptsOffers.
+    - `.bd-info__deal` 2-cell strip: transaction kind + posted
+      date (or shipping cost when present).
+    - `.bd-info__ctas` 3-button grid: primary „Trimite mesaj"
+      (focuses contact form), ghost „Fă ofertă →" (or „Vezi
+      mai mult" fallback), icon-only heart watch toggle. Owner
+      sees „Editează" / „Anunțurile mele" / eye-icon instead.
+    - `.bd-info__posted` row with view count.
+
+- **Main grid** `.bd-main` 2-col (1fr + 320px):
+  - Left column:
+    - `.bd-desc` x N (description innerHTML, looking_for,
+      condition_note as separate sections).
+    - `.bd-mini-specs` (when gear linked) with link to Tezaur.
+    - `.bd-similar` with `.bz-grid` of `.listing` cards from
+      `bazar.recentlySold({gearId})`.
+  - Right column `.bd-sidebar`:
+    - Seller block: avatar (initials) + name + handle + 3-stat
+      grid (rating★ / sales / reviews), Block + Report buttons
+      (when logged-in non-owner), contact textarea form, phone
+      strip when contactPhone is set.
+    - Safety tips block: 4 numbered tips, all i18n.
+
+- **Style block** trimmed to ~250 lines covering only what's
+  NOT in v05.css: `.bd-banner`, `.bd-desc__body p/strong`,
+  `.bd-seller__*` internals, `.bd-contact textarea/ok/err`,
+  `.bd-phone`, `.bd-safety__*`, `.bd-similar__head`, `.bd-loading`/
+  `.bd-empty`. All hero/gallery/info/chip/deal/CTA/sidebar
+  structural styles inherited from v05.css globally.
+
+- **Imports cleanup**: SzAvatarComponent, SzBadgeComponent,
+  SzButtonComponent, SzIconComponent all removed — V05 uses
+  global sprite + class names. BlockButtonComponent + 
+  ReportButtonComponent kept (trust UI from M6).
+
+- **New methods**: `prevPhoto()`, `nextPhoto()`, `activeIndex()`
+  computed, `focusContactForm()` smooth-scrolls + focuses the
+  textarea or routes to login if logged out. `formatPriceShort()`,
+  `initials()` for the seller avatar.
+
+- **i18n**: 21 new keys under `bazar.detail.*`
+  (`about_this_item`, `brand`, `model`, `make_offer`,
+  `my_listings`, `negotiable`, `posted`, `rating`, `reviews`,
+  `sales`, `safety_title`, `safety_1..4_title`,
+  `safety_1..4_body`, `see_more`, `specs_short`, `status_active`,
+  `transaction`, `tx_completed`).
+
+- **Build clean**. CSS bundle unchanged; bazar-detail lazy
+  chunk holds steady around 27 kB.
+
 #### M13-C1 — Bazar list re-aligned to V05 (single commit `5d5c541`)
 
 `apps/site/src/app/bazar/bazar-list.page.ts` re-aligned 1:1 to

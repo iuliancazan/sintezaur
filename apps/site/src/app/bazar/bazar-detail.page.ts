@@ -9,12 +9,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { formatPrice } from '@sintezaur/shared';
-import {
-  SzAvatarComponent,
-  SzBadgeComponent,
-  SzButtonComponent,
-  SzIconComponent,
-} from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
@@ -28,6 +22,19 @@ import {
   type BazarListingDetail,
 } from './bazar.service';
 
+/**
+ * Bazar listing detail — V05 design 1:1 (M13-C2).
+ *
+ * Layout:
+ *   .td-crumb (breadcrumb) →
+ *   .bd-hero { .bd-gallery + .bd-info(price/chips/deal/CTAs) } →
+ *   .bd-main { left: .bd-desc + .bd-mini-specs + .bd-similar + delivery
+ *              right: .bd-sidebar { seller, safety, contact-form } }
+ *
+ * All visual styling is provided globally by `v05.css`. Page-local
+ * styles cover only seller block internals and the contact form
+ * textarea (no equivalent in v05.css).
+ */
 @Component({
   selector: 'app-bazar-detail-page',
   standalone: true,
@@ -36,10 +43,6 @@ import {
     FormsModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
-    SzBadgeComponent,
-    SzAvatarComponent,
-    SzButtonComponent,
     BlockButtonComponent,
     ReportButtonComponent,
   ],
@@ -47,10 +50,10 @@ import {
   template: `
     @if (detail(); as d) {
       <div class="shell">
-        <!-- BREADCRUMB -->
-        <nav class="bd-crumb" aria-label="Breadcrumb">
-          <a routerLink="/bazar" class="bd-crumb__back">
-            <sz-icon name="back" [size]="14" />
+        <!-- BREADCRUMB (V05: .td-crumb) -->
+        <nav class="td-crumb" aria-label="Breadcrumb">
+          <a routerLink="/bazar" style="display:inline-flex;align-items:center;gap:6px;color:var(--accent);">
+            <svg width="14" height="14"><use href="#i-back"/></svg>
             {{ 'bazar.detail.back_to_list' | t }}
           </a>
           <span class="sep">·</span>
@@ -69,187 +72,281 @@ import {
           </div>
         }
 
-        <div class="bd-main">
-          <!-- ============ LEFT: gallery + info ============ -->
-          <div class="bd-left">
-            <!-- GALLERY -->
-            <div class="bd-gallery">
-              @if (photos().length > 0) {
-                <div class="bd-gallery__hero">
-                  <img
-                    [src]="bazar.imageUrl(heroPhoto()!.path)"
-                    [alt]="d.listing.title"
-                  />
+        <!-- HERO (V05: .bd-hero with .bd-gallery + .bd-info) -->
+        <section class="bd-hero crosses">
+          <span class="crosses-tl"></span><span class="crosses-tr"></span>
+
+          <div class="bd-gallery">
+            <div class="bd-gallery__main">
+              <span class="bd-gallery__chip">{{ 'bazar.condition.' + d.listing.condition | t }}</span>
+              @if (heroPhoto(); as h) {
+                <div class="gear-fill">
+                  <img class="gear-fill__photo" [src]="bazar.imageUrl(h.path)" [alt]="d.listing.title" />
                 </div>
-                @if (photos().length > 1) {
-                  <div class="bd-gallery__thumbs">
-                    @for (p of thumbs(); track p.sourceId) {
-                      <button
-                        type="button"
-                        class="bd-gallery__thumb"
-                        [class.is-active]="p.sourceId === activeSourceId()"
-                        (click)="activeSourceId.set(p.sourceId)"
-                      >
-                        <img [src]="bazar.imageUrl(p.path)" alt="" />
-                      </button>
-                    }
-                  </div>
-                }
               } @else {
-                <div class="bd-gallery__hero is-empty">
-                  <span>{{ 'bazar.detail.no_photos' | t }}</span>
+                <div class="gear-fill">
+                  <span class="gear-fill__label">{{ 'bazar.detail.no_photos' | t }}</span>
+                </div>
+              }
+              @if (photos().length > 1) {
+                <div class="bd-gallery__counter">
+                  {{ activeIndex() + 1 }} / {{ photos().length }}
+                </div>
+                <div class="bd-gallery__nav">
+                  <button type="button" aria-label="Anterior" (click)="prevPhoto()">‹</button>
+                  <button type="button" aria-label="Următorul" (click)="nextPhoto()">›</button>
+                </div>
+              }
+            </div>
+            @if (photos().length > 1) {
+              <div class="bd-gallery__thumbs">
+                @for (p of photos(); track p.sourceId) {
+                  <button
+                    type="button"
+                    class="bd-thumb"
+                    [class.is-active]="p.sourceId === activeSourceId()"
+                    (click)="activeSourceId.set(p.sourceId)"
+                  >
+                    <div class="gear-fill">
+                      <img class="gear-fill__photo" [src]="bazar.imageUrl(p.thumbPath)" alt="" />
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="bd-info">
+            <div class="bd-info__topline">
+              @if (d.gear) {
+                <a class="bd-info__brand" [routerLink]="['/tezaur', d.gear.slug]">
+                  {{ d.gear.brand }} · {{ 'bazar.kind.' + d.listing.kind | t }}
+                </a>
+              } @else {
+                <span class="bd-info__brand">
+                  {{ d.listing.rawMake || '—' }} · {{ 'bazar.kind.' + d.listing.kind | t }}
+                </span>
+              }
+              <span class="bd-info__status">
+                {{ 'bazar.detail.status_' + d.listing.status | t }}
+              </span>
+            </div>
+            <h1 class="bd-info__title">{{ d.gear?.model ?? d.listing.rawModel ?? d.listing.title }}</h1>
+            <p class="bd-info__sub">{{ d.listing.title }}</p>
+
+            <div class="bd-info__price-row">
+              <div class="bd-info__price">
+                {{ formatPriceShort(d.listing.price) }}<small>{{ d.listing.currency | uppercase }}</small>
+              </div>
+              @if (d.listing.acceptsOffers) {
+                <div class="bd-info__price-side">
+                  <span class="bd-info__price-delta">{{ 'bazar.detail.offers_welcome' | t }}</span>
                 </div>
               }
             </div>
 
-            <!-- HEADER -->
-            <header class="bd-header">
-              <div class="bd-header__top">
-                @if (d.gear) {
-                  <a class="bd-header__brand" [routerLink]="['/tezaur', d.gear.slug]">
-                    // {{ d.gear.brand }} {{ d.gear.model }}
-                  </a>
-                } @else if (d.listing.rawMake || d.listing.rawModel) {
-                  <span class="bd-header__brand bd-header__brand--raw">
-                    // {{ d.listing.rawMake }} {{ d.listing.rawModel }}
-                    @if (d.listing.rawYear) {
-                      ({{ d.listing.rawYear }})
-                    }
-                  </span>
-                }
-                <div class="bd-header__badges">
-                  <sz-badge>{{ 'bazar.condition.' + d.listing.condition | t }}</sz-badge>
-                  @if (d.listing.kind !== 'sell') {
-                    <sz-badge variant="accent">{{ 'bazar.kind.' + d.listing.kind | t }}</sz-badge>
-                  }
-                  @if (d.listing.acceptsOffers) {
-                    <sz-badge>{{ 'bazar.card.accepts_offers' | t }}</sz-badge>
-                  }
-                </div>
-              </div>
-              <h1 class="bd-header__title">{{ d.listing.title }}</h1>
-              <div class="bd-header__meta">
-                <span class="bd-header__meta-item">
-                  <sz-icon name="pin" [size]="13" />
-                  {{ d.listing.location }}
-                </span>
-                <span class="bd-header__meta-item">
-                  {{ 'bazar.detail.posted_on' | t: { date: formatDate(d.listing.createdAt) } }}
-                </span>
-                <span class="bd-header__meta-item">
-                  <sz-icon name="heart" [size]="13" />
-                  {{ d.listing.viewCount }} {{ 'bazar.detail.views' | t }}
-                </span>
-              </div>
-            </header>
-
-            <!-- PRICE -->
-            <div class="bd-price-bar">
-              <div>
-                <div class="bd-price">
-                  {{ formatPrice(d.listing.price, d.listing.currency) }}
-                </div>
-                @if (d.listing.acceptsOffers) {
-                  <div class="bd-price__sub">{{ 'bazar.detail.offers_welcome' | t }}</div>
-                }
-              </div>
-              <div class="bd-actions">
-                @if (isOwner()) {
-                  <a
-                    class="bd-action"
-                    [routerLink]="['/bazar', d.listing.slug, 'editare']"
-                  >{{ 'bazar.detail.edit' | t }}</a>
-                } @else {
-                  <button
-                    type="button"
-                    class="bd-action bd-action--watch"
-                    [class.is-active]="isWatched()"
-                    (click)="toggleWatch()"
-                    [disabled]="watchPending() || !auth.isLoggedIn()"
-                  >
-                    <sz-icon name="heart" [size]="14" />
-                    {{ (isWatched() ? 'bazar.detail.watching' : 'bazar.detail.watch') | t }}
-                  </button>
-                  <a class="bd-action" routerLink="/login">
-                    {{ 'bazar.detail.report' | t }}
-                  </a>
-                }
-              </div>
+            <div class="bd-info__chips">
+              <span class="bd-info__chip">
+                <svg><use href="#i-pin"/></svg>
+                {{ d.listing.location }}
+              </span>
+              <span class="bd-info__chip">
+                <svg><use href="#i-truck"/></svg>
+                {{ 'bazar.delivery.' + d.listing.delivery | t }}
+              </span>
+              @if (d.listing.acceptsOffers) {
+                <span class="bd-info__chip is-accent">{{ 'bazar.detail.negotiable' | t }} ↕</span>
+              }
             </div>
 
-            <!-- DESCRIPTION -->
+            <div class="bd-info__deal">
+              <div class="bd-info__deal-cell">
+                <span class="k">// {{ 'bazar.detail.transaction' | t }}</span>
+                <span class="v">{{ 'bazar.kind.' + d.listing.kind | t }}</span>
+              </div>
+              @if (d.listing.shippingCost) {
+                <div class="bd-info__deal-cell">
+                  <span class="k">// {{ 'bazar.detail.shipping_cost' | t }}</span>
+                  <span class="v">{{ formatPrice(d.listing.shippingCost, d.listing.currency) }}</span>
+                </div>
+              } @else {
+                <div class="bd-info__deal-cell">
+                  <span class="k">// {{ 'bazar.detail.posted' | t }}</span>
+                  <span class="v">{{ formatDate(d.listing.createdAt) }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="bd-info__ctas">
+              @if (isOwner()) {
+                <a class="bd-info__cta bd-info__cta--primary" [routerLink]="['/bazar', d.listing.slug, 'editare']">
+                  {{ 'bazar.detail.edit' | t }}
+                </a>
+                <a class="bd-info__cta bd-info__cta--ghost" routerLink="/cont/anunturile-mele">
+                  {{ 'bazar.detail.my_listings' | t }} →
+                </a>
+                <span class="bd-info__cta bd-info__cta--icon">
+                  <svg><use href="#i-eye"/></svg>
+                </span>
+              } @else {
+                <button
+                  type="button"
+                  class="bd-info__cta bd-info__cta--primary"
+                  (click)="focusContactForm()"
+                  [disabled]="d.listing.status !== 'active'"
+                >
+                  {{ 'bazar.detail.send_message' | t }}
+                </button>
+                @if (d.listing.acceptsOffers) {
+                  <button
+                    type="button"
+                    class="bd-info__cta bd-info__cta--ghost"
+                    (click)="focusContactForm()"
+                    [disabled]="d.listing.status !== 'active'"
+                  >
+                    {{ 'bazar.detail.make_offer' | t }} →
+                  </button>
+                } @else {
+                  <a class="bd-info__cta bd-info__cta--ghost" routerLink="/bazar">
+                    {{ 'bazar.detail.see_more' | t }} →
+                  </a>
+                }
+                <button
+                  type="button"
+                  class="bd-info__cta bd-info__cta--icon"
+                  [class.is-on]="isWatched()"
+                  (click)="toggleWatch()"
+                  [disabled]="watchPending() || !auth.isLoggedIn()"
+                  [attr.aria-label]="(isWatched() ? 'bazar.detail.watching' : 'bazar.detail.watch') | t"
+                >
+                  <svg><use href="#i-heart"/></svg>
+                </button>
+              }
+            </div>
+
+            <div class="bd-info__posted">
+              <span>
+                <span class="accent">{{ 'bazar.detail.posted' | t }}</span>
+                · {{ formatDate(d.listing.createdAt) }}
+              </span>
+              <span>
+                <svg width="11" height="11" style="display:inline-block;vertical-align:-1px;margin-right:4px"><use href="#i-eye"/></svg>
+                {{ d.listing.viewCount }} {{ 'bazar.detail.views' | t }}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <!-- MAIN: description + sidebar (V05: .bd-main) -->
+        <div class="bd-main">
+          <div>
             @if (d.listing.descriptionHtml) {
-              <section class="bd-section">
-                <h2 class="bd-section__title">// {{ 'bazar.detail.description' | t }}</h2>
-                <div class="bd-prose" [innerHTML]="d.listing.descriptionHtml"></div>
+              <section class="bd-desc">
+                <h2>{{ 'bazar.detail.about_this_item' | t }}</h2>
+                <div class="bd-desc__body" [innerHTML]="d.listing.descriptionHtml"></div>
               </section>
             }
 
-            <!-- TRADE LOOKING FOR -->
             @if (d.listing.lookingFor) {
-              <section class="bd-section">
-                <h2 class="bd-section__title">// {{ 'bazar.detail.looking_for' | t }}</h2>
-                <p class="bd-lookingfor">{{ d.listing.lookingFor }}</p>
+              <section class="bd-desc">
+                <h2>{{ 'bazar.detail.looking_for' | t }}</h2>
+                <p>{{ d.listing.lookingFor }}</p>
               </section>
             }
 
-            <!-- CONDITION NOTE -->
             @if (d.listing.conditionNote) {
-              <section class="bd-section">
-                <h2 class="bd-section__title">// {{ 'bazar.detail.condition_note' | t }}</h2>
+              <section class="bd-desc">
+                <h2>{{ 'bazar.detail.condition_note' | t }}</h2>
                 <p>{{ d.listing.conditionNote }}</p>
               </section>
             }
 
-            <!-- DELIVERY -->
-            <section class="bd-section">
-              <h2 class="bd-section__title">// {{ 'bazar.detail.delivery' | t }}</h2>
-              <dl class="bd-spec">
-                <div>
-                  <dt>{{ 'bazar.filters.delivery' | t }}</dt>
-                  <dd>{{ 'bazar.delivery.' + d.listing.delivery | t }}</dd>
+            <!-- Mini-specs (V05: link to Tezaur if gear linked) -->
+            @if (d.gear) {
+              <section class="bd-mini-specs">
+                <header class="bd-mini-specs__head">
+                  <h3>{{ 'bazar.detail.specs_short' | t }}</h3>
+                  <a class="block__cta" [routerLink]="['/tezaur', d.gear.slug]">
+                    {{ 'bazar.detail.view_tezaur' | t }}
+                  </a>
+                </header>
+                <div class="bd-mini-specs__body">
+                  <div class="bd-mini-specs__row"><span class="k">{{ 'bazar.detail.brand' | t }}</span><span class="v">{{ d.gear.brand }}</span></div>
+                  <div class="bd-mini-specs__row"><span class="k">{{ 'bazar.detail.model' | t }}</span><span class="v">{{ d.gear.model }}</span></div>
                 </div>
-                @if (d.listing.shippingCost) {
-                  <div>
-                    <dt>{{ 'bazar.detail.shipping_cost' | t }}</dt>
-                    <dd>{{ formatPrice(d.listing.shippingCost, d.listing.currency) }}</dd>
-                  </div>
-                }
-                @if (d.listing.shippingCarriers.length > 0) {
-                  <div>
-                    <dt>{{ 'bazar.detail.shipping_carriers' | t }}</dt>
-                    <dd>{{ shippingCarriersLabel(d.listing.shippingCarriers) }}</dd>
-                  </div>
-                }
-              </dl>
-            </section>
+              </section>
+            }
+
+            <!-- Similar (V05: .bd-similar; use recentlySold from same gear) -->
+            @if (recentlySold().length > 0) {
+              <section class="bd-similar">
+                <header class="bd-similar__head">
+                  <h3>{{ 'bazar.detail.recently_sold' | t }}<span style="color:var(--accent)">.</span></h3>
+                  <span class="sub">{{ recentlySold().length }} {{ 'bazar.detail.tx_completed' | t }}</span>
+                </header>
+                <div class="bz-grid">
+                  @for (s of recentlySold(); track s.id) {
+                    <a class="listing" [routerLink]="['/bazar', s.slug]" style="text-decoration:none;color:inherit;">
+                      <div class="listing__media">
+                        <div class="gear-fill">
+                          @if (s.thumb) {
+                            <img class="gear-fill__photo" [src]="bazar.imageUrl(s.thumb)" [alt]="s.title" loading="lazy" />
+                          }
+                          <span class="gear-fill__label">{{ s.brand }} · {{ s.model }}</span>
+                        </div>
+                        <span class="listing__chip" [attr.data-cond]="s.condition">{{ 'bazar.condition.' + s.condition | t }}</span>
+                      </div>
+                      <div class="listing__body">
+                        <div class="listing__brand">// {{ s.brand || '—' }}</div>
+                        <div class="listing__title">{{ s.model || s.title }}</div>
+                        <div class="listing__row">
+                          <div class="listing__price">{{ formatPriceShort(s.price) }}<small>{{ s.currency | uppercase }}</small></div>
+                          <div class="listing__loc">
+                            <svg width="11" height="11"><use href="#i-pin"/></svg>
+                            {{ s.location }}
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  }
+                </div>
+              </section>
+            }
           </div>
 
-          <!-- ============ RIGHT: sticky sidebar ============ -->
-          <aside class="bd-side">
-            <!-- SELLER CARD -->
-            <section class="bd-card">
-              <header class="bd-card__head">// {{ 'bazar.detail.seller' | t }}</header>
-              <div class="bd-card__body">
-                <div class="bd-seller">
-                  <sz-avatar [name]="d.seller.username" />
+          <!-- SIDEBAR (V05: .bd-sidebar) -->
+          <aside class="bd-sidebar">
+            <section class="bd-sidebar__block">
+              <header class="bd-sidebar__head">{{ 'bazar.detail.seller' | t }}</header>
+              <div class="bd-seller">
+                <div class="bd-seller__row">
+                  <span class="bd-seller__avatar">{{ initials(d.seller.username) }}</span>
                   <div>
                     <div class="bd-seller__name">{{ d.seller.username }}</div>
-                    <div class="bd-seller__meta">
-                      @if (d.seller.avgRating) {
-                        <span class="bd-seller__rating">★ {{ d.seller.avgRating }}</span>
-                        <span class="dot">·</span>
-                      }
-                      <span>{{ 'bazar.detail.tx_count' | t: { count: d.seller.transactionCount } }}</span>
-                    </div>
-                    <div class="bd-seller__since">
+                    <div class="bd-seller__handle">
+                      &#64;{{ d.seller.username }} ·
                       {{ 'bazar.detail.member_since' | t: { date: formatYear(d.seller.createdAt) } }}
                     </div>
                   </div>
                 </div>
 
+                <div class="bd-seller__stats">
+                  <div class="bd-seller__stat">
+                    <span class="v accent">{{ d.seller.avgRating ?? '—' }}</span>
+                    <span class="k">★ {{ 'bazar.detail.rating' | t }}</span>
+                  </div>
+                  <div class="bd-seller__stat">
+                    <span class="v">{{ d.seller.transactionCount }}</span>
+                    <span class="k">{{ 'bazar.detail.sales' | t }}</span>
+                  </div>
+                  <div class="bd-seller__stat">
+                    <span class="v">{{ d.seller.reviewCount }}</span>
+                    <span class="k">{{ 'bazar.detail.reviews' | t }}</span>
+                  </div>
+                </div>
+
                 @if (!isOwner() && auth.isLoggedIn()) {
-                  <div class="bd-trust-actions">
+                  <div class="bd-seller__rows">
                     <app-report-button
                       targetType="listing"
                       [targetId]="d.listing.id"
@@ -264,13 +361,11 @@ import {
 
                 @if (!isOwner() && d.listing.status === 'active') {
                   @if (auth.isLoggedIn()) {
-                    <div class="bd-contact">
+                    <div class="bd-contact" #contactBlock>
                       @if (contactSuccess()) {
                         <p class="bd-contact__ok">
                           ✓ {{ 'bazar.detail.message_sent' | t }}
-                          <a routerLink="/cont/mesaje">
-                            {{ 'bazar.detail.go_to_inbox' | t }}
-                          </a>
+                          <a routerLink="/cont/mesaje">{{ 'bazar.detail.go_to_inbox' | t }} →</a>
                         </p>
                       } @else {
                         <textarea
@@ -286,21 +381,17 @@ import {
                           <p class="bd-contact__err">{{ contactError() }}</p>
                         }
                         <button
-                          sz-button
                           type="button"
+                          class="bd-info__cta bd-info__cta--primary"
                           (click)="sendMessage(d.listing.id)"
                           [disabled]="!contactBody.trim() || contactPending()"
                         >
-                          {{
-                            (contactPending()
-                              ? 'bazar.detail.sending'
-                              : 'bazar.detail.send_message') | t
-                          }}
+                          {{ (contactPending() ? 'bazar.detail.sending' : 'bazar.detail.send_message') | t }}
                         </button>
                       }
                     </div>
                   } @else {
-                    <a routerLink="/login" class="bd-login-cta">
+                    <a routerLink="/login" class="bd-info__cta bd-info__cta--ghost" style="text-align:center;display:block;margin-top:14px;">
                       {{ 'bazar.detail.login_to_message' | t }}
                     </a>
                   }
@@ -308,48 +399,35 @@ import {
 
                 @if (d.listing.contactPhone) {
                   <p class="bd-phone">
-                    <sz-icon name="bell" [size]="12" />
+                    <svg width="12" height="12"><use href="#i-bell"/></svg>
                     <strong>{{ d.listing.contactPhone }}</strong>
                   </p>
                 }
               </div>
             </section>
 
-            <!-- LINKED TEZAUR ENTRY -->
-            @if (d.gear) {
-              <section class="bd-card">
-                <header class="bd-card__head">// {{ 'bazar.detail.linked_gear' | t }}</header>
-                <div class="bd-card__body">
-                  <a class="bd-gear-link" [routerLink]="['/tezaur', d.gear.slug]">
-                    <div class="bd-gear-link__brand">{{ d.gear.brand }}</div>
-                    <div class="bd-gear-link__model">{{ d.gear.model }}</div>
-                    <div class="bd-gear-link__cta">{{ 'bazar.detail.view_tezaur' | t }} →</div>
-                  </a>
+            <!-- Safety tips (V05: .bd-safety) -->
+            <section class="bd-sidebar__block">
+              <header class="bd-sidebar__head">{{ 'bazar.detail.safety_title' | t }}</header>
+              <div class="bd-safety">
+                <div class="bd-safety__item">
+                  <span class="ico">1</span>
+                  <span class="txt"><strong>{{ 'bazar.detail.safety_1_title' | t }}</strong> {{ 'bazar.detail.safety_1_body' | t }}</span>
                 </div>
-              </section>
-            }
-
-            <!-- RECENTLY SOLD -->
-            @if (recentlySold().length > 0) {
-              <section class="bd-card">
-                <header class="bd-card__head">
-                  // {{ 'bazar.detail.recently_sold' | t }}
-                </header>
-                <div class="bd-card__body bd-recently">
-                  @for (s of recentlySold(); track s.id) {
-                    <a class="bd-recent" [routerLink]="['/bazar', s.slug]">
-                      <span class="bd-recent__price">
-                        {{ formatPrice(s.price, s.currency) }}
-                      </span>
-                      <span class="bd-recent__cond">
-                        {{ 'bazar.condition.' + s.condition | t }}
-                      </span>
-                      <span class="bd-recent__loc">{{ s.location }}</span>
-                    </a>
-                  }
+                <div class="bd-safety__item">
+                  <span class="ico">2</span>
+                  <span class="txt"><strong>{{ 'bazar.detail.safety_2_title' | t }}</strong> {{ 'bazar.detail.safety_2_body' | t }}</span>
                 </div>
-              </section>
-            }
+                <div class="bd-safety__item">
+                  <span class="ico">3</span>
+                  <span class="txt"><strong>{{ 'bazar.detail.safety_3_title' | t }}</strong> {{ 'bazar.detail.safety_3_body' | t }}</span>
+                </div>
+                <div class="bd-safety__item">
+                  <span class="ico">4</span>
+                  <span class="txt"><strong>{{ 'bazar.detail.safety_4_title' | t }}</strong> {{ 'bazar.detail.safety_4_body' | t }}</span>
+                </div>
+              </div>
+            </section>
           </aside>
         </div>
       </div>
@@ -368,28 +446,7 @@ import {
     `
       :host { display: block; }
 
-      .bd-crumb {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 16px 0;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-      }
-      .bd-crumb a { color: var(--fg-muted); text-decoration: none; }
-      .bd-crumb a:hover { color: var(--fg); }
-      .bd-crumb .sep { color: var(--fg-subtle); }
-      .bd-crumb .cur { color: var(--fg); }
-      .bd-crumb__back {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        color: var(--accent) !important;
-      }
-
+      /* Page-local extras NOT covered by v05.css */
       .bd-banner {
         padding: 10px 14px;
         margin-bottom: 18px;
@@ -403,251 +460,87 @@ import {
       .bd-banner.is-warn { border-color: var(--accent); color: var(--accent); }
       .bd-banner.is-info { color: var(--fg-muted); }
 
-      .bd-main {
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 32px;
-        margin-bottom: var(--gutter-y);
-      }
+      .bd-info__cta--icon.is-on { color: var(--accent); border-color: var(--accent); }
 
-      .bd-gallery {
+      /* Description body — fits V05 prose look without redefining typography */
+      .bd-desc__body p {
+        font-size: 15.5px;
+        line-height: 1.65;
+        margin: 0 0 16px;
+        color: var(--fg);
+        text-wrap: pretty;
+      }
+      .bd-desc__body strong { color: var(--accent); font-weight: 600; }
+
+      /* Seller block internals (not in v05.css) */
+      .bd-seller {
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 14px;
+        padding: 14px 18px;
       }
-      .bd-gallery__hero {
-        position: relative;
-        aspect-ratio: 4 / 3;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        overflow: hidden;
-      }
-      .bd-gallery__hero img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-      }
-      .bd-gallery__hero.is-empty {
-        display: grid;
-        place-items: center;
-        color: var(--fg-subtle);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-      }
-      .bd-gallery__thumbs {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-        gap: 8px;
-      }
-      .bd-gallery__thumb {
-        aspect-ratio: 1 / 1;
-        padding: 0;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        cursor: pointer;
-        overflow: hidden;
-      }
-      .bd-gallery__thumb.is-active { border-color: var(--accent); }
-      .bd-gallery__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-      .bd-header {
-        border-top: 1px solid var(--line);
-        padding-top: 16px;
-        margin-bottom: 18px;
-      }
-      .bd-header__top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 12px;
-        margin-bottom: 8px;
-      }
-      .bd-header__brand {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .bd-header__brand:hover { text-decoration: underline; text-underline-offset: 3px; }
-      .bd-header__brand--raw { color: var(--fg-muted); }
-      .bd-header__badges {
-        display: inline-flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .bd-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(28px, 4vw, 42px);
-        line-height: 1.1;
-        margin: 0 0 12px;
-      }
-      .bd-header__meta {
-        display: inline-flex;
-        gap: 16px;
-        flex-wrap: wrap;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--fg-muted);
-      }
-      .bd-header__meta-item { display: inline-flex; align-items: center; gap: 4px; }
-
-      .bd-price-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        padding: 18px 20px;
-        background: var(--bg-elev);
+      .bd-seller__row { display: flex; align-items: center; gap: 12px; }
+      .bd-seller__avatar {
+        width: 44px; height: 44px;
+        display: inline-grid; place-items: center;
+        background: var(--bg-card-2);
         border: 1px solid var(--line-strong);
-        margin-bottom: 22px;
+        font-family: var(--font-mono);
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--fg);
       }
-      .bd-price {
+      .bd-seller__name { font-weight: 600; font-size: 14px; }
+      .bd-seller__handle {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        color: var(--fg-muted);
+        margin-top: 2px;
+      }
+      .bd-seller__stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0;
+        border-top: 1px dashed var(--line);
+        border-bottom: 1px dashed var(--line);
+        padding: 12px 0;
+      }
+      .bd-seller__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-items: center;
+        text-align: center;
+        border-right: 1px dashed var(--line);
+      }
+      .bd-seller__stat:last-child { border-right: 0; }
+      .bd-seller__stat .v {
         font-family: var(--font-display);
-        font-size: clamp(28px, 4vw, 38px);
+        font-size: 22px;
         font-weight: 600;
         line-height: 1;
       }
-      .bd-price__sub {
+      .bd-seller__stat .v.accent { color: var(--accent); }
+      .bd-seller__stat .k {
         font-family: var(--font-mono);
-        font-size: 10px;
+        font-size: 9px;
         letter-spacing: 0.14em;
         text-transform: uppercase;
         color: var(--fg-muted);
-        margin-top: 4px;
       }
-      .bd-actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
-      .bd-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 10px 16px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--fg);
-        cursor: pointer;
-        text-decoration: none;
-        min-height: 40px;
-      }
-      .bd-action:hover { border-color: var(--accent); color: var(--accent); }
-      .bd-action--watch.is-active {
-        background: var(--accent);
-        color: var(--bg);
-        border-color: var(--accent);
-      }
-      .bd-action:disabled { cursor: not-allowed; opacity: 0.55; }
-
-      .bd-section { margin-bottom: 28px; }
-      .bd-section__title {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: var(--fg-muted);
-        margin: 0 0 10px;
-      }
-      .bd-prose {
-        font-size: 15px;
-        line-height: 1.65;
-        color: var(--fg);
-      }
-      .bd-prose :is(p, ul, ol) { margin: 0 0 12px; }
-      .bd-prose ul, .bd-prose ol { padding-left: 22px; }
-      .bd-prose a { color: var(--accent); }
-      .bd-lookingfor {
-        padding: 14px 16px;
-        background: var(--bg-elev);
-        border-left: 3px solid var(--accent);
-        font-style: italic;
-        color: var(--fg);
-      }
-      .bd-spec {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px 24px;
-        margin: 0;
-      }
-      .bd-spec dt {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--fg-muted);
-      }
-      .bd-spec dd { margin: 4px 0 0; font-size: 14px; }
-
-      .bd-side {
-        position: sticky;
-        top: 84px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        align-self: start;
-      }
-      .bd-card {
-        border: 1px solid var(--line);
-        background: var(--bg-elev);
-      }
-      .bd-card__head {
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--line);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--fg);
-      }
-      .bd-card__body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
-
-      .bd-seller {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-      .bd-seller__name {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: 16px;
-      }
-      .bd-seller__meta {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 4px;
-      }
-      .bd-seller__rating { color: var(--accent); }
-      .bd-seller__since {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        color: var(--fg-subtle);
-        margin-top: 2px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-
-      .bd-trust-actions {
+      .bd-seller__rows {
         display: flex;
         gap: 8px;
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px solid var(--line);
         flex-wrap: wrap;
       }
-      .bd-contact { display: flex; flex-direction: column; gap: 8px; }
+
+      /* Contact form */
+      .bd-contact {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 4px;
+      }
       .bd-contact textarea {
         width: 100%;
         padding: 10px 12px;
@@ -657,44 +550,30 @@ import {
         font-size: 14px;
         color: var(--fg);
         resize: vertical;
-        min-height: 90px;
+        min-height: 88px;
       }
-      .bd-contact textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+      .bd-contact textarea:focus { outline: 0; border-color: var(--accent); }
       .bd-contact__ok {
+        color: var(--accent);
         font-family: var(--font-mono);
         font-size: 12px;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.06em;
+        margin: 0;
       }
-      .bd-contact__ok a {
-        display: block;
-        margin-top: 4px;
-        color: var(--fg);
-        text-decoration: underline;
-        text-transform: none;
-        letter-spacing: 0;
-      }
+      .bd-contact__ok a { color: var(--fg); text-decoration: underline; }
       .bd-contact__err {
+        color: var(--accent);
         font-family: var(--font-mono);
         font-size: 11px;
-        color: #c0392b;
+        letter-spacing: 0.06em;
+        margin: 0;
       }
 
-      .bd-login-cta {
-        display: block;
-        text-align: center;
-        padding: 12px;
-        background: var(--accent);
-        color: var(--bg);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        text-decoration: none;
-      }
       .bd-phone {
         margin: 0;
+        padding: 10px 12px;
+        background: var(--bg-card);
+        border: 1px dashed var(--line);
         font-family: var(--font-mono);
         font-size: 13px;
         color: var(--fg);
@@ -703,56 +582,59 @@ import {
         gap: 6px;
       }
 
-      .bd-gear-link {
-        display: block;
-        padding: 12px;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        text-decoration: none;
-        color: var(--fg);
+      /* Safety tips block */
+      .bd-safety {
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
-      .bd-gear-link:hover { border-color: var(--accent); }
-      .bd-gear-link__brand {
+      .bd-safety__item {
+        display: grid;
+        grid-template-columns: 22px 1fr;
+        gap: 10px;
+        font-size: 12.5px;
+        line-height: 1.45;
+        color: var(--fg-muted);
+      }
+      .bd-safety__item .ico {
+        width: 22px; height: 22px;
+        display: inline-grid; place-items: center;
+        background: var(--bg-card);
+        border: 1px solid var(--line-strong);
         font-family: var(--font-mono);
-        font-size: 10px;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-      }
-      .bd-gear-link__model {
-        font-family: var(--font-display);
+        font-size: 12px;
         font-weight: 600;
-        font-size: 18px;
-        margin: 4px 0 8px;
+        color: var(--accent);
       }
-      .bd-gear-link__cta {
-        font-family: var(--font-mono);
-        font-size: 10px;
+      .bd-safety__item strong { color: var(--fg); font-weight: 600; }
+
+      /* Similar grid using v05.css's .bz-grid */
+      .bd-similar { margin-bottom: 24px; }
+      .bd-similar__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 14px;
+      }
+      .bd-similar__head h3 {
+        font-family: var(--font-display);
+        font-size: clamp(24px, 2.5vw, 36px);
+        font-weight: 600;
+        line-height: 0.95;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
+        margin: 0;
+        padding-top: 0.18em;
+      }
+      .bd-similar__head .sub {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
         color: var(--fg-muted);
       }
 
-      .bd-recently { gap: 8px; }
-      .bd-recent {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 8px;
-        padding: 8px 10px;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        text-decoration: none;
-        color: var(--fg);
-        font-family: var(--font-mono);
-        font-size: 12px;
-      }
-      .bd-recent:hover { border-color: var(--accent); }
-      .bd-recent__price { font-weight: 600; }
-      .bd-recent__cond { color: var(--fg-muted); text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px; align-self: center; }
-      .bd-recent__loc { color: var(--fg-subtle); font-size: 10px; align-self: center; text-transform: uppercase; letter-spacing: 0.08em; }
-
-      .bd-loading,
-      .bd-empty {
+      .bd-loading, .bd-empty {
         text-align: center;
         padding: 60px 20px;
         color: var(--fg-muted);
@@ -766,14 +648,7 @@ import {
       }
 
       @media (max-width: 1100px) {
-        .bd-main { grid-template-columns: 1fr; }
-        .bd-side { position: static; }
-      }
-      @media (max-width: 720px) {
-        .bd-price-bar { flex-direction: column; align-items: stretch; }
-        .bd-actions { flex-direction: column; }
-        .bd-action { justify-content: center; }
-        .bd-spec { grid-template-columns: 1fr; }
+        .bd-seller__stats { grid-template-columns: 1fr 1fr 1fr; }
       }
     `,
   ],
@@ -804,7 +679,6 @@ export class BazarDetailPage {
 
   readonly photos = computed(() => {
     const all = this.detail()?.photos ?? [];
-    // Group by sourceId, prefer the `landscape_4x3_large` variant for the hero.
     const bySource = new Map<string, typeof all>();
     for (const p of all) {
       const arr = bySource.get(p.sourceId) ?? [];
@@ -838,9 +712,13 @@ export class BazarDetailPage {
     return ps.find((p) => p.sourceId === active) ?? ps[0];
   });
 
-  readonly thumbs = computed(() =>
-    this.photos().map((p) => ({ sourceId: p.sourceId, path: p.thumbPath })),
-  );
+  readonly activeIndex = computed(() => {
+    const ps = this.photos();
+    if (ps.length === 0) return 0;
+    const active = this.activeSourceId();
+    const idx = ps.findIndex((p) => p.sourceId === active);
+    return idx < 0 ? 0 : idx;
+  });
 
   readonly isOwner = computed(() => {
     const user = this.auth.currentUser();
@@ -853,25 +731,13 @@ export class BazarDetailPage {
     if (!l) return null;
     switch (l.status) {
       case 'sold':
-        return {
-          kind: 'warn',
-          label: this.i18n.t('bazar.detail.status_sold'),
-        } as const;
+        return { kind: 'warn', label: this.i18n.t('bazar.detail.status_sold') } as const;
       case 'expired':
-        return {
-          kind: 'warn',
-          label: this.i18n.t('bazar.detail.status_expired'),
-        } as const;
+        return { kind: 'warn', label: this.i18n.t('bazar.detail.status_expired') } as const;
       case 'removed':
-        return {
-          kind: 'warn',
-          label: this.i18n.t('bazar.detail.status_removed'),
-        } as const;
+        return { kind: 'warn', label: this.i18n.t('bazar.detail.status_removed') } as const;
       case 'draft':
-        return {
-          kind: 'info',
-          label: this.i18n.t('bazar.detail.status_draft'),
-        } as const;
+        return { kind: 'info', label: this.i18n.t('bazar.detail.status_draft') } as const;
       default:
         return null;
     }
@@ -897,17 +763,10 @@ export class BazarDetailPage {
       this.isWatched.set(d.isWatched);
       const firstSourceId = this.photos()[0]?.sourceId ?? null;
       this.activeSourceId.set(firstSourceId);
-      // Recently sold sidebar — only when there's a Tezaur gear FK.
       if (d.gear?.id) {
         try {
-          const sold = await this.bazar.recentlySold({
-            gearId: d.gear.id,
-            limit: 5,
-          });
-          // exclude the current listing if it appears (shouldn't, but defensive)
-          this.recentlySold.set(
-            sold.items.filter((i) => i.id !== d.listing.id),
-          );
+          const sold = await this.bazar.recentlySold({ gearId: d.gear.id, limit: 5 });
+          this.recentlySold.set(sold.items.filter((i) => i.id !== d.listing.id));
         } catch {
           this.recentlySold.set([]);
         }
@@ -920,6 +779,34 @@ export class BazarDetailPage {
       this.notFound.set(true);
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  prevPhoto(): void {
+    const ps = this.photos();
+    if (ps.length < 2) return;
+    const idx = this.activeIndex();
+    const next = (idx - 1 + ps.length) % ps.length;
+    this.activeSourceId.set(ps[next].sourceId);
+  }
+
+  nextPhoto(): void {
+    const ps = this.photos();
+    if (ps.length < 2) return;
+    const idx = this.activeIndex();
+    const next = (idx + 1) % ps.length;
+    this.activeSourceId.set(ps[next].sourceId);
+  }
+
+  focusContactForm(): void {
+    if (typeof document === 'undefined') return;
+    const el = document.querySelector<HTMLTextAreaElement>('.bd-contact textarea');
+    if (el) {
+      el.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+      // Logged-out path → push them to login.
+      void this.router.navigate(['/login']);
     }
   }
 
@@ -950,9 +837,7 @@ export class BazarDetailPage {
       this.contactBody = '';
     } catch (err: unknown) {
       console.error('[bazar] send message failed', err);
-      this.contactError.set(
-        this.i18n.t('bazar.detail.message_error'),
-      );
+      this.contactError.set(this.i18n.t('bazar.detail.message_error'));
     } finally {
       this.contactPending.set(false);
     }
@@ -1015,17 +900,6 @@ export class BazarDetailPage {
     ]);
   }
 
-  shippingCarriersLabel(carriers: string[]): string {
-    return carriers
-      .map((c) =>
-        c
-          .split('_')
-          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-          .join(' '),
-      )
-      .join(' · ');
-  }
-
   formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString(this.i18n.locale(), {
       day: 'numeric',
@@ -1036,5 +910,18 @@ export class BazarDetailPage {
 
   formatYear(iso: string): string {
     return String(new Date(iso).getFullYear());
+  }
+
+  formatPriceShort(price: string | number): string {
+    const n = typeof price === 'number' ? price : Number(price);
+    if (!isFinite(n)) return String(price);
+    return n.toLocaleString('ro-RO', { maximumFractionDigits: 0 });
+  }
+
+  initials(name: string): string {
+    if (!name) return '—';
+    const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }
