@@ -3,6 +3,105 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
+/* ============================================================
+   M11 — community contributor flow
+   ============================================================ */
+
+export type GearState = 'draft' | 'submitted' | 'approved' | 'rejected';
+
+export interface TezaurBrandSuggestion {
+  name: string;
+  count: number;
+}
+
+export interface TezaurFamilySuggestion {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface TezaurMyDraft {
+  id: string;
+  slug: string;
+  brand: string;
+  model: string;
+  category: string;
+  state: GearState;
+  rejectionReason: string | null;
+  submittedAt: string | null;
+  updatedAt: string;
+  thumb: string | null;
+}
+
+export interface TezaurDraftPayload {
+  brand?: string;
+  model?: string;
+  category?: string;
+  formFactor?: string | null;
+  familyLabel?: string | null;
+  yearReleased?: number | null;
+  yearDiscontinued?: number | null;
+  msrpAtLaunchEur?: number | null;
+  tagline?: string;
+  descriptionText?: string;
+  specs?: Record<string, unknown>;
+}
+
+export interface TezaurDraftImage {
+  id: string;
+  gearId: string;
+  sourceId: string;
+  variant: string;
+  path: string;
+  width: number;
+  height: number;
+  position: number;
+  caption: string | null;
+}
+
+export interface TezaurDraftLink {
+  id: string;
+  kind: string;
+  url: string;
+  label: string | null;
+  vendor: string | null;
+}
+
+export interface TezaurDraftRelationship {
+  relId: string;
+  id: string;
+  slug: string;
+  brand: string;
+  model: string;
+  type: string;
+  note: string | null;
+}
+
+export interface TezaurDraftDetail {
+  gear: {
+    id: string;
+    slug: string;
+    state: GearState;
+    rejectionReason: string | null;
+    brand: string;
+    model: string;
+    category: string;
+    formFactor: string | null;
+    familyId: string | null;
+    yearReleased: number | null;
+    yearDiscontinued: number | null;
+    msrpAtLaunchEur: string | null;
+    specs: Record<string, unknown>;
+    submittedAt: string | null;
+    updatedAt: string;
+  };
+  family: { id: string; slug: string; name: string } | null;
+  images: TezaurDraftImage[];
+  links: TezaurDraftLink[];
+  relationships: { parent: TezaurDraftRelationship[] };
+  description: { body: unknown; bodyHtml: string } | null;
+}
+
 export interface TezaurListItem {
   id: string;
   slug: string;
@@ -108,5 +207,147 @@ export class TezaurService {
     // `apiBaseUrl` ends with /api; strip that to land on the host root
     // where /uploads/* is served.
     return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
+  }
+
+  /* ============================================================
+     M11 — auto-suggest meta endpoints
+     ============================================================ */
+
+  listBrandSuggestions(): Promise<TezaurBrandSuggestion[]> {
+    return firstValueFrom(
+      this.http.get<TezaurBrandSuggestion[]>(
+        `${this.base}/tezaur/meta/brands`,
+      ),
+    );
+  }
+
+  listFamilySuggestions(): Promise<TezaurFamilySuggestion[]> {
+    return firstValueFrom(
+      this.http.get<TezaurFamilySuggestion[]>(
+        `${this.base}/tezaur/meta/families`,
+      ),
+    );
+  }
+
+  /* ============================================================
+     M11 — own drafts (contributor flow)
+     ============================================================ */
+
+  listMyDrafts(): Promise<TezaurMyDraft[]> {
+    return firstValueFrom(
+      this.http.get<TezaurMyDraft[]>(`${this.base}/me/tezaur/drafts`),
+    );
+  }
+
+  createDraft(payload: TezaurDraftPayload): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/me/tezaur/gear`,
+        payload,
+      ),
+    );
+  }
+
+  getDraft(id: string): Promise<TezaurDraftDetail> {
+    return firstValueFrom(
+      this.http.get<TezaurDraftDetail>(`${this.base}/me/tezaur/gear/${id}`),
+    );
+  }
+
+  updateDraft(id: string, payload: TezaurDraftPayload): Promise<void> {
+    return firstValueFrom(
+      this.http.patch<void>(`${this.base}/me/tezaur/gear/${id}`, payload),
+    );
+  }
+
+  deleteDraft(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(`${this.base}/me/tezaur/gear/${id}`),
+    );
+  }
+
+  submitDraft(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(`${this.base}/me/tezaur/gear/${id}/submit`, {}),
+    );
+  }
+
+  /* ---- images ---- */
+
+  uploadDraftImage(
+    gearId: string,
+    file: File,
+    caption?: string,
+  ): Promise<{ sourceId: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    if (caption) form.append('caption', caption);
+    return firstValueFrom(
+      this.http.post<{ sourceId: string }>(
+        `${this.base}/me/tezaur/gear/${gearId}/images`,
+        form,
+      ),
+    );
+  }
+
+  deleteDraftImage(gearId: string, sourceId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/tezaur/gear/${gearId}/images/${sourceId}`,
+      ),
+    );
+  }
+
+  reorderDraftImages(gearId: string, sourceIds: string[]): Promise<void> {
+    return firstValueFrom(
+      this.http.patch<void>(
+        `${this.base}/me/tezaur/gear/${gearId}/images/reorder`,
+        { sourceIds },
+      ),
+    );
+  }
+
+  /* ---- links ---- */
+
+  addDraftLink(
+    gearId: string,
+    payload: { kind: string; url: string; label?: string; vendor?: string },
+  ): Promise<{ id: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string }>(
+        `${this.base}/me/tezaur/gear/${gearId}/links`,
+        payload,
+      ),
+    );
+  }
+
+  deleteDraftLink(gearId: string, linkId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/tezaur/gear/${gearId}/links/${linkId}`,
+      ),
+    );
+  }
+
+  /* ---- relationships ---- */
+
+  addDraftRelationship(
+    gearId: string,
+    payload: { childGearId: string; type: string; note?: string },
+  ): Promise<{ id: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string }>(
+        `${this.base}/me/tezaur/gear/${gearId}/relationships`,
+        payload,
+      ),
+    );
+  }
+
+  deleteDraftRelationship(gearId: string, relId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/me/tezaur/gear/${gearId}/relationships/${relId}`,
+      ),
+    );
   }
 }

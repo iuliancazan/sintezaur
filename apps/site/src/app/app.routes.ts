@@ -24,6 +24,13 @@ export const appRoutes: Route[] = [
       import('./tezaur/tezaur-list.page').then((m) => m.TezaurListPage),
   },
   {
+    path: 'tezaur/adauga',
+    pathMatch: 'full',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./tezaur/tezaur-add.page').then((m) => m.TezaurAddPage),
+  },
+  {
     path: 'tezaur/:slug',
     loadComponent: () =>
       import('./tezaur/tezaur-detail.page').then((m) => m.TezaurDetailPage),

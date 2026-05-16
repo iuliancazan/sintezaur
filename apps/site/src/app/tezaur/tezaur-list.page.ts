@@ -74,7 +74,7 @@ const PAGE_SIZE = 24;
       </section>
 
       <!-- TOOLBAR -->
-      <div class="tez-toolbar crosses">
+      <div class="tez-toolbar has-add crosses">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <label class="tez-search">
           <svg><use href="#i-search"/></svg>
@@ -104,6 +104,14 @@ const PAGE_SIZE = 24;
             {{ 'tezaur.view.grid' | t }}
           </button>
         </div>
+        <a
+          class="tez-add-btn"
+          routerLink="/tezaur/adauga"
+          [attr.aria-label]="i18n.t('tezaur.add_button_aria')"
+        >
+          <span class="tez-add-btn__plus">+</span>
+          {{ 'tezaur.add_button' | t }}
+        </a>
       </div>
 
       <!-- ACTIVE FILTER CHIPS -->

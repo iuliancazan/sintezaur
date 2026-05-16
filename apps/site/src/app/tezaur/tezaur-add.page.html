@@ -1,0 +1,989 @@
+<div class="shell">
+  <!-- BREADCRUMB -->
+  <nav class="td-crumb" aria-label="Breadcrumb">
+    <a routerLink="/tezaur" style="display:inline-flex; align-items:center; gap:6px">
+      <svg width="14" height="14"><use href="#i-back"/></svg>
+      {{ 'tezaur.add.back' | t }}
+    </a>
+    <span class="sep">·</span>
+    <a routerLink="/tezaur">{{ 'tezaur.add.crumb_root' | t }}</a>
+    <span class="sep">/</span>
+    <span class="cur">{{ 'tezaur.add.crumb_current' | t }}</span>
+  </nav>
+
+  <!-- HEADER -->
+  <section class="ta-header crosses" aria-labelledby="ta-title">
+    <span class="crosses-tl"></span><span class="crosses-tr"></span>
+    <div>
+      <p class="ta-header__sub">{{ 'tezaur.add.header_eyebrow' | t }}</p>
+      <h1 class="ta-header__title" id="ta-title">
+        {{ 'tezaur.add.header_title_line1' | t }}<br />
+        {{ 'tezaur.add.header_title_line2' | t }}<span class="dot">.</span>
+      </h1>
+    </div>
+    <div>
+      <p class="ta-header__lede" [innerHTML]="'tezaur.add.header_lede' | t"></p>
+      <div class="ta-header__steps">
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[0].done && checklist()[1].done && checklist()[2].done"
+          [class.is-current]="!(checklist()[0].done && checklist()[1].done)"
+          [class.is-todo]="false"
+        >
+          <span class="ta-step__num"><b>01</b>
+            @if (checklist()[0].done && checklist()[1].done) {<span class="tick">✓</span>}
+            {{ 'tezaur.add.step_status.identification' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'tezaur.add.steps.identification' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[3].done && checklist()[4].done"
+          [class.is-current]="checklist()[0].done && (!checklist()[3].done || !checklist()[4].done)"
+          [class.is-todo]="!checklist()[0].done"
+        >
+          <span class="ta-step__num"><b>02</b>
+            @if (checklist()[3].done && checklist()[4].done) {<span class="tick">✓</span>}
+            {{ 'tezaur.add.step_status.media' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'tezaur.add.steps.media' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[6].done && checklist()[7].done"
+          [class.is-current]="checklist()[3].done && (!checklist()[6].done || !checklist()[7].done)"
+          [class.is-todo]="!checklist()[3].done"
+        >
+          <span class="ta-step__num"><b>03</b>
+            {{ 'tezaur.add.step_status.specs' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'tezaur.add.steps.specs' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="draftState() === 'submitted' || draftState() === 'approved'"
+          [class.is-current]="canSubmit() && draftState() === 'draft'"
+          [class.is-todo]="!canSubmit() && draftState() !== 'submitted'"
+        >
+          <span class="ta-step__num"><b>04</b>
+            {{ 'tezaur.add.step_status.submit' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'tezaur.add.steps.submit' | t }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REJECT NOTICE (if draft was rejected by a moderator) -->
+  @if (draftState() === 'rejected' && rejectionReason()) {
+    <div class="reject-notice">
+      <span class="reject-notice__head">{{ 'tezaur.add.rejected_head' | t }}</span>
+      <p style="margin:0">{{ rejectionReason() }}</p>
+    </div>
+  }
+
+  <!-- SUBMITTED NOTICE -->
+  @if (draftState() === 'submitted') {
+    <div class="form-success" style="margin-bottom:24px">
+      <strong>{{ 'tezaur.add.submitted_head' | t }}.</strong>
+      {{ 'tezaur.add.submitted_body' | t }}
+    </div>
+  }
+
+  <!-- MAIN -->
+  <div class="ta-main" [class.form-disabled]="isLocked()">
+    <!-- ===================== LEFT: form ===================== -->
+    <form [formGroup]="form" (ngSubmit)="$event.preventDefault()" (click)="closeAllMenus()">
+
+      <!-- ---------- IDENTIFICARE ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_identification_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_identification' | t }}</h2>
+          </div>
+        </header>
+        <div class="ta-sec__body">
+          <div class="ta-grid">
+            <!-- Brand combo -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-brand">
+                {{ 'tezaur.add.fields.brand' | t }} <span class="req">*</span>
+                <span class="hint">{{ 'tezaur.add.fields.brand_hint' | t }}</span>
+              </label>
+              <div
+                class="ta-select ta-select--combo"
+                [class.is-open]="brandMenuOpen()"
+                (click)="$event.stopPropagation()"
+              >
+                <div class="ta-select__btn">
+                  <input
+                    id="f-brand"
+                    name="brand"
+                    type="text"
+                    class="ta-select__search"
+                    [placeholder]="i18n.t('tezaur.add.fields.brand_placeholder')"
+                    formControlName="brand"
+                    autocomplete="off"
+                    (focus)="brandMenuOpen.set(true)"
+                  />
+                  <span
+                    class="ta-select__caret-wrap"
+                    aria-hidden="true"
+                    (click)="brandMenuOpen.update(o => !o)"
+                  >
+                    <svg class="ta-select__caret" viewBox="0 0 24 24">
+                      <use href="#i-caret-down"/>
+                    </svg>
+                  </span>
+                </div>
+                @if (brandMenuOpen()) {
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__group">
+                      {{ 'tezaur.add.fields.brand_group' | t }}
+                    </div>
+                    @for (b of filteredBrands(); track b.name) {
+                      <div
+                        class="ta-select__opt"
+                        [class.is-selected]="form.controls['brand'].value === b.name"
+                        (click)="selectBrand(b.name)"
+                      >
+                        {{ b.name }}
+                        <span class="ta-select__opt-meta">{{ b.count }}</span>
+                      </div>
+                    }
+                    @if (filteredBrands().length === 0 && form.controls['brand'].value) {
+                      <div class="ta-select__opt ta-select__opt--add" (click)="brandMenuOpen.set(false)">
+                        {{ 'tezaur.add.fields.brand_add_new' | t: { name: form.controls['brand'].value } }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Model -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-model">
+                {{ 'tezaur.add.fields.model' | t }} <span class="req">*</span>
+              </label>
+              <input
+                id="f-model"
+                name="model"
+                type="text"
+                formControlName="model"
+                [placeholder]="i18n.t('tezaur.add.fields.model_placeholder')"
+              />
+            </div>
+
+            <!-- Category -->
+            <div class="ta-field">
+              <label class="ta-field__label">
+                {{ 'tezaur.add.fields.category' | t }} <span class="req">*</span>
+              </label>
+              <div
+                class="ta-select"
+                [class.is-open]="categoryMenuOpen()"
+                (click)="$event.stopPropagation()"
+              >
+                <button
+                  class="ta-select__btn"
+                  type="button"
+                  aria-haspopup="listbox"
+                  (click)="categoryMenuOpen.update(o => !o)"
+                >
+                  <span class="ta-select__val">
+                    {{ categoryLabel(form.controls['category'].value) }}
+                  </span>
+                  <svg class="ta-select__caret" viewBox="0 0 24 24">
+                    <use href="#i-caret-down"/>
+                  </svg>
+                </button>
+                @if (categoryMenuOpen()) {
+                  <div class="ta-select__menu" role="listbox">
+                    @for (c of categoryOptions; track c.value; let last = $last) {
+                      @if ($index === 0 || categoryOptions[$index - 1].group !== c.group) {
+                        <div class="ta-select__group">{{ c.group }}</div>
+                      }
+                      <div
+                        class="ta-select__opt"
+                        [class.is-selected]="form.controls['category'].value === c.value"
+                        (click)="selectCategory(c.value)"
+                      >
+                        {{ c.label }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Form factor radio chips -->
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.form_factor' | t }}</label>
+              <div class="ta-chips" role="radiogroup">
+                @for (ff of formFactorOptions; track ff.value) {
+                  <input
+                    type="radio"
+                    [id]="'ff-' + ff.value"
+                    name="formFactor"
+                    [value]="ff.value"
+                    [checked]="form.controls['formFactor'].value === ff.value"
+                    (change)="form.controls['formFactor'].setValue(ff.value)"
+                  />
+                  <label [for]="'ff-' + ff.value">{{ ff.label }}</label>
+                }
+              </div>
+            </div>
+
+            <!-- Year released -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-year">
+                {{ 'tezaur.add.fields.year_released' | t }} <span class="req">*</span>
+              </label>
+              <input
+                id="f-year"
+                name="yearReleased"
+                type="number"
+                formControlName="yearReleased"
+                min="1900"
+                max="2100"
+                placeholder="—"
+              />
+            </div>
+
+            <!-- Year discontinued -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-disc">
+                {{ 'tezaur.add.fields.year_discontinued' | t }}
+                <span class="hint">{{ 'tezaur.add.fields.year_discontinued_hint' | t }}</span>
+              </label>
+              <input
+                id="f-disc"
+                name="yearDiscontinued"
+                type="number"
+                formControlName="yearDiscontinued"
+                min="1900"
+                max="2100"
+                placeholder="—"
+              />
+            </div>
+
+            <!-- Family combo -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-family">
+                {{ 'tezaur.add.fields.family' | t }}
+                <span class="hint">{{ 'tezaur.add.fields.family_hint' | t }}</span>
+              </label>
+              <div
+                class="ta-select ta-select--combo"
+                [class.is-open]="familyMenuOpen()"
+                (click)="$event.stopPropagation()"
+              >
+                <div class="ta-select__btn">
+                  <input
+                    id="f-family"
+                    name="familyLabel"
+                    type="text"
+                    class="ta-select__search"
+                    [placeholder]="i18n.t('tezaur.add.fields.family_placeholder')"
+                    formControlName="familyLabel"
+                    autocomplete="off"
+                    (focus)="familyMenuOpen.set(true)"
+                  />
+                  <span
+                    class="ta-select__caret-wrap"
+                    aria-hidden="true"
+                    (click)="familyMenuOpen.update(o => !o)"
+                  >
+                    <svg class="ta-select__caret" viewBox="0 0 24 24">
+                      <use href="#i-caret-down"/>
+                    </svg>
+                  </span>
+                </div>
+                @if (familyMenuOpen()) {
+                  <div class="ta-select__menu" role="listbox">
+                    @for (f of filteredFamilies(); track f.id) {
+                      <div
+                        class="ta-select__opt"
+                        (click)="selectFamily(f.name)"
+                      >
+                        {{ f.name }}
+                      </div>
+                    }
+                    @if (filteredFamilies().length === 0 && form.controls['familyLabel'].value) {
+                      <div class="ta-select__opt ta-select__opt--add" (click)="familyMenuOpen.set(false)">
+                        {{ 'tezaur.add.fields.family_add_new' | t: { name: form.controls['familyLabel'].value } }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- MSRP -->
+            <div class="ta-field">
+              <label class="ta-field__label" for="f-msrp">
+                {{ 'tezaur.add.fields.msrp' | t }}
+                <span class="hint">EUR</span>
+              </label>
+              <div class="ta-field__input-row">
+                <input
+                  id="f-msrp"
+                  name="msrpAtLaunchEur"
+                  type="number"
+                  formControlName="msrpAtLaunchEur"
+                  min="0"
+                  placeholder="—"
+                />
+                <span class="unit">EUR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- IMAGINI ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_images_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_images' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">
+            <b>{{ images().length }} / 12</b> {{ 'tezaur.add.images_hint' | t }}
+          </div>
+        </header>
+        <div class="ta-sec__body">
+          <label
+            class="ta-drop"
+            tabindex="0"
+            (drop)="onDrop($event)"
+            (dragover)="onDragOver($event)"
+          >
+            <div class="ta-drop__icon">
+              <svg width="28" height="28"><use href="#i-upload"/></svg>
+            </div>
+            <div class="ta-drop__primary" [innerHTML]="'tezaur.add.drop_primary' | t"></div>
+            <div class="ta-drop__sub" [innerHTML]="'tezaur.add.drop_sub' | t"></div>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              style="display:none"
+              (change)="onFileSelected($event)"
+              #fileInput
+            />
+          </label>
+
+          <div class="ta-imgs">
+            @for (img of images(); track img.sourceId; let idx = $index) {
+              <div
+                class="ta-img"
+                [attr.data-i]="idx"
+                draggable="true"
+                (dragstart)="onImgDragStart($event, idx)"
+                (dragend)="onImgDragEnd($event)"
+                (dragover)="onImgDragOver($event, idx)"
+                (drop)="onImgDrop($event, idx)"
+              >
+                <img
+                  class="ta-img__photo"
+                  [src]="tezaur.imageUrl(img.path)"
+                  [alt]="form.controls['brand'].value + ' ' + form.controls['model'].value"
+                />
+                <span class="ta-img__num">
+                  {{ (idx + 1).toString().padStart(2, '0') }}
+                </span>
+                @if (idx === 0) {
+                  <span class="ta-img__cover">{{ 'tezaur.add.img_cover' | t }}</span>
+                }
+                <span class="ta-img__handle">
+                  <svg width="11" height="11"><use href="#i-drag"/></svg>
+                  drag
+                </span>
+                <button
+                  class="ta-img__del"
+                  type="button"
+                  [attr.aria-label]="i18n.t('tezaur.add.img_delete_aria')"
+                  (click)="deleteImage(img.sourceId)"
+                >
+                  <svg><use href="#i-x"/></svg>
+                </button>
+              </div>
+            }
+            <button
+              class="ta-img ta-img--add"
+              type="button"
+              [attr.aria-label]="i18n.t('tezaur.add.img_add_more_aria')"
+              (click)="fileInput.click()"
+            >
+              +
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- DESCRIERE ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_description_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_description' | t }}</h2>
+          </div>
+        </header>
+        <div class="ta-sec__body">
+          <div class="ta-grid">
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-tag">
+                {{ 'tezaur.add.fields.tagline' | t }}
+                <span class="hint">{{ 'tezaur.add.fields.tagline_hint' | t }}</span>
+              </label>
+              <input
+                id="f-tag"
+                name="tagline"
+                type="text"
+                formControlName="tagline"
+                [placeholder]="i18n.t('tezaur.add.fields.tagline_placeholder')"
+              />
+            </div>
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-desc">
+                {{ 'tezaur.add.fields.description' | t }} <span class="req">*</span>
+                <span class="hint">{{ 'tezaur.add.fields.description_hint' | t }}</span>
+              </label>
+              <textarea
+                id="f-desc"
+                name="descriptionText"
+                rows="12"
+                formControlName="descriptionText"
+                [placeholder]="i18n.t('tezaur.add.fields.description_placeholder')"
+              ></textarea>
+              <div class="ta-field__counter">
+                <b>{{ descriptionLength() }}</b> / 8000 {{ 'tezaur.add.fields.chars' | t }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- SPECIFICAȚII ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_specs_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_specs' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">{{ 'tezaur.add.specs_hint' | t }}</div>
+        </header>
+        <div class="ta-sec__body">
+          <!-- Sub-section: Sinteză -->
+          <p class="ta-sub-h">{{ 'tezaur.add.subsec.synthesis' | t }}</p>
+          <div class="ta-grid ta-grid--3" style="margin-bottom:24px">
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.synth_type' | t }}</label>
+              <div
+                class="ta-select"
+                [class.is-open]="synthTypeMenuOpen()"
+                (click)="$event.stopPropagation()"
+              >
+                <button
+                  class="ta-select__btn"
+                  type="button"
+                  (click)="synthTypeMenuOpen.update(o => !o)"
+                >
+                  <span class="ta-select__val">
+                    {{ synthTypeLabel(form.controls['synth_type'].value) }}
+                  </span>
+                  <svg class="ta-select__caret" viewBox="0 0 24 24">
+                    <use href="#i-caret-down"/>
+                  </svg>
+                </button>
+                @if (synthTypeMenuOpen()) {
+                  <div class="ta-select__menu" role="listbox">
+                    @for (s of synthTypeOptions; track s.value) {
+                      <div
+                        class="ta-select__opt"
+                        [class.is-selected]="form.controls['synth_type'].value === s.value"
+                        (click)="selectSynthType(s.value)"
+                      >
+                        {{ s.label }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">
+                {{ 'tezaur.add.fields.polyphony' | t }}
+                <span class="hint">{{ 'tezaur.add.fields.polyphony_hint' | t }}</span>
+              </label>
+              <input
+                type="number"
+                name="polyphony"
+                formControlName="polyphony"
+                min="1"
+                max="999"
+                placeholder="ex. 8 · 16 · 256"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.osc_per_voice' | t }}</label>
+              <input
+                type="number"
+                name="osc_per_voice"
+                formControlName="osc_per_voice"
+                min="1"
+                max="32"
+                placeholder="ex. 2"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.filter_type' | t }}</label>
+              <input
+                type="text"
+                name="filter_type"
+                formControlName="filter_type"
+                placeholder="ex. LPF 24 dB · multimode"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.has_arpeggiator' | t }}</label>
+              <label class="ta-toggle" style="margin-top:4px">
+                <input type="checkbox" formControlName="has_arpeggiator" />
+                <span class="ta-toggle__sw"></span>
+                <span>{{ form.controls['has_arpeggiator'].value ? ('tezaur.add.fields.yes' | t) : ('tezaur.add.fields.no' | t) }}</span>
+              </label>
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.has_sequencer' | t }}</label>
+              <label class="ta-toggle" style="margin-top:4px">
+                <input type="checkbox" formControlName="has_sequencer" />
+                <span class="ta-toggle__sw"></span>
+                <span>{{ form.controls['has_sequencer'].value ? ('tezaur.add.fields.yes' | t) : ('tezaur.add.fields.no' | t) }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Sub-section: Keyboard -->
+          <p class="ta-sub-h">{{ 'tezaur.add.subsec.keyboard' | t }}</p>
+          <div class="ta-grid ta-grid--3" style="margin-bottom:24px">
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.has_keys' | t }}</label>
+              <label class="ta-toggle" style="margin-top:4px">
+                <input type="checkbox" formControlName="has_keys" />
+                <span class="ta-toggle__sw"></span>
+                <span>{{ form.controls['has_keys'].value ? ('tezaur.add.fields.yes' | t) : ('tezaur.add.fields.no' | t) }}</span>
+              </label>
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.num_keys' | t }}</label>
+              <input
+                type="number"
+                name="num_keys"
+                formControlName="num_keys"
+                min="1"
+                max="128"
+                placeholder="ex. 49 · 61 · 88"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.aftertouch' | t }}</label>
+              <div
+                class="ta-select"
+                [class.is-open]="aftertouchMenuOpen()"
+                (click)="$event.stopPropagation()"
+              >
+                <button
+                  class="ta-select__btn"
+                  type="button"
+                  (click)="aftertouchMenuOpen.update(o => !o)"
+                >
+                  <span class="ta-select__val">
+                    {{ aftertouchLabel(form.controls['aftertouch'].value) }}
+                  </span>
+                  <svg class="ta-select__caret" viewBox="0 0 24 24">
+                    <use href="#i-caret-down"/>
+                  </svg>
+                </button>
+                @if (aftertouchMenuOpen()) {
+                  <div class="ta-select__menu" role="listbox">
+                    @for (a of aftertouchOptions; track a.value) {
+                      <div
+                        class="ta-select__opt"
+                        [class.is-selected]="form.controls['aftertouch'].value === a.value"
+                        (click)="selectAftertouch(a.value)"
+                      >
+                        {{ a.label }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-section: Conectivitate -->
+          <p class="ta-sub-h">{{ 'tezaur.add.subsec.connectivity' | t }}</p>
+          <div class="ta-grid" style="margin-bottom:18px">
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.midi_io' | t }}</label>
+              <div class="ta-chips" role="group">
+                @for (m of midiIoOptions; track m.value) {
+                  <input
+                    type="checkbox"
+                    [id]="'midi-' + m.value"
+                    [checked]="isMidiChecked(m.value)"
+                    (change)="toggleMidiIo(m.value)"
+                  />
+                  <label [for]="'midi-' + m.value">{{ m.label }}</label>
+                }
+              </div>
+            </div>
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.audio_out' | t }}</label>
+              <div class="ta-chips" role="group">
+                @for (a of audioOutOptions; track a.value) {
+                  <input
+                    type="checkbox"
+                    [id]="'out-' + a.value"
+                    [checked]="isAudioOutChecked(a.value)"
+                    (change)="toggleAudioOut(a.value)"
+                  />
+                  <label [for]="'out-' + a.value">{{ a.label }}</label>
+                }
+              </div>
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.pedals' | t }}</label>
+              <input
+                type="text"
+                name="pedals_label"
+                formControlName="pedals_label"
+                placeholder="ex. 2× footswitch · 1× expression"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.patch_memory' | t }}</label>
+              <input
+                type="text"
+                name="patch_memory_label"
+                formControlName="patch_memory_label"
+                placeholder="ex. 256 user · 4000 presets"
+              />
+            </div>
+          </div>
+
+          <!-- Sub-section: Fizic -->
+          <p class="ta-sub-h">{{ 'tezaur.add.subsec.physical' | t }}</p>
+          <div class="ta-grid ta-grid--3">
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.weight' | t }}</label>
+              <div class="ta-field__input-row">
+                <input
+                  type="number"
+                  step="0.1"
+                  name="weight_kg"
+                  formControlName="weight_kg"
+                  min="0"
+                  max="200"
+                  placeholder="ex. 12.0"
+                />
+                <span class="unit">kg</span>
+              </div>
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.dimensions' | t }}</label>
+              <input
+                type="text"
+                name="dimensions_label"
+                formControlName="dimensions_label"
+                placeholder="ex. 109 × 39 × 12 cm"
+              />
+            </div>
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'tezaur.add.fields.power' | t }}</label>
+              <input
+                type="text"
+                name="power_label"
+                formControlName="power_label"
+                placeholder="ex. 100–240 V AC, intern"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- RELAȚII ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_relations_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_relations' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">{{ 'tezaur.add.relations_hint' | t }}</div>
+        </header>
+        <div class="ta-sec__body">
+          <div class="ta-rows">
+            @for (row of relationships(); track $index; let i = $index) {
+              <div class="ta-rel">
+                <select
+                  [value]="row.type"
+                  (change)="updateRelRow(i, 'type', $any($event.target).value); saveRelRow(i)"
+                  style="height:40px;border:1px solid var(--line);background:var(--bg-elev);color:var(--fg);padding:0 8px;font-size:13px"
+                  [attr.aria-label]="i18n.t('tezaur.add.fields.rel_type')"
+                >
+                  @for (t of relationshipTypeOptions; track t.value) {
+                    <option [value]="t.value">{{ t.label }}</option>
+                  }
+                </select>
+                <input
+                  type="text"
+                  [value]="row.brand"
+                  (input)="updateRelRow(i, 'brand', $any($event.target).value)"
+                  (blur)="saveRelRow(i)"
+                  [placeholder]="i18n.t('tezaur.add.fields.brand')"
+                />
+                <input
+                  type="text"
+                  [value]="row.model"
+                  (input)="updateRelRow(i, 'model', $any($event.target).value)"
+                  (blur)="saveRelRow(i)"
+                  [placeholder]="i18n.t('tezaur.add.fields.model')"
+                />
+                <input
+                  type="text"
+                  [value]="row.note"
+                  (input)="updateRelRow(i, 'note', $any($event.target).value)"
+                  (blur)="saveRelRow(i)"
+                  [placeholder]="i18n.t('tezaur.add.fields.rel_note')"
+                />
+                <button
+                  type="button"
+                  class="ta-row__del"
+                  [attr.aria-label]="i18n.t('tezaur.add.row_delete_aria')"
+                  (click)="removeRelRow(i)"
+                >
+                  <svg><use href="#i-x"/></svg>
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="ta-add-row" (click)="addRelRow()">
+            {{ 'tezaur.add.add_relation' | t }}
+          </button>
+        </div>
+      </section>
+
+      <!-- ---------- LINKURI ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'tezaur.add.sec_links_kicker' | t }}</span>
+            <h2>{{ 'tezaur.add.sec_links' | t }}</h2>
+          </div>
+        </header>
+        <div class="ta-sec__body">
+          <div class="ta-rows">
+            @for (row of linkRows(); track $index; let i = $index) {
+              <div class="ta-row">
+                <select
+                  [value]="row.kind"
+                  (change)="updateLinkRow(i, 'kind', $any($event.target).value); saveLinkRow(i)"
+                  style="height:40px;border:1px solid var(--line);background:var(--bg-elev);color:var(--fg);padding:0 8px;font-size:13px"
+                  [attr.aria-label]="i18n.t('tezaur.add.fields.link_kind')"
+                >
+                  @for (k of linkKindOptions; track k.value) {
+                    <option [value]="k.value">{{ k.label }}</option>
+                  }
+                </select>
+                <input
+                  type="text"
+                  [value]="row.label"
+                  (input)="updateLinkRow(i, 'label', $any($event.target).value)"
+                  (blur)="saveLinkRow(i)"
+                  [placeholder]="i18n.t('tezaur.add.fields.link_label')"
+                />
+                <input
+                  type="url"
+                  [value]="row.url"
+                  (input)="updateLinkRow(i, 'url', $any($event.target).value)"
+                  (blur)="saveLinkRow(i)"
+                  placeholder="https://…"
+                />
+                <button
+                  type="button"
+                  class="ta-row__del"
+                  [attr.aria-label]="i18n.t('tezaur.add.row_delete_aria')"
+                  (click)="removeLinkRow(i)"
+                >
+                  <svg><use href="#i-x"/></svg>
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="ta-add-row" (click)="addLinkRow()">
+            {{ 'tezaur.add.add_link' | t }}
+          </button>
+        </div>
+      </section>
+    </form>
+
+    <!-- ===================== RIGHT: sticky sidebar ===================== -->
+    <aside class="ta-side">
+      <!-- preview -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'tezaur.add.side.preview' | t }}
+          <span style="color:var(--fg-muted); font-size:9px;">live</span>
+        </header>
+        <div class="ta-side__body">
+          <div class="ta-preview">
+            <div class="ta-preview__media">
+              @if (previewImage()) {
+                <img [src]="previewImage()" [alt]="previewBrand() + ' ' + previewModel()" />
+              } @else {
+                <div class="img-tile-empty">— fără imagine —</div>
+              }
+            </div>
+            <div class="ta-preview__brand">// {{ previewBrand() }}</div>
+            <div class="ta-preview__model">{{ previewModel() }}</div>
+            <div class="ta-preview__tags">
+              @if (previewTagsList().length > 0) {
+                @for (tag of previewTagsList(); track tag) {
+                  <span>{{ tag }}</span>
+                }
+              } @else {
+                <span style="opacity:.4">— fără tag-uri —</span>
+              }
+            </div>
+            <div
+              style="display:flex; justify-content:space-between; padding-top:10px; border-top:1px dashed var(--line); font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-muted);"
+            >
+              <span>// nou în Tezaur</span>
+              <span>{{ previewYear() }}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- completion -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'tezaur.add.side.completion' | t }}
+          <span class="ta-status">
+            <span class="ta-status__dot"></span>
+            {{ 'tezaur.add.state.' + draftState() | t }}
+          </span>
+        </header>
+        <div class="ta-side__body">
+          <div class="ta-meter" [style.--p.%]="progressPercent()">
+            <div class="ta-meter__top">
+              <span>{{ 'tezaur.add.side.progress' | t }}</span>
+              <span><b>{{ progressPercent() }}</b>%</span>
+            </div>
+            <div class="ta-meter__bar"></div>
+          </div>
+
+          <div class="ta-checklist">
+            @for (item of checklist(); track item.key) {
+              <div
+                class="ta-checklist__item"
+                [class.is-done]="item.done"
+              >
+                <span class="mark">{{ item.done ? '✓' : '·' }}</span>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- CTAs -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'tezaur.add.side.actions' | t }}
+          <span class="save-status" [class.save-status--saving]="saveStatus() === 'saving'" [class.save-status--saved]="saveStatus() === 'saved'" [class.save-status--error]="saveStatus() === 'error'">
+            <span class="save-status__dot"></span>
+            @switch (saveStatus()) {
+              @case ('saving') { {{ 'tezaur.add.save.saving' | t }} }
+              @case ('saved') { {{ 'tezaur.add.save.saved' | t }} }
+              @case ('error') { {{ 'tezaur.add.save.error' | t }} }
+              @default { {{ 'tezaur.add.save.idle' | t }} }
+            }
+          </span>
+        </header>
+        <div class="ta-side__body">
+          <div class="ta-cta-row">
+            <button
+              class="ta-cta ta-cta--primary"
+              type="button"
+              [disabled]="!canSubmit() || submitting()"
+              (click)="submitForModeration()"
+            >
+              {{ submitting() ? ('tezaur.add.submitting' | t) : ('tezaur.add.submit' | t) }} →
+            </button>
+            <button
+              class="ta-cta ta-cta--ghost"
+              type="button"
+              (click)="saveDraftNow()"
+              [disabled]="isLocked()"
+            >
+              {{ 'tezaur.add.save_draft' | t }}
+            </button>
+            <button
+              class="ta-cta ta-cta--danger-text"
+              type="button"
+              (click)="discardAndLeave()"
+            >
+              {{ 'tezaur.add.discard' | t }}
+            </button>
+          </div>
+          @if (submitError()) {
+            <div class="submit-error">
+              {{ submitError() }}
+              @if (submitMissing().length > 0) {
+                <ul style="margin:6px 0 0 18px">
+                  @for (m of submitMissing(); track m) {
+                    <li>{{ 'tezaur.add.missing.' + m | t }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+          <p
+            style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-subtle); margin:8px 0 0; line-height:1.55;"
+          >
+            * {{ 'tezaur.add.moderation_note' | t }}
+          </p>
+        </div>
+      </section>
+
+      <!-- tips -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">{{ 'tezaur.add.side.tips' | t }}</header>
+        <div class="ta-side__body">
+          <div class="ta-tips">
+            <div class="ta-tips__item">
+              <span class="n">01</span>
+              <span [innerHTML]="'tezaur.add.tips.photos' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">02</span>
+              <span [innerHTML]="'tezaur.add.tips.sound' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">03</span>
+              <span [innerHTML]="'tezaur.add.tips.sources' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">04</span>
+              <span [innerHTML]="'tezaur.add.tips.partial' | t"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>

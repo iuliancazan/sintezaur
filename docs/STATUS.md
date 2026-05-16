@@ -6,7 +6,34 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M11-A** — Tezaur contributor backend (state enum + ME endpoints).
+**Last shipped:** **M11-B** — Tezaur contributor add page (V06 form + auto-save).
+Pagina nouă la `/tezaur/adauga` (auth-guarded). Componenta
+`TezaurAddPage` cu form ReactiveForm complet pe markup V06
+`.ta-*` — 6 secțiuni (Identificare, Imagini, Descriere, Specs cu
+4 sub-secțiuni, Relații, Linkuri) + sidebar sticky (preview live,
+progress meter, CTAs, tips). Auto-save debounced 1.5s creează
+draft la prima cheie validă, apoi PATCH-uri pe gear-ul existent
+— refresh-ul păstrează lucrul (query param `?draft=<id>`
+înlocuit prin `history.replaceState`). Live preview leagă brand /
+model / year / tags la card-ul din sidebar. Progress meter calculat
+din 9-item checklist (mirror al validării backend `meSubmitDraft`).
+Drag-drop pentru reorder imagini cu API `reorderDraftImages` per
+mișcare. Upload multi-file la endpoint multipart. Combo dropdowns
+custom pentru brand (auto-suggest din `/tezaur/meta/brands` cu
+counts), familie (din `/tezaur/meta/families`, lookup-or-create
+backend pe submit), categorie (18 RO labels grupate pe „Sinteză &
+ritmică / Modular & control / Procesare & efecte / Studio &
+captură / Diverse"), synth_type, aftertouch. Repeatable rows
+pentru relații + linkuri — relațiile rezolvă brand+model la
+`gear.id` via `/tezaur` search (mesaj prietenos dacă nu există).
+Markup HTML extras într-un template file separat (572 linii). CSS
+v06 `.ta-*` (984 linii) copiat la `apps/site/src/v06-tezaur-add.css`
+și importat din `styles.scss`. Buton „Adaugă în Tezaur" adăugat
+în toolbar-ul `/tezaur` per design V06 (clasa `.tez-toolbar.has-add`).
+106 chei i18n noi sub `tezaur.add.*`. Bundle add page:
+52.65 kB / 12.61 kB gzip lazy.
+
+**Last shipped (previous):** **M11-A** — Tezaur contributor backend (state enum + ME endpoints).
 Migration `0014_gear_moderation.sql` adaugă enum `gear_state`
 {draft, submitted, approved, rejected} + coloane `state` (default
 'draft'), `rejection_reason`, `submitted_at`, `reviewed_at`,

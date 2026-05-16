@@ -14,6 +14,75 @@ Tezaur with a community-moderation workflow (spec §7.2 — was
 previously blocked behind `curator+` role). Shipped in sub-phases
 A (backend) → B (FE form) → C (drafts list + nav) → D (close).
 
+#### M11-B — Frontend add page (V06 form + auto-save + live preview)
+
+- **New route `/tezaur/adauga`** (auth-guarded) loads
+  `TezaurAddPage` (apps/site/src/app/tezaur/tezaur-add.page.ts).
+  ReactiveForm with 25+ controls across 6 sections matching the
+  V06 design 1:1: Identificare (brand combo, model, category,
+  form-factor chips, year released, year discontinued, family,
+  msrp), Imagini (drag-drop dropzone + tile grid with reorder),
+  Descriere (tagline + textarea + live char counter), Specs
+  (Sinteză / Keyboard / Conectivitate / Fizic sub-sections),
+  Relații (repeatable rows), Linkuri (repeatable rows).
+- **Auto-save** — debounced 1.5s after typing stops. Creates the
+  draft on first non-empty field via `POST /me/tezaur/gear`,
+  then `PATCH`-es subsequent edits. Query param `?draft=<id>` is
+  written via `history.replaceState` so refresh resumes the
+  in-progress draft. Save status pill in sidebar header pulses
+  during save and turns green on success / red on error.
+- **Sticky sidebar (right column)** — live preview card mirrors
+  the form (brand, model, year, top tags computed from
+  `synth_type` / `formFactor` / `num_keys` / `polyphony`, first
+  image); 9-item completion checklist (mirror of backend
+  `meSubmitDraft` validation: brand+model, category, year, ≥1
+  image, ≥80-char description, tagline, specs polyphony+synth,
+  dimensions+weight, ≥1 source); progress meter computed from
+  checklist; CTAs row (Trimite la moderare / Salvează draft /
+  Renunță & întoarce-te); rotating tips block (4 entries).
+- **Image upload** — multi-file via `<input type=file>` + native
+  drag-drop on `.ta-drop`. Each file `POST`s to `/me/tezaur/gear/
+  :id/images`; if no draft exists yet, an auto-save fires first.
+  Tile grid renders square_thumb variant; drag-to-reorder calls
+  `PATCH .../images/reorder` with new sourceId order.
+- **Brand / Family combo dropdowns** — searchable inputs fed by
+  `GET /tezaur/meta/brands` (with usage counts) and `GET /tezaur/
+  meta/families`. Open on focus, filter live by typed value, show
+  "Adaugă „X" ca nou" affordance when no match exists. The
+  service-side lookup-or-create handles families on submit so the
+  contributor can type a new series name freely.
+- **Category select** — 18 backend enum literals mapped to RO
+  labels grouped into 5 visual sections (Sinteză & ritmică /
+  Modular & control / Procesare & efecte / Studio & captură /
+  Diverse). Custom button dropdown styled per V06.
+- **Specs JSONB shape** — flat tipizat: `synth_type`, `polyphony`,
+  `osc_per_voice`, `filter_type`, `has_arpeggiator`,
+  `has_sequencer`, `has_keys`, `num_keys`, `aftertouch`, `midi_io: []`,
+  `audio_out: []`, `pedals_label`, `patch_memory_label`,
+  `weight_kg`, `dimensions_label`, `power_label`, `tagline`.
+- **Relations rows** — type (Inspirat de / Bazat pe / Succesor /
+  Variantă / Înlocuiește) + brand + model + note. On blur,
+  resolves brand+model via `/tezaur?q=` lookup; if no match,
+  surfaces a friendly message and keeps the row pending. Found
+  match → `POST .../relationships`.
+- **Link rows** — kind (Producător / Manual / Service notes /
+  Wikipedia / Reverb / Firmware / Afiliere / Altă sursă) + label
+  + url. Saved on blur via `POST .../links`.
+- **Tezaur list toolbar** — `.tez-toolbar` upgraded to
+  `.has-add` grid + `.tez-add-btn` "Adaugă în Tezaur" CTA per
+  V06 design. Click navigates to `/tezaur/adauga` (authGuard
+  redirects to login with redirect param if anonymous).
+- **CSS** — `apps/site/src/v06-tezaur-add.css` (984 lines from
+  v06 styles.css starting at line 4564) imported via
+  `styles.scss`. Adds `.ta-*` form sections, sticky sidebar
+  blocks, custom combo dropdowns, image tiles + drag affordances,
+  toggle switches, repeatable rows. Light theme override for
+  menu shadows.
+- **i18n** — 106 new keys under `tezaur.add.*` + `tezaur.
+  add_button` + `tezaur.add_button_aria`.
+- **Bundle** — lazy chunk `tezaur-add-page` 52.65 kB raw / 12.61
+  kB estimated transfer (gzipped). No new runtime deps.
+
 #### M11-A — Backend foundation (state enum + ME endpoints)
 
 - **Migration `0014_gear_moderation.sql`** — adds

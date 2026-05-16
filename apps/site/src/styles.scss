@@ -11,6 +11,12 @@
    Source: docs/design-imports/2026-05-16-v05/styles.forum.css. */
 @use './v05-forum.css';
 
+/* V06 Tezaur "add item" page styles — `.ta-*` form sections, sticky
+   sidebar (preview / completion / CTAs / tips), custom combo dropdowns,
+   image upload tiles + drag-to-reorder, repeatable relation/link rows.
+   Source: docs/design-imports/2026-05-16-v06/styles.css (lines 4564→). */
+@use './v06-tezaur-add.css';
+
 /* Mobile-first defense: prevent iOS auto-zoom on input focus. */
 input,
 textarea,
