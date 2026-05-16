@@ -105,11 +105,19 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
          the label readable instead of collapsing the tile. */
       .gear-fill__photo:not([src]) { display: none; }
 
+      /* Long hero titles overflow the column at the default clamp
+         (max 88px). When the title exceeds ~30 chars we switch to a
+         tighter scale so the lede + footer stay visible above the fold. */
+      :host .hero__title--compact {
+        font-size: clamp(28px, 3vw, 44px);
+        line-height: 1.05;
+      }
+
     `,
   ],
   template: `
     <div class="shell">
-      <!-- ============== HERO (featured article) ============== -->
+      <!-- ============== HERO (featured article + rotator) ============== -->
       <section class="hero crosses" aria-labelledby="hero-title">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <div class="hero__grid">
@@ -132,6 +140,18 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                 <span class="gear-fill__label">{{ 'home.featured_chip' | t }}</span>
               </div>
             }
+
+            @if (heroPool().length > 1) {
+              <div class="hero__rotator">
+                <button type="button" [attr.aria-label]="'home.hero_prev' | t" (click)="heroPrev()">
+                  ‹
+                </button>
+                <span class="hero__counter">{{ heroCounter() }}</span>
+                <button type="button" [attr.aria-label]="'home.hero_next' | t" (click)="heroNext()">
+                  ›
+                </button>
+              </div>
+            }
           </div>
 
           <div class="hero__body">
@@ -142,7 +162,7 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                 <span>{{ formatShortDate(heroPublishedAt()) }}</span>
               </div>
               @if (heroArticle(); as a) {
-                <h1 class="hero__title" id="hero-title">{{ a.title }}</h1>
+                <h1 [class]="heroTitleClass()" id="hero-title">{{ a.title }}</h1>
                 <p class="hero__lede">{{ a.excerpt || ('home.featured_no_excerpt' | t) }}</p>
               } @else {
                 <h1 class="hero__title" id="hero-title">{{ 'home.hero_title_fallback' | t }}</h1>
@@ -552,13 +572,54 @@ export class HomePage implements OnInit {
   readonly tezaurList = signal<TezaurListItem[]>([]);
   readonly forumThreads = signal<ThreadListItem[]>([]);
 
+  /**
+   * Hero rotator — cycles through up to 4 of the freshest articles
+   * (mirrors the v07 design). The rotator is purely client-side: the
+   * `loadRevista()` call already fetches 4, so prev/next swap which
+   * one is the hero subject. The first article (newest) is the
+   * default landing slide.
+   */
+  readonly heroIndex = signal(0);
+  readonly heroPool = computed<ArticleListItem[]>(() =>
+    this.revistaArticles().slice(0, 4),
+  );
   readonly heroArticle = computed<ArticleListItem | null>(
-    () => this.revistaArticles()[0] ?? null,
+    () => this.heroPool()[this.heroIndex()] ?? null,
   );
   readonly heroPublishedAt = computed<string | null>(
     () => this.heroArticle()?.publishedAt ?? null,
   );
   readonly heroAuthor = computed(() => this.heroArticle()?.author ?? null);
+
+  /** "01 / 04" counter — 1-based for humans. */
+  readonly heroCounter = computed(() => {
+    const total = this.heroPool().length;
+    const current = total > 0 ? this.heroIndex() + 1 : 0;
+    return `${String(current).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+  });
+
+  /**
+   * Long titles overflow the hero column when rendered at the default
+   * display-font clamp (max 88px). Drop to roughly half the size when
+   * the title is over 30 chars so it still fits next to the photo
+   * without pushing the lede off-screen.
+   */
+  readonly heroTitleClass = computed(() =>
+    (this.heroArticle()?.title.length ?? 0) > 30
+      ? 'hero__title hero__title--compact'
+      : 'hero__title',
+  );
+
+  heroPrev(): void {
+    const total = this.heroPool().length;
+    if (total === 0) return;
+    this.heroIndex.update((i) => (i - 1 + total) % total);
+  }
+  heroNext(): void {
+    const total = this.heroPool().length;
+    if (total === 0) return;
+    this.heroIndex.update((i) => (i + 1) % total);
+  }
 
   /**
    * "Ultimele citite" — pick the next 4 articles after the hero. When

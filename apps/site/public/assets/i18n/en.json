@@ -113,6 +113,8 @@
     "hero_title_fallback": "Welcome to Sintezaur",
     "hero_lede_fallback": "Catalog, marketplace, magazine and forum for music production in Romanian. New articles and listings show up here the moment they go live.",
     "hero_cta": "Read",
+    "hero_prev": "Previous article",
+    "hero_next": "Next article",
     "revista_eyebrow": "Revista",
     "revista_title": "Latest reads",
     "revista_cta": "See all articles",
