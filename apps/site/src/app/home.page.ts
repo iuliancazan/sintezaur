@@ -113,6 +113,32 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         line-height: 1.05;
       }
 
+      /* Hero photo: stop cropping. Show the whole image with
+         object-fit:contain, and fill the surrounding letterbox with a
+         heavily-blurred copy of the same photo so we keep a fixed-size
+         media tile without dead pixels. Scope is .hero__media only —
+         every other card keeps its cover-crop. */
+      :host .hero__media { position: relative; overflow: hidden; }
+      :host .hero__bg-blur {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        /* Scale up so the blur doesn't bleed transparent edges in, and
+           drop saturation/brightness so the foreground stays the focus. */
+        transform: scale(1.15);
+        filter: blur(28px) saturate(1.15) brightness(0.75);
+        z-index: 0;
+        pointer-events: none;
+        user-select: none;
+      }
+      :host .hero__media .gear-fill { z-index: 1; }
+      :host .gear-fill__photo--contain {
+        object-fit: contain;
+        background: transparent;
+      }
+
     `,
   ],
   template: `
@@ -123,10 +149,20 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         <div class="hero__grid">
           <div class="hero__media">
             @if (heroArticle(); as a) {
+              @if (a.heroThumb) {
+                <img
+                  class="hero__bg-blur"
+                  [src]="mediaUrl(a.heroThumb)"
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  (error)="onImageError($event)"
+                />
+              }
               <div class="gear-fill" [attr.data-gear]="a.slug">
                 @if (a.heroThumb) {
                   <img
-                    class="gear-fill__photo"
+                    class="gear-fill__photo gear-fill__photo--contain"
                     [src]="mediaUrl(a.heroThumb)"
                     [alt]="a.title"
                     loading="lazy"
