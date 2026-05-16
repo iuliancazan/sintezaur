@@ -408,29 +408,180 @@
     "page_eyebrow": "Tezaur · Catalog",
     "page_title": "The gear encyclopedia",
     "page_lede": "Every synth, drum machine, sampler and module our community has written up. Each entry links back to active listings, reviews and forum threads.",
+    "stats": {
+      "pieces": "Entries",
+      "brands": "Brands",
+      "categories": "Categories"
+    },
     "search_placeholder": "Search the catalog…",
-    "results_count": "{{count}} entries",
+    "sort": {
+      "label": "Sort",
+      "popular": "Most popular",
+      "alpha": "Alphabetical",
+      "newest": "Newest",
+      "discussed": "Most discussed",
+      "year_asc": "Year released ↑",
+      "year_desc": "Year released ↓"
+    },
+    "view": {
+      "grid": "Grid",
+      "list": "List"
+    },
+    "filters": {
+      "active_label": "Active filters",
+      "clear_all": "Clear all ×",
+      "category": "Category",
+      "type": "Type",
+      "brand": "Brand",
+      "year_released": "Year released",
+      "status": "Status",
+      "in_production": "In production",
+      "discontinued": "Discontinued",
+      "no_results": "No entries match your active filters."
+    },
+    "card": {
+      "owners": "{{count}} own",
+      "year_unknown": "—"
+    },
+    "results_count": "{{shown}} of {{total}} results",
+    "pagination": {
+      "page_of": "Page {{page}} of {{total}}",
+      "show_count": "Showing {{shown}} of {{total}}"
+    },
     "add_button": "Add to Tezaur",
     "add_button_aria": "Add a new gear entry to Tezaur"
   },
   "bazar": {
-    "page_eyebrow": "Bazar",
-    "page_title": "The marketplace",
-    "page_lede": "Buy, sell or trade synths, drum machines, modules and studio gear.",
-    "search_placeholder": "Search listings…",
+    "page_eyebrow": "Bazar · Music marketplace",
+    "page_title": "Bazar",
+    "page_lede": "Buy, sell or trade music gear with other producers. Verified listings, direct chat, bilateral reviews after the transaction.",
+    "search_placeholder": "Search gear, brand, city…",
+    "list_new": "List gear",
     "new_listing": "New listing",
-    "empty": "No listings match your filters."
+    "empty": "No listings match your filters.",
+    "stats": {
+      "listings": "Active listings",
+      "categories": "Categories",
+      "cities": "Country"
+    },
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "price_asc": "Price ascending",
+      "price_desc": "Price descending",
+      "expiring_soon": "Expiring soon",
+      "most_viewed": "Most viewed"
+    },
+    "filters": {
+      "heading": "Filters",
+      "active_label": "Active filters",
+      "clear_all": "Clear all ×",
+      "condition": "Condition",
+      "kind": "Listing type",
+      "delivery": "Delivery",
+      "price": "Price",
+      "price_min": "Min",
+      "price_max": "Max",
+      "location": "City / County",
+      "location_placeholder": "e.g. Bucharest",
+      "category": "Category",
+      "no_results": "No listings match your active filters.",
+      "save_search": "☆ Save this search",
+      "saved_ok": "Saved",
+      "save_cap_reached": "You've reached the 50 saved-searches cap.",
+      "save_error": "Save failed. Try again."
+    },
+    "condition": {
+      "new": "Sealed / new",
+      "mint": "Like new (mint)",
+      "very_good": "Very good",
+      "good": "Good",
+      "fair": "Fair",
+      "for_parts": "For parts"
+    },
+    "kind": {
+      "sell": "For sale",
+      "trade": "For trade",
+      "sell_or_trade": "Sell / Trade"
+    },
+    "delivery": {
+      "pickup_only": "Pickup only",
+      "shipping_only": "Shipping only",
+      "both": "Pickup or shipping"
+    },
+    "card": {
+      "accepts_offers": "Accepts offers",
+      "tx": "transactions"
+    },
+    "actions_saved_listings": "Saved listings",
+    "actions_saved_searches": "Saved searches",
+    "results_count": "{{shown}} of {{total}} results",
+    "pagination": {
+      "page_of": "Page {{page}} of {{total}}",
+      "show_count": "Showing {{shown}} of {{total}}"
+    }
   },
   "revista": {
-    "page_eyebrow": "Revista",
-    "page_title": "The magazine",
+    "page_eyebrow": "Revista · Magazine",
+    "page_title": "Revista",
     "page_lede": "Reviews, tutorials, news, interviews — by and for the music-production community.",
-    "empty": "No articles published yet."
+    "search_placeholder": "Search articles…",
+    "empty": "No articles published yet.",
+    "sort": {
+      "label": "Sort",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "most_viewed": "Most viewed"
+    },
+    "filters": {
+      "all_categories": "All categories",
+      "all_tags": "All tags",
+      "clear_all": "Clear all ×"
+    },
+    "results_count": "{{shown}} of {{total}} results",
+    "pagination": {
+      "page_of": "Page {{page}} of {{total}}",
+      "show_count": "Showing {{shown}} of {{total}}"
+    },
+    "translation_pending": "This article hasn't been translated to English yet — the Romanian version is shown below."
   },
   "forum": {
-    "page_eyebrow": "Forum",
-    "page_title": "Community discussions",
-    "page_lede": "Ask, share, debate. Every gear page links to its canonical thread.",
-    "empty": "No threads here yet — be the first."
+    "page_eyebrow": "Forum · Community",
+    "page_title": "Forum",
+    "page_lede": "Questions about gear, production tips, recommendations — open discussion between music producers.",
+    "system_section": "Automated",
+    "badge_auto": "auto",
+    "badge_admin": "admin",
+    "tab_all": "All categories",
+    "kind_user": "community category",
+    "kind_system": "automated category",
+    "load_error": "Content failed to load.",
+    "no_threads": "No threads in this category yet.",
+    "no_replies": "No replies yet. Be the first!",
+    "crumb_root": "Forum",
+    "results_count": "{{shown}} of {{total}} threads",
+    "pagination": {
+      "page_of": "Page {{page}} of {{total}}"
+    },
+    "replies_short": "replies",
+    "posts_count": "posts",
+    "pinned": "Pinned",
+    "locked": "Locked",
+    "deleted_user": "[deleted user]",
+    "edited": "edited",
+    "hidden_post": "[Post hidden by moderator]",
+    "expand_all": "Expand all",
+    "collapse_all": "Collapse all",
+    "show_n_replies": "Show {{n}} replies",
+    "hide_replies": "Hide replies",
+    "action": {
+      "reply": "Reply",
+      "like": "Useful",
+      "edit": "Edit",
+      "delete": "Delete",
+      "report": "Report"
+    },
+    "actions_menu": "More actions",
+    "translation_pending": "Forum threads stay in the language of the original poster."
   }
 }

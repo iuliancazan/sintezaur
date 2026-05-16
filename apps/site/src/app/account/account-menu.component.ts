@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { hasAnyRole } from '../auth/auth.types';
 import { FeedbackService } from '../feedback/feedback.service';
+import { Locale, LocaleService } from '../i18n/locale.service';
 import { TPipe } from '../i18n/t.pipe';
 
 /**
@@ -76,6 +77,37 @@ import { TPipe } from '../i18n/t.pipe';
       >
         {{ 'account.menu.feedback' | t }}
       </button>
+
+      <span class="am__sep" aria-hidden="true"></span>
+      <div class="am__group">
+        <span class="am__group-label">
+          {{ 'app.topbar.language_label' | t }}
+        </span>
+        <div
+          class="am__seg"
+          role="radiogroup"
+          [attr.aria-label]="'app.topbar.language_label' | t"
+        >
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="locale.locale() === 'ro'"
+            [class.is-active]="locale.locale() === 'ro'"
+            (click)="setLocale('ro')"
+          >
+            RO
+          </button>
+          <button
+            type="button"
+            role="radio"
+            [attr.aria-checked]="locale.locale() === 'en'"
+            [class.is-active]="locale.locale() === 'en'"
+            (click)="setLocale('en')"
+          >
+            EN
+          </button>
+        </div>
+      </div>
 
       @if (showDashboard()) {
         <span class="am__sep" aria-hidden="true"></span>
@@ -203,11 +235,56 @@ import { TPipe } from '../i18n/t.pipe';
         background: var(--line);
         margin: 6px 0;
       }
+      .am__group {
+        padding: 8px 16px 10px;
+      }
+      .am__group-label {
+        display: block;
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--fg-subtle);
+        margin-bottom: 6px;
+      }
+      .am__seg {
+        display: flex;
+        border: 1px solid var(--line);
+        width: 100%;
+      }
+      .am__seg button {
+        flex: 1;
+        appearance: none;
+        background: var(--bg-elev);
+        border: 0;
+        border-right: 1px solid var(--line);
+        padding: 8px 0;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--fg-muted);
+        cursor: pointer;
+        min-height: auto;
+        min-width: auto;
+      }
+      .am__seg button:last-child {
+        border-right: 0;
+      }
+      .am__seg button:hover:not(.is-active) {
+        color: var(--fg);
+      }
+      .am__seg button.is-active {
+        background: var(--accent);
+        color: var(--accent-fg);
+        cursor: default;
+      }
     `,
   ],
 })
 export class AccountMenuComponent {
   readonly auth = inject(AuthService);
+  readonly locale = inject(LocaleService);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly router = inject(Router);
   private readonly feedback = inject(FeedbackService);
@@ -233,6 +310,12 @@ export class AccountMenuComponent {
   openFeedback(): void {
     this.feedback.open();
     this.close();
+  }
+
+  setLocale(loc: Locale): void {
+    if (this.locale.locale() === loc) return;
+    this.close();
+    this.locale.setLocale(loc);
   }
 
   async logout(): Promise<void> {

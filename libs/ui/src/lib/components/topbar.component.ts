@@ -163,17 +163,30 @@ export interface SzTopbarUser {
           }
 
           @if (showLocaleSwitch) {
-            <button
-              class="sz-icon-btn sz-locale-btn"
-              type="button"
+            <div
+              class="sz-locale-group"
+              role="group"
               [attr.aria-label]="localeAriaLabel"
-              [attr.title]="localeAriaLabel"
-              (click)="localeClick.emit()"
             >
-              <span class="sz-locale-btn__label">
-                {{ currentLocale === 'en' ? 'EN' : 'RO' }}
-              </span>
-            </button>
+              <button
+                type="button"
+                class="sz-locale-seg"
+                [class.is-active]="currentLocale === 'ro'"
+                [attr.aria-pressed]="currentLocale === 'ro'"
+                (click)="currentLocale !== 'ro' && localeClick.emit()"
+              >
+                RO
+              </button>
+              <button
+                type="button"
+                class="sz-locale-seg"
+                [class.is-active]="currentLocale === 'en'"
+                [attr.aria-pressed]="currentLocale === 'en'"
+                (click)="currentLocale !== 'en' && localeClick.emit()"
+              >
+                EN
+              </button>
+            </div>
           }
 
           @if (user) {
@@ -351,15 +364,46 @@ export interface SzTopbarUser {
         transform: translate(-50%, -50%);
       }
 
-      /* Locale switcher — same chrome as the icon buttons but shows
-         the active locale as a 2-letter mono label. */
-      .sz-locale-btn .sz-locale-btn__label {
+      /* Locale switcher — segmented [RO][EN] control. Active half is
+         filled with the accent so the current locale is unambiguous;
+         the other half is a click target for switching. Mirrors the
+         theme segmented control pattern from the old topbar. */
+      .sz-locale-group {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        background: var(--bg-elev);
+        height: 30px;
+        align-items: stretch;
+      }
+      .sz-locale-seg {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        padding: 0 10px;
         font-family: var(--font-mono);
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 0.08em;
-        color: inherit;
-        line-height: 1;
+        color: var(--fg-muted);
+        cursor: pointer;
+        min-height: 30px;
+        min-width: 30px;
+        display: inline-grid;
+        place-items: center;
+        transition:
+          background 0.12s ease,
+          color 0.12s ease;
+      }
+      .sz-locale-seg + .sz-locale-seg {
+        border-left: 1px solid var(--line);
+      }
+      .sz-locale-seg:hover:not(.is-active) {
+        color: var(--fg);
+      }
+      .sz-locale-seg.is-active {
+        background: var(--accent);
+        color: var(--accent-fg);
+        cursor: default;
       }
 
       .sz-btn-login,
@@ -445,7 +489,8 @@ export interface SzTopbarUser {
         .sz-nav,
         .sz-theme-toggle,
         .sz-btn-ghost,
-        .sz-icon-btn--collapsible {
+        .sz-icon-btn--collapsible,
+        .sz-locale-group {
           display: none;
         }
         .sz-account-trigger {
