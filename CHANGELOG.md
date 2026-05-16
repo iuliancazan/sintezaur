@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-C2 — Bazar detail rewrite V05 1:1 (single commit, _SHA TBD_)
+#### M13-C2 — Bazar detail rewrite V05 1:1 (single commit `a635f18`)
 
 `apps/site/src/app/bazar/bazar-detail.page.ts` complete rewrite to
 match V05's `Bazar - Roland Juno-60.html` layout. Class logic
