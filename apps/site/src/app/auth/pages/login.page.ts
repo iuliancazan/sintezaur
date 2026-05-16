@@ -30,6 +30,7 @@ import { authFormStyles } from '../auth-form.styles';
           <label class="field__label" for="email">{{ 'auth.login.fields.email' | t }}</label>
           <input
             id="email"
+            name="email"
             class="field__input"
             type="email"
             autocomplete="email"
@@ -41,6 +42,7 @@ import { authFormStyles } from '../auth-form.styles';
           <label class="field__label" for="password">{{ 'auth.login.fields.password' | t }}</label>
           <input
             id="password"
+            name="password"
             class="field__input"
             type="password"
             autocomplete="current-password"

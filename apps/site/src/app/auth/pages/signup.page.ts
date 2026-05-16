@@ -39,6 +39,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="email">{{ 'auth.signup.fields.email' | t }}</label>
             <input
               id="email"
+              name="email"
               class="field__input"
               type="email"
               autocomplete="email"
@@ -51,6 +52,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="username">{{ 'auth.signup.fields.username' | t }}</label>
             <input
               id="username"
+              name="username"
               class="field__input"
               type="text"
               autocapitalize="none"
@@ -63,6 +65,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="fullName">{{ 'auth.signup.fields.full_name' | t }}</label>
             <input
               id="fullName"
+              name="fullName"
               class="field__input"
               type="text"
               autocomplete="name"
@@ -74,6 +77,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="password">{{ 'auth.signup.fields.password' | t }}</label>
             <input
               id="password"
+              name="password"
               class="field__input"
               type="password"
               autocomplete="new-password"

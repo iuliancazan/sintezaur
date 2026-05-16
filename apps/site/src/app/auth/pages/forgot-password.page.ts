@@ -39,6 +39,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="email">{{ 'auth.forgot.fields.email' | t }}</label>
             <input
               id="email"
+              name="email"
               class="field__input"
               type="email"
               autocomplete="email"

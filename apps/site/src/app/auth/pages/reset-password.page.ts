@@ -44,6 +44,7 @@ import { authFormStyles } from '../auth-form.styles';
             <label class="field__label" for="password">{{ 'auth.reset.fields.password' | t }}</label>
             <input
               id="password"
+              name="password"
               class="field__input"
               type="password"
               autocomplete="new-password"
