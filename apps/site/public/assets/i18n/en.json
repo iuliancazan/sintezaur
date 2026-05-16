@@ -1,5 +1,436 @@
 {
-  "_meta": {
-    "note": "Placeholder bundle — M16-D will replace this with the full EN translation. Until then, every key falls back to the RO bundle."
+  "app": {
+    "name": "Sintezaur",
+    "tagline": "The English-language platform for synthesizers and music gear",
+    "loading": "Loading...",
+    "section": {
+      "home": "Home",
+      "tezaur": "Tezaur",
+      "bazar": "Bazar",
+      "revista": "Revista",
+      "forum": "Forum"
+    },
+    "nav": {
+      "aria": "Main navigation",
+      "search": "Search",
+      "notifications": "Notifications",
+      "theme": "Switch theme",
+      "theme_auto": "Auto",
+      "theme_light": "Light",
+      "theme_dark": "Dark"
+    },
+    "actions": {
+      "signup_short": "Sign up",
+      "login_short": "Log in",
+      "account_short": "Account",
+      "account_menu": "Open account menu"
+    },
+    "topbar": {
+      "favorites": "Favorites",
+      "messages": "Messages",
+      "burger": "Open menu",
+      "switch_to_en": "Switch to English",
+      "switch_to_ro": "Comută în română",
+      "language_label": "Language"
+    },
+    "mobile_menu": {
+      "aria": "Account menu",
+      "title": "Menu",
+      "close": "Close menu",
+      "shortcuts": "Shortcuts"
+    }
+  },
+  "common": {
+    "loading": "Loading…",
+    "saving": "Saving…"
+  },
+  "footer": {
+    "tagline": "The encyclopedia, marketplace, magazine and forum for music production in Romanian — synthesis + treasure.",
+    "col_platform": "Platform",
+    "col_about": "Sintezaur",
+    "col_social": "Social",
+    "about": "About",
+    "contact": "Contact",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "forum_rules": "Forum rules",
+    "copy": "© {{year}} Sintezaur · Built in Bucharest",
+    "locale_ro": "RO",
+    "locale_en": "EN"
+  },
+  "account": {
+    "title": "My account",
+    "menu": {
+      "aria": "Account menu",
+      "settings": "Settings",
+      "dashboard": "Dashboard",
+      "favorites": "Favorites",
+      "profile": "Profile",
+      "password": "Password",
+      "email": "Email",
+      "logout": "Log out",
+      "messages": "Messages",
+      "my_listings": "My listings",
+      "forum_subscriptions": "Forum subscriptions",
+      "notification_preferences": "Notification preferences",
+      "feedback": "Send feedback",
+      "my_tezaur_drafts": "Tezaur contributions"
+    },
+    "logged_in_as": "Logged in as {{email}}",
+    "back": "← Back to account",
+    "back_to_account": "← Back to account",
+    "settings": {
+      "title": "Settings",
+      "tabs_aria": "Settings sections",
+      "my_data": "My data",
+      "blocked_users": "Blocked users"
+    },
+    "favorites": {
+      "title": "Favorites",
+      "tabs_aria": "Favorites sections",
+      "tab_listings": "Listings",
+      "tab_searches": "Searches"
+    },
+    "messages_shell": {
+      "title": "Messages",
+      "tabs_aria": "Message sources",
+      "tab_bazar": "Bazar",
+      "tab_forum": "Forum",
+      "forum_soon_title": "Coming soon",
+      "forum_soon_body": "Private forum messages will land here. We plan to merge them with Bazar messages into a single inbox, with a per-source badge."
+    }
+  },
+  "home": {
+    "welcome_eyebrow": "Welcome back",
+    "welcome_greeting": "{{name}}, there's new content since your last visit.",
+    "welcome_action_listing": "New listing",
+    "welcome_action_thread": "New thread",
+    "featured_chip": "Featured",
+    "featured_pill": "Featured",
+    "live_pill": "Live · Revista",
+    "featured_no_excerpt": "Read on Revista for the full context.",
+    "hero_title_fallback": "Welcome to Sintezaur",
+    "hero_lede_fallback": "Catalog, marketplace, magazine and forum for music production in Romanian. New articles and listings show up here the moment they go live.",
+    "hero_cta": "Read",
+    "revista_eyebrow": "Revista",
+    "revista_title": "Latest reads",
+    "revista_cta": "See all articles",
+    "revista_no_tag": "Revista",
+    "revista_empty": "No published articles yet",
+    "bazar_eyebrow": "Bazar · Hot right now",
+    "bazar_title": "On the market",
+    "bazar_cta": "All listings",
+    "bazar_empty": "No active listings at the moment.",
+    "listing_tx": "transactions",
+    "forum_eyebrow": "Forum · Community",
+    "forum_title": "Trending discussions",
+    "forum_cta": "Go to the forum →",
+    "forum_empty": "Recent forum activity shows up on /forum.",
+    "spotlight_eyebrow": "Tezaur · This week's spotlight",
+    "spotlight_title": "Gear of the week",
+    "spotlight_cta": "View page",
+    "spotlight_empty": "Catalog is empty for now.",
+    "spotlight_year": "Released",
+    "spotlight_category": "Category",
+    "spotlight_form": "Form factor",
+    "spotlight_rating": "Rating",
+    "spotlight_reviews": "Reviews",
+    "spotlight_type": "Type",
+    "spotlight_owners": "people own this gear on Sintezaur",
+    "spotlight_generic_desc": "{{brand}} {{model}} — this week's pick from the community-curated catalog.",
+    "catalog_eyebrow": "Tezaur · Random pick",
+    "catalog_title": "From the catalog",
+    "catalog_cta": "Explore the catalog",
+    "catalog_own": "people own this",
+    "cta_logged_title": "Post something.",
+    "cta_logged_body": "List a piece of gear, start a discussion or pitch an article to the magazine.",
+    "cta_action_listing": "New listing",
+    "cta_action_thread": "New thread",
+    "cta_action_article": "Submit article",
+    "cta_guest_title": "Create an account.",
+    "cta_guest_body": "Full catalog, saved listings, price alerts, thread subscriptions and your personal collection — free, always.",
+    "cta_guest_action": "Sign up",
+    "newsletter_label": "Sintezaur newsletter — weekly",
+    "newsletter_placeholder": "your@email.com",
+    "newsletter_action": "Subscribe",
+    "newsletter_note": "Our best writing and an honest market recap. No spam. Unsubscribe in one click.",
+    "condition": {
+      "new": "New",
+      "mint": "Mint",
+      "very_good": "Very good",
+      "good": "Good",
+      "fair": "Fair",
+      "for_parts": "For parts"
+    },
+    "category": {
+      "reviews": "Review",
+      "tutorials": "Tutorial",
+      "news": "News",
+      "interviews": "Interview",
+      "buying_guides": "Buying guide",
+      "hardware_deep_dives": "Hardware deep-dive"
+    }
+  },
+  "auth": {
+    "shared": {
+      "back_home": "← Back to home",
+      "submitting": "Sending...",
+      "field_required": "Required.",
+      "email_invalid": "Invalid email address.",
+      "password_too_short": "Password must be at least 8 characters.",
+      "username_invalid": "Use 3–30 characters: lowercase letters, digits, _ or -.",
+      "unexpected_error": "Something went wrong. Try again in a moment."
+    },
+    "signup": {
+      "title": "Create an account",
+      "subtitle": "One account for Tezaur, Bazar, Revista and the Forum.",
+      "fields": {
+        "email": "Email",
+        "email_help": "We use this address only for sign-in and notifications.",
+        "password": "Password",
+        "password_help": "Minimum 8 characters. Longer is better.",
+        "username": "Username",
+        "username_help": "Your public handle, used in URLs and @mentions.",
+        "full_name": "Display name",
+        "full_name_help": "How you'd like to appear in the community."
+      },
+      "submit": "Create account",
+      "have_account": "Already have an account?",
+      "login_link": "Log in",
+      "success_title": "Account created",
+      "success_body": "We sent a confirmation email to {{email}}. Check your inbox (and spam folder) and click the link to activate your account."
+    },
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back to Sintezaur.",
+      "fields": {
+        "email": "Email",
+        "password": "Password"
+      },
+      "submit": "Log in",
+      "forgot_link": "Forgot your password?",
+      "no_account": "No account yet?",
+      "signup_link": "Create one"
+    },
+    "forgot": {
+      "title": "Reset password",
+      "subtitle": "We'll email you a reset link.",
+      "fields": {
+        "email": "Email"
+      },
+      "submit": "Send the link",
+      "back_login": "← Back to log in",
+      "success_title": "Check your inbox",
+      "success_body": "If an account is tied to {{email}}, we just sent it a reset link. The link expires in an hour."
+    },
+    "reset": {
+      "title": "Set a new password",
+      "subtitle": "Pick something you don't use anywhere else.",
+      "fields": {
+        "password": "New password",
+        "password_help": "Minimum 8 characters."
+      },
+      "submit": "Save new password",
+      "success_title": "Password changed",
+      "success_body": "You can log in now with the new password.",
+      "login_link": "Go to log in",
+      "invalid_token_title": "Link expired or invalid",
+      "invalid_token_body": "This reset link is no longer valid. Request a new one.",
+      "request_again": "Request another link"
+    },
+    "verify": {
+      "title": "Email verification",
+      "in_progress": "Confirming your email...",
+      "success_title": "Email confirmed",
+      "success_body": "Thanks. You can log in now.",
+      "failure_title": "Link expired or invalid",
+      "failure_body": "This confirmation link is no longer valid. Log in to receive a new one.",
+      "login_link": "Go to log in"
+    },
+    "change_password": {
+      "title": "Change password",
+      "subtitle": "After saving, we'll sign you out of all sessions.",
+      "fields": {
+        "current": "Current password",
+        "new": "New password",
+        "new_help": "Minimum 8 characters."
+      },
+      "submit": "Save",
+      "success": "Password changed. Please log in again."
+    },
+    "change_email": {
+      "title": "Change email address",
+      "subtitle": "We'll email a confirmation link to the new address. The old address stays active until you confirm.",
+      "fields": {
+        "current_password": "Current password",
+        "new_email": "New email"
+      },
+      "submit": "Send confirmation",
+      "success_title": "Check the new email",
+      "success_body": "We sent a confirmation link to {{email}}. The old address stays active until you confirm."
+    },
+    "errors": {
+      "email_exists": "An account with this email already exists.",
+      "username_taken": "This username is already taken.",
+      "invalid_credentials": "Invalid email or password.",
+      "account_locked": "Account temporarily locked. Try again in a few minutes.",
+      "email_not_verified": "Email address is not confirmed. Check your inbox.",
+      "invalid_token": "This link is invalid or expired.",
+      "current_password_wrong": "Current password is incorrect.",
+      "same_email": "The new address is the same as the current one.",
+      "rate_limited": "Too many attempts. Try again in a moment."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_read": "Mark all as read",
+    "empty": "No new notifications.",
+    "kind": {
+      "bazar_new_message": "New message on \"{{title}}\"",
+      "bazar_new_offer": "New offer on \"{{title}}\"",
+      "bazar_counter_offer": "Counter-offer on \"{{title}}\"",
+      "bazar_offer_accepted": "Your offer on \"{{title}}\" was accepted",
+      "bazar_offer_rejected": "Your offer on \"{{title}}\" was rejected",
+      "bazar_price_drop_watched": "Price drop on \"{{title}}\": {{oldPrice}} → {{newPrice}}",
+      "bazar_saved_search_match": "New listing matching saved search \"{{name}}\"",
+      "bazar_listing_expiring": "\"{{title}}\" expires in {{bucket}}",
+      "bazar_transaction_confirmed_by_other": "Transaction confirmed on \"{{title}}\"",
+      "bazar_review_submitted_on_me": "You received a review ({{rating}}★)",
+      "generic": "New notification"
+    }
+  },
+  "search": {
+    "title": "Search Sintezaur",
+    "intro": "One input — searches Tezaur, Bazar, Revista and the Forum simultaneously.",
+    "placeholder": "What are you looking for? (gear, brand, article, thread…)",
+    "too_short": "Type at least 2 characters to start searching.",
+    "start_typing": "Start typing to see results.",
+    "no_results": "No results for „{{query}}\" in any module. Try another term.",
+    "totals": "{{total}} results",
+    "see_all": "See all {{n}} results",
+    "section_count": "{{n}} results",
+    "section": {
+      "tezaur": "Tezaur · gear",
+      "bazar": "Bazar · listings",
+      "revista": "Revista · articles",
+      "forum": "Forum · discussions"
+    }
+  },
+  "inbox": {
+    "title": "Messages",
+    "lede": "All your Bazar conversations — buyer or seller.",
+    "empty": "No conversations yet. Messages show up here once you reach out about a listing.",
+    "no_preview": "(no preview)",
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "sold": "Sold",
+      "expired": "Expired",
+      "removed": "Removed"
+    },
+    "relative": {
+      "now": "now",
+      "minutes": "{{count}}m",
+      "hours": "{{count}}h",
+      "days": "{{count}}d"
+    }
+  },
+  "thread": {
+    "back_to_inbox": "Messages",
+    "compose_placeholder": "Write a message... (Ctrl+Enter)",
+    "send": "Send",
+    "sending": "...",
+    "send_error": "Message could not be sent. Try again.",
+    "not_found": "This conversation doesn't exist or you no longer have access to it.",
+    "locked": {
+      "sold": "Listing has been sold — this conversation is archived.",
+      "expired": "Listing has expired — you can no longer send messages.",
+      "removed": "Listing has been removed.",
+      "draft": "Listing is in draft."
+    },
+    "system": {
+      "tx_confirmed": "Transaction confirmed",
+      "offer_placeholder": "(structured offer — UI coming soon)"
+    },
+    "tab_message": "Message",
+    "tab_offer": "Offer",
+    "tab_counter": "Counter-offer",
+    "offer": {
+      "kind_offer": "Offer",
+      "kind_counter": "Counter-offer",
+      "amount_label": "Amount",
+      "currency_label": "Currency",
+      "note_placeholder": "Optional note (justify the price, conditions...)",
+      "send": "Send offer",
+      "send_counter": "Send counter-offer",
+      "cancel": "Cancel",
+      "accept": "Accept",
+      "reject": "Reject",
+      "counter": "Counter-offer",
+      "accepted_system": "Offer accepted — finalize the transaction via \"Confirm transaction\".",
+      "rejected_system": "Offer rejected",
+      "resolved_accepted": "✓ Accepted",
+      "resolved_rejected": "Rejected",
+      "resolved_countered": "Counter-offer sent",
+      "counter_hint": "Round {{rounds}}/5 of counter-offers.",
+      "cap_reached": "You've reached the 5-round counter-offer cap on this thread.",
+      "send_error": "Offer could not be sent.",
+      "action_error": "Offer action failed. Try again."
+    },
+    "tx": {
+      "banner_idle_title": "Confirm the transaction",
+      "banner_idle_detail": "Once you've agreed, both parties click \"Confirm transaction\" to close the sale and open the review window.",
+      "banner_waiting_other_title": "You've confirmed — waiting for the other side",
+      "banner_waiting_other_detail": "You'll get a notification as soon as the other party confirms.",
+      "banner_other_confirmed_title": "The other party has confirmed",
+      "banner_other_confirmed_detail": "Confirm to mark the listing as sold.",
+      "banner_confirmed_title": "Transaction confirmed",
+      "banner_confirmed_detail": "Leave a review for the other party (30 days).",
+      "banner_review_done_title": "✓ Thanks for the review",
+      "banner_review_done_detail": "Your review has been recorded and will appear on the other user's profile.",
+      "confirm_button": "Confirm transaction",
+      "confirming": "Confirming...",
+      "review_button": "Write a review",
+      "confirm_error": "Confirmation failed. Try again."
+    },
+    "review": {
+      "title": "How did the transaction go?",
+      "rate": "Give {{n}} stars",
+      "body_placeholder": "A few words about the experience (minimum 10 characters)...",
+      "submit": "Submit review",
+      "submitting": "Sending...",
+      "cancel": "Cancel",
+      "error": "Review could not be submitted. Try again."
+    }
+  },
+  "tezaur": {
+    "page_eyebrow": "Tezaur · Catalog",
+    "page_title": "The gear encyclopedia",
+    "page_lede": "Every synth, drum machine, sampler and module our community has written up. Each entry links back to active listings, reviews and forum threads.",
+    "search_placeholder": "Search the catalog…",
+    "results_count": "{{count}} entries",
+    "add_button": "Add to Tezaur",
+    "add_button_aria": "Add a new gear entry to Tezaur"
+  },
+  "bazar": {
+    "page_eyebrow": "Bazar",
+    "page_title": "The marketplace",
+    "page_lede": "Buy, sell or trade synths, drum machines, modules and studio gear.",
+    "search_placeholder": "Search listings…",
+    "new_listing": "New listing",
+    "empty": "No listings match your filters."
+  },
+  "revista": {
+    "page_eyebrow": "Revista",
+    "page_title": "The magazine",
+    "page_lede": "Reviews, tutorials, news, interviews — by and for the music-production community.",
+    "empty": "No articles published yet."
+  },
+  "forum": {
+    "page_eyebrow": "Forum",
+    "page_title": "Community discussions",
+    "page_lede": "Ask, share, debate. Every gear page links to its canonical thread.",
+    "empty": "No threads here yet — be the first."
   }
 }
