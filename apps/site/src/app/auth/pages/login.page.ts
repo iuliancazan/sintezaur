@@ -84,14 +84,39 @@ export class LoginPage {
     this.pending.set(true);
     this.formError.set(null);
     const value = this.form.getRawValue();
+    const email = value.email.trim().toLowerCase();
     try {
-      await this.auth.login(value.email.trim().toLowerCase(), value.password);
+      await this.auth.login(email, value.password);
+      // SPA login submits via fetch, so Chrome's password-save heuristic
+      // doesn't always fire. Calling the Credential Management API after
+      // a successful login tells the browser explicitly to offer "Save
+      // password?" — works in Chrome, Edge, Brave, Safari (best-effort).
+      await this.offerToSavePassword(email, value.password);
       const redirect = this.route.snapshot.queryParamMap.get('redirect') ?? '/';
       await this.router.navigateByUrl(redirect);
     } catch (err) {
       this.formError.set(this.mapError(err));
     } finally {
       this.pending.set(false);
+    }
+  }
+
+  private async offerToSavePassword(
+    email: string,
+    password: string,
+  ): Promise<void> {
+    if (typeof window === 'undefined') return;
+    const PwCredCtor = (window as unknown as { PasswordCredential?: new (init: {
+      id: string;
+      password: string;
+      name?: string;
+    }) => Credential }).PasswordCredential;
+    if (!PwCredCtor || !('credentials' in navigator)) return;
+    try {
+      const cred = new PwCredCtor({ id: email, password, name: email });
+      await navigator.credentials.store(cred);
+    } catch {
+      // Non-fatal — login already succeeded.
     }
   }
 

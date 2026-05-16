@@ -130,18 +130,41 @@ export class SignupPage {
     this.pending.set(true);
     this.formError.set(null);
     const value = this.form.getRawValue();
+    const email = value.email.trim().toLowerCase();
     try {
       await this.auth.signup({
-        email: value.email.trim().toLowerCase(),
+        email,
         username: value.username.trim().toLowerCase(),
         fullName: value.fullName.trim(),
         password: value.password,
       });
       this.success.set(true);
+      // Offer the password manager prompt now while we still have the
+      // plaintext password — the user will need it again at first login.
+      await this.offerToSavePassword(email, value.password);
     } catch (err) {
       this.formError.set(this.mapError(err));
     } finally {
       this.pending.set(false);
+    }
+  }
+
+  private async offerToSavePassword(
+    email: string,
+    password: string,
+  ): Promise<void> {
+    if (typeof window === 'undefined') return;
+    const PwCredCtor = (window as unknown as { PasswordCredential?: new (init: {
+      id: string;
+      password: string;
+      name?: string;
+    }) => Credential }).PasswordCredential;
+    if (!PwCredCtor || !('credentials' in navigator)) return;
+    try {
+      const cred = new PwCredCtor({ id: email, password, name: email });
+      await navigator.credentials.store(cred);
+    } catch {
+      // Non-fatal.
     }
   }
 
