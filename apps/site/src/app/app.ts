@@ -13,6 +13,7 @@ import { AccountMenuComponent } from './account/account-menu.component';
 import { MobileMenuComponent } from './account/mobile-menu.component';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
+import { LocaleService } from './i18n/locale.service';
 import { TPipe } from './i18n/t.pipe';
 import { FeedbackModal } from './feedback/feedback-modal.component';
 import { CookiesBanner } from './legal/cookies-banner.component';
@@ -83,6 +84,10 @@ import { V05SpriteComponent } from './ui/v05-sprite.component';
       [themeAutoLabel]="themeAutoLabel()"
       [themeLightLabel]="themeLightLabel()"
       [themeDarkLabel]="themeDarkLabel()"
+      [showLocaleSwitch]="true"
+      [currentLocale]="locale.locale()"
+      [localeAriaLabel]="localeAriaLabel()"
+      (localeClick)="toggleLocale()"
     />
 
     @if (notificationsOpen()) {
@@ -175,6 +180,7 @@ import { V05SpriteComponent } from './ui/v05-sprite.component';
 export class App {
   readonly auth = inject(AuthService);
   readonly notifications = inject(NotificationsService);
+  readonly locale = inject(LocaleService);
   private readonly i18n = inject(I18nService);
   private readonly router = inject(Router);
 
@@ -232,6 +238,10 @@ export class App {
     void this.router.navigate(['/cautare']);
   }
 
+  toggleLocale(): void {
+    this.locale.setLocale(this.locale.locale() === 'en' ? 'ro' : 'en');
+  }
+
   readonly copyYear = new Date().getFullYear();
   readonly logoSrc = '/assets/brand/logo-white.png';
 
@@ -246,6 +256,11 @@ export class App {
   readonly messagesAriaLabel = computed(() => this.i18n.t('app.topbar.messages'));
   readonly burgerAriaLabel = computed(() => this.i18n.t('app.topbar.burger'));
   readonly themeAriaLabel = computed(() => this.i18n.t('app.nav.theme'));
+  readonly localeAriaLabel = computed(() =>
+    this.locale.locale() === 'en'
+      ? this.i18n.t('app.topbar.switch_to_ro')
+      : this.i18n.t('app.topbar.switch_to_en'),
+  );
   readonly themeAutoLabel = computed(() => this.i18n.t('app.nav.theme_auto'));
   readonly themeLightLabel = computed(() => this.i18n.t('app.nav.theme_light'));
   readonly themeDarkLabel = computed(() => this.i18n.t('app.nav.theme_dark'));

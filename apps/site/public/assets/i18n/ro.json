@@ -28,7 +28,10 @@
     "topbar": {
       "favorites": "Favorite",
       "messages": "Mesaje",
-      "burger": "Deschide meniul"
+      "burger": "Deschide meniul",
+      "switch_to_en": "Switch to English",
+      "switch_to_ro": "Comută în română",
+      "language_label": "Limba"
     },
     "mobile_menu": {
       "aria": "Meniu cont",

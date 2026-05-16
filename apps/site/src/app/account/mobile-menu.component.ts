@@ -16,6 +16,7 @@ import { hasAnyRole } from '../auth/auth.types';
 import { FeedbackService } from '../feedback/feedback.service';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
+import { Locale, LocaleService } from '../i18n/locale.service';
 import { ThemeMode, ThemeService } from '@sintezaur/ui';
 
 /**
@@ -88,6 +89,30 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
             (click)="setTheme('dark')"
           >
             {{ 'app.nav.theme_dark' | t }}
+          </button>
+        </div>
+      </div>
+
+      <div class="mm__group">
+        <span class="mm__group-label">{{ 'app.topbar.language_label' | t }}</span>
+        <div
+          class="mm__theme"
+          role="group"
+          [attr.aria-label]="'app.topbar.language_label' | t"
+        >
+          <button
+            type="button"
+            [class.is-active]="locale.locale() === 'ro'"
+            (click)="setLocale('ro')"
+          >
+            RO
+          </button>
+          <button
+            type="button"
+            [class.is-active]="locale.locale() === 'en'"
+            (click)="setLocale('en')"
+          >
+            EN
           </button>
         </div>
       </div>
@@ -279,6 +304,7 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
 export class MobileMenuComponent {
   readonly auth = inject(AuthService);
   readonly theme = inject(ThemeService);
+  readonly locale = inject(LocaleService);
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly router = inject(Router);
   private readonly feedback = inject(FeedbackService);
@@ -300,6 +326,12 @@ export class MobileMenuComponent {
 
   setTheme(mode: ThemeMode): void {
     this.theme.setMode(mode);
+  }
+
+  setLocale(loc: Locale): void {
+    if (this.locale.locale() === loc) return;
+    this.close();
+    this.locale.setLocale(loc);
   }
 
   close(): void {

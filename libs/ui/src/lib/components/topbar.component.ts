@@ -162,6 +162,20 @@ export interface SzTopbarUser {
             </button>
           }
 
+          @if (showLocaleSwitch) {
+            <button
+              class="sz-icon-btn sz-locale-btn"
+              type="button"
+              [attr.aria-label]="localeAriaLabel"
+              [attr.title]="localeAriaLabel"
+              (click)="localeClick.emit()"
+            >
+              <span class="sz-locale-btn__label">
+                {{ currentLocale === 'en' ? 'EN' : 'RO' }}
+              </span>
+            </button>
+          }
+
           @if (user) {
             <button
               #accountTrigger
@@ -337,6 +351,17 @@ export interface SzTopbarUser {
         transform: translate(-50%, -50%);
       }
 
+      /* Locale switcher — same chrome as the icon buttons but shows
+         the active locale as a 2-letter mono label. */
+      .sz-locale-btn .sz-locale-btn__label {
+        font-family: var(--font-mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: inherit;
+        line-height: 1;
+      }
+
       .sz-btn-login,
       .sz-btn-ghost {
         font-family: var(--font-mono);
@@ -446,6 +471,7 @@ export class SzTopbarComponent {
   @Input() showMessages = false;
   @Input() showBurger = false;
   @Input() showThemeSwitch = true;
+  @Input() showLocaleSwitch = false;
 
   @Input() searchAriaLabel = 'Search';
   @Input() bellAriaLabel = 'Notifications';
@@ -459,6 +485,8 @@ export class SzTopbarComponent {
   @Input() themeAutoLabel = 'Auto';
   @Input() themeLightLabel = 'Light';
   @Input() themeDarkLabel = 'Dark';
+  @Input() currentLocale: 'ro' | 'en' = 'ro';
+  @Input() localeAriaLabel = 'Switch language';
 
   @Input() user: SzTopbarUser | null = null;
   @Input() loginHref = '/login';
@@ -476,6 +504,7 @@ export class SzTopbarComponent {
   @Output() messagesClick = new EventEmitter<void>();
   @Output() burgerClick = new EventEmitter<void>();
   @Output() accountClick = new EventEmitter<void>();
+  @Output() localeClick = new EventEmitter<void>();
 
   readonly theme = inject(ThemeService);
 
