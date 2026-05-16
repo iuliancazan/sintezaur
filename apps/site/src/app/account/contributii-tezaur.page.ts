@@ -199,11 +199,15 @@ type TabKey = 'mine' | 'queue';
                       <tr>
                         <td>
                           <div class="cn-gear">
-                            <div class="cn-gear__thumb">
+                            <div
+                              class="cn-gear__thumb"
+                              [class.is-empty]="!d.thumb"
+                              [style.background]="!d.thumb ? brandColor(d.brand) : null"
+                            >
                               @if (d.thumb) {
                                 <img [src]="tezaur.imageUrl(d.thumb)" [alt]="d.brand + ' ' + d.model" />
                               } @else {
-                                <span class="cn-gear__thumb-placeholder">—</span>
+                                <span class="cn-gear__thumb-initial">{{ brandInitial(d.brand) }}</span>
                               }
                             </div>
                             <div class="cn-gear__txt">
@@ -263,11 +267,15 @@ type TabKey = 'mine' | 'queue';
                     <tr>
                       <td>
                         <div class="cn-gear">
-                          <div class="cn-gear__thumb">
+                          <div
+                            class="cn-gear__thumb"
+                            [class.is-empty]="!d.thumb"
+                            [style.background]="!d.thumb ? brandColor(d.brand) : null"
+                          >
                             @if (d.thumb) {
                               <img [src]="tezaur.imageUrl(d.thumb)" [alt]="d.brand + ' ' + d.model" />
                             } @else {
-                              <span class="cn-gear__thumb-placeholder">—</span>
+                              <span class="cn-gear__thumb-initial">{{ brandInitial(d.brand) }}</span>
                             }
                           </div>
                           <div class="cn-gear__txt">
@@ -322,9 +330,14 @@ type TabKey = 'mine' | 'queue';
                               <svg><use href="#i-eye" /></svg>
                             </a>
                           } @else {
-                            <span class="cn-row-act__lock" [title]="'contributii_tezaur.queued_note' | t">
+                            <!-- submitted: owner can still open the editor in read-only mode -->
+                            <a
+                              [routerLink]="['/tezaur/adauga']"
+                              [queryParams]="{ draft: d.id }"
+                              [title]="'contributii_tezaur.action_view_submitted' | t"
+                            >
                               <svg><use href="#i-eye" /></svg>
-                            </span>
+                            </a>
                           }
                         </div>
                       </td>
@@ -385,11 +398,15 @@ type TabKey = 'mine' | 'queue';
             } @else {
               @for (item of filteredQueue(); track item.id) {
                 <article class="mod-card">
-                  <div class="mod-card__thumb">
+                  <div
+                    class="mod-card__thumb"
+                    [class.is-empty]="!item.thumb"
+                    [style.background]="!item.thumb ? brandColor(item.brand) : null"
+                  >
                     @if (item.thumb) {
                       <img [src]="tezaur.imageUrl(item.thumb)" [alt]="item.brand + ' ' + item.model" />
                     } @else {
-                      <span class="mod-card__thumb-placeholder">—</span>
+                      <span class="mod-card__thumb-initial">{{ brandInitial(item.brand) }}</span>
                     }
                     <span class="mod-card__thumb-tag" data-t="new">
                       {{ 'contributii_tezaur.type_new' | t }}
@@ -821,6 +838,16 @@ type TabKey = 'mine' | 'queue';
         font-size: 16px;
         color: var(--fg-subtle);
       }
+      .cn-gear__thumb.is-empty {
+        border-color: transparent;
+      }
+      .cn-gear__thumb-initial {
+        font-family: var(--font-display);
+        font-weight: 600;
+        font-size: 22px;
+        color: oklch(0.18 0 0 / 0.85);
+        line-height: 1;
+      }
       .cn-gear__txt {
         display: flex;
         flex-direction: column;
@@ -1064,6 +1091,16 @@ type TabKey = 'mine' | 'queue';
         font-family: var(--font-mono);
         font-size: 18px;
         color: var(--fg-subtle);
+      }
+      .mod-card__thumb.is-empty {
+        border-color: transparent;
+      }
+      .mod-card__thumb-initial {
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 56px;
+        color: oklch(0.18 0 0 / 0.82);
+        line-height: 1;
       }
       .mod-card__thumb-tag {
         position: absolute;
@@ -1474,6 +1511,21 @@ export class ContributiiTezaurPage {
     } finally {
       this.acting.set(null);
     }
+  }
+
+  brandInitial(brand: string | null | undefined): string {
+    const b = (brand ?? '').trim();
+    if (!b || b === 'Necunoscut') return '?';
+    return b[0].toUpperCase();
+  }
+
+  /** Deterministic hue from the brand name so each brand gets its own tint. */
+  brandColor(brand: string | null | undefined): string {
+    const b = (brand ?? '').trim() || 'unknown';
+    let h = 0;
+    for (let i = 0; i < b.length; i++) h = ((h << 5) - h + b.charCodeAt(i)) | 0;
+    const hue = Math.abs(h) % 360;
+    return `oklch(0.78 0.08 ${hue})`;
   }
 
   formatDate(iso: string | null): string {

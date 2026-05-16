@@ -1114,6 +1114,8 @@ export class TezaurAddPage {
     if (!ok) return;
     this.modAction.set('approving');
     try {
+      // Persist any pending field edits before publishing.
+      await this.saveDraftNow();
       await this.tezaur.approveModerationItem(id);
       this.draftState.set('approved');
     } catch (err) {
@@ -1137,6 +1139,8 @@ export class TezaurAddPage {
     }
     this.modAction.set('rejecting');
     try {
+      // Persist any pending field edits first so the contributor sees them.
+      await this.saveDraftNow();
       await this.tezaur.rejectModerationItem(id, trimmed);
       this.draftState.set('rejected');
       this.rejectionReason.set(trimmed);

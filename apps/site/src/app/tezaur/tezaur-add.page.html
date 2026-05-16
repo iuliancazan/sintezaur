@@ -964,14 +964,14 @@
                 [disabled]="modAction() !== 'idle' || draftState() === 'approved'"
                 (click)="approveAsModerator()"
               >
-                {{ modAction() === 'approving' ? ('tezaur.add.mod.approving' | t) : ('tezaur.add.mod.approve' | t) }} →
+                {{ modAction() === 'approving' ? ('tezaur.add.mod.approving' | t) : ('tezaur.add.mod.save_and_publish' | t) }} →
               </button>
               <button
                 class="ta-cta ta-cta--ghost"
                 type="button"
                 (click)="saveDraftNow()"
               >
-                {{ 'tezaur.add.save_draft' | t }}
+                {{ 'tezaur.add.mod.save_only' | t }}
               </button>
               <button
                 class="ta-cta ta-cta--danger-text"
