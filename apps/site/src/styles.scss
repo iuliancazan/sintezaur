@@ -7,6 +7,10 @@
    Dark tokens use v2-neutral hex per user decision (2026-05-16). */
 @use './v05.css';
 
+/* V05 Forum design — thread list / detail / new / search.
+   Source: docs/design-imports/2026-05-16-v05/styles.forum.css. */
+@use './v05-forum.css';
+
 /* Mobile-first defense: prevent iOS auto-zoom on input focus. */
 input,
 textarea,

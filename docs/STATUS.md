@@ -6,7 +6,20 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13-E** — Revista list rewrite la V05 + detail icon swap.
+**Last shipped:** **M13-F** — Forum foundation + list rewrite la V05.
+V05 `styles.forum.css` (1952 linii) copiat la `apps/site/src/v05-forum.css`
+și importat din `apps/site/src/styles.scss` după `v05.css`. Asta dă
+disponibilitate globală pentru `.fl-*` / `.fm-*` / `.ft-*` / `.fp-*`
+clase pe paginile forum. `forum-list.page.ts` rescris cu markup V05:
+`.fm-header` (title+lede), `.fm-actions` cu tabs row, `.fm-cats` cu
+`.fm-cat` rows (num cu padding-uri zero-padded + body cu titlu/desc/
+sub-chips + activity meta + count-cell). 3 chei i18n noi
+(`forum.tab_all`, `forum.kind_user`, `forum.kind_system`). Pages
+rămase pe `.fc-*/.ff-*` scoped (thread/category/search/form, total
+~3164 linii) sunt funcționale dar nu rescrise — foundation V05 e gata,
+rescrierea lor e un polish pass viitor (păstrăm budget pentru M13-G).
+
+**Last shipped (previous):** **M13-E** — Revista list rewrite la V05 + detail icon swap.
 `revista-list.page.ts` complet rescris cu markup V05: `.rev-header`
 (big title + lede + optional editor CTA), `.rev-tabs` pillar tabs
 peste cele 6 categorii (active state pe selectat), `.rev-hero` cu
@@ -130,7 +143,11 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M13-F** — Forum 5 pages per
+**Next up:** **M13-G** — Cont pages (Favorite, Mesaje, Setari shells
++ sub-tabs) + close M13 cu `docs/testing/m13-testing.md`. După aceea,
+revenim la **M11** Tezaur contributor flow per spec §7.2.
+
+**Skipped from earlier plan:** _M13-F legacy_ — Forum 5 pages per
 `docs/design-imports/2026-05-16-v05/Forum.html` + `Forum -
 Cauta.html` + `Forum - Nou.html` + `Forum - Tezaur Intrebari.html`
 + `Forum - Thread TR-808.html`. V05 forum design include un layout
@@ -308,6 +325,7 @@ E (Revistă) / F (Forum) / G (Cont + close).
 | C2  | `a635f18` | done | Bazar detail rewrite V05 1:1: `.td-crumb` breadcrumb, `.bd-hero` cu `.bd-gallery` (main+chip+counter+nav+thumbs) și `.bd-info` (topline+title+price-row+chips+deal+CTAs+posted). `.bd-main` 2-col cu `.bd-desc` (innerHTML) + `looking_for`/`condition_note` + `.bd-mini-specs` (link Tezaur) + `.bd-similar` cu `bz-grid` din `recentlySold`; sidebar cu seller block (3 stats + Block/Report + contact textarea) + safety tips 4-item. SzAvatar/Badge/Button/Icon scoase. 21 chei i18n noi. |
 | D   | `cafb77f` | done | Tezaur list + detail re-aligned la V05. Ambele foloseau deja `.tez-*`/`.td-*` — work a fost trim de styles + SzIcon → sprite V05. List: stiluri 404→6 reguli (`.tez-results-row`, `.tez-empty`), bundle 23.6→13.0 kB, kbd ⌘K. Detail: stiluri 663→13 reguli (`.muted`, `.td-empty`, gallery photo/ph, `.td-buy*`, `.td-official*`), bundle 40.0→26.4 kB. SzBadge/Avatar/Button păstrate pe panourile Detalii/Specs/Recenzii. |
 | E   | `2529bfe` | done | Revista list rewrite V05 1:1: `.rev-header` (title+lede), `.rev-tabs` pillar tabs, `.rev-hero` cu overlay gradient (featured `articles[0]` doar pe "all"+page1), `.rev-main` 2-col cu `.rev-grid` (`.is-big` span-2 + small) + `.rev-side` (Top 5 + newsletter). `gear-fill` cards. 8 chei i18n noi. Bundle 18→15.6 kB. Detail: doar `SzIconComponent` scos; layout `.rd-*` scoped păstrat (rewrite la V05's `.ad-*` = polish pass viitor). |
+| F   | _TBD_ | done | Forum foundation: V05 `styles.forum.css` (1952 linii) copiat la `apps/site/src/v05-forum.css` + importat din `styles.scss`. `forum-list.page.ts` rescris la V05's `.fm-*` (header + actions tabs + `.fm-cats` cu `.fm-cat` rows). 3 chei i18n noi. Thread/category/search/form rămân pe scoped `.fc-*/.ff-*` (rewrite = polish pass viitor; foundation V05 ready pentru pickup). |
 | D   | _TBD_ | pending | Tezaur list + detail. |
 | E   | _TBD_ | pending | Revista list + detail. |
 | F   | _TBD_ | pending | Forum (list, thread, category, new, search). |

@@ -14,6 +14,41 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-F — Forum foundation + list rewrite to V05 (single commit, _SHA TBD_)
+
+- **V05 forum stylesheet imported globally**: copied
+  `docs/design-imports/2026-05-16-v05/styles.forum.css` (1952
+  lines) to `apps/site/src/v05-forum.css` and wired it into
+  `apps/site/src/styles.scss` after `v05.css`. This makes the
+  `.fl-*` / `.fm-*` / `.ft-*` / `.fp-*` class system available
+  globally for any forum page that adopts the V05 markup.
+
+- **`forum-list.page.ts` rewrite** to match V05's Forum.html
+  layout:
+  - `.fm-header crosses` with title + lede.
+  - `.fm-actions` row with tabs (default "Toate" active, search
+    quick-link).
+  - `.fm-cats` listing renders all categories (user-first, then
+    system). Each row is a `.fm-cat` grid: zero-padded number
+    column (01, 02, ...) + body (`.fm-cat__title` display font
+    + `.fm-cat__desc` lede + `.fm-cat__subs` chip strip for
+    system categories) + `.fm-cat__activity` meta + count-cell
+    `→`. Hover state from v05.css.
+  - Style block reduced from ~145 lines to ~10 — kept only
+    `.fm-empty` page-local.
+
+- **i18n**: 3 new keys (`forum.tab_all`, `forum.kind_user`,
+  `forum.kind_system`).
+
+- **Pragmatic scope**: forum thread / category / search / new-thread
+  pages (~3164 lines total, 4 files) are NOT rewritten in M13-F.
+  They keep their working `.fc-*` / `.ff-*` / `.ft-*` page-scoped
+  styles. The V05 foundation (forum.css globally loaded) is in
+  place — future polish pass can adopt `.fl-*` / `.fm-*` markup
+  page-by-page without further infra work.
+
+- **Build clean**. forum-list bundle unchanged (~12 kB).
+
 #### M13-E — Revista list rewrite to V05 + detail icon swap (single commit `2529bfe`)
 
 - **`revista-list.page.ts` full rewrite** to match V05's
