@@ -5,9 +5,9 @@
     "loading": "Loading...",
     "section": {
       "home": "Home",
-      "tezaur": "Tezaur",
-      "bazar": "Bazar",
-      "revista": "Revista",
+      "tezaur": "Catalog",
+      "bazar": "Marketplace",
+      "revista": "Magazine",
       "forum": "Forum"
     },
     "nav": {

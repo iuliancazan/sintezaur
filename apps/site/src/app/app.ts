@@ -269,8 +269,10 @@ export class App {
   // EN-mode points to `/en/tezaur` from the start — keeps the URL bar
   // crisp without relying on `localeGuard`'s redirect. The guard is
   // still wired as a safety net for routerLinks deeper in the tree.
+  // `exact: true` on Home prevents the homepage tab from staying
+  // highlighted on `/tezaur`, `/en/forum`, etc.
   readonly navLinks = computed<SzNavLink[]>(() => [
-    { label: this.i18n.t('app.section.home'), routerLink: this.locale.localizeUrl('/') },
+    { label: this.i18n.t('app.section.home'), routerLink: this.locale.localizeUrl('/'), exact: true },
     { label: this.i18n.t('app.section.tezaur'), routerLink: this.locale.localizeUrl('/tezaur') },
     { label: this.i18n.t('app.section.bazar'), routerLink: this.locale.localizeUrl('/bazar') },
     { label: this.i18n.t('app.section.revista'), routerLink: this.locale.localizeUrl('/revista') },

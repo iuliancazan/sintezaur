@@ -17,6 +17,12 @@ export interface SzNavLink {
   label: string;
   routerLink: string;
   active?: boolean;
+  /**
+   * When true, `routerLinkActive` matches only the exact URL (so
+   * `/` doesn't stay highlighted on `/tezaur`). Set this for the
+   * homepage entry; everything else uses prefix matching.
+   */
+  exact?: boolean;
 }
 
 export interface SzTopbarUser {
@@ -75,7 +81,7 @@ export interface SzTopbarUser {
                 class="sz-nav__link"
                 [routerLink]="link.routerLink"
                 routerLinkActive="is-active"
-                [routerLinkActiveOptions]="{ exact: link.routerLink === '/' }"
+                [routerLinkActiveOptions]="{ exact: !!link.exact }"
               >
                 {{ link.label }}
               </a>
