@@ -77,5 +77,35 @@
     "filters": {
       "no_results": "Nicio piesă găsită."
     }
+  },
+  "families": {
+    "title": "Familii Tezaur",
+    "back_to_tezaur": "Înapoi la Tezaur",
+    "total_suffix": "familii",
+    "orphan_suffix": "orfane (0 piese)",
+    "filter_placeholder": "Caută familie după nume sau slug…",
+    "col_name": "Nume",
+    "col_slug": "Slug",
+    "col_count": "Piese",
+    "col_summary": "Sumar",
+    "col_actions": "Acțiuni",
+    "edit": "Editează",
+    "merge": "Mută în…",
+    "delete": "Șterge",
+    "save": "Salvează",
+    "saving": "Salvez…",
+    "cancel": "Anulează",
+    "edit_title": "Editează familia",
+    "merge_title": "Mută piesele în altă familie",
+    "merge_from_label": "Mut piesele din:",
+    "merge_into_label": "În familia:",
+    "merge_hint": "După mutare, familia sursă va fi ștearsă. Toate piesele primesc noua familie. Acțiunea e audit-logată.",
+    "merge_confirm": "Mută și șterge familia sursă",
+    "merge_confirm_prompt": "Muți {{count}} piese din {{from}} în {{into}} și ștergi familia sursă?",
+    "delete_confirm_with_gear": "Ștergi familia {{name}}? Cele {{count}} piese rămân fără familie atribuită (poți reatribui manual ulterior).",
+    "delete_confirm_empty": "Ștergi familia goală {{name}}? Nu există piese atribuite.",
+    "gear_pieces": "piese",
+    "no_results": "Nicio familie găsită.",
+    "error_generic": "A apărut o eroare. Încearcă din nou."
   }
 }

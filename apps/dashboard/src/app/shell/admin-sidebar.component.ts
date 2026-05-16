@@ -81,6 +81,7 @@ export class AdminSidebarComponent {
       group: 'Conținut',
       items: [
         { label: 'Tezaur', routerLink: '/tezaur', icon: 'i-archive' },
+        { label: 'Familii Tezaur', routerLink: '/tezaur/families', icon: 'i-stack' },
         { label: 'Bazar', routerLink: '/bazar', icon: 'i-tag' },
         { label: 'Revistă', routerLink: '/revista', icon: 'i-book' },
         { label: 'Forum', routerLink: '/forum-queue', icon: 'i-chat' },

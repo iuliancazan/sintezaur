@@ -453,3 +453,12 @@ export class SetImageCropDto {
   @Min(1)
   h!: number;
 }
+
+/* ============================================================
+   M15-A — Families admin (merge)
+   ============================================================ */
+
+export class MergeGearFamilyDto {
+  @IsUUID()
+  intoId!: string;
+}

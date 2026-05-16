@@ -43,6 +43,13 @@ export const appRoutes: Route[] = [
           import('./tezaur/tezaur-list.page').then((m) => m.TezaurAdminListPage),
       },
       {
+        path: 'tezaur/families',
+        loadComponent: () =>
+          import('./tezaur/families-admin.page').then(
+            (m) => m.FamiliesAdminPage,
+          ),
+      },
+      {
         path: 'tezaur/new',
         loadComponent: () =>
           import('./tezaur/tezaur-edit.page').then((m) => m.TezaurAdminEditPage),

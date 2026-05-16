@@ -36,6 +36,7 @@ import type {
   CreateGearRelationshipDto,
   CreateGearVideoDto,
   ListModerationQueueDto,
+  MergeGearFamilyDto,
   RejectGearDto,
   UpdateGearDto,
   UpdateGearFamilyDto,
@@ -243,6 +244,32 @@ export class AdminTezaurController {
   @Get('families')
   listFamilies() {
     return this.tezaur.listFamilies();
+  }
+
+  /** Admin-only listing with gear count + timestamps for the families page. */
+  @Get('families/admin')
+  listFamiliesAdmin() {
+    return this.tezaur.listFamiliesAdmin();
+  }
+
+  @Delete('families/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteFamily(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    await this.tezaur.deleteFamily(id, user.sub, req);
+  }
+
+  @Post('families/:id/merge')
+  async mergeFamily(
+    @Param('id', ParseUUIDPipe) fromId: string,
+    @Body() dto: MergeGearFamilyDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    return this.tezaur.mergeFamilies(fromId, dto.intoId, user.sub, req);
   }
 
   /* ============================================================

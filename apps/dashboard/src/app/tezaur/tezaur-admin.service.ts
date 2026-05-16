@@ -29,6 +29,16 @@ export interface GearFamily {
   name: string;
 }
 
+export interface GearFamilyAdminRow {
+  id: string;
+  slug: string;
+  name: string;
+  summary: string | null;
+  gearCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TezaurAdminService {
   private readonly http = inject(HttpClient);
@@ -161,6 +171,15 @@ export class TezaurAdminService {
     );
   }
 
+  listFamiliesAdmin(): Promise<GearFamilyAdminRow[]> {
+    return firstValueFrom(
+      this.http.get<GearFamilyAdminRow[]>(
+        `${this.base}/admin/tezaur/families/admin`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
   createFamily(payload: {
     name: string;
     slug?: string;
@@ -170,6 +189,41 @@ export class TezaurAdminService {
       this.http.post<{ id: string; slug: string }>(
         `${this.base}/admin/tezaur/families`,
         payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  updateFamily(
+    id: string,
+    payload: { name?: string; slug?: string; summary?: string },
+  ): Promise<void> {
+    return firstValueFrom(
+      this.http.patch<void>(
+        `${this.base}/admin/tezaur/families/${id}`,
+        payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  deleteFamily(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.delete<void>(
+        `${this.base}/admin/tezaur/families/${id}`,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  mergeFamily(
+    fromId: string,
+    intoId: string,
+  ): Promise<{ movedGearCount: number }> {
+    return firstValueFrom(
+      this.http.post<{ movedGearCount: number }>(
+        `${this.base}/admin/tezaur/families/${fromId}/merge`,
+        { intoId },
         { withCredentials: true },
       ),
     );

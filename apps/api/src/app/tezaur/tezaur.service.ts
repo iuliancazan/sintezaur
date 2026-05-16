@@ -493,6 +493,117 @@ export class TezaurService {
       .orderBy(asc(gearFamilies.name));
   }
 
+  /**
+   * Admin family listing with gear count (non-deleted) per family. Used
+   * by the dashboard families management page to highlight which entries
+   * are heavy / which are orphan candidates for delete.
+   */
+  async listFamiliesAdmin(): Promise<
+    {
+      id: string;
+      slug: string;
+      name: string;
+      summary: string | null;
+      gearCount: number;
+      createdAt: Date;
+      updatedAt: Date;
+    }[]
+  > {
+    return this.db
+      .select({
+        id: gearFamilies.id,
+        slug: gearFamilies.slug,
+        name: gearFamilies.name,
+        summary: gearFamilies.summary,
+        createdAt: gearFamilies.createdAt,
+        updatedAt: gearFamilies.updatedAt,
+        gearCount: sql<number>`(
+          SELECT count(*)::int FROM ${gear}
+          WHERE ${gear.familyId} = ${gearFamilies.id}
+            AND ${gear.deletedAt} IS NULL
+        )`,
+      })
+      .from(gearFamilies)
+      .orderBy(asc(gearFamilies.name));
+  }
+
+  /**
+   * Hard delete a family. Safe because `gear.family_id` is `ON DELETE
+   * SET NULL` — the gear rows stay, they just lose their family grouping.
+   */
+  async deleteFamily(
+    id: string,
+    actorId: string,
+    req?: Request,
+  ): Promise<void> {
+    const result = await this.db
+      .delete(gearFamilies)
+      .where(eq(gearFamilies.id, id))
+      .returning({ id: gearFamilies.id, name: gearFamilies.name });
+    if (!result.length) throw new NotFoundException(`family ${id} not found`);
+    await this.audit.record({
+      actorId,
+      action: 'edit_gear_family',
+      targetType: 'gear_family',
+      targetId: id,
+      details: { kind: 'delete', name: result[0].name },
+      req,
+    });
+  }
+
+  /**
+   * Merge family `fromId` into `intoId`: re-parents every gear pointing
+   * at `fromId` to `intoId`, then drops the source family row. Audit-logs
+   * both sides + the number of gears moved.
+   */
+  async mergeFamilies(
+    fromId: string,
+    intoId: string,
+    actorId: string,
+    req?: Request,
+  ): Promise<{ movedGearCount: number }> {
+    if (fromId === intoId) {
+      throw new BadRequestException('Sursa și destinația trebuie să fie diferite.');
+    }
+    const [src] = await this.db
+      .select()
+      .from(gearFamilies)
+      .where(eq(gearFamilies.id, fromId))
+      .limit(1);
+    if (!src) throw new NotFoundException(`source family ${fromId} not found`);
+    const [dst] = await this.db
+      .select()
+      .from(gearFamilies)
+      .where(eq(gearFamilies.id, intoId))
+      .limit(1);
+    if (!dst)
+      throw new NotFoundException(`destination family ${intoId} not found`);
+
+    return this.db.transaction(async (tx) => {
+      const moved = await tx
+        .update(gear)
+        .set({ familyId: intoId, updatedAt: new Date(), updatedBy: actorId })
+        .where(eq(gear.familyId, fromId))
+        .returning({ id: gear.id });
+      await tx.delete(gearFamilies).where(eq(gearFamilies.id, fromId));
+      await this.audit.record({
+        actorId,
+        action: 'edit_gear_family',
+        targetType: 'gear_family',
+        targetId: intoId,
+        details: {
+          kind: 'merge',
+          fromId,
+          fromName: src.name,
+          intoName: dst.name,
+          movedGearCount: moved.length,
+        },
+        req,
+      });
+      return { movedGearCount: moved.length };
+    });
+  }
+
   /* ============================================================
      gear_description (Tiptap, per locale)
      ============================================================ */

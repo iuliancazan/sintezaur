@@ -45,6 +45,9 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
           <rect x="3" y="4" width="18" height="4" /><path d="M5 8v12h14V8" /><path d="M10 12h4" />
         </symbol>
+        <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+          <path d="M12 3l9 5-9 5-9-5z" /><path d="M3 13l9 5 9-5" /><path d="M3 17l9 5 9-5" />
+        </symbol>
         <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
           <path d="M3 12V4h8l10 10-8 8L3 12z" /><circle cx="8" cy="9" r="1.5" />
         </symbol>
