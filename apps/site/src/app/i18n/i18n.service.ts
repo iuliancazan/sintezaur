@@ -27,29 +27,39 @@ type Bundle = Record<string, unknown>;
  * Missing keys fall back to the key itself in dev (visible in UI
  * which is the right amount of nag).
  */
+const FALLBACK_LOCALE = 'ro';
+
 @Injectable({ providedIn: 'root' })
 export class I18nService {
   private readonly http = inject(HttpClient);
+  /** Active bundle for the current locale (may equal the fallback). */
   private bundle: Bundle = {};
-  readonly locale = signal<string>('ro');
+  /**
+   * Always-loaded RO bundle. When the active locale is EN and a key
+   * is missing from `bundle`, we resolve against this so the UI never
+   * shows raw keys to the user — RO copy fills the gap.
+   */
+  private fallbackBundle: Bundle = {};
+  readonly locale = signal<string>(FALLBACK_LOCALE);
   readonly ready = signal<boolean>(false);
 
-  async init(locale = 'ro'): Promise<void> {
+  async init(locale: string = FALLBACK_LOCALE): Promise<void> {
     this.locale.set(locale);
-    try {
-      const bundle = await firstValueFrom(
-        this.http.get<Bundle>(`/assets/i18n/${locale}.json`),
-      );
-      this.bundle = bundle ?? {};
-    } catch (err) {
-      console.error('[i18n] failed to load bundle', err);
-      this.bundle = {};
+    // Always make sure the RO fallback is in memory before the first
+    // paint. Subsequent calls reuse the already-loaded fallback.
+    if (Object.keys(this.fallbackBundle).length === 0) {
+      this.fallbackBundle = await this.fetchBundle(FALLBACK_LOCALE);
+    }
+    if (locale === FALLBACK_LOCALE) {
+      this.bundle = this.fallbackBundle;
+    } else {
+      this.bundle = await this.fetchBundle(locale);
     }
     this.ready.set(true);
   }
 
   t(key: string, vars?: Record<string, string | number>): string {
-    const raw = this.resolve(key);
+    const raw = this.resolve(key) ?? this.resolve(key, this.fallbackBundle);
     if (raw === undefined) return key;
     if (!vars) return raw;
     return raw.replace(/\{\{\s*(\w+)\s*\}\}/g, (_, name: string) =>
@@ -57,9 +67,21 @@ export class I18nService {
     );
   }
 
-  private resolve(key: string): string | undefined {
+  private async fetchBundle(locale: string): Promise<Bundle> {
+    try {
+      const bundle = await firstValueFrom(
+        this.http.get<Bundle>(`/assets/i18n/${locale}.json`),
+      );
+      return bundle ?? {};
+    } catch (err) {
+      console.error(`[i18n] failed to load ${locale} bundle`, err);
+      return {};
+    }
+  }
+
+  private resolve(key: string, bundle: Bundle = this.bundle): string | undefined {
     const path = key.split('.');
-    let cur: unknown = this.bundle;
+    let cur: unknown = bundle;
     for (const part of path) {
       if (cur === null || typeof cur !== 'object') return undefined;
       cur = (cur as Record<string, unknown>)[part];

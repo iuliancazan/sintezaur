@@ -4,8 +4,13 @@ import { authGuard, editorGuard } from './auth/auth.guard';
 /**
  * Site routes. M1 ships auth + a stub home; section routes
  * (`/tezaur`, `/bazar`, `/revista`, `/forum`) land in M2/M3/M4/M5.
+ *
+ * M16-B: every section is reachable in two locales — Romanian under
+ * the bare root (default) and English under the `/en/...` prefix.
+ * Same component, same children, same params; only the locale flips.
+ * See `LocaleService` for how the prefix is read at runtime.
  */
-export const appRoutes: Route[] = [
+const sectionRoutes: Route[] = [
   {
     path: '',
     pathMatch: 'full',
@@ -354,4 +359,17 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./ui/not-found.page').then((m) => m.NotFoundPage),
   },
+];
+
+export const appRoutes: Route[] = [
+  // English mirror — same route tree, prefix `/en`. The `data.locale`
+  // flag is read by `LocaleService` to flip the i18n bundle and to
+  // resolve EN content from the API where the column is populated.
+  {
+    path: 'en',
+    data: { locale: 'en' as const },
+    children: sectionRoutes,
+  },
+  // Romanian (default) — bare root, no prefix.
+  ...sectionRoutes,
 ];

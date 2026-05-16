@@ -22,6 +22,7 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
+import { detectInitialLocale } from './i18n/locale.service';
 import { httpErrorInterceptor } from './ui/http-error.interceptor';
 import { UmamiService } from './analytics/umami.service';
 
@@ -65,7 +66,10 @@ export const appConfig: ApplicationConfig = {
       // Umami is fire-and-forget — don't gate boot on its script load.
       umami.init();
       await Promise.all([
-        i18n.init('ro'),
+        // Detect locale from URL/cookie BEFORE first render so users
+        // landing on /en/... see EN copy immediately (no RO flash).
+        // Falls back to RO when detection is ambiguous.
+        i18n.init(detectInitialLocale()),
         auth.loadCurrentUser(),
         appConfig.bootstrap(environment.apiBaseUrl),
       ]);
