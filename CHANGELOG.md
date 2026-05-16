@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-G — Close M13 + testing doc (single commit, _SHA TBD_)
+#### M13-G — Close M13 + testing doc (single commit `f68c854`)
 
 Closes the M13 milestone. No new code rewrites in this sub-phase.
 
