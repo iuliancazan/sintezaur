@@ -12,7 +12,6 @@ import {
   GEAR_CATEGORIES,
   type GearCategoryLiteral,
 } from '@sintezaur/shared';
-import { SzIconComponent } from '@sintezaur/ui';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
 import { EmptyStateComponent } from '../ui/empty-state.component';
@@ -41,7 +40,6 @@ const PAGE_SIZE = 24;
     FormsModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
     EmptyStateComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,13 +77,14 @@ const PAGE_SIZE = 24;
       <div class="tez-toolbar crosses">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <label class="tez-search">
-          <sz-icon name="search" [size]="16" />
+          <svg><use href="#i-search"/></svg>
           <input
             type="search"
             [placeholder]="i18n.t('tezaur.search_placeholder')"
             [value]="qText()"
             (input)="onSearchInput($any($event.target).value)"
           />
+          <kbd>⌘ K</kbd>
         </label>
         <div class="tez-sort">
           <span class="tez-sort__label">// {{ 'tezaur.sort.label' | t }}</span>
@@ -98,7 +97,7 @@ const PAGE_SIZE = 24;
               <option [value]="s">{{ 'tezaur.sort.' + s | t }}</option>
             }
           </select>
-          <sz-icon name="caret-down" [size]="14" class="tez-sort__caret" />
+          <svg class="tez-sort__caret" width="14" height="14"><use href="#i-caret-down"/></svg>
         </div>
         <div class="tez-view" role="group">
           <button class="is-active" type="button">
@@ -119,7 +118,7 @@ const PAGE_SIZE = 24;
                 [attr.aria-label]="i18n.t('tezaur.filters.clear_all')"
                 (click)="clearChip(chip.key)"
               >
-                <sz-icon name="x" [size]="11" />
+                <svg><use href="#i-x"/></svg>
               </button>
             </span>
           }
@@ -214,18 +213,17 @@ const PAGE_SIZE = 24;
                 @for (g of r.items; track g.id) {
                   <a class="tez-card" [routerLink]="['/tezaur', g.slug]">
                     <div class="tez-card__media">
-                      @if (g.thumb) {
-                        <img
-                          class="tez-card__photo"
-                          [src]="tezaur.imageUrl(g.thumb)"
-                          [alt]="g.brand + ' ' + g.model"
-                          loading="lazy"
-                        />
-                      } @else {
-                        <div class="tez-card__ph">
-                          <span class="tez-card__ph-label">{{ g.brand }}</span>
-                        </div>
-                      }
+                      <div class="gear-fill" [attr.data-gear]="g.slug">
+                        @if (g.thumb) {
+                          <img
+                            class="gear-fill__photo"
+                            [src]="tezaur.imageUrl(g.thumb)"
+                            [alt]="g.brand + ' ' + g.model"
+                            loading="lazy"
+                          />
+                        }
+                        <span class="gear-fill__label">{{ g.brand }} · {{ g.model }}</span>
+                      </div>
                     </div>
                     <div class="tez-card__brand">// {{ g.brand }}</div>
                     <div class="tez-card__model">{{ g.model }}</div>
@@ -241,7 +239,7 @@ const PAGE_SIZE = 24;
                         {{ 'tezaur.card.owners' | t: { count: g.ownersPublicCount } }}
                       </span>
                       <span class="tez-card__year">
-                        {{ g.yearReleased ?? 'tezaur.card.year_unknown' }}
+                        {{ g.yearReleased ?? '—' }}
                       </span>
                     </div>
                   </a>
@@ -295,271 +293,10 @@ const PAGE_SIZE = 24;
   styles: [
     `
       :host { display: block; }
-
-      .tez-header {
-        position: relative;
-        padding: clamp(40px, 6vw, 72px) clamp(20px, 3vw, 36px) clamp(28px, 4vw, 44px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: var(--gutter-y) 0 24px;
-        display: grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 32px;
-        align-items: end;
-      }
-      .tez-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(70px, 11vw, 160px);
-        line-height: 0.85;
-        text-transform: uppercase;
-        margin: 0;
-        padding-top: 0.22em;
-        letter-spacing: 0.005em;
-      }
-      .tez-header__title .dot { color: var(--accent); }
-      .tez-header__sub {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        margin: 0 0 14px;
-      }
-      .tez-header__sub::before { content: '* '; color: var(--accent); }
-      .tez-header__lede {
-        color: var(--fg-muted);
-        font-size: 15px;
-        max-width: 38ch;
-        margin: 0 0 18px;
-        text-wrap: pretty;
-      }
-      .tez-header__stats {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 0;
-        border-top: 1px dashed var(--line);
-        padding-top: 16px;
-      }
-      .tez-header__stat { padding-right: 14px; border-right: 1px dashed var(--line); }
-      .tez-header__stat:last-child { border-right: 0; padding-left: 14px; padding-right: 0; }
-      .tez-header__stat:nth-child(2) { padding-left: 14px; padding-right: 14px; }
-      .tez-header__stat .k {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        display: block;
-      }
-      .tez-header__stat .v {
-        font-family: var(--font-display);
-        font-size: 40px;
-        font-weight: 600;
-        line-height: 1;
-        display: block;
-        margin-top: 4px;
-      }
-
-      .tez-toolbar {
-        position: sticky;
-        top: 64px;
-        z-index: 50;
-        background: color-mix(in oklab, var(--bg) 90%, transparent);
-        backdrop-filter: blur(10px) saturate(140%);
-        -webkit-backdrop-filter: blur(10px) saturate(140%);
-        border: var(--grid-line) solid var(--line);
-        display: grid;
-        grid-template-columns: 1fr auto auto;
-        gap: 0;
-      }
-      .tez-search {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 18px;
-        border-right: 1px solid var(--line);
-        min-height: 44px;
-      }
-      .tez-search input {
-        flex: 1;
-        background: none;
-        border: 0;
-        outline: 0;
-        font-family: var(--font-ui);
-        font-size: 15px;
-        color: var(--fg);
-        padding: 0;
-      }
-      .tez-search input::placeholder { color: var(--fg-subtle); }
-      .tez-search sz-icon { color: var(--fg-muted); }
-
-      .tez-sort, .tez-view {
-        display: flex;
-        align-items: center;
-        border-right: 1px solid var(--line);
-        position: relative;
-      }
-      .tez-view:last-child { border-right: 0; }
-      .tez-sort__label {
-        padding: 0 14px;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--fg-muted);
-      }
-      .tez-sort select {
-        background: none;
-        border: 0;
-        border-left: 1px solid var(--line);
-        padding: 14px 32px 14px 14px;
-        font-family: var(--font-mono);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        color: var(--fg);
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-      }
-      .tez-sort select:focus { outline: none; color: var(--accent); }
-      .tez-sort__caret {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        color: var(--fg-muted);
-      }
-      .tez-view button {
-        padding: 14px 16px;
-        color: var(--fg-muted);
-        border-left: 1px solid var(--line);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        min-height: 44px;
-      }
-      .tez-view button.is-active { color: var(--fg); background: var(--bg-card); }
-      .tez-view button:first-child { border-left: 0; }
-
-      .tez-chips {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: center;
-        padding: 14px 0;
-        font-family: var(--font-mono);
-        font-size: 11px;
-      }
-      .tez-chips__label {
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        margin-right: 6px;
-      }
-      .tez-chips__label::before { content: '// '; color: var(--accent); }
-      .tez-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 4px 6px 4px 10px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line-strong);
-        letter-spacing: 0.06em;
-      }
-      .tez-chip button {
-        width: 16px;
-        min-width: 16px;
-        height: 16px;
-        min-height: 16px;
-        display: grid;
-        place-items: center;
-        color: var(--fg-muted);
-        transition: color 0.12s ease;
-      }
-      .tez-chip button:hover { color: var(--accent); }
-      .tez-chip__clear {
-        margin-left: auto;
-        color: var(--fg-muted);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        font-size: 10px;
-        min-height: auto;
-        min-width: auto;
-      }
-      .tez-chip__clear:hover { color: var(--accent); }
-
-      .tez-main {
-        display: grid;
-        grid-template-columns: 260px 1fr;
-        gap: 32px;
-        align-items: start;
-        margin-bottom: var(--gutter-y);
-      }
-      .tez-rail {
-        position: sticky;
-        top: 128px;
-        border: 1px solid var(--line);
-        background: var(--bg-elev);
-      }
-      .tez-rail__sec { border-bottom: 1px solid var(--line); }
-      .tez-rail__sec:last-child { border-bottom: 0; }
-      .tez-rail__head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 14px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg);
-      }
-      .tez-rail__head::before { content: '// '; color: var(--accent); }
-      .tez-rail__head .count { color: var(--fg-muted); font-size: 10px; }
-      .tez-rail__body {
-        padding: 4px 14px 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      .tez-check {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 5px 0;
-        cursor: pointer;
-        font-size: 13px;
-        color: var(--fg-muted);
-        font-family: var(--font-ui);
-        min-height: auto;
-      }
-      .tez-check:hover { color: var(--fg); }
-      .tez-check input { display: none; }
-      .tez-check .box {
-        width: 14px;
-        height: 14px;
-        border: 1px solid var(--line-strong);
-        display: grid;
-        place-items: center;
-        flex-shrink: 0;
-        transition: border-color 0.12s ease;
-      }
-      .tez-check .box::after {
-        content: '';
-        width: 8px;
-        height: 8px;
-        background: var(--accent);
-        opacity: 0;
-        transition: opacity 0.12s ease;
-      }
-      .tez-check input:checked + .box { border-color: var(--accent); }
-      .tez-check input:checked + .box::after { opacity: 1; }
-      .tez-check input:checked ~ .lbl { color: var(--fg); }
-      .tez-check .lbl { flex: 1; }
-
+      /* All .tez-* structural classes (header/toolbar/search/sort/view/
+         chips/main/rail/check/grid/card/pag) are provided globally by
+         v05.css — page-locals below cover only the extras: results
+         counter row + empty state. */
       .tez-results-row {
         display: flex;
         justify-content: space-between;
@@ -572,157 +309,12 @@ const PAGE_SIZE = 24;
         text-transform: uppercase;
       }
       .tez-results-row .accent { color: var(--accent); }
-
       .tez-empty {
         padding: 48px;
         text-align: center;
         color: var(--fg-muted);
         border: 1px solid var(--line);
         background: var(--bg-elev);
-      }
-
-      .tez-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0;
-        border-left: 1px solid var(--line);
-        border-top: 1px solid var(--line);
-      }
-      .tez-card {
-        background: var(--bg-card);
-        border-right: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-        padding: 18px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        cursor: pointer;
-        transition: background 0.15s ease;
-        position: relative;
-        min-height: auto;
-        min-width: auto;
-        align-items: stretch;
-        justify-content: flex-start;
-      }
-      .tez-card:hover { background: var(--bg-card-2); }
-      .tez-card:hover .tez-card__model { color: var(--accent); }
-      .tez-card__media {
-        aspect-ratio: 1;
-        background: var(--bg-card-2);
-        position: relative;
-        overflow: hidden;
-        border: 1px solid var(--line);
-      }
-      .tez-card__photo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-      .tez-card__ph {
-        position: absolute;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        background:
-          repeating-linear-gradient(135deg,
-            color-mix(in oklab, var(--fg) 4%, transparent) 0 8px,
-            transparent 8px 16px),
-          linear-gradient(180deg, var(--bg-card-2), var(--bg-card));
-      }
-      .tez-card__ph-label {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-        padding: 4px 8px;
-        border: 1px solid var(--line-strong);
-        background: var(--bg);
-      }
-      .tez-card__brand {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: var(--fg-muted);
-      }
-      .tez-card__model {
-        font-family: var(--font-display);
-        font-size: 26px;
-        font-weight: 600;
-        line-height: 0.95;
-        text-transform: uppercase;
-        letter-spacing: 0.005em;
-        padding-top: 0.18em;
-        text-wrap: balance;
-        transition: color 0.12s ease;
-      }
-      .tez-card__tags { display: flex; flex-wrap: wrap; gap: 6px; }
-      .tez-card__tag {
-        font-family: var(--font-mono);
-        font-size: 9px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        padding: 3px 6px;
-        border: 1px solid var(--line);
-        color: var(--fg-muted);
-      }
-      .tez-card__foot {
-        display: flex;
-        justify-content: space-between;
-        margin-top: auto;
-        padding-top: 12px;
-        border-top: 1px dashed var(--line);
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.06em;
-        color: var(--fg-muted);
-      }
-      .tez-card__foot b { color: var(--accent); font-weight: 600; }
-      .tez-card__year { text-align: right; }
-
-      .tez-pag {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 32px 0 var(--gutter-y);
-        padding: 18px 0;
-        border-top: 1px solid var(--line);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        color: var(--fg-muted);
-        text-transform: uppercase;
-      }
-      .tez-pag__nums { display: flex; gap: 6px; }
-      .tez-pag__num {
-        width: 34px;
-        height: 34px;
-        min-width: 34px;
-        min-height: 34px;
-        display: grid;
-        place-items: center;
-        border: 1px solid var(--line-strong);
-        color: var(--fg);
-        transition: background 0.12s, color 0.12s, border-color 0.12s;
-        cursor: pointer;
-      }
-      .tez-pag__num:hover { background: var(--bg-elev); }
-      .tez-pag__num.is-active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-      .tez-pag__num.is-disabled { color: var(--fg-subtle); cursor: not-allowed; opacity: 0.4; }
-      .tez-pag__num.is-ellipsis { border: 0; cursor: default; }
-
-      @media (max-width: 1100px) {
-        .tez-header { grid-template-columns: 1fr; gap: 18px; }
-        .tez-main { grid-template-columns: 1fr; }
-        .tez-rail { position: static; }
-        .tez-grid { grid-template-columns: repeat(3, 1fr); }
-      }
-      @media (max-width: 720px) {
-        .tez-grid { grid-template-columns: repeat(2, 1fr); }
-        .tez-toolbar { grid-template-columns: 1fr; }
-        .tez-toolbar > * { border-right: 0; border-bottom: 1px solid var(--line); }
-        .tez-toolbar > *:last-child { border-bottom: 0; }
       }
     `,
   ],

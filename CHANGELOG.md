@@ -14,6 +14,52 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-D — Tezaur list + detail re-aligned to V05 (single commit, _SHA TBD_)
+
+Both Tezaur pages were already using V05's `.tez-*` / `.td-*`
+class names (the page-scoped layout was lifted from V05 at M2-C).
+M13-D's work was therefore mechanical cleanup:
+
+- **`tezaur-list.page.ts`**:
+  - Removed SzIconComponent import — `<sz-icon name="search">` →
+    `<svg><use href="#i-search"/>`, `<sz-icon name="caret-down">` →
+    `<svg class="tez-sort__caret"><use href="#i-caret-down"/>`,
+    `<sz-icon name="x">` → `<svg><use href="#i-x"/>`.
+  - Added kbd `⌘ K` hint to the search input (V05 spec).
+  - Card media reworked from `.tez-card__media > .tez-card__photo`
+    img to V05's `.tez-card__media > .gear-fill > .gear-fill__photo`
+    + `.gear-fill__label` (consistent with Home/Bazar).
+  - Style block reduced from ~430 to ~25 lines — kept only
+    `.tez-results-row` + `.tez-empty`. All structural CSS
+    (`.tez-header`/toolbar/search/sort/view/chips/main/rail/
+    check/grid/card/pag/responsive) inherited from v05.css.
+  - Bundle: 23.6 kB → 13.0 kB lazy chunk.
+  - Class logic untouched (all signals, fetch, pagination, URL
+    sync preserved).
+
+- **`tezaur-detail.page.ts`**:
+  - `<sz-icon name="back">` in breadcrumb → `<svg><use href="#i-back"/>`.
+    Other SzBadge/SzAvatar/SzButton usages kept (9 spots across
+    Detalii/Specs/Recenzii panels — replacing them all would have
+    been overkill for this sub-phase; M13-G or follow-up.)
+  - Style block reduced from ~660 to ~110 lines — kept page-local
+    extras NOT in v05.css: `.muted` helper, `.td-empty`,
+    `.td-gallery__photo` + `.td-gallery__ph` (placeholder pattern
+    for img tag handling), `.td-buy*` (buy panel sidebar block),
+    `.td-official*` (official forum thread teaser badge).
+  - Everything else (`.td-hero`, `.td-gallery__main/counter/nav/
+    thumbs`, `.td-info*`, `.td-tabs`, `.td-prose`, `.td-family`,
+    `.td-specs`, `.td-price`, `.td-reviews`, `.td-sidebar*`,
+    `.td-stat-grid`, `.td-lineage`, `.td-watch`) inherited from
+    v05.css globally.
+  - Bundle: 40.0 kB → 26.4 kB lazy chunk.
+
+- File sizes: tezaur-list 904 → 496 lines; tezaur-detail
+  1492 → 937 lines. Combined dead-CSS removal: ~1000 lines.
+
+- Build clean; no warnings; tests N/A (M13 milestones close with
+  manual testing doc at M13-G).
+
 #### M13-C2 — Bazar detail rewrite V05 1:1 (single commit `a635f18`)
 
 `apps/site/src/app/bazar/bazar-detail.page.ts` complete rewrite to

@@ -533,51 +533,27 @@ interface ReviewsResponse {
   styles: [
     `
       :host { display: block; }
-
-      .td-crumb {
+      /* All .td-* / .bd-* / .bz-* structural classes are provided
+         globally by v05.css — page-locals below cover only extras:
+         buy panel, official-thread teaser, empty state, muted helper,
+         gallery photo/placeholder when no V05 .gear-fill wrapper. */
+      .muted {
+        color: var(--fg-muted);
         font-family: var(--font-mono);
         font-size: 11px;
-        letter-spacing: 0.08em;
-        color: var(--fg-muted);
-        padding: 24px 0 12px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
       }
-      .td-crumb a {
+      .td-empty {
+        padding: 48px;
+        text-align: center;
         color: var(--fg-muted);
-        min-height: auto;
-        min-width: auto;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .td-crumb a:hover { color: var(--accent); }
-      .td-crumb .sep { opacity: 0.5; }
-      .td-crumb .cur { color: var(--fg); }
-
-      .td-hero {
-        position: relative;
-        border: var(--grid-line) solid var(--line);
+        border: 1px solid var(--line);
         background: var(--bg-elev);
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 0;
-        margin-bottom: 32px;
-      }
-      .td-gallery {
-        display: flex;
-        flex-direction: column;
-        border-right: var(--grid-line) solid var(--line);
-      }
-      .td-gallery__main {
-        position: relative;
-        aspect-ratio: 4/3;
-        background: var(--bg-card);
-        overflow: hidden;
       }
       .td-gallery__photo {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -593,205 +569,42 @@ interface ReviewsResponse {
             transparent 8px 16px),
           linear-gradient(180deg, var(--bg-card-2), var(--bg-card));
         font-family: var(--font-mono);
-        color: var(--fg-muted);
         font-size: 12px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-      }
-      .td-gallery__counter {
-        position: absolute;
-        top: 14px;
-        left: 14px;
-        padding: 4px 10px;
-        background: var(--bg);
         color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 11px;
+        text-transform: uppercase;
         letter-spacing: 0.14em;
-        border: 1px solid var(--line-strong);
       }
-      .td-gallery__nav {
-        position: absolute;
-        bottom: 14px;
-        right: 14px;
-        display: flex;
-        gap: 6px;
-      }
-      .td-gallery__nav button {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        min-height: 32px;
-        display: grid;
-        place-items: center;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        color: var(--fg);
-        transition: background 0.15s, color 0.15s;
-      }
-      .td-gallery__nav button:hover {
-        background: var(--accent);
-        color: var(--accent-fg);
-        border-color: var(--accent);
-      }
-      .td-gallery__thumbs {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 0;
-        border-top: 1px solid var(--line);
-      }
-      .td-thumb {
-        aspect-ratio: 1;
-        background: var(--bg-card);
-        border: 0;
-        border-right: 1px solid var(--line);
-        cursor: pointer;
-        padding: 0;
-        overflow: hidden;
-        min-height: auto;
-        min-width: auto;
-        transition: background 0.12s;
-      }
-      .td-thumb:last-child { border-right: 0; }
-      .td-thumb img { width: 100%; height: 100%; object-fit: cover; }
-      .td-thumb.is-active { background: var(--bg-card-2); outline: 2px solid var(--accent); outline-offset: -2px; }
-
-      .td-info {
-        padding: clamp(28px, 4vw, 56px);
+      .td-buy {
         display: flex;
         flex-direction: column;
-        gap: 18px;
-      }
-      .td-info__brand {
-        font-family: var(--font-mono);
-        font-size: 12px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-      }
-      .td-info__model {
-        font-family: var(--font-display);
-        font-size: clamp(40px, 5vw, 80px);
-        line-height: 0.92;
-        text-transform: uppercase;
-        margin: 0;
-        font-weight: 600;
-        text-wrap: balance;
-      }
-      .td-info__tags {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .td-info__stat-row {
-        display: flex;
-        gap: 24px;
-        flex-wrap: wrap;
-        padding: 16px 0;
-        border-top: 1px dashed var(--line);
-        border-bottom: 1px dashed var(--line);
-      }
-      .td-info__stat .k {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-        margin-bottom: 4px;
-      }
-      .td-info__stat .v {
-        display: block;
-        font-family: var(--font-display);
-        font-size: 28px;
-        font-weight: 600;
-        line-height: 1;
-      }
-      .td-info__stat .v.accent { color: var(--accent); }
-
-      .td-info__collection {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 0;
-      }
-      .td-info__collection__label {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-      }
-      .td-info__collection select {
-        flex: 1;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        padding: 8px 12px;
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--fg);
-        cursor: pointer;
-      }
-      .td-info__collection select:focus { outline: none; border-color: var(--accent); }
-
-      .td-info__ctas { display: flex; gap: 12px; flex-wrap: wrap; }
-
-      .td-tabs {
-        position: sticky;
-        top: 64px;
-        z-index: 50;
-        display: flex;
-        gap: 0;
-        overflow-x: auto;
-        border-bottom: 1px solid var(--line);
-        background: color-mix(in oklab, var(--bg) 92%, transparent);
-        backdrop-filter: blur(10px) saturate(140%);
-        margin-bottom: 32px;
-      }
-      .td-tab {
-        padding: 14px 22px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-        border-bottom: 2px solid transparent;
-        white-space: nowrap;
-        cursor: pointer;
-        transition: color 0.15s, border-color 0.15s;
-        min-height: auto;
-        min-width: auto;
-        display: inline-flex;
-        align-items: center;
+        padding: 12px;
         gap: 8px;
       }
-      .td-tab:hover { color: var(--fg); }
-      .td-tab.is-active { color: var(--fg); border-bottom-color: var(--accent); }
-      .td-tab .count {
+      .td-buy__row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .td-buy__row a {
+        flex: 1;
+        min-width: 0;
+      }
+      .td-buy__note {
+        font-family: var(--font-mono);
         font-size: 10px;
-        color: var(--fg-subtle);
+        color: var(--fg-muted);
+        letter-spacing: 0.04em;
+        margin: 0;
       }
-
-      .td-main {
-        display: grid;
-        grid-template-columns: 1fr 320px;
-        gap: 32px;
-        margin-bottom: var(--gutter-y);
-      }
-      .td-panel {
-        padding: 0;
-      }
-
-      /* M5-I — official forum thread card */
       .td-official {
         display: block;
+        padding: 18px 20px;
         text-decoration: none;
         color: var(--fg);
-        padding: 18px 20px;
         background: var(--bg-elev);
-        border: 1px solid var(--line-strong);
-        border-left: 3px solid var(--accent);
-        margin-bottom: 18px;
+        border: 1px solid var(--line);
+        margin-top: 16px;
+        transition: background 0.15s ease;
       }
       .td-official:hover {
         background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%);
@@ -801,396 +614,28 @@ interface ReviewsResponse {
         align-items: center;
         gap: 10px;
         margin-bottom: 8px;
-        flex-wrap: wrap;
       }
       .td-official__badge {
         font-family: var(--font-mono);
         font-size: 10px;
-        text-transform: uppercase;
         letter-spacing: 0.14em;
-        padding: 3px 8px;
-        background: var(--accent);
-        color: var(--accent-fg);
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border: 1px solid var(--accent);
+        color: var(--accent);
       }
       .td-official__meta {
         font-family: var(--font-mono);
         font-size: 10px;
-        text-transform: uppercase;
         letter-spacing: 0.1em;
+        text-transform: uppercase;
         color: var(--fg-muted);
       }
       .td-official__title {
         font-family: var(--font-display);
         font-weight: 600;
-        font-size: 20px;
-        line-height: 1.2;
-        margin: 0 0 6px;
-      }
-      .td-official__lede {
-        margin: 0;
-        color: var(--fg-muted);
-        font-size: 13px;
-      }
-      .td-related-cta {
-        margin-top: 12px;
-      }
-      .td-related-link {
-        display: inline-block;
-        padding: 8px 14px;
-        background: transparent;
-        border: 1px dashed var(--line-strong);
-        color: var(--accent);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        text-decoration: none;
-      }
-      .td-related-link:hover {
-        background: var(--bg-elev);
-      }
-
-      /* prose */
-      .td-prose {
-        font-size: 16px;
-        line-height: 1.65;
-        max-width: 70ch;
-      }
-      .td-prose p { margin: 0 0 16px; color: var(--fg); }
-      .td-prose h2 {
-        font-family: var(--font-display);
-        text-transform: uppercase;
-        font-size: clamp(28px, 3vw, 40px);
-        margin: 0 0 20px;
-      }
-
-      .td-family {
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px solid var(--line);
-      }
-      .td-family h3 {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-        margin: 0 0 14px;
-      }
-      .td-family h3::before { content: '// '; color: var(--accent); }
-      .td-family__row {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 0;
-        border-left: 1px solid var(--line);
-        border-top: 1px solid var(--line);
-      }
-      .td-family__card {
-        padding: 14px;
-        background: var(--bg-card);
-        border-right: 1px solid var(--line);
-        border-bottom: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        cursor: pointer;
-        transition: background 0.15s;
-        min-height: auto;
-        min-width: auto;
-        align-items: stretch;
-      }
-      .td-family__card:hover { background: var(--bg-card-2); }
-      .td-family__brand {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-      }
-      .td-family__model {
-        font-family: var(--font-display);
         font-size: 18px;
-        text-transform: uppercase;
-        font-weight: 600;
-        line-height: 1;
-      }
-      .td-family__year {
-        margin-top: auto;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-      }
-
-      /* specs */
-      .td-specs { display: flex; flex-direction: column; gap: 32px; }
-      .td-specs__sec { border-top: 1px solid var(--line); padding-top: 16px; }
-      .td-specs__head {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--fg);
-        margin-bottom: 12px;
-      }
-      .td-specs__head::before { content: '// '; color: var(--accent); }
-      .td-specs__rows { display: flex; flex-direction: column; }
-      .td-specs__row {
-        display: grid;
-        grid-template-columns: 1fr 2fr;
-        gap: 16px;
-        padding: 10px 0;
-        border-bottom: 1px dashed var(--line);
-        font-size: 14px;
-      }
-      .td-specs__row:last-child { border-bottom: 0; }
-      .td-specs__row .k {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.06em;
-        color: var(--fg-muted);
-        text-transform: uppercase;
-      }
-      .td-specs__row .v a { color: var(--accent); display: inline; min-height: 0; min-width: 0; }
-
-      /* reviews */
-      .td-reviews__agg {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 32px;
-        padding: 24px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        margin-bottom: 24px;
-        align-items: center;
-      }
-      .td-reviews__num {
-        font-family: var(--font-display);
-        font-size: 64px;
-        line-height: 1;
-        font-weight: 600;
-      }
-      .td-reviews__stars {
-        color: var(--accent);
-        font-size: 18px;
-        letter-spacing: 4px;
-        margin: 4px 0;
-      }
-      .td-reviews__count {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-        letter-spacing: 0.08em;
-      }
-      .td-reviews__bars { display: flex; flex-direction: column; gap: 6px; }
-      .td-reviews__bar {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 10px;
-        align-items: center;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-      }
-      .td-reviews__bar .track {
-        height: 6px;
-        background: var(--bg-card-2);
-        border: 1px solid var(--line);
-        position: relative;
-      }
-      .td-reviews__bar .fill { display: block; height: 100%; background: var(--accent); }
-
-      .td-review {
-        padding: 16px 0;
-        border-bottom: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .td-review__head {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-        flex-wrap: wrap;
-      }
-      .td-review__head .stars { color: var(--accent); }
-      .td-review__head .name { color: var(--fg); }
-      .td-review__body { color: var(--fg); margin: 0; }
-      .td-review__foot {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-      }
-
-      .td-review-form {
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        padding: 18px;
-        margin-bottom: 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      .td-review-form__field { display: flex; flex-direction: column; gap: 6px; }
-      .td-review-form__field span {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-      }
-      .td-review-form__field select,
-      .td-review-form__field textarea {
-        padding: 10px 12px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        font-family: var(--font-ui);
-        font-size: 14px;
-        color: var(--fg);
-        outline: none;
-        resize: vertical;
-      }
-      .td-review-form__field select:focus,
-      .td-review-form__field textarea:focus { border-color: var(--accent); }
-      .td-review-form__row { display: flex; gap: 8px; }
-      .td-review-form__error {
-        color: #d93025;
-        font-family: var(--font-mono);
-        font-size: 12px;
-      }
-
-      .td-empty {
-        padding: 48px 32px;
-        text-align: center;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-      }
-      .td-empty h3 {
-        font-family: var(--font-display);
-        text-transform: uppercase;
-        font-size: 28px;
-        margin: 0 0 12px;
-      }
-      .td-empty p { color: var(--fg-muted); margin: 0; }
-
-      /* sidebar */
-      .td-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        position: sticky;
-        top: 130px;
-        align-self: start;
-      }
-      .td-sidebar__block {
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-      }
-      .td-sidebar__head {
-        padding: 12px 14px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg);
-        border-bottom: 1px dashed var(--line);
-      }
-      .td-sidebar__head::before { content: '// '; color: var(--accent); }
-      .td-stat-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 0;
-      }
-      .td-stat-grid > div {
-        padding: 14px;
-        border-right: 1px dashed var(--line);
-        border-bottom: 1px dashed var(--line);
-      }
-      .td-stat-grid > div:nth-child(2n) { border-right: 0; }
-      .td-stat-grid .k {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        color: var(--fg-muted);
-        margin-bottom: 4px;
-      }
-      .td-stat-grid .v {
-        display: block;
-        font-family: var(--font-display);
-        font-size: 24px;
-        line-height: 1;
-        font-weight: 600;
-      }
-      .td-stat-grid .v.accent { color: var(--accent); }
-
-      .td-lineage { display: flex; flex-direction: column; }
-      .td-lineage__item {
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        font-size: 13px;
-        color: var(--fg);
-        cursor: pointer;
-        min-height: auto;
-        min-width: auto;
-        align-items: stretch;
-      }
-      .td-lineage__item:hover { background: var(--bg-card); }
-      .td-lineage__item:last-child { border-bottom: 0; }
-      .td-lineage__item.is-current {
-        background: var(--bg-card);
-        cursor: default;
-      }
-      .td-lineage__item.is-current:hover { background: var(--bg-card); }
-      .td-lineage__role {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--fg-muted);
-      }
-
-      .td-buy {
-        display: flex;
-        flex-direction: column;
-        padding: 12px;
-        gap: 8px;
-      }
-      .td-buy__row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 12px 14px;
-        background: var(--bg-card);
-        border: 1px solid var(--line);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--fg);
-        transition: border-color 0.12s;
-        min-height: auto;
-        min-width: auto;
-      }
-      .td-buy__row:hover { border-color: var(--accent); }
-      .td-buy__row .accent { color: var(--accent); }
-      .td-buy__note {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        color: var(--fg-subtle);
-        margin: 0;
-      }
-
-      .muted { color: var(--fg-muted); margin: 0; }
-
-      @media (max-width: 1100px) {
-        .td-hero { grid-template-columns: 1fr; }
-        .td-gallery { border-right: 0; border-bottom: 1px solid var(--line); }
-        .td-main { grid-template-columns: 1fr; }
-        .td-sidebar { position: static; }
+        line-height: 1.15;
       }
     `,
   ],

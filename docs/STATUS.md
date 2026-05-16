@@ -6,7 +6,22 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13-C2** — Bazar detail rewrite V05 1:1.
+**Last shipped:** **M13-D** — Tezaur list + detail re-aligned la V05.
+Ambele template-uri foloseau deja clase V05 `.tez-*` / `.td-*`; munca
+a fost trim-uirea blocurilor `styles:` (v05.css le furnizează acum
+global) + scoaterea `SzIconComponent` în favoarea sprite-ului V05
+(`<svg><use href="#i-search"/>` etc.). **Tezaur list:** stiluri
+404→6 reguli page-locale (`.tez-results-row`, `.tez-empty`), bundle
+23.6→13.0 kB. Card media folosește `.gear-fill__photo`+`.gear-fill__label`
+ca Home/Bazar (uniform). Toolbar primește kbd ⌘K. **Tezaur detail:**
+stiluri 663→13 reguli page-locale (`.muted`, `.td-empty`,
+`.td-gallery__photo/ph`, `.td-buy`/`.td-buy__row`/`.td-buy__note`,
+`.td-official`/`.td-official__head/badge/meta/title`). Bundle
+40.0→26.4 kB. `SzBadge/Avatar/Button` păstrate (folosite în 9 locuri
+pe panourile Detalii/Specs/Recenzii — replace global ar fi fost
+overkill pentru M13-D). Class logic neatinsă în ambele pagini.
+
+**Last shipped (previous):** **M13-C2** — Bazar detail rewrite V05 1:1.
 `apps/site/src/app/bazar/bazar-detail.page.ts` complet rescris cu
 markup V05: `.td-crumb` breadcrumb, `.bd-hero` cu `.bd-gallery`
 (main cu chip-condition + counter + nav prev/next + thumbs grid) și
@@ -96,7 +111,14 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M13-D** — Tezaur list + detail per
+**Next up:** **M13-E** — Revista list + detail per
+`docs/design-imports/2026-05-16-v05/Revista.html` și `Revista - Cum
+suna Romania prin Juno-60.html`. Magazine layout: `.rev-header`
+(big title + lede), `.rev-tabs` pillar tabs, `.rev-hero` featured
+article cu overlay gradient, `.rev-main` 2-col cu `.rev-grid`
+3-col (`.rev-card.is-big` span-2 + small cards) + `.rev-side`
+sticky (top-list). Detail: prose layout cu blockquote + author byline.
+**Skipped from earlier plan:** _M13-D legacy_ — Tezaur list + detail per
 `docs/design-imports/2026-05-16-v05/Tezaur.html` și `Tezaur - Roland
 Juno-60.html`. Tezaur list folosește același shell `.tez-*` ca
 Bazar list (header + toolbar + chips + rail + grid + pag) — diff e
@@ -257,6 +279,7 @@ E (Revistă) / F (Forum) / G (Cont + close).
 | B   | `044fd5a` | done | Home page rewrite V05 1:1: welcome strip auth-aware, hero featured article (revista.list newest #1) + rotator placeholder, revista grid 1 big + 2 small, bazar horizontal scroll 8 listings, forum + 4-cell pulse aside (static threads + `—` pulse pending dedicated endpoint), tezaur spotlight popular #1 + catalog 6, CTA strip auth-aware (Guest signup vs Logat 3 ghost actions + newsletter). 60 chei i18n noi (înlocuiește vechiul `home.hero/sections` tree). Build curat. |
 | C1  | `5d5c541` | done | Bazar list re-aligned la V05: clase `.tez-*` globale (header/toolbar/main/rail/check/pag) + cards switched la `.bz-grid > .listing` (uniform cu Home bazar-scroll) + `.bz-actions` row. Style block 500→50 linii. Bundle 32→22 kB. |
 | C2  | `a635f18` | done | Bazar detail rewrite V05 1:1: `.td-crumb` breadcrumb, `.bd-hero` cu `.bd-gallery` (main+chip+counter+nav+thumbs) și `.bd-info` (topline+title+price-row+chips+deal+CTAs+posted). `.bd-main` 2-col cu `.bd-desc` (innerHTML) + `looking_for`/`condition_note` + `.bd-mini-specs` (link Tezaur) + `.bd-similar` cu `bz-grid` din `recentlySold`; sidebar cu seller block (3 stats + Block/Report + contact textarea) + safety tips 4-item. SzAvatar/Badge/Button/Icon scoase. 21 chei i18n noi. |
+| D   | _TBD_ | done | Tezaur list + detail re-aligned la V05. Ambele foloseau deja `.tez-*`/`.td-*` — work a fost trim de styles + SzIcon → sprite V05. List: stiluri 404→6 reguli (`.tez-results-row`, `.tez-empty`), bundle 23.6→13.0 kB, kbd ⌘K. Detail: stiluri 663→13 reguli (`.muted`, `.td-empty`, gallery photo/ph, `.td-buy*`, `.td-official*`), bundle 40.0→26.4 kB. SzBadge/Avatar/Button păstrate pe panourile Detalii/Specs/Recenzii. |
 | D   | _TBD_ | pending | Tezaur list + detail. |
 | E   | _TBD_ | pending | Revista list + detail. |
 | F   | _TBD_ | pending | Forum (list, thread, category, new, search). |
