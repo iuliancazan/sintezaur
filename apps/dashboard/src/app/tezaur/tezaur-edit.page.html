@@ -697,6 +697,33 @@
       <button type="button" class="admin__addrow" (click)="addRelRow()">
         + Adaugă relație
       </button>
+
+      @if (missingRelations().length > 0) {
+        <div class="admin__missing">
+          <p class="admin__missing-head">
+            ⚠ Aceste ținte de relație nu există în catalog — creează-le mai
+            întâi, apoi dă din nou „Salvează" ca să se atașeze:
+          </p>
+          <ul>
+            @for (m of missingRelations(); track m.brand + m.model) {
+              <li>
+                <span>
+                  <code>{{ m.type }}</code> → <strong>{{ m.brand }} {{ m.model }}</strong>
+                </span>
+                <a
+                  routerLink="/tezaur/new"
+                  [queryParams]="{ brand: m.brand, model: m.model }"
+                  target="_blank"
+                  rel="noopener"
+                  class="admin__missing-link"
+                >
+                  Creează în tab nou →
+                </a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
     </section>
 
     @if (isEdit()) {

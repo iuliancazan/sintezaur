@@ -176,6 +176,46 @@ textarea { font-family: var(--font-mono); resize: vertical; }
    not at the top of the form — keep it visually lighter. */
 .admin__drop--img { margin-top: 12px; padding: 20px; }
 
+/* Missing-target hints under Relații, populated after each save when a
+   row's brand+model didn't match a published gear in the catalog. */
+.admin__missing {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid oklch(0.7 0.18 70);
+  background: oklch(0.7 0.18 70 / 0.08);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.admin__missing-head {
+  margin: 0 0 8px;
+  color: oklch(0.7 0.18 70);
+}
+.admin__missing ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.admin__missing li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin__missing code {
+  background: var(--bg);
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  font-size: 11px;
+}
+.admin__missing-link {
+  color: var(--accent);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 /* ===== chips (midi_io, audio_out) ===== */
 .admin__chips {
   display: flex;

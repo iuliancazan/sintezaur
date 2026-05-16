@@ -277,6 +277,13 @@ export class TezaurAdminEditPage {
   readonly familyWarning = signal<string | null>(null);
   readonly dropHover = signal(false);
   readonly imageDropHover = signal(false);
+  /** Relationship targets that the last save couldn't find in the catalog.
+   *  Surfaced under the Relații section with a one-click link to open
+   *  /tezaur/new pre-filled with brand+model so the user can create the
+   *  missing row, come back, and re-save to attach the relation. */
+  readonly missingRelations = signal<
+    { brand: string; model: string; type: string }[]
+  >([]);
 
   readonly saving = signal(false);
   readonly uploading = signal(false);
@@ -321,6 +328,22 @@ export class TezaurAdminEditPage {
         void this.loadDetail(idOrSlug);
       } else {
         this.isEdit.set(false);
+        // /new accepts ?brand=&model=&category= so the relationship UX
+        // can deep-link "create missing target" from another tab.
+        const qp = this.route.snapshot.queryParamMap;
+        const brand = qp.get('brand');
+        const model = qp.get('model');
+        const category = qp.get('category');
+        if (brand || model || category) {
+          this.form.update((f) => ({
+            ...f,
+            ...(brand ? { brand } : {}),
+            ...(model ? { model } : {}),
+            ...(category
+              ? { category: category as GearCategoryLiteral }
+              : {}),
+          }));
+        }
       }
     });
   }
@@ -1036,6 +1059,7 @@ export class TezaurAdminEditPage {
   async save(event: Event): Promise<void> {
     event.preventDefault();
     this.saveError.set(null);
+    this.missingRelations.set([]);
     if (this.specsError()) return;
 
     this.saving.set(true);
@@ -1200,6 +1224,7 @@ export class TezaurAdminEditPage {
         errors.push(`Relația ${id} nu a putut fi ștearsă.`);
       }
     }
+    const missing: { brand: string; model: string; type: string }[] = [];
     for (const row of current) {
       if (row.relId) continue;
       if (!row.brand || !row.model || !row.type) continue;
@@ -1214,7 +1239,7 @@ export class TezaurAdminEditPage {
             g.model.toLowerCase() === row.model.toLowerCase(),
         );
         if (!match) {
-          errors.push(`Relația „${row.brand} ${row.model}" nu există în catalog — sari peste.`);
+          missing.push({ brand: row.brand, model: row.model, type: row.type });
           continue;
         }
         await this.tezaur.addRelationship(gearId, {
@@ -1227,6 +1252,7 @@ export class TezaurAdminEditPage {
         errors.push(`Relația „${row.brand} ${row.model}" a eșuat.`);
       }
     }
+    this.missingRelations.set(missing);
   }
 
   /* ============================================================
