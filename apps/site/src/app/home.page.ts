@@ -157,8 +157,14 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         gap: 6px;
       }
       :host .hero__media .hero__rotator button {
-        width: 30px;
-        height: 30px;
+        width: 24px;
+        height: 24px;
+        /* Override the global 44px accessibility minimums in
+           styles.scss — these rotator chips are decorative siblings of
+           the counter pill, not standalone tap targets, so they need to
+           match the pill height instead of the WCAG 44x44 floor. */
+        min-width: 0;
+        min-height: 0;
         padding: 0;
         line-height: 1;
       }
