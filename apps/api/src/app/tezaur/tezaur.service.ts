@@ -157,6 +157,12 @@ export class TezaurService {
       : slugFromParts(dto.brand, dto.model);
     const slug = await uniqueSlug(slugCandidate, (s) => this.gearSlugExists(s));
 
+    // Admin-created rows can land directly in `approved` (per schema
+    // comment §7.2). When the admin form ticks "Publicat" on create we
+    // skip the moderation queue — set state=approved + stamp reviewedAt
+    // so the badge in admin lists reads "Publicat" instead of "Draft".
+    const willPublish = dto.published ?? false;
+    const now = new Date();
     const [row] = await this.db
       .insert(gear)
       .values({
@@ -176,7 +182,9 @@ export class TezaurService {
         latestFirmwareVersion: dto.latestFirmwareVersion,
         firmwareNotesUrl: dto.firmwareNotesUrl,
         specs: dto.specs ?? {},
-        published: dto.published ?? false,
+        published: willPublish,
+        state: willPublish ? 'approved' : 'draft',
+        ...(willPublish && { reviewedAt: now, reviewedBy: actorId }),
         createdBy: actorId,
         updatedBy: actorId,
       })
@@ -260,6 +268,14 @@ export class TezaurService {
         }),
         ...(dto.specs !== undefined && { specs: dto.specs }),
         ...(dto.published !== undefined && { published: dto.published }),
+        // When an admin flips Publicat on, lift the row out of the
+        // moderation queue too (state=approved). We never downgrade
+        // state on unpublish — past moderation history stays intact.
+        ...(!wasPublished && willPublish && {
+          state: 'approved',
+          reviewedAt: new Date(),
+          reviewedBy: actorId,
+        }),
         updatedAt: new Date(),
         updatedBy: actorId,
       })
