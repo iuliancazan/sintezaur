@@ -466,12 +466,20 @@ export class TezaurAddPage {
     return first ? this.tezaur.imageUrl(first.path) : null;
   });
 
-  readonly previewBrand = computed(() => this.form.controls['brand'].value || '—');
-  readonly previewModel = computed(() => this.form.controls['model'].value || '—');
-  readonly previewYear = computed(
-    () => this.form.controls['yearReleased'].value ?? '—',
-  );
+  readonly previewBrand = computed(() => {
+    this.formTick();
+    return this.form.controls['brand'].value || '—';
+  });
+  readonly previewModel = computed(() => {
+    this.formTick();
+    return this.form.controls['model'].value || '—';
+  });
+  readonly previewYear = computed(() => {
+    this.formTick();
+    return this.form.controls['yearReleased'].value ?? '—';
+  });
   readonly previewTagsList = computed<string[]>(() => {
+    this.formTick();
     const v = this.form.value;
     const tags: string[] = [];
     if (v.synth_type) {
@@ -487,12 +495,23 @@ export class TezaurAddPage {
     return tags.slice(0, 4);
   });
 
-  readonly descriptionLength = computed(
-    () => (this.form.controls['descriptionText'].value ?? '').length,
-  );
+  /**
+   * Bumped on every form valueChanges so signal-based computeds
+   * (`checklist`, `descriptionLength`, preview tags) re-run as the user
+   * types. `form.value` itself isn't a signal, so without this the
+   * memoized computed would only refresh when an unrelated signal
+   * (e.g. `images()`) happens to change.
+   */
+  readonly formTick = signal(0);
+
+  readonly descriptionLength = computed(() => {
+    this.formTick();
+    return (this.form.controls['descriptionText'].value ?? '').length;
+  });
 
   /** Checklist items mirror backend `meSubmitDraft` validation. */
   readonly checklist = computed(() => {
+    this.formTick();
     const v = this.form.value;
     const imageCount = this.images().length;
     const descLen = (v.descriptionText ?? '').length;
@@ -557,9 +576,12 @@ export class TezaurAddPage {
     // Boot: kick off both lookups + maybe-load existing draft in parallel.
     void this.bootstrap();
 
-    // Subscribe to form value changes → debounced auto-save.
+    // Subscribe to form value changes → debounced auto-save + tick the
+    // signal that signal-based computeds (checklist, preview, etc.) read,
+    // so they re-evaluate as the user types.
     this.form.valueChanges.subscribe(() => {
       this.dirty = true;
+      this.formTick.update((n) => n + 1);
       this.scheduleAutoSave();
     });
   }

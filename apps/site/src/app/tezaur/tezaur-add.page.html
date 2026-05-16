@@ -891,6 +891,39 @@
 
     <!-- ===================== RIGHT: sticky sidebar ===================== -->
     <aside class="ta-side">
+      <!-- completion (M15-D: moved to top so the checklist stays visible
+           while filling the form) -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'tezaur.add.side.completion' | t }}
+          <span class="ta-status">
+            <span class="ta-status__dot"></span>
+            {{ 'tezaur.add.state.' + draftState() | t }}
+          </span>
+        </header>
+        <div class="ta-side__body">
+          <div class="ta-meter" [style.--p.%]="progressPercent()">
+            <div class="ta-meter__top">
+              <span>{{ 'tezaur.add.side.progress' | t }}</span>
+              <span><b>{{ progressPercent() }}</b>%</span>
+            </div>
+            <div class="ta-meter__bar"></div>
+          </div>
+
+          <div class="ta-checklist">
+            @for (item of checklist(); track item.key) {
+              <div
+                class="ta-checklist__item"
+                [class.is-done]="item.done"
+              >
+                <span class="mark">{{ item.done ? '✓' : '·' }}</span>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
       <!-- preview -->
       <section class="ta-side__block">
         <header class="ta-side__head">
@@ -940,38 +973,6 @@
               <span>// nou în Tezaur</span>
               <span>{{ previewYear() }}</span>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- completion -->
-      <section class="ta-side__block">
-        <header class="ta-side__head">
-          {{ 'tezaur.add.side.completion' | t }}
-          <span class="ta-status">
-            <span class="ta-status__dot"></span>
-            {{ 'tezaur.add.state.' + draftState() | t }}
-          </span>
-        </header>
-        <div class="ta-side__body">
-          <div class="ta-meter" [style.--p.%]="progressPercent()">
-            <div class="ta-meter__top">
-              <span>{{ 'tezaur.add.side.progress' | t }}</span>
-              <span><b>{{ progressPercent() }}</b>%</span>
-            </div>
-            <div class="ta-meter__bar"></div>
-          </div>
-
-          <div class="ta-checklist">
-            @for (item of checklist(); track item.key) {
-              <div
-                class="ta-checklist__item"
-                [class.is-done]="item.done"
-              >
-                <span class="mark">{{ item.done ? '✓' : '·' }}</span>
-                <span>{{ item.label }}</span>
-              </div>
-            }
           </div>
         </div>
       </section>
