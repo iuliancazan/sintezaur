@@ -66,6 +66,12 @@ export const forumCategories = pgTable(
     slug: text('slug').notNull(),
     name: text('name').notNull(),
     description: text('description'),
+    /**
+     * Optional English labels (M16). Populated by postflight 9017 for
+     * the 8 seeded categories. UI resolves to RO when these are NULL.
+     */
+    nameEn: text('name_en'),
+    descriptionEn: text('description_en'),
     kind: forumCategoryKindEnum('kind').notNull().default('user'),
     /** Display order; system categories typically sink to the bottom. */
     position: integer('position').notNull().default(0),

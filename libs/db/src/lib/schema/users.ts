@@ -12,6 +12,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import {
   displayCurrencyEnum,
+  localeEnum,
   subscriptionTierEnum,
   trustLevelEnum,
   userRoleEnum,
@@ -85,6 +86,14 @@ export const users = pgTable(
      * Collection panel entirely.
      */
     collectionPublic: boolean('collection_public').notNull().default(true),
+
+    /**
+     * In-app locale preference (M16). Drives default language for new
+     * sessions and for transactional emails. Set when the user toggles
+     * the language switcher while authenticated; anonymous visitors use
+     * a cookie instead.
+     */
+    preferredLocale: localeEnum('preferred_locale').notNull().default('ro'),
 
     /**
      * Forum first-post approval gate (spec §8.4). New users start with

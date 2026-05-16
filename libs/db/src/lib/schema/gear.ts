@@ -114,6 +114,15 @@ export const gear = pgTable(
     model: text('model').notNull(),
     formFactor: formFactorEnum('form_factor'),
 
+    /**
+     * Short editorial pitch per locale (M16). 80–180 chars, single
+     * sentence. The full editorial body still lives per-locale in
+     * `gear_descriptions`. Either field may be NULL — UI falls back
+     * to the other when one is missing.
+     */
+    taglineRo: text('tagline_ro'),
+    taglineEn: text('tagline_en'),
+
     yearReleased: integer('year_released'),
     /** NULL = still in production as of `updated_at`. */
     yearDiscontinued: integer('year_discontinued'),

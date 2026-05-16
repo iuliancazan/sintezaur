@@ -60,6 +60,16 @@ export const articles = pgTable(
     body: jsonb('body').notNull().default(sql`'{}'::jsonb`),
     bodyHtml: text('body_html').notNull().default(''),
 
+    /**
+     * Optional English translation (M16). NULL when the editor hasn't
+     * translated this article; readers on the EN locale fall back to
+     * the RO body with a "translation pending" banner.
+     */
+    titleEn: text('title_en'),
+    excerptEn: text('excerpt_en'),
+    bodyEn: jsonb('body_en'),
+    bodyHtmlEn: text('body_html_en'),
+
     category: articleCategoryEnum('category').notNull(),
     /** Free-text tags — keyword filter only, not a controlled vocab. */
     tags: text('tags')

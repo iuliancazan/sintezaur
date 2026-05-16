@@ -29,6 +29,13 @@ export const legalPages = pgTable(
     bodyMd: text('body_md').notNull(),
     /** Optional one-liner shown in `<meta name="description">` per page. */
     metaDescription: text('meta_description'),
+    /**
+     * Optional English fields (M16). When the EN locale is active and
+     * any field is NULL, the controller falls back to the RO column.
+     */
+    titleEn: text('title_en'),
+    bodyMdEn: text('body_md_en'),
+    metaDescriptionEn: text('meta_description_en'),
     updatedByUserId: uuid('updated_by_user_id').references(() => users.id, {
       onDelete: 'set null',
     }),
