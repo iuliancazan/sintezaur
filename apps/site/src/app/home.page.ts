@@ -157,8 +157,8 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         gap: 6px;
       }
       :host .hero__media .hero__rotator button {
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 30px;
         padding: 0;
         line-height: 1;
       }
