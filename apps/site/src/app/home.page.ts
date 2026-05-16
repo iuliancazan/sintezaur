@@ -145,22 +145,11 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
       :host .gear-fill__photo--contain {
         object-fit: contain;
         background: transparent;
-        /* Soft-fade the photo's edges into the blurred backdrop so the
-           contain letterbox / pillarbox doesn't show a hard cut.
-           Two linear-gradient masks (vertical + horizontal) composited
-           with intersect give a rounded-rectangle visible area that
-           feathers in both directions — works for landscape, portrait
-           and square sources without picking an orientation up-front.
-           Tune the feather depth via the % stops (8% subtle, 12%
-           dramatic). */
-        -webkit-mask-image:
-          linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%),
-          linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
-        -webkit-mask-composite: source-in;
-        mask-image:
-          linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%),
-          linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
-        mask-composite: intersect;
+        /* The mask-image is computed in onHeroPhotoLoad() because the
+           feather has to land exactly where the photo edges meet the
+           letterbox / pillarbox band — and that position depends on
+           the photo's intrinsic aspect ratio vs the container's.
+           Inline style on the <img> wins over this rule. */
       }
 
       /* Hero rotator (prev / counter / next) — align to the bottom-right
@@ -219,6 +208,7 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                     [src]="mediaUrl(a.heroThumb)"
                     [alt]="a.title"
                     loading="lazy"
+                    (load)="onHeroPhotoLoad($event)"
                     (error)="onImageError($event)"
                   />
                 }
@@ -853,6 +843,60 @@ export class HomePage implements OnInit {
   onImageError(event: Event): void {
     const el = event.target as HTMLImageElement | null;
     if (el) el.style.display = 'none';
+  }
+
+  /**
+   * Hero foreground photo loaded — compute where the letterbox /
+   * pillarbox bands sit so we can feather only the matching photo edge
+   * into the blurred backdrop. Without this we either bleed the wrong
+   * axis (the container edges, which look fine sharp) or skip the
+   * one that actually meets the blur. Container aspect ratio comes
+   * from clientWidth/clientHeight at load time; if the viewport
+   * resizes the mask stays as-is until the photo reloads, which is
+   * fine for a hero that doesn't reflow much.
+   */
+  onHeroPhotoLoad(event: Event): void {
+    const img = event.target as HTMLImageElement | null;
+    if (!img || !img.naturalWidth || !img.naturalHeight) return;
+    const box = img.closest('.hero__media') as HTMLElement | null;
+    if (!box || !box.clientWidth || !box.clientHeight) return;
+    const imgRatio = img.naturalWidth / img.naturalHeight;
+    const boxRatio = box.clientWidth / box.clientHeight;
+    const FEATHER = 4; // % of container, soft transition into the blur
+    if (Math.abs(imgRatio - boxRatio) < 0.01) {
+      // Photo fills the box exactly — no bands, no mask needed.
+      img.style.maskImage = '';
+      return;
+    }
+    let mask: string;
+    if (imgRatio > boxRatio) {
+      // Wider than the box → letterbox top + bottom. Compute the band
+      // height as a percentage of container height; the photo sits
+      // between bandTop% and bandBottom%.
+      const photoHeightPct = (boxRatio / imgRatio) * 100;
+      const bandTop = (100 - photoHeightPct) / 2;
+      const bandBottom = 100 - bandTop;
+      mask = `linear-gradient(to bottom,
+        transparent 0,
+        transparent ${bandTop}%,
+        #000 ${bandTop + FEATHER}%,
+        #000 ${bandBottom - FEATHER}%,
+        transparent ${bandBottom}%,
+        transparent 100%)`;
+    } else {
+      // Taller than the box → pillarbox left + right.
+      const photoWidthPct = (imgRatio / boxRatio) * 100;
+      const bandLeft = (100 - photoWidthPct) / 2;
+      const bandRight = 100 - bandLeft;
+      mask = `linear-gradient(to right,
+        transparent 0,
+        transparent ${bandLeft}%,
+        #000 ${bandLeft + FEATHER}%,
+        #000 ${bandRight - FEATHER}%,
+        transparent ${bandRight}%,
+        transparent 100%)`;
+    }
+    img.style.maskImage = mask;
   }
 
   heroReadMinutes(): number {
