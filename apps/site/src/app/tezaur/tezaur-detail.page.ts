@@ -180,16 +180,17 @@ interface ReviewsResponse {
         <!-- STICKY TABS -->
         <nav class="td-tabs">
           @for (key of tabKeys; track key) {
-            <a
-              [routerLink]="['/tezaur', d.gear.slug, key]"
+            <button
+              type="button"
               [class.is-active]="activeTab() === key"
               class="td-tab"
+              (click)="selectTab(key, d.gear.slug)"
             >
               {{ 'tezaur.detail.tabs.' + key | t }}
               @if (key === 'recenzii' && d.gear.reviewCount > 0) {
                 <span class="count">{{ d.gear.reviewCount }}</span>
               }
-            </a>
+            </button>
           }
         </nav>
 
@@ -900,6 +901,26 @@ export class TezaurDetailPage {
     void this.router.navigateByUrl(
       this.locale.localizeUrl(`/bazar/nou?gear=${encodeURIComponent(gearId)}`),
     );
+  }
+
+  /**
+   * Switch the active tab. The tab slug is mirrored to the URL so the
+   * page is deep-linkable, but the global router config has
+   * `scrollPositionRestoration: 'top'` which would otherwise jump the
+   * page to the header on every tab click — we save the current
+   * scroll position before navigating and restore it on the next
+   * frame.
+   */
+  selectTab(key: TabKey, slug: string): void {
+    this.activeTab.set(key);
+    const y = window.scrollY;
+    void this.router
+      .navigateByUrl(this.locale.localizeUrl(`/tezaur/${slug}/${key}`), {
+        replaceUrl: true,
+      })
+      .then(() => {
+        window.scrollTo({ top: y, behavior: 'instant' as ScrollBehavior });
+      });
   }
 
   async onCollectionChange(status: UserGearStatusFlagLiteral | ''): Promise<void> {
