@@ -50,6 +50,11 @@ export const appRoutes: Route[] = [
           ),
       },
       {
+        path: 'tezaur/brands',
+        loadComponent: () =>
+          import('./tezaur/brands-admin.page').then((m) => m.BrandsAdminPage),
+      },
+      {
         path: 'tezaur/new',
         loadComponent: () =>
           import('./tezaur/tezaur-edit.page').then((m) => m.TezaurAdminEditPage),

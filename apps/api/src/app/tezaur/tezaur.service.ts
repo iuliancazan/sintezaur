@@ -1742,6 +1742,70 @@ export class TezaurService {
   }
 
   /**
+   * Admin brand listing: every distinct brand string currently in use
+   * across non-deleted gear, with the count of pieces per brand. Used
+   * by the dashboard Brands management page to spot duplicates
+   * (KORG vs Korg vs korg) and consolidate.
+   */
+  async listBrandsAdmin(): Promise<
+    { name: string; count: number; sampleId: string }[]
+  > {
+    return this.db
+      .select({
+        name: gear.brand,
+        count: sql<number>`count(*)::int`,
+        sampleId: sql<string>`min(${gear.id}::text)`,
+      })
+      .from(gear)
+      .where(isNull(gear.deletedAt))
+      .groupBy(gear.brand)
+      .orderBy(asc(sql`lower(${gear.brand})`), asc(gear.brand));
+  }
+
+  /**
+   * Rename or merge a brand. If `caseInsensitive` is true, every gear
+   * whose brand lower-cases to `from` is updated — useful for collapsing
+   * KORG/Korg/korg into one canonical spelling. Otherwise the match is
+   * exact. Returns the number of rows touched + audit-logs the change.
+   */
+  async renameBrand(
+    from: string,
+    to: string,
+    caseInsensitive: boolean,
+    actorId: string,
+    req?: Request,
+  ): Promise<{ moved: number }> {
+    const fromTrim = from.trim();
+    const toTrim = to.trim();
+    if (!fromTrim || !toTrim) {
+      throw new BadRequestException('Brandurile sursă și destinație sunt obligatorii.');
+    }
+    const whereCond = caseInsensitive
+      ? sql`lower(${gear.brand}) = lower(${fromTrim})`
+      : eq(gear.brand, fromTrim);
+    const moved = await this.db
+      .update(gear)
+      .set({ brand: toTrim, updatedAt: new Date(), updatedBy: actorId })
+      .where(and(whereCond, isNull(gear.deletedAt)))
+      .returning({ id: gear.id });
+    await this.audit.record({
+      actorId,
+      action: 'edit_gear',
+      targetType: 'gear',
+      targetId: actorId,
+      details: {
+        kind: 'rename_brand',
+        from: fromTrim,
+        to: toTrim,
+        caseInsensitive,
+        movedCount: moved.length,
+      },
+      req,
+    });
+    return { moved: moved.length };
+  }
+
+  /**
    * Brand list for the authenticated contributor — published brands plus
    * the user's own non-published drafts/submissions. Stops "I just added
    * a Korg draft, why isn't Korg in the autocomplete?".

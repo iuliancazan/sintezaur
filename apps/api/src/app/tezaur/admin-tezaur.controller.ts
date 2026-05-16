@@ -38,6 +38,7 @@ import type {
   ListModerationQueueDto,
   MergeGearFamilyDto,
   RejectGearDto,
+  RenameBrandDto,
   UpdateGearDto,
   UpdateGearFamilyDto,
   UpsertGearDescriptionDto,
@@ -270,6 +271,30 @@ export class AdminTezaurController {
     @Req() req: Request,
   ) {
     return this.tezaur.mergeFamilies(fromId, dto.intoId, user.sub, req);
+  }
+
+  /* ============================================================
+     brands admin
+     ============================================================ */
+
+  @Get('brands')
+  listBrandsAdmin() {
+    return this.tezaur.listBrandsAdmin();
+  }
+
+  @Post('brands/rename')
+  async renameBrand(
+    @Body() dto: RenameBrandDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    return this.tezaur.renameBrand(
+      dto.from,
+      dto.to,
+      dto.caseInsensitive ?? false,
+      user.sub,
+      req,
+    );
   }
 
   /* ============================================================

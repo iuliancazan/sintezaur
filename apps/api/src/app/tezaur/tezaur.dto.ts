@@ -462,3 +462,21 @@ export class MergeGearFamilyDto {
   @IsUUID()
   intoId!: string;
 }
+
+/* ============================================================
+   M15-B — Brands admin (rename / merge)
+   ============================================================ */
+
+export class RenameBrandDto {
+  @IsString()
+  @Length(1, 200)
+  from!: string;
+
+  @IsString()
+  @Length(1, 200)
+  to!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  caseInsensitive?: boolean;
+}

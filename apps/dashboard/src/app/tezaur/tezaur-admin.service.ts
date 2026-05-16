@@ -39,6 +39,12 @@ export interface GearFamilyAdminRow {
   updatedAt: string;
 }
 
+export interface BrandAdminRow {
+  name: string;
+  count: number;
+  sampleId: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TezaurAdminService {
   private readonly http = inject(HttpClient);
@@ -224,6 +230,28 @@ export class TezaurAdminService {
       this.http.post<{ movedGearCount: number }>(
         `${this.base}/admin/tezaur/families/${fromId}/merge`,
         { intoId },
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  listBrandsAdmin(): Promise<BrandAdminRow[]> {
+    return firstValueFrom(
+      this.http.get<BrandAdminRow[]>(`${this.base}/admin/tezaur/brands`, {
+        withCredentials: true,
+      }),
+    );
+  }
+
+  renameBrand(payload: {
+    from: string;
+    to: string;
+    caseInsensitive?: boolean;
+  }): Promise<{ moved: number }> {
+    return firstValueFrom(
+      this.http.post<{ moved: number }>(
+        `${this.base}/admin/tezaur/brands/rename`,
+        payload,
         { withCredentials: true },
       ),
     );
