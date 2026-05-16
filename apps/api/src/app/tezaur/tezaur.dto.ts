@@ -433,6 +433,45 @@ export class ListModerationQueueDto {
 }
 
 /* ============================================================
+   M15-C — Admin gear listing (all states + deleted)
+   ============================================================ */
+
+export class ListAdminGearDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  q?: string;
+
+  @IsOptional()
+  @IsEnum(STATES)
+  state?: GearStateLiteral;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  includeDeleted?: boolean;
+
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  onlyDeleted?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  page?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  pageSize?: number;
+}
+
+/* ============================================================
    Image manual crop (contributor)
    ============================================================ */
 

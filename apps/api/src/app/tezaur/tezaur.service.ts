@@ -1898,6 +1898,104 @@ export class TezaurService {
     };
   }
 
+  /**
+   * Admin gear listing for the dashboard `/tezaur` page. Unlike the
+   * public `listPublic`, this returns rows in any state (draft / submitted
+   * / approved / rejected) and can also include soft-deleted rows so an
+   * admin can spot and restore them. Filters: free-text q, state, and
+   * the includeDeleted/onlyDeleted pair.
+   */
+  async listAdmin(q: {
+    q?: string;
+    state?: string;
+    includeDeleted?: boolean;
+    onlyDeleted?: boolean;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{
+    items: {
+      id: string;
+      slug: string;
+      brand: string;
+      model: string;
+      category: string;
+      state: string;
+      published: boolean;
+      yearReleased: number | null;
+      ownersPublicCount: number;
+      createdBy: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+      deletedAt: Date | null;
+      thumb: string | null;
+    }[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const page = q.page ?? 1;
+    const pageSize = Math.min(q.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+    const offset = (page - 1) * pageSize;
+
+    const conditions: ReturnType<typeof eq>[] = [];
+    if (q.onlyDeleted) {
+      conditions.push(sql`${gear.deletedAt} IS NOT NULL` as never);
+    } else if (!q.includeDeleted) {
+      conditions.push(isNull(gear.deletedAt) as never);
+    }
+    if (q.state) conditions.push(sql`${gear.state} = ${q.state}` as never);
+    if (q.q && q.q.trim().length >= 1) {
+      const term = `%${q.q.trim()}%`;
+      conditions.push(
+        sql`(${gear.brand} ILIKE ${term} OR ${gear.model} ILIKE ${term})` as never,
+      );
+    }
+    const whereClause = conditions.length ? and(...conditions) : undefined;
+
+    const items = await this.db
+      .select({
+        id: gear.id,
+        slug: gear.slug,
+        brand: gear.brand,
+        model: gear.model,
+        category: gear.category,
+        state: gear.state,
+        published: gear.published,
+        yearReleased: gear.yearReleased,
+        ownersPublicCount: gear.ownersPublicCount,
+        createdBy: gear.createdBy,
+        createdAt: gear.createdAt,
+        updatedAt: gear.updatedAt,
+        deletedAt: gear.deletedAt,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${gearImages}
+          WHERE ${gearImages.gearId} = ${gear.id}
+            AND ${gearImages.variant} = 'square_thumb'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(gear)
+      .where(whereClause)
+      .orderBy(desc(gear.updatedAt))
+      .limit(pageSize)
+      .offset(offset);
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(gear)
+      .where(whereClause);
+
+    return {
+      items,
+      page,
+      pageSize,
+      totalCount: count,
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
+    };
+  }
+
   async approveGear(
     gearId: string,
     actorId: string,

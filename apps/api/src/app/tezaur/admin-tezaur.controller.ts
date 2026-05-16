@@ -35,6 +35,7 @@ import type {
   CreateGearLinkDto,
   CreateGearRelationshipDto,
   CreateGearVideoDto,
+  ListAdminGearDto,
   ListModerationQueueDto,
   MergeGearFamilyDto,
   RejectGearDto,
@@ -304,6 +305,24 @@ export class AdminTezaurController {
   @Get('moderation')
   listModeration(@Query() q: ListModerationQueueDto) {
     return this.tezaur.listModeration(q);
+  }
+
+  /**
+   * Admin-only gear listing — returns rows in every state (draft, submitted,
+   * approved, rejected) and optionally soft-deleted rows for restore. Used
+   * by the dashboard /tezaur page to give admins visibility outside the
+   * public published-only listing.
+   */
+  @Get('gear-list')
+  listGearAdmin(@Query() q: ListAdminGearDto) {
+    return this.tezaur.listAdmin({
+      q: q.q,
+      state: q.state,
+      includeDeleted: q.includeDeleted === true || (q.includeDeleted as unknown) === 'true',
+      onlyDeleted: q.onlyDeleted === true || (q.onlyDeleted as unknown) === 'true',
+      page: q.page,
+      pageSize: q.pageSize,
+    });
   }
 
   @Post('gear/:id/approve')

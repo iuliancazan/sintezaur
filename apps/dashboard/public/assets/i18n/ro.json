@@ -50,26 +50,43 @@
       "list_title": "Tezaur",
       "new_gear": "Adaugă piesă",
       "filter_placeholder": "Caută brand, model, categorie…",
+      "actions": {
+        "edit": "Editează",
+        "delete": "Șterge",
+        "deleting": "Șterg…",
+        "restore": "Restaurează",
+        "restoring": "Restaurez…"
+      },
+      "delete": {
+        "confirm_title": "Șterge piesa {{brand}} {{model}}?",
+        "confirm_body": "Ștergere soft — rândul rămâne în DB (cascadă pe imagini, link-uri, relații, descrieri) dar dispare din enciclopedie. Acțiunea poate fi anulată din această pagină (filtrul Vizibilitate → Doar șterse) sau de superadmin din Audit log.",
+        "confirm_ok": "Da, șterge",
+        "confirm_cancel": "Anulează",
+        "error": "Nu am putut șterge piesa. Încearcă din nou."
+      },
+      "restore": {
+        "confirm": "Restaurezi piesa {{brand}} {{model}}? Va redeveni vizibilă (în starea ei dinainte de ștergere).",
+        "error": "Nu am putut restaura piesa. Încearcă din nou."
+      },
       "table": {
         "brand": "Brand",
         "model": "Model",
         "category": "Categorie",
         "year": "An lansare",
         "owners": "Dețin",
+        "state": "Stare",
         "actions": "Acțiuni"
       },
-      "actions": {
-        "edit": "Editează",
-        "delete": "Șterge",
-        "deleting": "Șterg…"
-      },
-      "delete": {
-        "confirm_title": "Șterge piesa {{brand}} {{model}}?",
-        "confirm_body": "Ștergere soft — rândul rămâne în DB (cascadă pe imagini, link-uri, relații, descrieri) dar dispare din enciclopedie. Acțiunea poate fi anulată de superadmin din Audit log.",
-        "confirm_ok": "Da, șterge",
-        "confirm_cancel": "Anulează",
-        "error": "Nu am putut șterge piesa. Încearcă din nou."
-      }
+      "filter_state": "Stare",
+      "filter_visibility": "Vizibilitate",
+      "state_all": "Toate stările",
+      "state_draft": "Draft (în lucru)",
+      "state_submitted": "În moderare",
+      "state_approved": "Publicat",
+      "state_rejected": "Respins",
+      "visibility_live": "Doar live",
+      "visibility_all": "Toate (inclusiv șterse)",
+      "visibility_deleted": "Doar șterse"
     },
     "stats": {
       "pieces": "piese"

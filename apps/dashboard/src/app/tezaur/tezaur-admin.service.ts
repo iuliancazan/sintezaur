@@ -45,6 +45,31 @@ export interface BrandAdminRow {
   sampleId: string;
 }
 
+export interface AdminGearRow {
+  id: string;
+  slug: string;
+  brand: string;
+  model: string;
+  category: string;
+  state: 'draft' | 'submitted' | 'approved' | 'rejected';
+  published: boolean;
+  yearReleased: number | null;
+  ownersPublicCount: number;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  thumb: string | null;
+}
+
+export interface AdminGearListResponse {
+  items: AdminGearRow[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TezaurAdminService {
   private readonly http = inject(HttpClient);
@@ -64,6 +89,37 @@ export class TezaurAdminService {
     }
     return firstValueFrom(
       this.http.get<TezaurListResponse>(`${this.base}/tezaur`, { params }),
+    );
+  }
+
+  listAdmin(query: {
+    q?: string;
+    state?: string;
+    includeDeleted?: boolean;
+    onlyDeleted?: boolean;
+    page?: number;
+    pageSize?: number;
+  } = {}): Promise<AdminGearListResponse> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query)) {
+      if (v === undefined || v === null || v === '') continue;
+      params = params.set(k, String(v));
+    }
+    return firstValueFrom(
+      this.http.get<AdminGearListResponse>(
+        `${this.base}/admin/tezaur/gear-list`,
+        { params, withCredentials: true },
+      ),
+    );
+  }
+
+  restore(id: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/admin/tezaur/gear/${id}/restore`,
+        {},
+        { withCredentials: true },
+      ),
     );
   }
 
