@@ -130,6 +130,7 @@ export interface TezaurDraftDetail {
     specs: Record<string, unknown>;
     submittedAt: string | null;
     updatedAt: string;
+    createdBy: string | null;
   };
   family: { id: string; slug: string; name: string } | null;
   images: TezaurDraftImage[];

@@ -83,10 +83,20 @@
   }
 
   <!-- SUBMITTED NOTICE -->
-  @if (draftState() === 'submitted') {
+  @if (draftState() === 'submitted' && !isModeratorViewingOther()) {
     <div class="form-success" style="margin-bottom:24px">
       <strong>{{ 'tezaur.add.submitted_head' | t }}.</strong>
       {{ 'tezaur.add.submitted_body' | t }}
+    </div>
+  }
+
+  <!-- MODERATOR BANNER — viewing/editing someone else's draft -->
+  @if (isModeratorViewingOther()) {
+    <div class="mod-edit-banner" style="margin-bottom:24px">
+      <strong>{{ 'tezaur.add.mod.banner_head' | t }}</strong>
+      <p style="margin:4px 0 0; font-size:13px;">
+        {{ ('tezaur.add.mod.banner_body_' + draftState()) | t }}
+      </p>
     </div>
   }
 
@@ -946,31 +956,59 @@
           </span>
         </header>
         <div class="ta-side__body">
-          <div class="ta-cta-row">
-            <button
-              class="ta-cta ta-cta--primary"
-              type="button"
-              [disabled]="!canSubmit() || submitting()"
-              (click)="submitForModeration()"
-            >
-              {{ submitting() ? ('tezaur.add.submitting' | t) : ('tezaur.add.submit' | t) }} →
-            </button>
-            <button
-              class="ta-cta ta-cta--ghost"
-              type="button"
-              (click)="saveDraftNow()"
-              [disabled]="isLocked()"
-            >
-              {{ 'tezaur.add.save_draft' | t }}
-            </button>
-            <button
-              class="ta-cta ta-cta--danger-text"
-              type="button"
-              (click)="discardAndLeave()"
-            >
-              {{ 'tezaur.add.discard' | t }}
-            </button>
-          </div>
+          @if (isModeratorViewingOther()) {
+            <div class="ta-cta-row">
+              <button
+                class="ta-cta ta-cta--primary"
+                type="button"
+                [disabled]="modAction() !== 'idle' || draftState() === 'approved'"
+                (click)="approveAsModerator()"
+              >
+                {{ modAction() === 'approving' ? ('tezaur.add.mod.approving' | t) : ('tezaur.add.mod.approve' | t) }} →
+              </button>
+              <button
+                class="ta-cta ta-cta--ghost"
+                type="button"
+                (click)="saveDraftNow()"
+              >
+                {{ 'tezaur.add.save_draft' | t }}
+              </button>
+              <button
+                class="ta-cta ta-cta--danger-text"
+                type="button"
+                [disabled]="modAction() !== 'idle'"
+                (click)="requestChangesAsModerator()"
+              >
+                {{ 'tezaur.add.mod.request_changes' | t }}
+              </button>
+            </div>
+          } @else {
+            <div class="ta-cta-row">
+              <button
+                class="ta-cta ta-cta--primary"
+                type="button"
+                [disabled]="!canSubmit() || submitting()"
+                (click)="submitForModeration()"
+              >
+                {{ submitting() ? ('tezaur.add.submitting' | t) : ('tezaur.add.submit' | t) }} →
+              </button>
+              <button
+                class="ta-cta ta-cta--ghost"
+                type="button"
+                (click)="saveDraftNow()"
+                [disabled]="isLocked()"
+              >
+                {{ 'tezaur.add.save_draft' | t }}
+              </button>
+              <button
+                class="ta-cta ta-cta--danger-text"
+                type="button"
+                (click)="discardAndLeave()"
+              >
+                {{ 'tezaur.add.discard' | t }}
+              </button>
+            </div>
+          }
           @if (submitError()) {
             <div class="submit-error">
               {{ submitError() }}

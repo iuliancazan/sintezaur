@@ -47,6 +47,11 @@ import type {
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
 
+const MODERATOR_ROLES = ['curator', 'admin', 'superadmin'] as const;
+function isModerator(roles: readonly string[]): boolean {
+  return roles.some((r) => (MODERATOR_ROLES as readonly string[]).includes(r));
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, '&amp;')
@@ -1102,6 +1107,7 @@ export class TezaurService {
   async meGetDraft(
     gearId: string,
     userId: string,
+    actorRoles: readonly string[] = [],
   ): Promise<{
     gear: typeof gear.$inferSelect;
     family: { id: string; slug: string; name: string } | null;
@@ -1126,7 +1132,7 @@ export class TezaurService {
       .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
       .limit(1);
     if (!gearRow) throw new NotFoundException(`gear ${gearId} not found`);
-    if (gearRow.createdBy !== userId) {
+    if (gearRow.createdBy !== userId && !isModerator(actorRoles)) {
       throw new ForbiddenException('Not your draft.');
     }
 
@@ -1194,8 +1200,15 @@ export class TezaurService {
     gearId: string,
     userId: string,
     dto: MeUpdateGearDto,
+    actorRoles: readonly string[] = [],
+    req?: Request,
   ): Promise<void> {
-    const current = await this.assertOwnsEditableDraft(gearId, userId);
+    const current = await this.assertOwnsEditableDraft(
+      gearId,
+      userId,
+      actorRoles,
+    );
+    const asModerator = current.createdBy !== userId && isModerator(actorRoles);
 
     // Slug stays stable unless brand/model change AND the row hasn't
     // been published yet. Approved-then-edited rows keep their slug.
@@ -1250,6 +1263,17 @@ export class TezaurService {
       const { body, bodyHtml } = this.descriptionFromText(dto.descriptionText);
       await this.upsertDescription(gearId, { lang: 'ro', body, bodyHtml }, userId);
     }
+
+    if (asModerator) {
+      await this.audit.record({
+        actorId: userId,
+        action: 'edit_gear',
+        targetType: 'gear',
+        targetId: gearId,
+        details: { byModerator: true, kind: 'me_update_draft' },
+        req,
+      });
+    }
   }
 
   /**
@@ -1258,8 +1282,12 @@ export class TezaurService {
    * moderator's hands. Approved rows can only be removed by an admin
    * via `softDeleteGear`.
    */
-  async meDeleteDraft(gearId: string, userId: string): Promise<void> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+  async meDeleteDraft(
+    gearId: string,
+    userId: string,
+    actorRoles: readonly string[] = [],
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
     await this.db
       .update(gear)
       .set({ deletedAt: new Date(), updatedBy: userId })
@@ -1271,8 +1299,16 @@ export class TezaurService {
    * minimum required field set; the contributor sees the missing-field
    * checklist live in the editor so this is a defensive validation.
    */
-  async meSubmitDraft(gearId: string, userId: string): Promise<void> {
-    const current = await this.assertOwnsEditableDraft(gearId, userId);
+  async meSubmitDraft(
+    gearId: string,
+    userId: string,
+    actorRoles: readonly string[] = [],
+  ): Promise<void> {
+    const current = await this.assertOwnsEditableDraft(
+      gearId,
+      userId,
+      actorRoles,
+    );
 
     const missing: string[] = [];
     if (!current.brand || current.brand === 'Necunoscut') missing.push('brand');
@@ -1361,18 +1397,43 @@ export class TezaurService {
     userId: string,
     file: Express.Multer.File,
     caption?: string,
+    actorRoles: readonly string[] = [],
+    req?: Request,
   ): Promise<{ sourceId: string }> {
-    await this.assertOwnsEditableDraft(gearId, userId);
-    return this.attachImage(gearId, userId, file, caption);
+    const row = await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
+    const result = await this.attachImage(gearId, userId, file, caption);
+    if (row.createdBy !== userId && isModerator(actorRoles)) {
+      await this.audit.record({
+        actorId: userId,
+        action: 'edit_gear',
+        targetType: 'gear',
+        targetId: gearId,
+        details: { byModerator: true, kind: 'me_attach_image' },
+        req,
+      });
+    }
+    return result;
   }
 
   async meDetachImage(
     gearId: string,
     userId: string,
     sourceId: string,
+    actorRoles: readonly string[] = [],
+    req?: Request,
   ): Promise<void> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+    const row = await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
     await this.detachImage(gearId, sourceId);
+    if (row.createdBy !== userId && isModerator(actorRoles)) {
+      await this.audit.record({
+        actorId: userId,
+        action: 'edit_gear',
+        targetType: 'gear',
+        targetId: gearId,
+        details: { byModerator: true, kind: 'me_detach_image', sourceId },
+        req,
+      });
+    }
   }
 
   /**
@@ -1387,8 +1448,14 @@ export class TezaurService {
     userId: string,
     sourceId: string,
     crop: { x: number; y: number; w: number; h: number },
+    actorRoles: readonly string[] = [],
+    req?: Request,
   ): Promise<void> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+    const gearRow = await this.assertOwnsEditableDraft(
+      gearId,
+      userId,
+      actorRoles,
+    );
 
     // Load all variants of this source so we can find the original
     // (input for re-render) + the square keys we'll replace.
@@ -1455,6 +1522,20 @@ export class TezaurService {
 
     // Delete old square keys best-effort — DB is already updated.
     await this.storage.deleteObjects(oldSquareKeys);
+
+    await this.audit.record({
+      actorId: userId,
+      action: 'edit_gear',
+      targetType: 'gear',
+      targetId: gearId,
+      details: {
+        kind: 'me_set_image_crop',
+        sourceId,
+        crop,
+        byModerator: gearRow.createdBy !== userId && isModerator(actorRoles),
+      },
+      req,
+    });
   }
 
   /** Reorder the gallery — `sourceIds` is the new top-to-bottom order. */
@@ -1462,8 +1543,9 @@ export class TezaurService {
     gearId: string,
     userId: string,
     sourceIds: string[],
+    actorRoles: readonly string[] = [],
   ): Promise<void> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
     // Apply positions in a single transaction.
     await this.db.transaction(async (tx) => {
       for (let i = 0; i < sourceIds.length; i++) {
@@ -1486,8 +1568,9 @@ export class TezaurService {
     gearId: string,
     userId: string,
     dto: CreateGearLinkDto,
+    actorRoles: readonly string[] = [],
   ): Promise<{ id: string }> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
     return this.addLink(gearId, dto, userId);
   }
 
@@ -1495,8 +1578,9 @@ export class TezaurService {
     gearId: string,
     userId: string,
     linkId: string,
+    actorRoles: readonly string[] = [],
   ): Promise<void> {
-    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.assertOwnsEditableDraft(gearId, userId, actorRoles);
     await this.removeLink(gearId, linkId);
   }
 
@@ -1506,8 +1590,9 @@ export class TezaurService {
     parentGearId: string,
     userId: string,
     dto: CreateGearRelationshipDto,
+    actorRoles: readonly string[] = [],
   ): Promise<{ id: string }> {
-    await this.assertOwnsEditableDraft(parentGearId, userId);
+    await this.assertOwnsEditableDraft(parentGearId, userId, actorRoles);
     return this.addRelationship(parentGearId, dto, userId);
   }
 
@@ -1515,8 +1600,9 @@ export class TezaurService {
     parentGearId: string,
     userId: string,
     relId: string,
+    actorRoles: readonly string[] = [],
   ): Promise<void> {
-    await this.assertOwnsEditableDraft(parentGearId, userId);
+    await this.assertOwnsEditableDraft(parentGearId, userId, actorRoles);
     await this.db
       .delete(gearRelationships)
       .where(
@@ -1719,6 +1805,7 @@ export class TezaurService {
   private async assertOwnsEditableDraft(
     gearId: string,
     userId: string,
+    actorRoles: readonly string[] = [],
   ): Promise<typeof gear.$inferSelect> {
     const [row] = await this.db
       .select()
@@ -1726,6 +1813,10 @@ export class TezaurService {
       .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
       .limit(1);
     if (!row) throw new NotFoundException(`gear ${gearId} not found`);
+    if (isModerator(actorRoles)) {
+      // Moderators can view + edit any draft regardless of state.
+      return row;
+    }
     if (row.createdBy !== userId) {
       throw new ForbiddenException('Not your draft.');
     }

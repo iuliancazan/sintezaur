@@ -398,7 +398,10 @@ type TabKey = 'mine' | 'queue';
                   <div class="mod-card__body">
                     <div class="mod-card__head">
                       <h3 class="mod-card__title">
-                        <a [routerLink]="['/tezaur', item.slug]">
+                        <a
+                          [routerLink]="['/tezaur/adauga']"
+                          [queryParams]="{ draft: item.id }"
+                        >
                           {{ item.brand }} · {{ item.model }}
                         </a>
                       </h3>
@@ -414,6 +417,14 @@ type TabKey = 'mine' | 'queue';
                   </div>
                   <aside class="mod-card__side">
                     <div class="mod-card__actions">
+                      <a
+                        class="mod-btn mod-btn--ghost"
+                        [routerLink]="['/tezaur/adauga']"
+                        [queryParams]="{ draft: item.id }"
+                      >
+                        <svg width="13" height="13"><use href="#i-edit" /></svg>
+                        {{ 'contributii_tezaur.action_open_editor' | t }}
+                      </a>
                       <button
                         class="mod-btn mod-btn--ok"
                         type="button"
@@ -430,15 +441,8 @@ type TabKey = 'mine' | 'queue';
                         [disabled]="acting() === item.id"
                       >
                         <svg width="13" height="13"><use href="#i-x" /></svg>
-                        {{ 'contributii_tezaur.action_reject' | t }}
+                        {{ 'contributii_tezaur.action_request_changes' | t }}
                       </button>
-                      <a
-                        class="mod-btn mod-btn--ghost"
-                        [routerLink]="['/tezaur', item.slug]"
-                      >
-                        <svg width="13" height="13"><use href="#i-eye" /></svg>
-                        {{ 'contributii_tezaur.action_details' | t }}
-                      </a>
                     </div>
                   </aside>
                 </article>

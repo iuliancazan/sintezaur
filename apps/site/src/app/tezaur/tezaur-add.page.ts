@@ -15,6 +15,8 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
+import { hasAnyRole } from '../auth/auth.types';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
 import {
@@ -327,6 +329,7 @@ export class TezaurAddPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   readonly i18n = inject(I18nService);
+  readonly auth = inject(AuthService);
 
   /* ---------- option tables for the template ---------- */
   readonly categoryOptions = CATEGORY_OPTIONS;
@@ -373,8 +376,21 @@ export class TezaurAddPage {
   /* ---------- draft state ---------- */
   readonly draftId = signal<string | null>(null);
   readonly draftState = signal<GearState>('draft');
+  readonly draftCreatedBy = signal<string | null>(null);
   readonly rejectionReason = signal<string | null>(null);
   readonly images = signal<TezaurDraftImage[]>([]);
+
+  /** Current user has curator/admin/superadmin role + is NOT the draft owner. */
+  readonly isModeratorViewingOther = computed(() => {
+    const user = this.auth.currentUser();
+    if (!user) return false;
+    if (!hasAnyRole(user, ['curator', 'admin', 'superadmin'])) return false;
+    const createdBy = this.draftCreatedBy();
+    return createdBy !== null && createdBy !== user.id;
+  });
+
+  /** Mod approval/rejection from inside the editor. */
+  readonly modAction = signal<'idle' | 'approving' | 'rejecting'>('idle');
   readonly relationships = signal<RelationshipRow[]>([]);
   readonly linkRows = signal<LinkRow[]>([]);
 
@@ -499,10 +515,15 @@ export class TezaurAddPage {
     );
   });
 
-  /** True if the form is locked (submitted to mod queue or approved). */
-  readonly isLocked = computed(
-    () => this.draftState() === 'submitted' || this.draftState() === 'approved',
-  );
+  /**
+   * True if the form is locked (submitted to mod queue or approved).
+   * Moderators viewing someone else's draft keep edit access at every state
+   * — the BE allows it and audit-logs each mutation.
+   */
+  readonly isLocked = computed(() => {
+    if (this.isModeratorViewingOther()) return false;
+    return this.draftState() === 'submitted' || this.draftState() === 'approved';
+  });
 
   /* ---------- auto-save debouncing ---------- */
   private autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -549,6 +570,7 @@ export class TezaurAddPage {
     const specs = (g.specs ?? {}) as SpecsShape;
     this.draftId.set(g.id);
     this.draftState.set(g.state);
+    this.draftCreatedBy.set(g.createdBy);
     this.rejectionReason.set(g.rejectionReason);
     this.images.set(detail.images.filter((i) => i.variant === 'square_thumb'));
     this.originalsBySourceId.set(this.buildOriginalsMap(detail.images));
@@ -1079,6 +1101,50 @@ export class TezaurAddPage {
       );
     } catch (err) {
       console.error('[tezaur-add] save relationship failed', err);
+    }
+  }
+
+  /* ---------- moderator inline actions ---------- */
+
+  async approveAsModerator(): Promise<void> {
+    if (!this.isModeratorViewingOther() || this.modAction() !== 'idle') return;
+    const id = this.draftId();
+    if (!id) return;
+    const ok = confirm(this.i18n.t('tezaur.add.mod.approve_confirm'));
+    if (!ok) return;
+    this.modAction.set('approving');
+    try {
+      await this.tezaur.approveModerationItem(id);
+      this.draftState.set('approved');
+    } catch (err) {
+      console.error('[tezaur-add] mod approve failed', err);
+      alert(this.i18n.t('tezaur.add.mod.action_error'));
+    } finally {
+      this.modAction.set('idle');
+    }
+  }
+
+  async requestChangesAsModerator(): Promise<void> {
+    if (!this.isModeratorViewingOther() || this.modAction() !== 'idle') return;
+    const id = this.draftId();
+    if (!id) return;
+    const reason = prompt(this.i18n.t('tezaur.add.mod.reject_prompt'));
+    if (reason === null) return;
+    const trimmed = reason.trim();
+    if (trimmed.length < 3) {
+      alert(this.i18n.t('tezaur.add.mod.reject_too_short'));
+      return;
+    }
+    this.modAction.set('rejecting');
+    try {
+      await this.tezaur.rejectModerationItem(id, trimmed);
+      this.draftState.set('rejected');
+      this.rejectionReason.set(trimmed);
+    } catch (err) {
+      console.error('[tezaur-add] mod reject failed', err);
+      alert(this.i18n.t('tezaur.add.mod.action_error'));
+    } finally {
+      this.modAction.set('idle');
     }
   }
 

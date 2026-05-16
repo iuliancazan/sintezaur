@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -20,6 +21,7 @@ import {
   JwtAuthGuard,
   type AuthenticatedUser,
 } from '@sintezaur/auth';
+import type { Request } from 'express';
 import { StorageService } from '../common/storage.service';
 import { TezaurService } from './tezaur.service';
 import type {
@@ -38,6 +40,11 @@ import type {
  *
  * Mounted at `/api/me/tezaur/...` to mirror the existing `/api/me/...`
  * personal-collection controller.
+ *
+ * Moderator note: curator / admin / superadmin roles bypass the
+ * ownership + state checks at the service layer, so the same /me/* URLs
+ * also serve the moderator review-and-edit flow. Every moderator edit
+ * is audit-logged with `byModerator: true`.
  */
 @Controller('me/tezaur')
 @UseGuards(JwtAuthGuard)
@@ -75,7 +82,7 @@ export class MeContributorController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    return this.tezaur.meGetDraft(id, user.sub);
+    return this.tezaur.meGetDraft(id, user.sub, user.roles);
   }
 
   @Patch('gear/:id')
@@ -84,8 +91,9 @@ export class MeContributorController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: MeUpdateGearDto,
+    @Req() req: Request,
   ) {
-    await this.tezaur.meUpdateDraft(id, user.sub, dto);
+    await this.tezaur.meUpdateDraft(id, user.sub, dto, user.roles, req);
   }
 
   @Delete('gear/:id')
@@ -94,7 +102,7 @@ export class MeContributorController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    await this.tezaur.meDeleteDraft(id, user.sub);
+    await this.tezaur.meDeleteDraft(id, user.sub, user.roles);
   }
 
   @Post('gear/:id/submit')
@@ -103,7 +111,7 @@ export class MeContributorController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
   ) {
-    await this.tezaur.meSubmitDraft(id, user.sub);
+    await this.tezaur.meSubmitDraft(id, user.sub, user.roles);
   }
 
   /* ---------- images ---------- */
@@ -119,8 +127,16 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @UploadedFile() file: Express.Multer.File,
     @Body('caption') caption: string | undefined,
+    @Req() req: Request,
   ) {
-    return this.tezaur.meAttachImage(id, user.sub, file, caption);
+    return this.tezaur.meAttachImage(
+      id,
+      user.sub,
+      file,
+      caption,
+      user.roles,
+      req,
+    );
   }
 
   @Delete('gear/:id/images/:sourceId')
@@ -129,8 +145,9 @@ export class MeContributorController {
     @CurrentUser() user: AuthenticatedUser,
     @Param('id', ParseUUIDPipe) id: string,
     @Param('sourceId', ParseUUIDPipe) sourceId: string,
+    @Req() req: Request,
   ) {
-    await this.tezaur.meDetachImage(id, user.sub, sourceId);
+    await this.tezaur.meDetachImage(id, user.sub, sourceId, user.roles, req);
   }
 
   @Patch('gear/:id/images/reorder')
@@ -140,7 +157,12 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body('sourceIds') sourceIds: string[],
   ) {
-    await this.tezaur.meReorderImages(id, user.sub, sourceIds ?? []);
+    await this.tezaur.meReorderImages(
+      id,
+      user.sub,
+      sourceIds ?? [],
+      user.roles,
+    );
   }
 
   @Patch('gear/:id/images/:sourceId/crop')
@@ -150,13 +172,16 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('sourceId', ParseUUIDPipe) sourceId: string,
     @Body() dto: SetImageCropDto,
+    @Req() req: Request,
   ) {
-    await this.tezaur.meSetImageCrop(id, user.sub, sourceId, {
-      x: dto.x,
-      y: dto.y,
-      w: dto.w,
-      h: dto.h,
-    });
+    await this.tezaur.meSetImageCrop(
+      id,
+      user.sub,
+      sourceId,
+      { x: dto.x, y: dto.y, w: dto.w, h: dto.h },
+      user.roles,
+      req,
+    );
   }
 
   /* ---------- links ---------- */
@@ -167,7 +192,7 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateGearLinkDto,
   ) {
-    return this.tezaur.meAddLink(id, user.sub, dto);
+    return this.tezaur.meAddLink(id, user.sub, dto, user.roles);
   }
 
   @Delete('gear/:id/links/:linkId')
@@ -177,7 +202,7 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('linkId', ParseUUIDPipe) linkId: string,
   ) {
-    await this.tezaur.meRemoveLink(id, user.sub, linkId);
+    await this.tezaur.meRemoveLink(id, user.sub, linkId, user.roles);
   }
 
   /* ---------- relationships ---------- */
@@ -188,7 +213,7 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateGearRelationshipDto,
   ) {
-    return this.tezaur.meAddRelationship(id, user.sub, dto);
+    return this.tezaur.meAddRelationship(id, user.sub, dto, user.roles);
   }
 
   @Delete('gear/:id/relationships/:relId')
@@ -198,6 +223,6 @@ export class MeContributorController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('relId', ParseUUIDPipe) relId: string,
   ) {
-    await this.tezaur.meRemoveRelationship(id, user.sub, relId);
+    await this.tezaur.meRemoveRelationship(id, user.sub, relId, user.roles);
   }
 }

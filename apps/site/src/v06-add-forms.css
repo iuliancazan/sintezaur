@@ -1417,3 +1417,21 @@
   .bz-price { grid-template-columns: 1fr; }
   .bz-price__cur, .bz-price__conv { border-left: 0; border-top: 1px dashed var(--line); padding: 8px 18px; justify-items: start; }
 }
+
+/* ============================================================
+   M14-D — Moderator-viewing-someone-else banner on tezaur add page
+   ============================================================ */
+.mod-edit-banner {
+  padding: 14px 18px;
+  border: 1px solid var(--accent);
+  background: oklch(0.55 0.14 80 / 0.10);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.mod-edit-banner strong {
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
