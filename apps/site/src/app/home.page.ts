@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { environment } from '../environments/environment';
+import { AppConfigService } from '@sintezaur/ui';
 import { AuthService } from './auth/auth.service';
 import { BazarService, BazarListItem } from './bazar/bazar.service';
 import { I18nService } from './i18n/i18n.service';
@@ -398,6 +398,7 @@ export class HomePage implements OnInit {
   private readonly bazar = inject(BazarService);
   private readonly tezaur = inject(TezaurService);
   private readonly seo = inject(SeoService);
+  private readonly appConfig = inject(AppConfigService);
 
   readonly revistaArticles = signal<ArticleListItem[]>([]);
   readonly bazarListings = signal<BazarListItem[]>([]);
@@ -516,10 +517,12 @@ export class HomePage implements OnInit {
     return this.i18n.t(`home.category.${c}`) || c;
   }
 
-  mediaUrl(path: string): string {
-    if (!path) return '';
-    if (path.startsWith('http://') || path.startsWith('https://')) return path;
-    return `${environment.apiBaseUrl.replace(/\/api$/, '')}${path}`;
+  /** Delegate to AppConfigService so storage URLs go through `imageBaseUrl`
+   *  (files.sintezaur.ro on prod, /uploads on local) instead of the API
+   *  host. The previous in-line builder used `apiBaseUrl` and forgot the
+   *  joining slash, producing 404s like `api.sintezaur.rolisting/...jpg`. */
+  mediaUrl(path: string | null | undefined): string {
+    return this.appConfig.imageUrl(path);
   }
 
   heroReadMinutes(): number {
