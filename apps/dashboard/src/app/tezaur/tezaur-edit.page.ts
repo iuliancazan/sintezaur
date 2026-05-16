@@ -1065,7 +1065,7 @@ export class TezaurAdminEditPage {
     this.saving.set(true);
     try {
       const wasNew = !this.isEdit();
-      const { id: gearId, slug: nextSlug } = await this.persistGear();
+      const { id: gearId } = await this.persistGear();
 
       // Sub-resources: links, videos, relationships
       const subErrors: string[] = [];
@@ -1100,8 +1100,10 @@ export class TezaurAdminEditPage {
       }
 
       // Reload to pick up server-assigned ids on freshly-created
-      // sub-resources / image variants.
-      await this.loadDetail(nextSlug);
+      // sub-resources / image variants. Use the UUID so we always hit
+      // the admin endpoint — the public slug endpoint hides unpublished
+      // gear and would 404 right after a save with published=false.
+      await this.loadDetail(gearId);
     } catch (err) {
       this.saveError.set(
         (err as { error?: { message?: string } })?.error?.message ??
