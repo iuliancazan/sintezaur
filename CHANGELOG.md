@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-D — Tezaur list + detail re-aligned to V05 (single commit, _SHA TBD_)
+#### M13-D — Tezaur list + detail re-aligned to V05 (single commit `cafb77f`)
 
 Both Tezaur pages were already using V05's `.tez-*` / `.td-*`
 class names (the page-scoped layout was lifted from V05 at M2-C).
