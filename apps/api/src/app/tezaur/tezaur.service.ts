@@ -47,6 +47,32 @@ import type {
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 100;
 
+/**
+ * SQL fragment that picks one thumb path for a given gear row. It prefers
+ * `square_thumb`, then `square_medium`, then any landscape variant, then
+ * `original` — so if the sharp pipeline ever produced a partial set (e.g.
+ * one variant put failed mid-loop) we still surface SOMETHING in cards.
+ * Use as: `thumb: gearThumbSql()`
+ */
+function gearThumbSql() {
+  return sql<string | null>`(
+    SELECT path FROM ${gearImages}
+    WHERE ${gearImages.gearId} = ${gear.id}
+    ORDER BY ${gearImages.position} ASC,
+      CASE ${gearImages.variant}
+        WHEN 'square_thumb' THEN 0
+        WHEN 'square_medium' THEN 1
+        WHEN 'landscape_4x3_medium' THEN 2
+        WHEN 'landscape_4x3_large' THEN 3
+        WHEN 'landscape_16x9_medium' THEN 4
+        WHEN 'landscape_16x9_large' THEN 5
+        WHEN 'original' THEN 6
+        ELSE 9
+      END ASC
+    LIMIT 1
+  )`;
+}
+
 const MODERATOR_ROLES = ['curator', 'admin', 'superadmin'] as const;
 function isModerator(roles: readonly string[]): boolean {
   return roles.some((r) => (MODERATOR_ROLES as readonly string[]).includes(r));
@@ -868,13 +894,7 @@ export class TezaurService {
         avgRating: gear.avgRating,
         reviewCount: gear.reviewCount,
         type: sql<string | null>`${gear.specs}->>'type'`,
-        thumb: sql<string | null>`(
-          SELECT path FROM ${gearImages}
-          WHERE ${gearImages.gearId} = ${gear.id}
-            AND ${gearImages.variant} = 'square_thumb'
-          ORDER BY position ASC
-          LIMIT 1
-        )`,
+        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(whereClause)
@@ -1488,13 +1508,7 @@ export class TezaurService {
         rejectionReason: gear.rejectionReason,
         submittedAt: gear.submittedAt,
         updatedAt: gear.updatedAt,
-        thumb: sql<string | null>`(
-          SELECT path FROM ${gearImages}
-          WHERE ${gearImages.gearId} = ${gear.id}
-            AND ${gearImages.variant} = 'square_thumb'
-          ORDER BY position ASC
-          LIMIT 1
-        )`,
+        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(and(eq(gear.createdBy, userId), isNull(gear.deletedAt)))
@@ -1870,13 +1884,7 @@ export class TezaurService {
         state: gear.state,
         submittedAt: gear.submittedAt,
         createdBy: gear.createdBy,
-        thumb: sql<string | null>`(
-          SELECT path FROM ${gearImages}
-          WHERE ${gearImages.gearId} = ${gear.id}
-            AND ${gearImages.variant} = 'square_thumb'
-          ORDER BY position ASC
-          LIMIT 1
-        )`,
+        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(where)
@@ -1968,13 +1976,7 @@ export class TezaurService {
         createdAt: gear.createdAt,
         updatedAt: gear.updatedAt,
         deletedAt: gear.deletedAt,
-        thumb: sql<string | null>`(
-          SELECT path FROM ${gearImages}
-          WHERE ${gearImages.gearId} = ${gear.id}
-            AND ${gearImages.variant} = 'square_thumb'
-          ORDER BY position ASC
-          LIMIT 1
-        )`,
+        thumb: gearThumbSql(),
       })
       .from(gear)
       .where(whereClause)
