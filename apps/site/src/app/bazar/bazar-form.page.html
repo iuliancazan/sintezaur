@@ -610,8 +610,10 @@
           <div class="ta-cta-row">
             <button
               class="ta-cta ta-cta--primary"
+              [class.is-not-ready]="!canPublish()"
               type="button"
-              [disabled]="submitting() || !canPublish()"
+              [disabled]="submitting()"
+              [attr.aria-disabled]="!canPublish() ? 'true' : null"
               (click)="publish()"
             >
               {{ (submitting() ? 'bazar.form.publishing' : 'bazar.form.publish_cta') | t }}

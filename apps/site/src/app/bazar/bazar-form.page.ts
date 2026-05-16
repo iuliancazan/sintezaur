@@ -18,6 +18,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
 import { TPipe } from '../i18n/t.pipe';
+import { ToastService } from '../ui/toast.service';
 import {
   BazarService,
   type BazarListingDetail,
@@ -187,6 +188,7 @@ export class BazarFormPage {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   readonly i18n = inject(I18nService);
+  private readonly toast = inject(ToastService);
 
   /* ---------- static option tables ---------- */
   readonly conditionOptions = CONDITION_OPTIONS;
@@ -767,11 +769,32 @@ export class BazarFormPage {
 
   async publish(): Promise<void> {
     if (this.submitting()) return;
+
+    // Front-end checklist gate — surface what's missing via toast instead
+    // of silently disabling the button (general project rule: never let a
+    // form action fail without telling the user why).
+    if (!this.canPublish()) {
+      const missing = this.checklist()
+        .filter((i) => !i.done)
+        .map((i) => i.label);
+      this.submitMissing.set(
+        this.checklist().filter((i) => !i.done).map((i) => i.key),
+      );
+      const detail = missing.length
+        ? 'Lipsește: ' + missing.join(' · ')
+        : 'Draftul mai are câmpuri obligatorii nebifate.';
+      this.submitError.set(detail);
+      this.toast.warn('Nu poți publica încă', { detail, ttlMs: 8000 });
+      return;
+    }
+
     if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
     await this.persistDraft();
     const id = this.listingId();
     if (!id) {
-      this.submitError.set('Nu există încă un draft de publicat.');
+      const msg = 'Nu există încă un draft de publicat.';
+      this.submitError.set(msg);
+      this.toast.error(msg);
       return;
     }
     this.submitting.set(true);
@@ -781,17 +804,24 @@ export class BazarFormPage {
       const res = await this.bazar.publishDraft(id);
       this.listingSlug.set(res.slug);
       this.listingStatus.set('active');
+      this.toast.success('Anunțul tău e live în Bazar.');
       void this.router.navigate(['/bazar', res.slug]);
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 409) {
         const body = err.error as { missing?: string[] } | null;
-        if (body?.missing) this.submitMissing.set(body.missing);
-        this.submitError.set(
-          'Draftul nu e gata — completează câmpurile lipsă.',
-        );
+        const missing = body?.missing ?? [];
+        if (missing.length) this.submitMissing.set(missing);
+        const msg = 'Draftul nu e gata — completează câmpurile lipsă.';
+        this.submitError.set(msg);
+        this.toast.warn(msg, {
+          detail: missing.length ? 'Lipsește: ' + missing.join(' · ') : undefined,
+          ttlMs: 8000,
+        });
       } else {
         console.error('[bazar-form] publish failed', err);
-        this.submitError.set('Publicarea a eșuat. Încearcă din nou.');
+        const msg = 'Publicarea a eșuat. Încearcă din nou.';
+        this.submitError.set(msg);
+        this.toast.error(msg);
       }
     } finally {
       this.submitting.set(false);
