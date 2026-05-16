@@ -122,10 +122,21 @@ export class LocaleService {
   }
 
   /**
-   * Switch to a new locale. Persists the choice (cookie now, server
-   * preference later via auth service) and navigates to the same page
-   * under the new prefix. We force a full reload through the router so
-   * resolvers + APP_INITIALIZER picks up the new bundle cleanly.
+   * Switch to a new locale.
+   *
+   * We hard-reload the page via `window.location.assign` instead of
+   * an in-app router navigation because the i18n bundle lives behind
+   * the `TPipe` (pure pipe — re-evaluates only on input changes) and
+   * dozens of components cache translated strings in computed signals
+   * built from `i18n.t(...)`. None of those will re-render when the
+   * bundle is swapped in place under a router navigation.
+   *
+   * A hard reload is the standard SPA pattern for locale switching
+   * (Wikipedia, GitHub, etc.) and guarantees a clean state:
+   * APP_INITIALIZER re-runs with the new URL prefix and pulls the
+   * right bundle BEFORE the first paint, every component remounts
+   * with the right locale, and the localeInterceptor stamps the new
+   * locale on subsequent API calls.
    */
   setLocale(next: Locale): void {
     if (next === this._locale()) return;
@@ -133,7 +144,13 @@ export class LocaleService {
     const current = this.router.url || '/';
     const stripped = this.stripPrefix(current);
     const target = next === 'en' ? `/en${stripped}` : stripped || '/';
-    void this.router.navigateByUrl(target);
+    if (isPlatformBrowser(this.platformId)) {
+      this.document.location.assign(target);
+    } else {
+      // SSR / Node — fall back to a router nav. We never actually hit
+      // this in the browser, but it keeps the contract sane for tests.
+      void this.router.navigateByUrl(target);
+    }
   }
 
   /**
