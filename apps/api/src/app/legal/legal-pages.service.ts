@@ -80,7 +80,7 @@ export class LegalPagesService {
       .orderBy(asc(legalPages.slug));
   }
 
-  /** Admin surface — full row for the edit table. */
+  /** Admin surface — full row for the edit table (both locales). */
   async listAdmin() {
     return this.db
       .select({
@@ -88,6 +88,9 @@ export class LegalPagesService {
         title: legalPages.title,
         bodyMd: legalPages.bodyMd,
         metaDescription: legalPages.metaDescription,
+        titleEn: legalPages.titleEn,
+        bodyMdEn: legalPages.bodyMdEn,
+        metaDescriptionEn: legalPages.metaDescriptionEn,
         updatedAt: legalPages.updatedAt,
         updatedByUserId: legalPages.updatedByUserId,
       })
@@ -99,12 +102,19 @@ export class LegalPagesService {
     if (!isLegalSlug(slug)) {
       throw new NotFoundException(`legal page "${slug}" not found`);
     }
+    // Normalize empty EN strings to NULL so the public fallback path
+    // ("EN missing → render RO") triggers cleanly.
+    const normalize = (v: string | null | undefined) =>
+      v && v.trim() ? v : null;
     const [row] = await this.db
       .update(legalPages)
       .set({
         title: dto.title,
         bodyMd: dto.bodyMd,
         metaDescription: dto.metaDescription ?? null,
+        titleEn: normalize(dto.titleEn),
+        bodyMdEn: normalize(dto.bodyMdEn),
+        metaDescriptionEn: normalize(dto.metaDescriptionEn),
         updatedByUserId: editorUserId,
         updatedAt: sql`now()`,
       })

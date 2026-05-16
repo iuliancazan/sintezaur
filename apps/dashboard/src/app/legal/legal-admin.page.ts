@@ -159,6 +159,41 @@ const SLUG_LABELS: Record<string, string> = {
                 ></textarea>
               </label>
 
+              <details class="editor__en">
+                <summary>🇬🇧 English translation (optional)</summary>
+                <p class="editor__en-note">
+                  When empty, the /en page falls back to the Romanian
+                  body and shows a "translation pending" banner.
+                </p>
+                <label class="field">
+                  <span class="field__label">Title (EN)</span>
+                  <input
+                    pInputText
+                    formControlName="titleEn"
+                    maxlength="200"
+                  />
+                </label>
+                <label class="field">
+                  <span class="field__label">
+                    Meta description (EN)
+                    <span class="field__hint">optional, max 300 chars</span>
+                  </span>
+                  <input
+                    pInputText
+                    formControlName="metaDescriptionEn"
+                    maxlength="300"
+                  />
+                </label>
+                <label class="field">
+                  <span class="field__label">Body (Markdown, EN)</span>
+                  <textarea
+                    formControlName="bodyMdEn"
+                    rows="20"
+                    class="editor__textarea"
+                  ></textarea>
+                </label>
+              </details>
+
               <div class="editor__actions">
                 <button
                   pButton
@@ -275,6 +310,24 @@ const SLUG_LABELS: Record<string, string> = {
         border-radius: 6px;
         margin-bottom: 8px;
       }
+      .editor__en {
+        border: 1px solid var(--p-content-border-color);
+        border-radius: 6px;
+        padding: 10px 14px;
+        background: color-mix(in oklab, var(--p-content-background) 96%, black);
+      }
+      .editor__en > summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 4px 0;
+      }
+      .editor__en[open] > summary { margin-bottom: 8px; }
+      .editor__en-note {
+        font-size: 12px;
+        color: var(--p-text-muted-color);
+        margin: 0 0 12px;
+      }
     `,
   ],
 })
@@ -292,6 +345,9 @@ export class LegalAdminPage {
     title: ['', [Validators.required, Validators.maxLength(200)]],
     bodyMd: ['', [Validators.required, Validators.minLength(10)]],
     metaDescription: [''],
+    titleEn: [''],
+    bodyMdEn: [''],
+    metaDescriptionEn: [''],
   });
 
   constructor() {
@@ -333,6 +389,9 @@ export class LegalAdminPage {
       title: row.title,
       bodyMd: row.bodyMd,
       metaDescription: row.metaDescription ?? '',
+      titleEn: row.titleEn ?? '',
+      bodyMdEn: row.bodyMdEn ?? '',
+      metaDescriptionEn: row.metaDescriptionEn ?? '',
     });
   }
 
@@ -352,12 +411,15 @@ export class LegalAdminPage {
     this.saving.set(true);
     this.saveError.set(null);
     try {
+      const normalize = (v: string | null | undefined) =>
+        v && v.trim() ? v.trim() : null;
       await this.service.update(row.slug, {
         title: value.title,
         bodyMd: value.bodyMd,
-        metaDescription: value.metaDescription?.trim()
-          ? value.metaDescription.trim()
-          : null,
+        metaDescription: normalize(value.metaDescription),
+        titleEn: normalize(value.titleEn),
+        bodyMdEn: normalize(value.bodyMdEn),
+        metaDescriptionEn: normalize(value.metaDescriptionEn),
       });
       await this.refresh();
       this.cancel();

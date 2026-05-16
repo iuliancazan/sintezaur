@@ -8,6 +8,9 @@ export interface LegalPageAdminRow {
   title: string;
   bodyMd: string;
   metaDescription: string | null;
+  titleEn: string | null;
+  bodyMdEn: string | null;
+  metaDescriptionEn: string | null;
   updatedAt: string;
   updatedByUserId: string | null;
 }
@@ -16,6 +19,9 @@ export interface UpdateLegalPagePayload {
   title: string;
   bodyMd: string;
   metaDescription?: string | null;
+  titleEn?: string | null;
+  bodyMdEn?: string | null;
+  metaDescriptionEn?: string | null;
 }
 
 export type ContactCategory =

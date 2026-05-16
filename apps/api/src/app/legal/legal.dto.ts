@@ -45,6 +45,23 @@ export class UpdateLegalPageDto {
   @IsString()
   @Length(0, 300)
   metaDescription?: string | null;
+
+  // M16-H: optional English translation. NULL = not yet translated;
+  // the public route falls back to the RO column when missing.
+  @IsOptional()
+  @IsString()
+  @Length(0, 200)
+  titleEn?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 100_000)
+  bodyMdEn?: string | null;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 300)
+  metaDescriptionEn?: string | null;
 }
 
 export class CreateContactMessageDto {
