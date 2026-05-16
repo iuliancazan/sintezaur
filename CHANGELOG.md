@@ -7,6 +7,97 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M16 — Bilingual platform RO/EN (foundation)
+
+Site-ul devine bilingv. Romanian stays default, English becomes a
+peer through a `/en/...` URL mirror with a topbar RO/EN toggle.
+Forum + Bazar posts stay in the user's language (UGC), but every
+piece of chrome and every translatable piece of catalog/editorial
+content gains an optional EN counterpart. Foundational sub-phases
+A–E + H, I, J shipped; the bilingual editing forms for Tezaur
+contributors (F) and Revista articles (G) are deferred.
+
+#### M16-A — Bilingual schema + locale preference (`8edaf14`)
+
+- Migration `0017_bilingual_columns.sql`: 13 new nullable columns
+  across 5 tables — `articles.{title_en,excerpt_en,body_en,
+  body_html_en}`, `legal_pages.{title_en,body_md_en,
+  meta_description_en}`, `gear.{tagline_ro,tagline_en}`,
+  `forum_categories.{name_en,description_en}`.
+- New `users.preferred_locale` enum column, default `'ro'`.
+- Postflight `9017_forum_seed_categories_en.sql` seeds EN names
+  + descriptions for the 8 forum categories.
+
+#### M16-B — `/en/` URL prefix + LocaleService (`7ae1500`)
+
+- Routes refactored: `appRoutes` wraps a shared `sectionRoutes`
+  array twice — once under `path: 'en'` with `data.locale = 'en'`,
+  once at the bare root for RO.
+- New `LocaleService`: signal-backed `locale`, synchronous
+  `detectInitialLocale()` (URL prefix → `sz_locale` cookie → RO
+  default), `setLocale(next)` navigates and persists, plus
+  `localizeUrl()` / `alternateUrl()` helpers.
+- `I18nService` gains a RO fallback layer — partial EN translations
+  degrade into RO copy instead of raw keys.
+- APP_INITIALIZER loads the right bundle for the deep-linked
+  locale before first paint.
+
+#### M16-C — Topbar language switcher (`71cdb1b`)
+
+- `SzTopbarComponent` adds a mono 2-letter button (`RO`/`EN`)
+  between theme and avatar; emits `localeClick`.
+- `MobileMenuComponent` adds a segmented RO/EN control below
+  the theme picker.
+
+#### M16-D — EN i18n bundle for chrome (`639b18d`)
+
+- `en.json` ships ~330 translated keys covering topbar, footer,
+  account menus, mobile drawer, home, auth flows, notifications,
+  search, inbox, thread chat, and section landing pages.
+- Form-internal copy (Tezaur add page, Bazar form, Revista
+  editor, prefs matrix) stays RO with automatic fallback.
+
+#### M16-E — Per-locale API serialization (`66bb1dc`)
+
+- New `localeInterceptor` stamps every `/api/*` request with
+  `?locale=` from `LocaleService`.
+- `TezaurService.findBySlug(slug, lang)` returns
+  `description.{lang,isTranslated}` and a resolved `tagline`
+  field that picks from `tagline_en → tagline_ro → specs.tagline`.
+- `LegalPagesService.getBySlug(slug, lang)` returns EN columns
+  when populated, RO fallback otherwise.
+
+#### M16-H — Legal pages dashboard editor EN fields (`8185e2f`)
+
+- Edit modal at `/dashboard/legal` gains a collapsible English
+  section with 3 optional inputs (title_en, body_md_en,
+  meta_description_en). Empty strings save as NULL.
+
+#### M16-J — Bilingual sitemap + hreflang link tags (`53d6083`)
+
+- `sitemap.xml` emits each URL twice with 3 `xhtml:link
+  rel="alternate"` entries (ro / en / x-default → ro) per
+  `<url>`.
+- `SeoService.set()` injects 3 `<link rel="alternate">` in
+  `<head>` + flips `og:locale` between RO and EN based on the
+  canonical URL's prefix.
+
+#### M16-I — Bilingual search for Revista (`71547ee`)
+
+- Postflight `9018_bilingual_search_vectors.sql` adds
+  `articles.search_vector_en` (STORED, `english` config) + GIN
+  index.
+- `ArticlesService.listPublic` widens its `q` clause to OR
+  across both vectors; articles surface in both languages.
+- Tezaur, Bazar and Forum search stay RO-only (UGC / universal
+  brand+model).
+
+#### M16-M — Testing doc
+
+- `docs/testing/m16-testing.md` lays out the manual test plan
+  for the foundation + known limitations (Tezaur form, Revista
+  editor, gear-description FTS, email locale).
+
 ### M14 — Bazar V07 sell page + light-mode default ✅
 
 Reskin the "Sell a product" flow on Bazar to the V07 design

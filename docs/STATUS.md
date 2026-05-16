@@ -6,7 +6,38 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M14** ✅ — Bazar V07 sell page + light-mode default.
+**Last shipped:** **M16** ✅ (partial — A/B/C/D/E/H/I/J + testing doc;
+F/G deferred) — bilingual platform foundation RO/EN. Tot site-ul
+serveste acum sub două URL-uri (`/...` RO default + `/en/...` mirror)
+cu un selector RO/EN în topbar care setează cookie `sz_locale` și
+navighează la cealaltă variantă a URL-ului curent. `LocaleService`
+ține locale-ul curent ca signal, citește URL-ul sincron pe boot
+(no RO→EN flash pe deep-links), și sincronizează `<html lang>`.
+`I18nService` capătă fallback la RO bundle când o cheie lipsește din
+EN — niciun key brut în UI chiar cu `en.json` partial. Bundle `en.json`
+inițial (~330 chei) acoperă tot chrome-ul: topbar, footer, account,
+home sections, auth, notifications, search, inbox, thread, plus
+landing-urile Tezaur/Bazar/Revista/Forum. Form-internalele
+(tezaur add, bazar form, revista editor, prefs matrix) rămân RO și
+fallback-uiesc automat — vor primi traduceri când curatorii populează
+EN.
+
+Per total M16 a livrat: migration `0017_bilingual_columns` (13
+coloane noi pe 5 tabele) + postflight `9017_forum_seed_categories_en`
+(seed EN pentru cele 8 categorii) + postflight `9018_bilingual_search_
+vectors` (`articles.search_vector_en` cu config `english`); 1 funcție
++ 1 service nou pe site (`detectInitialLocale`, `LocaleService`) +
+HTTP `localeInterceptor` care stampilează toate `/api/*` cu `?locale=`;
+`SzTopbarComponent` cu input `showLocaleSwitch` + `MobileMenuComponent`
+cu segmented control RO/EN; bundle `en.json` ~330 chei traduse;
+`tezaur.findBySlug` și `legalPagesService.getBySlug` returnează
+`{ lang, isTranslated }` plus tagline rezolvat cu fallback; sitemap
+cu dublu URL-uri + 3 hreflang per `<url>`; SEO injectează 3 `<link
+rel="alternate">` și og:locale flips RO/EN; dashboard legal editor cu
+secțiune EN colapsabilă (3 inputs opționale). Total 8 commit-uri
+M16-A...M16-J pe main.
+
+**Last shipped (previous):** **M14** ✅ — Bazar V07 sell page + light-mode default.
 Pagina `/bazar/nou` și `/bazar/:slug/editare` reskinate complet pe V07
 „Vinde un produs" (single-page + sticky sidebar cu live preview și
 checklist). Auto-save pe draft cu debounce 1.5s, fallback URL prin
@@ -430,6 +461,22 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M16 — Bilingual platform RO/EN (foundation)
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `8edaf14` | done | Schema bilingv. Migration `0017_bilingual_columns.sql` adaugă 13 coloane nullable: `articles.{title_en,excerpt_en,body_en,body_html_en}`, `legal_pages.{title_en,body_md_en,meta_description_en}`, `gear.{tagline_ro,tagline_en}`, `users.preferred_locale` (default `'ro'`), `forum_categories.{name_en,description_en}`. Postflight `9017_forum_seed_categories_en.sql` seedează EN names + descrieri pentru cele 8 categorii (idempotent pe `key`). Drizzle schema TS oglindește toate coloanele. |
+| B   | `7ae1500` | done | Router `/en/` prefix + LocaleService. `appRoutes` extrage `sectionRoutes` ca array reutilizat + wrapper `{ path: 'en', children: sectionRoutes, data: { locale: 'en' } }` deasupra. Nou `LocaleService` cu signal `locale`, `localizeUrl()`, `setLocale()`, `alternateUrl()`, `stripPrefix()`. Detection sincron pe boot via `detectInitialLocale()` (URL prefix → cookie `sz_locale` → default RO). `I18nService` capătă `fallbackBundle` RO mereu în memorie + `t()` cu fallback la RO când cheia lipsește din active bundle. APP_INITIALIZER folosește `detectInitialLocale()` ca să încarce bundle-ul corect înainte de prima paint (no RO→EN flash). `en.json` placeholder gol creat. |
+| C   | `71cdb1b` | done | Language switcher RO/EN. `SzTopbarComponent` capătă input `showLocaleSwitch` + `currentLocale` + `localeAriaLabel` + output `localeClick`; randează un buton mono 2-litere între theme și avatar. `MobileMenuComponent` capătă grup nou „Limba / Language" cu segmented control RO/EN sub theme. `apps/site/app.ts` cablează la `LocaleService.setLocale`; i18n keys noi `app.topbar.{switch_to_en,switch_to_ro,language_label}`. |
+| D   | `639b18d` | done | en.json bundle ~330 chei traduse. Acoperă tot chrome-ul vizibil în primele 10s: topbar, footer, account menu/settings/favorites/messages_shell, home sections + CTAs, auth flows (signup/login/forgot/reset/verify/change_password/change_email), notifications.kind, search, inbox, thread (chat + offer + tx + review), landing-urile Tezaur/Bazar/Revista/Forum. Form-internalele (`tezaur.add.*`, `bazar.form.*`, `prefs.*`, `my_tezaur_drafts.*`, `cropper.*`) rămân netraduse — fallback automat la RO via `I18nService.t()`. |
+| E   | `66bb1dc` | done | API per-locale Tezaur + Legal. Nou `localeInterceptor` în `apps/site` stamplează toate request-urile `/api/*` cu `?locale=` din `LocaleService`. `TezaurService.findBySlug` returnează `description: { body, bodyHtml, lang, isTranslated }` cu fallback automat la RO când EN lipsește, plus `tagline: { value, isTranslated }` care rezolvă din `taglineEn → taglineRo → specs.tagline` (legacy). `LegalPagesService.getBySlug` la fel — EN columns când populate, RO fallback când NULL, response cu `lang` + `isTranslated`. Controllere acceptă `@Query('locale')`. |
+| F   | _deferred_ | pending | Tezaur dashboard contributor form — `tagline_ro` + `tagline_en` + Tiptap dual pentru body RO/EN. Defer din run autonom — pagina de add e 760+ linii şi user-ul a livrat-o recent, prea risky. |
+| G   | _deferred_ | pending | Revista editor — `title_en` + `excerpt_en` + Tiptap secondary pentru `body_en`. Defer la fel. |
+| H   | `8185e2f` | done | Legal pages dashboard editor cu secțiune EN colapsabilă. `<details>` block `🇬🇧 English translation (optional)` cu 3 inputs (title_en/meta_description_en/body_md_en). Empty strings normalizate la NULL în service ca fallback-ul public să se activeze curat. `UpdateLegalPageDto` extins, `LegalPagesService.{update,listAdmin}` extins. |
+| I   | `71547ee` | done | Search bilingv pentru Revista. Postflight `9018_bilingual_search_vectors.sql` adaugă `articles.search_vector_en` STORED cu config `english` (stemmer diferit) + GIN index. `ArticlesService.listPublic` lărgește clauza `q` la OR între `search_vector @@ ('sintezaur_ro')` și `search_vector_en @@ ('english')`. Tezaur (brand+model universal), Bazar, Forum rămân RO-only — UGC în limba autorului. |
+| J   | `53d6083` | done | Sitemap bilingv + hreflang. `SitemapService.serialize` emite fiecare URL DE DOUĂ ORI (`/...` + `/en/...`) cu 3 `xhtml:link rel="alternate" hreflang="..."` (ro/en/x-default→ro) per `<url>` + namespace `xmlns:xhtml`. `SeoService.set` injectează 3 `<link rel="alternate">` în head pentru pagina curentă + flips `og:locale` între `ro_RO` și `en_US` în funcție de prefixul URL-ului canonical. |
+| M   | _TBD_     | done | Close + `docs/testing/m16-testing.md` cu plan manual (schema, URL prefix, switcher, en.json fallback, API per-locale, dashboard legal EN, hreflang/sitemap, search bilingv, regresie, known limitations). |
 
 ### M14 — Bazar V07 sell page + light-mode default
 
