@@ -104,6 +104,8 @@ export const articles = pgTable(
 
     /** Read-only — populated by a postflight generated tsvector column. */
     searchVector: tsvector('search_vector'),
+    /** EN counterpart (M16-I). NULL/empty when no EN translation. */
+    searchVectorEn: tsvector('search_vector_en'),
   },
   (t) => [
     uniqueIndex('articles_slug_unique')

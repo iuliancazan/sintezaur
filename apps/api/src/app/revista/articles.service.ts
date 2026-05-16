@@ -452,8 +452,17 @@ export class ArticlesService {
       conds.push(sql`${query.tag} = ANY(${articles.tags})`);
     if (query.q && query.q.trim().length >= 2) {
       const term = query.q.trim();
+      // Bilingual search (M16-I): an article matches if EITHER the RO
+      // tsvector OR the EN tsvector hits. Articles with only RO content
+      // still surface for both audiences (search_vector_en is empty
+      // there, which simply never matches). The two configs have
+      // different stemmers, so the OR keeps recall solid in both
+      // languages without inflating false positives.
       conds.push(
-        sql`${articles.searchVector} @@ websearch_to_tsquery('sintezaur_ro', ${term})`,
+        sql`(
+          ${articles.searchVector} @@ websearch_to_tsquery('sintezaur_ro', ${term})
+          OR ${articles.searchVectorEn} @@ websearch_to_tsquery('english', ${term})
+        )`,
       );
     }
     if (query.gearId) {
