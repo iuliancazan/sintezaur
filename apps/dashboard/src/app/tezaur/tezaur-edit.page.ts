@@ -276,6 +276,7 @@ export class TezaurAdminEditPage {
   readonly jsonError = signal<string | null>(null);
   readonly familyWarning = signal<string | null>(null);
   readonly dropHover = signal(false);
+  readonly imageDropHover = signal(false);
 
   readonly saving = signal(false);
   readonly uploading = signal(false);
@@ -1039,19 +1040,8 @@ export class TezaurAdminEditPage {
 
     this.saving.set(true);
     try {
-      let gearId: string;
-      let nextSlug: string;
-      const payload = this.collectGearPayload();
-
-      if (this.isEdit() && this.editingId()) {
-        const result = await this.tezaur.update(this.editingId()!, payload);
-        gearId = result.id;
-        nextSlug = result.slug;
-      } else {
-        const created = await this.tezaur.create(payload);
-        gearId = created.id;
-        nextSlug = created.slug;
-      }
+      const wasNew = !this.isEdit();
+      const { id: gearId, slug: nextSlug } = await this.persistGear();
 
       // Sub-resources: links, videos, relationships
       const subErrors: string[] = [];
@@ -1059,8 +1049,8 @@ export class TezaurAdminEditPage {
       await this.syncVideos(gearId, subErrors);
       await this.syncRelationships(gearId, subErrors);
 
-      // Description (edit-only)
-      if (this.isEdit() && this.descriptionHtml) {
+      // Description (edit-only — endpoint requires the gear to exist).
+      if ((this.isEdit() || !wasNew) && this.descriptionHtml) {
         try {
           await this.tezaur.upsertDescription(gearId, {
             lang: 'ro',
@@ -1085,11 +1075,8 @@ export class TezaurAdminEditPage {
         );
       }
 
-      if (!this.isEdit()) {
-        await this.router.navigate(['/tezaur', gearId, 'edit']);
-        return;
-      }
-      // Reload to pick up server-assigned ids on freshly-created sub-resources.
+      // Reload to pick up server-assigned ids on freshly-created
+      // sub-resources / image variants.
       await this.loadDetail(nextSlug);
     } catch (err) {
       this.saveError.set(
@@ -1099,6 +1086,45 @@ export class TezaurAdminEditPage {
     } finally {
       this.saving.set(false);
     }
+  }
+
+  /**
+   * Create-or-update the gear row from the current form. On the `/new`
+   * path this also flips the page into edit-mode in place (no navigation)
+   * by rewriting the URL with `history.replaceState`, so any work already
+   * done on the page (e.g. a file the user just dropped) isn't lost.
+   */
+  private async persistGear(): Promise<{ id: string; slug: string }> {
+    const payload = this.collectGearPayload();
+    if (this.isEdit() && this.editingId()) {
+      return this.tezaur.update(this.editingId()!, payload);
+    }
+    const created = await this.tezaur.create(payload);
+    this.editingId.set(created.id);
+    this.isEdit.set(true);
+    // Swap the URL to /tezaur/:id/edit so a page refresh keeps editing
+    // the just-created row instead of starting fresh on /new.
+    history.replaceState(history.state, '', `/tezaur/${created.id}/edit`);
+    return created;
+  }
+
+  /**
+   * Image upload (and a few other edit-only actions) need a server-side
+   * gear row to attach to. On `/new` we create one on demand from the
+   * current form so the user can drop a file straight after typing brand
+   * + model. Throws if the brand/model required fields are missing — the
+   * backend will reject the POST otherwise.
+   */
+  private async ensureGearExists(): Promise<string> {
+    if (this.editingId()) return this.editingId()!;
+    const f = this.form();
+    if (!f.brand.trim() || !f.model.trim()) {
+      throw new Error(
+        'Completează „Brand" și „Model" înainte să încarci imagini sau să atașezi subresurse.',
+      );
+    }
+    const { id } = await this.persistGear();
+    return id;
   }
 
   private async syncLinks(gearId: string, errors: string[]): Promise<void> {
@@ -1230,15 +1256,56 @@ export class TezaurAdminEditPage {
 
   async uploadImage(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file || !this.editingId()) return;
+    const files = input.files ? Array.from(input.files) : [];
+    if (!files.length) return;
+    await this.uploadFiles(files);
+    input.value = '';
+  }
+
+  async onImageDrop(event: DragEvent): Promise<void> {
+    event.preventDefault();
+    this.imageDropHover.set(false);
+    const files = event.dataTransfer?.files
+      ? Array.from(event.dataTransfer.files).filter((f) =>
+          f.type.startsWith('image/'),
+        )
+      : [];
+    if (!files.length) return;
+    await this.uploadFiles(files);
+  }
+
+  onImageDragOver(event: DragEvent): void {
+    event.preventDefault();
+    if (!this.imageDropHover()) this.imageDropHover.set(true);
+  }
+  onImageDragLeave(event: DragEvent): void {
+    const related = event.relatedTarget as Node | null;
+    const currentEl = event.currentTarget as Node | null;
+    if (currentEl && related && currentEl.contains(related)) return;
+    this.imageDropHover.set(false);
+  }
+
+  /** Shared upload pipeline used by both the file-input and the drop-zone.
+   *  Calls `ensureGearExists()` first so /new can upload before the user
+   *  clicks "Creează". */
+  private async uploadFiles(files: File[]): Promise<void> {
     this.uploadError.set(null);
+    let gearId: string;
+    try {
+      gearId = await this.ensureGearExists();
+    } catch (err) {
+      this.uploadError.set(
+        err instanceof Error ? err.message : 'Nu am putut crea gear-ul.',
+      );
+      return;
+    }
     this.uploading.set(true);
     try {
-      await this.tezaur.uploadImage(this.editingId()!, file);
-      const d = await this.tezaur.detailById(this.editingId()!);
+      for (const file of files) {
+        await this.tezaur.uploadImage(gearId, file);
+      }
+      const d = await this.tezaur.detailById(gearId);
       this.detail.set(d);
-      input.value = '';
     } catch (err) {
       this.uploadError.set(
         (err as { error?: { message?: string } })?.error?.message ??

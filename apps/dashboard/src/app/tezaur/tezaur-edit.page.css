@@ -172,6 +172,10 @@ textarea { font-family: var(--font-mono); resize: vertical; }
 }
 .admin__paste-btn:hover { filter: brightness(1.1); }
 
+/* Image drop-zone reuses .admin__drop but sits next to the gallery,
+   not at the top of the form — keep it visually lighter. */
+.admin__drop--img { margin-top: 12px; padding: 20px; }
+
 /* ===== chips (midi_io, audio_out) ===== */
 .admin__chips {
   display: flex;

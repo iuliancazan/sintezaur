@@ -656,36 +656,63 @@
           ></textarea>
         </label>
       </section>
-
-      <!-- ===== Imagini ===== -->
-      <section class="admin__sec">
-        <h2>Imagini</h2>
-        @if (detail(); as d) {
-          <div class="admin__images">
-            @for (img of squareThumbs(d); track img.sourceId) {
-              <div class="admin__image">
-                <img [src]="tezaur.imageUrl(img.path)" [alt]="img.caption ?? ''" />
-                <button type="button" (click)="deleteImage(img.sourceId)">×</button>
-              </div>
-            }
-            @if (squareThumbs(d).length === 0) {
-              <p class="muted">Nicio imagine încărcată.</p>
-            }
-          </div>
-        }
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          (change)="uploadImage($event)"
-        />
-        @if (uploadError()) {
-          <span class="admin__err">{{ uploadError() }}</span>
-        }
-        @if (uploading()) {
-          <p class="muted">Se procesează imaginea (Sharp generează 7 variante)...</p>
-        }
-      </section>
     }
+
+    <!-- ===== Imagini (disponibil și pe /new — uploadul creează gear-ul) ===== -->
+    <section class="admin__sec">
+      <h2>Imagini</h2>
+      @if (!isEdit()) {
+        <p class="admin__hint">
+          💡 Pe pagina „Gear nou", uploadul de imagini creează automat gear-ul cu
+          valorile din form. Asigură-te că ai completat <strong>Brand</strong> și
+          <strong>Model</strong> înainte să arunci primul fișier.
+        </p>
+      }
+      @if (detail(); as d) {
+        <div class="admin__images">
+          @for (img of squareThumbs(d); track img.sourceId) {
+            <div class="admin__image">
+              <img [src]="tezaur.imageUrl(img.path)" [alt]="img.caption ?? ''" />
+              <button type="button" (click)="deleteImage(img.sourceId)">×</button>
+            </div>
+          }
+          @if (squareThumbs(d).length === 0) {
+            <p class="muted">Nicio imagine încărcată.</p>
+          }
+        </div>
+      }
+      <div
+        class="admin__drop admin__drop--img"
+        [class.is-hover]="imageDropHover()"
+        (click)="imageFileInput.click()"
+        (dragenter)="onImageDragOver($event)"
+        (dragover)="onImageDragOver($event)"
+        (dragleave)="onImageDragLeave($event)"
+        (drop)="onImageDrop($event)"
+      >
+        <p class="admin__drop-primary">
+          Drag &amp; drop una sau mai multe imagini (JPEG / PNG / WEBP) sau click
+          pentru a alege fișiere
+        </p>
+        <p class="admin__drop-sub">
+          Sharp generează automat variantele (thumb, medium, large) la upload.
+        </p>
+      </div>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        multiple
+        style="display:none"
+        (change)="uploadImage($event)"
+        #imageFileInput
+      />
+      @if (uploadError()) {
+        <span class="admin__err">{{ uploadError() }}</span>
+      }
+      @if (uploading()) {
+        <p class="muted">Se procesează imaginea (Sharp generează 7 variante)...</p>
+      }
+    </section>
 
     @if (saveError()) {
       <p class="error">{{ saveError() }}</p>
