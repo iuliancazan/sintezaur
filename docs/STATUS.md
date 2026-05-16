@@ -6,7 +6,23 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M11-C** — Drafturile mele + meniu cont.
+**Last shipped:** **M11** ✅ — Tezaur contributor flow complete.
+Toate sub-fazele A–D livrate pe `main`. `docs/testing/m11-testing.md`
+scris cu plan complet de testare manuală pe stack-ul deployed (6
+secțiuni: foundation backend + tezaur list button + add page core
+flow + drafturile mele + regression + known limitations).
+
+Per total M11 a livrat: backend cu migration 0014 (state enum +
+tracking columns + 2 indexes), refactor `TezaurService` (+ ~680
+linii), controller nou `MeContributorController`, extinderi
+public + admin controllers; frontend cu pagina nouă
+`/tezaur/adauga` (componentă 760 linii TS + 580 linii HTML +
+984 linii CSS extras din V06), pagina `/cont/contributii-tezaur`
+(~370 linii), extinderi service + i18n (~120 chei noi).
+Tezaur list capătă buton „Adaugă în Tezaur"; account menu capătă
+link „Contribuții Tezaur".
+
+**Last shipped (previous):** **M11-C** — Drafturile mele + meniu cont.
 Pagina nouă `/cont/contributii-tezaur` cu `MyTezaurDraftsPage`.
 Lista rândurilor (88×88 thumb + brand+model + state badge color-coded
 {draft=neutral, submitted=galben, approved=verde, rejected=roșu} +

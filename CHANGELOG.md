@@ -7,12 +7,37 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
-### M11 — Tezaur contributor flow (in progress)
+### M11 — Tezaur contributor flow ✅
 
 Allow any authenticated user to contribute a new gear entry to
 Tezaur with a community-moderation workflow (spec §7.2 — was
 previously blocked behind `curator+` role). Shipped in sub-phases
 A (backend) → B (FE form) → C (drafts list + nav) → D (close).
+
+#### M11-D — Close milestone + manual testing plan
+
+- **`docs/testing/m11-testing.md`** written with 6-section manual
+  testing plan for the deployed stack:
+  1. Foundation (migration applied, columns + enum + indexes
+     present, auth gating, ownership checks, state transitions,
+     admin moderation, public auto-suggest endpoints).
+  2. Tezaur list "Adaugă" button visibility + login redirect.
+  3. Add page core flow: header, identification (brand combo,
+     model, category, form factor chips, year, family combo,
+     msrp), auto-save lifecycle (debounce, draft URL, refresh),
+     images (multi-upload, drag-reorder, delete, 12-cap, 8MB
+     limit), description (counter, Tiptap conversion), specs
+     sub-sections (Sinteză / Keyboard / Conectivitate / Fizic),
+     relations (lookup resolution), links (kind selector, blur
+     save), sidebar (live preview / completion meter / CTAs /
+     tips), submit-to-moderation transition.
+  4. Drafturile mele: listing per-state badge color, continue
+     editing deep-link, delete with confirm, account menu link.
+  5. Regression: existing `/tezaur` list still shows only
+     approved rows, existing routes intact, build budgets okay.
+  6. Known limitations & next steps (tags, video, Tiptap real
+     editor, admin moderation dashboard UI, tagline preview,
+     contributor role auto-promotion).
 
 #### M11-C — "Drafturile mele" listing page + account menu link
 
