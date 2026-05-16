@@ -228,6 +228,45 @@ export class ForumThreadsService {
     };
   }
 
+  /**
+   * Cross-category recent activity for the home page "Se vorbește"
+   * block. Returns the most-recently-active threads regardless of
+   * category, ordered by lastPostAt (createdAt fallback for threads
+   * with zero replies). Public read — no auth required.
+   */
+  async listRecent(limit = 5): Promise<ThreadListItem[]> {
+    const safeLimit = Math.max(1, Math.min(limit, 20));
+    const rows = await this.db
+      .select({
+        id: forumThreads.id,
+        slug: forumThreads.slug,
+        title: forumThreads.title,
+        authorId: forumThreads.authorId,
+        authorUsername: users.username,
+        authorFullName: users.fullName,
+        categoryId: forumThreads.categoryId,
+        categorySlug: forumCategories.slug,
+        postCount: forumThreads.postCount,
+        lastPostAt: forumThreads.lastPostAt,
+        createdAt: forumThreads.createdAt,
+        pinnedAt: forumThreads.pinnedAt,
+        pinPosition: forumThreads.pinPosition,
+        lockedAt: forumThreads.lockedAt,
+      })
+      .from(forumThreads)
+      .innerJoin(
+        forumCategories,
+        eq(forumCategories.id, forumThreads.categoryId),
+      )
+      .leftJoin(users, eq(users.id, forumThreads.authorId))
+      .where(isNull(forumThreads.deletedAt))
+      .orderBy(
+        sql`COALESCE(${forumThreads.lastPostAt}, ${forumThreads.createdAt}) DESC`,
+      )
+      .limit(safeLimit);
+    return rows;
+  }
+
   async findById(id: string): Promise<ForumThread> {
     const [row] = await this.db
       .select()

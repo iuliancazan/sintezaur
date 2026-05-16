@@ -13,6 +13,7 @@ import { AuthService } from './auth/auth.service';
 import { BazarService, BazarListItem } from './bazar/bazar.service';
 import { I18nService } from './i18n/i18n.service';
 import { TPipe } from './i18n/t.pipe';
+import { ForumService, ThreadListItem } from './forum/forum.service';
 import { ArticleListItem, RevistaService } from './revista/revista.service';
 import { SeoService } from './seo/seo.service';
 import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
@@ -44,6 +45,67 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
   standalone: true,
   imports: [CommonModule, RouterLink, TPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      /* Forum recent — list view for the home page "Se vorbește" block.
+         Lives in the component (not v05.css) since it's home-specific. */
+      .forum-recent {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--line);
+      }
+      .forum-recent__item {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .forum-recent__item:hover { background: var(--bg-card-2); }
+      .forum-recent__title {
+        font-family: var(--font-display);
+        font-size: 18px;
+        color: var(--fg);
+        text-decoration: none;
+        line-height: 1.3;
+      }
+      .forum-recent__title:hover { color: var(--accent); }
+      .forum-recent__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.04em;
+        color: var(--fg-muted);
+      }
+      .forum-recent__meta .avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--fg);
+        font-family: var(--font-mono);
+        text-transform: uppercase;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+      .forum-recent__cat {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      .forum-recent__meta .sep { opacity: 0.4; }
+
+      /* Pattern-only fallback when the image hides itself (onerror) keeps
+         the label readable instead of collapsing the tile. */
+      .gear-fill__photo:not([src]) { display: none; }
+    `,
+  ],
   template: `
     <div class="shell">
       <!-- ============== HERO (featured article) ============== -->
@@ -54,7 +116,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
             @if (heroArticle(); as a) {
               <div class="gear-fill" [attr.data-gear]="a.slug">
                 @if (a.heroThumb) {
-                  <img class="gear-fill__photo" [src]="mediaUrl(a.heroThumb)" [alt]="a.title" loading="lazy" />
+                  <img
+                    class="gear-fill__photo"
+                    [src]="mediaUrl(a.heroThumb)"
+                    [alt]="a.title"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
                 }
                 <span class="gear-fill__label">{{ a.tags[0] || ('home.featured_chip' | t) }}</span>
               </div>
@@ -123,7 +191,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                 <div class="article__media">
                   <div class="gear-fill" [attr.data-gear]="big.slug">
                     @if (big.heroThumb) {
-                      <img class="gear-fill__photo" [src]="mediaUrl(big.heroThumb)" [alt]="big.title" loading="lazy" />
+                      <img
+                        class="gear-fill__photo"
+                        [src]="mediaUrl(big.heroThumb)"
+                        [alt]="big.title"
+                        loading="lazy"
+                        (error)="onImageError($event)"
+                      />
                     }
                     <span class="gear-fill__label">{{ big.tags[0] || ('home.revista_no_tag' | t) }}</span>
                   </div>
@@ -159,7 +233,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                   <div class="article__media">
                     <div class="gear-fill" [attr.data-gear]="a.slug">
                       @if (a.heroThumb) {
-                        <img class="gear-fill__photo" [src]="mediaUrl(a.heroThumb)" [alt]="a.title" loading="lazy" />
+                        <img
+                    class="gear-fill__photo"
+                    [src]="mediaUrl(a.heroThumb)"
+                    [alt]="a.title"
+                    loading="lazy"
+                    (error)="onImageError($event)"
+                  />
                       }
                       <span class="gear-fill__label">{{ a.tags[0] || categoryLabel(a.category) }}</span>
                     </div>
@@ -201,7 +281,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                 <div class="listing__media">
                   <div class="gear-fill" [attr.data-gear]="l.gearSlug ?? l.slug">
                     @if (l.thumb) {
-                      <img class="gear-fill__photo" [src]="mediaUrl(l.thumb)" [alt]="l.title" loading="lazy" />
+                      <img
+                        class="gear-fill__photo"
+                        [src]="mediaUrl(l.thumb)"
+                        [alt]="l.title"
+                        loading="lazy"
+                        (error)="onImageError($event)"
+                      />
                     }
                     <span class="gear-fill__label">{{ l.brand || '' }} · {{ l.model || l.title }}</span>
                   </div>
@@ -239,7 +325,7 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         </div>
       </section>
 
-      <!-- ============== FORUM + PULSE ============== -->
+      <!-- ============== FORUM RECENT ============== -->
       <section class="block crosses" aria-labelledby="forum-title">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <header class="block__head">
@@ -252,11 +338,57 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
           <a class="block__cta" routerLink="/forum">{{ 'home.forum_cta' | t }}</a>
         </header>
 
-        <div
-          class="block__body"
-          style="padding:40px 20px;text-align:center;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;"
-        >
-          {{ 'home.forum_empty' | t }}
+        <div class="block__body">
+          @if (forumThreads().length > 0) {
+            <ul class="forum-recent">
+              @for (t of forumThreads(); track t.id) {
+                <li class="forum-recent__item">
+                  <a
+                    class="forum-recent__title"
+                    [routerLink]="['/forum', t.categorySlug, t.slug]"
+                  >
+                    {{ t.title }}
+                  </a>
+                  <div class="forum-recent__meta">
+                    <a
+                      class="forum-recent__cat"
+                      [routerLink]="['/forum', t.categorySlug]"
+                    >
+                      // {{ t.categorySlug }}
+                    </a>
+                    <span class="sep">·</span>
+                    <span>
+                      <b>{{ t.postCount }}</b>
+                      {{
+                        t.postCount === 1
+                          ? ('home.forum_post_one' | t)
+                          : ('home.forum_post_many' | t)
+                      }}
+                    </span>
+                    @if (t.lastPostAt || t.createdAt) {
+                      <span class="sep">·</span>
+                      <span>{{ formatShortDate(t.lastPostAt ?? t.createdAt) }}</span>
+                    }
+                    @if (t.authorUsername) {
+                      <span class="sep">·</span>
+                      <span>
+                        <span class="avatar" style="width:18px;height:18px;font-size:9px">{{
+                          initials(t.authorFullName || t.authorUsername)
+                        }}</span>
+                        {{ t.authorFullName || t.authorUsername }}
+                      </span>
+                    }
+                  </div>
+                </li>
+              }
+            </ul>
+          } @else {
+            <div
+              style="padding:40px 20px;text-align:center;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;"
+            >
+              {{ 'home.forum_empty' | t }}
+            </div>
+          }
         </div>
       </section>
 
@@ -278,7 +410,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
             @if (spotlight(); as g) {
               <div class="gear-fill" [attr.data-gear]="g.slug">
                 @if (g.thumb) {
-                  <img class="gear-fill__photo" [src]="mediaUrl(g.thumb)" [alt]="g.brand + ' ' + g.model" loading="lazy" />
+                  <img
+                  class="gear-fill__photo"
+                  [src]="mediaUrl(g.thumb)"
+                  [alt]="g.brand + ' ' + g.model"
+                  loading="lazy"
+                  (error)="onImageError($event)"
+                />
                 }
                 <span class="gear-fill__label">{{ g.brand }} {{ g.model }}</span>
               </div>
@@ -336,7 +474,13 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
               <div class="gear__media">
                 <div class="gear-fill" [attr.data-gear]="g.slug">
                   @if (g.thumb) {
-                    <img class="gear-fill__photo" [src]="mediaUrl(g.thumb)" [alt]="g.brand + ' ' + g.model" loading="lazy" />
+                    <img
+                  class="gear-fill__photo"
+                  [src]="mediaUrl(g.thumb)"
+                  [alt]="g.brand + ' ' + g.model"
+                  loading="lazy"
+                  (error)="onImageError($event)"
+                />
                   }
                   <span class="gear-fill__label">{{ g.brand }} · {{ g.model }}</span>
                 </div>
@@ -399,11 +543,13 @@ export class HomePage implements OnInit {
   private readonly tezaur = inject(TezaurService);
   private readonly seo = inject(SeoService);
   private readonly appConfig = inject(AppConfigService);
+  private readonly forum = inject(ForumService);
 
   readonly revistaArticles = signal<ArticleListItem[]>([]);
   readonly bazarListings = signal<BazarListItem[]>([]);
   readonly bazarLoading = signal(true);
   readonly tezaurList = signal<TezaurListItem[]>([]);
+  readonly forumThreads = signal<ThreadListItem[]>([]);
 
   readonly heroArticle = computed<ArticleListItem | null>(
     () => this.revistaArticles()[0] ?? null,
@@ -412,10 +558,24 @@ export class HomePage implements OnInit {
     () => this.heroArticle()?.publishedAt ?? null,
   );
   readonly heroAuthor = computed(() => this.heroArticle()?.author ?? null);
+
+  /**
+   * "Ultimele citite" — pick the next 4 articles after the hero. When
+   * fewer than 4 articles exist we re-use the hero (better to show one
+   * article twice than to render an empty-state next to a populated
+   * hero, which made the page look like nothing was published). Order:
+   * first non-hero article goes into the big tile; the rest into the
+   * side rail.
+   */
+  readonly revistaSecondary = computed<ArticleListItem[]>(() => {
+    const all = this.revistaArticles();
+    if (all.length === 0) return [];
+    return all.length >= 2 ? all.slice(1) : all;
+  });
   readonly revistaBig = computed<ArticleListItem | null>(
-    () => this.revistaArticles()[1] ?? null,
+    () => this.revistaSecondary()[0] ?? null,
   );
-  readonly revistaSide = computed(() => this.revistaArticles().slice(2, 4));
+  readonly revistaSide = computed(() => this.revistaSecondary().slice(1, 4));
 
   readonly spotlight = computed(() => this.tezaurList()[0] ?? null);
   readonly catalog = computed(() => this.tezaurList().slice(1, 7));
@@ -456,6 +616,16 @@ export class HomePage implements OnInit {
     void this.loadRevista();
     void this.loadBazar();
     void this.loadTezaur();
+    void this.loadForum();
+  }
+
+  private async loadForum(): Promise<void> {
+    try {
+      const res = await this.forum.listRecent(5);
+      this.forumThreads.set(res);
+    } catch {
+      this.forumThreads.set([]);
+    }
   }
 
   private async loadRevista(): Promise<void> {
@@ -523,6 +693,15 @@ export class HomePage implements OnInit {
    *  joining slash, producing 404s like `api.sintezaur.rolisting/...jpg`. */
   mediaUrl(path: string | null | undefined): string {
     return this.appConfig.imageUrl(path);
+  }
+
+  /** Hide the <img> element when its src fails to load. Each card has a
+   *  layered placeholder (`gear-fill` pattern + label) underneath the
+   *  photo, so collapsing the img reveals it instead of leaving a blank
+   *  rectangle covering the brand text. */
+  onImageError(event: Event): void {
+    const el = event.target as HTMLImageElement | null;
+    if (el) el.style.display = 'none';
   }
 
   heroReadMinutes(): number {

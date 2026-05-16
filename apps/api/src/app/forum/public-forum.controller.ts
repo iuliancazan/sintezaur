@@ -39,6 +39,16 @@ export class PublicForumController {
     return this.categories.listAll();
   }
 
+  /**
+   * Cross-category recent activity — feeds the home page "Se vorbește"
+   * block. Defaults to the 5 most-recently-active threads; cap at 20.
+   */
+  @Get('recent')
+  listRecent(@Query('limit') limit?: string) {
+    const n = limit ? Number(limit) : 5;
+    return this.threads.listRecent(Number.isFinite(n) ? n : 5);
+  }
+
   @Get('search')
   searchThreads(
     @Query('q') q?: string,

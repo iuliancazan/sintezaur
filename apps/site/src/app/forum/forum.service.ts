@@ -239,6 +239,15 @@ export class ForumService {
     );
   }
 
+  /** Cross-category recent activity for the home page hero block. */
+  listRecent(limit = 5): Promise<ThreadListItem[]> {
+    return firstValueFrom(
+      this.http.get<ThreadListItem[]>(`${this.base}/forum/recent`, {
+        params: new HttpParams().set('limit', String(limit)),
+      }),
+    );
+  }
+
   listThreads(
     categorySlug: string,
     opts: { page?: number; pageSize?: number } = {},
