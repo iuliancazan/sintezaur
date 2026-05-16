@@ -536,7 +536,8 @@
       "my_listings": "Anunțurile mele",
       "forum_subscriptions": "Abonamente forum",
       "notification_preferences": "Preferințe notificări",
-      "feedback": "Trimite feedback"
+      "feedback": "Trimite feedback",
+      "my_tezaur_drafts": "Contribuții Tezaur"
     },
     "logged_in_as": "Conectat ca {{email}}",
     "back": "← Înapoi la cont",
@@ -1224,5 +1225,20 @@
       "hours": "acum {{n}} h",
       "days": "acum {{n}} zile"
     }
+  },
+  "my_tezaur_drafts": {
+    "title": "Contribuții Tezaur",
+    "lede": "Drafturi în lucru, piese trimise la moderare și piese publicate ale tale. Continuă editarea unei piese, sau șterge un draft care nu mai e relevant.",
+    "empty_title": "Nu ai contribuit încă nicio piesă",
+    "empty_body": "Adaugă un sintetizator, drum machine, sampler — orice piesă lipsă din Tezaur. După moderare devine pagină de detaliu pentru toată comunitatea.",
+    "updated_prefix": "actualizat",
+    "unnamed": "(fără model încă)",
+    "action_continue": "Continuă editare →",
+    "action_delete": "Șterge",
+    "action_view": "Vezi pagina",
+    "deleting": "Șterg…",
+    "delete_confirm": "Ștergi acest draft definitiv? Acțiunea nu poate fi anulată.",
+    "queued_note": "în coadă de moderare",
+    "reject_label": "Motiv respingere"
   }
 }

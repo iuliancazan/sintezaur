@@ -59,6 +59,15 @@ import { TPipe } from '../i18n/t.pipe';
         {{ 'account.menu.my_listings' | t }}
       </a>
 
+      <a
+        role="menuitem"
+        class="am__item"
+        routerLink="/cont/contributii-tezaur"
+        (click)="close()"
+      >
+        {{ 'account.menu.my_tezaur_drafts' | t }}
+      </a>
+
       <button
         role="menuitem"
         type="button"

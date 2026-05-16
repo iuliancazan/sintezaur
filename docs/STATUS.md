@@ -6,7 +6,23 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M11-B** — Tezaur contributor add page (V06 form + auto-save).
+**Last shipped:** **M11-C** — Drafturile mele + meniu cont.
+Pagina nouă `/cont/contributii-tezaur` cu `MyTezaurDraftsPage`.
+Lista rândurilor (88×88 thumb + brand+model + state badge color-coded
+{draft=neutral, submitted=galben, approved=verde, rejected=roșu} +
+„actualizat la {date}" + motiv respingere expandabil pentru
+rejected). Acțiuni per stare: draft/rejected = „Continuă editare →"
+(navighează la `/tezaur/adauga?draft=<id>`) + „Șterge" (cu confirm,
+soft delete via `meDeleteDraft`); submitted = „⏳ în coadă"
+read-only; approved = „Vezi pagina →" link la `/tezaur/<slug>`.
+Empty state cu CTA „+ Adaugă în Tezaur". Layout 3-col mobile-first
+care colapsează la 2-col pe <720px (acțiuni se mută pe row 2).
+Item nou în account-menu „Contribuții Tezaur" (vizibil pentru
+toți userii autentificați, între „Anunțurile mele" și separatorul
+către dashboard). 13 chei i18n noi sub `my_tezaur_drafts.*` +
+1 `account.menu.my_tezaur_drafts`.
+
+**Last shipped (previous):** **M11-B** — Tezaur contributor add page (V06 form + auto-save).
 Pagina nouă la `/tezaur/adauga` (auth-guarded). Componenta
 `TezaurAddPage` cu form ReactiveForm complet pe markup V06
 `.ta-*` — 6 secțiuni (Identificare, Imagini, Descriere, Specs cu

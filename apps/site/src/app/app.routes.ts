@@ -255,6 +255,13 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
           import('./account/my-listings.page').then((m) => m.MyListingsPage),
       },
+      {
+        path: 'contributii-tezaur',
+        loadComponent: () =>
+          import('./account/my-tezaur-drafts.page').then(
+            (m) => m.MyTezaurDraftsPage,
+          ),
+      },
       // M10-D: legacy favorites paths redirect into the new shell.
       { path: 'salvate', redirectTo: 'favorite/anunturi', pathMatch: 'full' },
       {

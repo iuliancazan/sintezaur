@@ -14,6 +14,37 @@ Tezaur with a community-moderation workflow (spec §7.2 — was
 previously blocked behind `curator+` role). Shipped in sub-phases
 A (backend) → B (FE form) → C (drafts list + nav) → D (close).
 
+#### M11-C — "Drafturile mele" listing page + account menu link
+
+- **New route `/cont/contributii-tezaur`** (under existing `cont`
+  authGuard). Loads `MyTezaurDraftsPage` listing every gear row
+  the current user has authored across all states. Each row
+  shows: 88×88 thumb (or — placeholder), brand + model, state
+  badge color-coded by lifecycle stage (draft=neutral,
+  submitted=amber, approved=green, rejected=red), "actualizat la
+  {date}" timestamp, plus per-state actions:
+  - **draft / rejected** — "Continuă editare →" navigates to
+    `/tezaur/adauga?draft=<id>` (auto-loads the draft and unlocks
+    the form), and "Șterge" with browser confirm calling
+    `meDeleteDraft` (soft delete; row disappears from the list).
+  - **submitted** — read-only "⏳ în coadă de moderare" tag, no
+    actions (curator owns the row now).
+  - **approved** — "Vezi pagina →" link to `/tezaur/<slug>` so
+    the contributor sees their published entry.
+  - **rejected** — also surfaces the moderator's
+    `rejectionReason` text in a callout so the contributor knows
+    what to fix before re-submitting.
+- **Account menu link** — `AccountMenuComponent` extended with a
+  "Contribuții Tezaur" item between "Anunțurile mele" and the
+  feedback button. Visible to every authenticated user.
+- **Empty state** — friendly icon + lede + "+ Adaugă în Tezaur"
+  CTA when the user hasn't started any draft yet.
+- **Responsive** — desktop 3-col layout (thumb / body / actions);
+  on screens <720px collapses to 2-col with actions wrapping onto
+  a second row below the body.
+- **i18n** — 13 new keys under `my_tezaur_drafts.*` +
+  `account.menu.my_tezaur_drafts`.
+
 #### M11-B — Frontend add page (V06 form + auto-save + live preview)
 
 - **New route `/tezaur/adauga`** (auth-guarded) loads
