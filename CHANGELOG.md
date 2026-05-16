@@ -7,6 +7,104 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M14 — Bazar V07 sell page + light-mode default ✅
+
+Reskin the "Sell a product" flow on Bazar to the V07 design
+(`docs/design-imports/2026-05-16-v07/Bazar - Adaugă.html`):
+single-page form with sticky sidebar preview, debounced auto-save
+into a `status='draft'` listing, and a dedicated publish step.
+Also flips the brand-default theme from `auto` (OS preference) to
+`light`. Shipped in sub-phases A (backend) → B (FE + theme) → C (close).
+
+#### M14-A — Backend draft flow + tagline/defects
+
+- **Schema** (`libs/db/src/lib/migrations/0015_listing_tagline_defects.sql`):
+  `ALTER TABLE listings ADD COLUMN tagline varchar(200)` +
+  `ADD COLUMN defects text`. Drizzle model + journal updated.
+- **DTOs** (`apps/api/src/app/bazar/bazar.dto.ts`): `CreateListingDto`
+  gains optional `tagline` (max 200) and `defects` (max 2000). New
+  `CreateListingDraftDto` with every field optional, used by the
+  initial "spin up a draft" call.
+- **Service** (`apps/api/src/app/bazar/listings.service.ts`):
+  - `createDraft(sellerId, dto)` — inserts a row with
+    `status='draft'`, placeholder title/slug, `expiresAt=null`.
+    Resolves and validates `gearId` if provided.
+  - `publishDraft(sellerId, id)` — validates required fields
+    server-side, re-slugs from brand+model+title (so the public
+    URL doesn't carry the random draft tail), flips to
+    `status='active'`, stamps `expiresAt = now + 90d`, fans out
+    saved-search matches. Returns `{ missing[] }` on 409 when
+    incomplete.
+  - `findOwnById(sellerId, id)` — owner-only, returns drafts too.
+  - `update` extended to accept changes on `gearId`/`rawMake`/
+    `rawModel`/`rawYear`/`tagline`/`defects`.
+- **Controller** (`apps/api/src/app/bazar/me-bazar.controller.ts`):
+  3 new endpoints: `POST /me/bazar/listings/draft`, `POST
+  /me/bazar/listings/:id/publish`, `GET /me/bazar/listings/:id`.
+- **Privacy**: `PublicBazarController.detail` now 404s on drafts
+  for anyone other than the seller; the public listing query
+  (`listPublic`) was already filtering `status='active'`, so this
+  closes the slug-leak side door.
+
+#### M14-B — Frontend V07 sell page + auto-save + light-mode default
+
+- **CSS rename**: `apps/site/src/v06-tezaur-add.css` →
+  `v06-add-forms.css` (scope partajat Tezaur + Bazar add). The
+  shared `.ta-*` block stays; ~350 lines of `.bz-*` widgets
+  appended (`.bz-add-link`, `.bz-cond` 5-step condition radio,
+  `.bz-deal` 3-card deal-type radio, `.bz-price` large display
+  with split RON/EUR cell, `.bz-deliv`, `.bz-payment` carrier
+  chips, `.bz-prev-card` live preview, `.bz-trust`,
+  `.bz-side-est`, `.bz-note`).
+- **`BazarFormPage` rewrite** (`apps/site/src/app/bazar/bazar-form.page.{ts,html}`):
+  reactive form (FormBuilder.nonNullable) + 1.5s debounced
+  auto-save (first save creates a draft, subsequent saves PATCH).
+  `history.replaceState(?listing=<id>)` keeps the URL stable so a
+  refresh resumes the draft.
+  - Identification: combo dropdown that queries `/tezaur?q=…` and
+    falls back to free-text brand/model/year if no match.
+  - Title (≤140), one-line tagline, and a long-form textarea (the
+    backend-side rendering converts to a minimal Tiptap doc).
+  - Condition: 5-step radio grid (Ca nou / Foarte bun / Bun /
+    Folosit / Piese) mapped to the existing 6-value enum
+    (`new`/`very_good`/`good`/`fair`/`for_parts`; the `mint`
+    backend value stays valid for legacy data but is no longer
+    selectable from UI).
+  - Free-form "Defecte cunoscute" note next to the existing
+    condition note.
+  - Price: large display input with click-to-toggle currency cell
+    plus live RON↔EUR conversion ("≈ 765 € · curs 4.97").
+  - Kind: `Vând` / `Schimb` / `Vând sau schimb` 3-card radio.
+    When non-sell, a "Ce caut la schimb" textarea appears.
+  - Delivery: `Pickup` / `Ship` / `Both` 3-card radio. When
+    non-pickup, shipping cost + carrier chip-grid surface.
+  - Photos: ta-drop dropzone + ta-imgs grid with click-to-add,
+    drag-to-reorder (HTML5 DnD), per-tile delete, position label,
+    "cover" overlay on the first tile.
+  - Sticky sidebar: live preview card mirroring the public
+    listing layout; progress meter with live percent; 8-item
+    checklist; CTAs (Publică / Save draft / Preview as visitor /
+    Discard); trust strip + 4 tips, all i18n.
+- **Light-mode default** (`libs/ui/src/lib/theme/theme.service.ts`):
+  `readInitialMode()` falls back to `'light'` instead of `'auto'`
+  for users without a saved preference. `setMode` now persists
+  every choice (including `auto`) so an explicit pick is no
+  longer collapsed back to the default on the next visit.
+- **i18n**: ~110 new keys under `bazar.form.*` (header, steps,
+  section kickers/heads/hints, dropzone, radio labels,
+  conversion, CTA copy, save-status, missing-field labels for
+  publish 409 responses, trust strip, 4 tips). The legacy keys
+  the old form used are replaced by the new tree.
+
+#### M14-C — Close + manual testing plan
+
+- **`docs/testing/m14-testing.md`** with a 6-section manual
+  testing plan covering: backend (migration, draft + publish +
+  findOwn endpoints, draft slug privacy), V07 form happy path,
+  auto-save & resume on refresh, photos + drag-reorder, publish
+  with validation (incomplete 409 path), light-mode default
+  behavior + regression.
+
 ### M11 — Tezaur contributor flow ✅
 
 Allow any authenticated user to contribute a new gear entry to

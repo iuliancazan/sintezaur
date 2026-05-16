@@ -6,7 +6,23 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M11** ✅ — Tezaur contributor flow complete.
+**Last shipped:** **M14** ✅ — Bazar V07 sell page + light-mode default.
+Pagina `/bazar/nou` și `/bazar/:slug/editare` reskinate complet pe V07
+„Vinde un produs" (single-page + sticky sidebar cu live preview și
+checklist). Auto-save pe draft cu debounce 1.5s, fallback URL prin
+`history.replaceState(?listing=<id>)`. Backend: migration 0015 cu
+`tagline varchar(200)` + `defects text` pe `listings`; rute noi
+`POST /me/bazar/listings/draft`, `POST /me/bazar/listings/:id/publish`,
+`GET /me/bazar/listings/:id` (owner-only fetch inclusiv pe drafts).
+`PublicBazarController.detail` ascunde drafturile pentru oricine
+nu e owner. `ThemeService.readInitialMode()` default schimbat din
+`auto` → `light` pentru utilizatori fără preferință salvată; `auto`
+acum se persistă explicit ca să nu mai colapseze în default. CSS
+`apps/site/src/v06-tezaur-add.css` redenumit `v06-add-forms.css`
+(scope partajat Tezaur + Bazar add) + ~350 linii `.bz-*` noi.
+`docs/testing/m14-testing.md` cu plan manual de testare.
+
+**Last shipped (previous):** **M11** ✅ — Tezaur contributor flow complete.
 Toate sub-fazele A–D livrate pe `main`. `docs/testing/m11-testing.md`
 scris cu plan complet de testare manuală pe stack-ul deployed (6
 secțiuni: foundation backend + tezaur list button + add page core
@@ -414,6 +430,14 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M14 — Bazar V07 sell page + light-mode default
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | `4401af7` | done | Backend draft flow + schema. Migration `0015_listing_tagline_defects.sql` adaugă `tagline varchar(200)` + `defects text` pe `listings`. `bazar.dto.ts`: `CreateListingDto` capătă `tagline`/`defects` optional, nou `CreateListingDraftDto` cu toate câmpurile opționale. `listings.service.ts` extins cu `createDraft` (status='draft', placeholder slug + title, expiresAt=null), `publishDraft` (validează shape-ul full + re-slug din brand+model+title + setează expiresAt + fan-out saved-search), `findOwnById` (slug-then-detail prin findBySlug cu sellerId pentru a permite acces la drafts). `update` extins să accepte schimbări de `gearId`/`rawMake`/`rawModel`/`rawYear`/`tagline`/`defects`. `MeBazarController` capătă `POST listings/draft`, `POST listings/:id/publish`, `GET listings/:id`. `PublicBazarController.detail` ascunde drafturile pentru oricine ≠ owner. |
+| B   | `dfbd736` | done | Frontend V07 form + light-mode default. `apps/site/src/v06-tezaur-add.css` redenumit `v06-add-forms.css` (scope partajat Tezaur + Bazar add); ~350 linii `.bz-*` apendate (`.bz-add-link`, `.bz-cond`, `.bz-deal`, `.bz-price`, `.bz-deliv`, `.bz-payment`, `.bz-prev-card`, `.bz-trust`, `.bz-side-est`, `.bz-note`). `BazarFormPage` rescris complet în V07 markup: reactive form + auto-save 1.5s + `history.replaceState(?listing=<id>)` la primul save, combo dropdown pentru Tezaur lookup, condition radio 5-step mapată pe enum-ul existing (`new`/`very_good`/`good`/`fair`/`for_parts`, fără `mint`), deal-type radio cu 3 cards (sell/trade/sell_or_trade), delivery radio (pickup/ship/both) cu shipping cost + carriers chip-grid apărute condiționat, photo dropzone cu drag-to-reorder, sticky sidebar cu live preview card + progress meter live + checklist 8-item + CTAs (Publică / Save draft / Preview / Discard). `ThemeService.readInitialMode()` default schimbat de la `auto` la `light`; `setMode` persistă acum și `auto` ca să respecte explicit alegerea userului. ~110 chei i18n noi sub `bazar.form.*` (înlocuiește vechiul block parțial). |
+| C   | _TBD_ | done | Close + `docs/testing/m14-testing.md` cu plan manual de testare (6 secțiuni: BE migration & endpoints, V07 form happy path, auto-save & resume, photos & reorder, publish & validation, light-mode default + regression). |
 
 ### M12 — Dashboard design import v04 (out-of-order before M11)
 
