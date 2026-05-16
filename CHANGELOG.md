@@ -14,7 +14,7 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
-#### M13-E — Revista list rewrite to V05 + detail icon swap (single commit, _SHA TBD_)
+#### M13-E — Revista list rewrite to V05 + detail icon swap (single commit `2529bfe`)
 
 - **`revista-list.page.ts` full rewrite** to match V05's
   `Revista.html` magazine layout:
