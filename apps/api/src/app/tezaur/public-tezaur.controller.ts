@@ -29,6 +29,26 @@ export class PublicTezaurController {
     return this.tezaur.listPublic(q);
   }
 
+  /**
+   * Brand auto-suggest for the contributor editor. Returns distinct
+   * `gear.brand` values from published rows with usage counts, sorted
+   * by count desc + brand alphabetic. Cap at 200.
+   */
+  @Get('meta/brands')
+  listBrands() {
+    return this.tezaur.listBrandsPublic();
+  }
+
+  /**
+   * Family auto-suggest for the contributor editor. Lift of the
+   * existing admin endpoint so unauthenticated users can preview the
+   * list and contributors can pick an existing family before submit.
+   */
+  @Get('meta/families')
+  listFamilies() {
+    return this.tezaur.listFamilies();
+  }
+
   @Get(':slug')
   async detail(@Param('slug') slug: string) {
     const data = await this.tezaur.findBySlug(slug, 'ro');

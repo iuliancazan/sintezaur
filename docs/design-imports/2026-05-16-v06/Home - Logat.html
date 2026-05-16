@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur — Home</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+  /* ============================================================
+     LOGGED-IN — topbar, avatar, dropdown, drawer, modal
+     ============================================================ */
+
+  /* --- icon badge (notif/mesaje count) --- */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  /* --- avatar (with deterministic hue + initials fallback) --- */
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    /* color set inline via JS */
+  }
+
+  /* --- avatar trigger button --- */
+  .avatar-menu { position: relative; }
+  .avatar-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 6px 2px 2px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+
+  .avatar-icon { padding: 0 !important; border-color: transparent !important; }
+  .avatar-icon:hover { border-color: var(--line) !important; }
+
+  /* --- dropdown panel --- */
+  .avatar-drop {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60;
+    padding: 6px;
+    transform-origin: top right;
+    animation: avatar-drop-in 0.16s ease;
+  }
+  @keyframes avatar-drop-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  [data-theme="light"] .avatar-drop {
+    box-shadow: 0 18px 48px -12px rgba(60, 50, 20, 0.18);
+  }
+
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px;
+    margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name {
+    font-weight: 600; font-size: 14px; color: var(--fg);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .avatar-drop__handle {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted); margin-top: 3px;
+  }
+
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 13px;
+    color: var(--fg);
+    text-align: left;
+    border-radius: 2px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__item.is-danger:hover svg { color: oklch(0.82 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger { color: oklch(0.45 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger:hover { background: oklch(0.94 0.06 28); color: oklch(0.38 0.20 28); }
+
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    color: var(--fg-muted);
+    border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* --- mobile vs desktop visibility --- */
+  .tools__mobile { display: none !important; }
+  @media (max-width: 860px) {
+    .tools__desktop { display: none !important; }
+    .tools__mobile  { display: inline-flex !important; }
+  }
+  @media (max-width: 640px) {
+    /* original styles.css hides .nav on small; that's fine */
+    /* keep our 4 mobile icons visible — override the .btn-login hide which doesn't apply here */
+  }
+
+  /* --- mobile drawer --- */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(360px, 92vw);
+    height: 100dvh;
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.24s ease;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .drawer.is-open { transform: translateX(0); }
+
+  .drawer__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .drawer__user { display: flex; align-items: center; gap: 12px; }
+  .drawer__name { font-weight: 600; font-size: 14px; }
+  .drawer__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+
+  .drawer__sec {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer__sec-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-subtle);
+    padding: 8px 8px 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .drawer__item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 11px 8px;
+    font-size: 14px;
+    color: var(--fg);
+    text-align: left;
+    background: transparent; border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .drawer__item:hover { background: var(--bg-elev); }
+  .drawer__item svg { width: 18px; height: 18px; color: var(--fg-muted); flex-shrink: 0; }
+  .drawer__item .drawer__badge {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px;
+    background: var(--accent); color: var(--accent-fg);
+    border-radius: 999px;
+  }
+  .drawer__item.is-active { color: var(--accent); }
+  .drawer__item.is-danger { color: oklch(0.72 0.16 28); }
+  [data-theme="light"] .drawer__item.is-danger { color: oklch(0.45 0.18 28); }
+
+  /* --- modal --- */
+  .modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 110;
+    display: grid; place-items: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+  .modal-back.is-open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(520px, 100%);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6);
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.18s ease;
+  }
+  .modal-back.is-open .modal { transform: scale(1) translateY(0); }
+  .modal__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal__head h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; }
+  .modal__body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .modal__foot {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .form-row { display: flex; flex-direction: column; gap: 6px; }
+  .form-row > span {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 2px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .form-row textarea { min-height: 110px; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+  /* --- bottom CTA actions list --- */
+  .cta-strip__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cta-strip__a .btn-ghost { padding: 10px 16px; font-size: 13px; }
+
+  /* --- close hidden attribute when JS toggles open --- */
+  [hidden] { display: none !important; }
+  </style>
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="01 Home · Logat">
+
+  <!-- ============================================================
+       SVG sprite — icons
+       ============================================================ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 12a8 8 0 0 0 0-8" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+        <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="3" y="5" width="18" height="14"/><path d="M3.5 6l8.5 7 8.5-7"/>
+      </symbol>
+      <symbol id="i-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.5a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.5a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>
+      </symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/>
+      </symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/>
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="/">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link is-active" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+
+        <button class="icon-btn has-badge" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></button>
+
+        <a class="icon-btn tools__desktop" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+
+        <a class="icon-btn has-badge tools__desktop" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+
+        <button class="icon-btn tools__desktop" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <div class="avatar-menu tools__desktop" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item" href="#" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem" data-feedback-open>
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+
+            <div class="avatar-drop__sep"></div>
+
+            <a class="avatar-drop__item is-admin" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+
+            <div class="avatar-drop__sep"></div>
+
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+
+        <!-- mobile-only: avatar mic + burger -->
+        <button class="icon-btn avatar-icon tools__mobile" aria-label="Cont" data-burger>
+          <span class="avatar avatar--sm" data-uid="u_8472" data-initials="TI">TI</span>
+        </button>
+        <button class="icon-btn tools__mobile" aria-label="Meniu" data-burger>
+          <svg><use href="#i-burger"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="hero crosses" aria-labelledby="hero-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="hero__grid">
+        <div class="hero__media">
+          <div class="gear-fill" data-gear="juno-60">
+            <img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="Roland Juno-60" loading="lazy" onerror="this.remove()" />
+            <span class="gear-fill__label">Foto · Roland Juno-60</span>
+          </div>
+          <div class="hero__rotator">
+            <button aria-label="Anterior" data-hero-prev>‹</button>
+            <span class="hero__counter">01 / 04</span>
+            <button aria-label="Următorul" data-hero-next>›</button>
+          </div>
+        </div>
+
+        <div class="hero__body">
+          <div>
+            <div class="hero__meta">
+              <span class="pill is-accent">Featured</span>
+              <span class="pill is-live">Live · Revistă</span>
+              <span>14 Mai 2026</span>
+            </div>
+            <h1 class="hero__title" id="hero-title">Cum sună<br/>România prin<br/>Juno-60</h1>
+            <p class="hero__lede">
+              Portret cu Khidja și colecția lor de polifonice analogice. O conversație despre tuning instabil,
+              despre Bucureștiul de noapte și despre de ce un Juno reparat de mâna a treia poate fi
+              cel mai bun preț pe care o să-l plătești vreodată pentru un sunet.
+            </p>
+          </div>
+
+          <div class="hero__footer">
+            <div class="hero__byline">
+              <span class="avatar">AM</span>
+              <span>Andrei Mihalache</span>
+              <span style="opacity:.5">·</span>
+              <span>12 min citire</span>
+            </div>
+            <a class="block__cta" href="#">Citește</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LATEST IN REVISTA
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="revista-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Revistă</span>
+          <h2 class="block__title" id="revista-title">Ultimele citite<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Revista.html">Vezi toate articolele</a>
+      </header>
+
+      <div class="block__body">
+        <div class="revista-grid" data-reveal-stagger>
+
+          <a class="article is-big" href="#">
+            <div class="article__media">
+              <div class="gear-fill" data-gear="pro-1">
+                <img class="gear-fill__photo" src="https://cdn.mos.cms.futurecdn.net/Kf8saVxuLCi9ZDaTZVypj4.jpg" alt="Behringer Pro-1" loading="lazy" onerror="this.remove()" />
+                <span class="gear-fill__label">Behringer Pro-1</span>
+              </div>
+            </div>
+            <div class="article__body">
+              <span class="article__pill">// Recenzie</span>
+              <h3 class="article__title">Behringer Pro-1 — clona Pro-One ajunge sub 400 €. Merită hype-ul?</h3>
+              <p class="article__excerpt">
+                Trei săptămâni cu Pro-1 în setup. Diferențele față de original sunt acolo, dar
+                discuția nu mai e despre fidelitate — e despre cine își permite ce.
+              </p>
+              <div class="article__byline">
+                <span class="avatar">RP</span>
+                <span>Radu Popescu</span>
+                <span class="sep">·</span>
+                <span>12 mai · 8 min</span>
+              </div>
+            </div>
+          </a>
+
+          <div class="revista-side">
+            <a class="article is-small" href="#">
+              <div class="article__media">
+                <div class="gear-fill" data-gear="volca-fm">
+                  <img class="gear-fill__photo" src="https://cdn.korg.com/ro/products/upload/497a8c904235c795605923a8d6860810_sp.jpg" alt="Korg Volca FM" loading="lazy" onerror="this.remove()" />
+                  <span class="gear-fill__label">Korg Volca FM</span>
+                </div>
+              </div>
+              <div class="article__body">
+                <span class="article__pill">// Tutorial</span>
+                <h3 class="article__title">7 patch-uri esențiale pe Volca FM — de la basuri la bell-uri</h3>
+                <div class="article__byline">
+                  <span class="avatar">MD</span>
+                  <span>Maria Dragomir</span>
+                  <span class="sep">·</span>
+                  <span>11 mai · 6 min</span>
+                </div>
+              </div>
+            </a>
+
+            <a class="article is-small" href="#">
+              <div class="article__media">
+                <div class="gear-fill" data-gear="portrait-studio">
+                  <img class="gear-fill__photo" src="https://geo-media.beatport.com/image_size/590x404/6a703041-524c-4360-81b2-388837c1cee5.jpg" alt="Cosmin TRG" loading="lazy" onerror="this.remove()" />
+                  <span class="gear-fill__label">Foto · Cosmin TRG</span>
+                </div>
+              </div>
+              <div class="article__body">
+                <span class="article__pill">// Interviu</span>
+                <h3 class="article__title">Cosmin TRG: „Setup-ul de live e ca o conversație cu tine de acum trei ani"</h3>
+                <div class="article__byline">
+                  <span class="avatar">EI</span>
+                  <span>Elena Iliescu</span>
+                  <span class="sep">·</span>
+                  <span>09 mai · 14 min</span>
+                </div>
+              </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         HOT IN BAZAR
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="bazar-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Bazar · Hot acum</span>
+          <h2 class="block__title" id="bazar-title">Pe piață<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Bazar.html">Toate listingurile</a>
+      </header>
+
+      <div class="block__body">
+        <div class="bazar-scroll" id="bazar-scroll" data-reveal-stagger>
+          <!-- Listing cards inserted via JS for compactness -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ACTIVE IN FORUM
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="forum-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Forum · Activitate recentă</span>
+          <h2 class="block__title" id="forum-title">Se vorbește<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Forum.html">Mergi pe forum</a>
+      </header>
+
+      <div class="block__body">
+        <div class="forum-with-pulse">
+          <div class="forum-list" id="forum-list" data-reveal-stagger></div>
+          <aside class="pulse pulse--aside" aria-label="Pulsul platformei" data-reveal-stagger>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Listinguri noi · azi</span>
+              <span class="pulse__num" data-count-to="47">47</span>
+              <span class="pulse__delta">↑ 12 față de ieri</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Articole · săpt.</span>
+              <span class="pulse__num" data-count-to="12">12</span>
+              <span class="pulse__delta">↑ 3 vs. săpt. trecută</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Threaduri active</span>
+              <span class="pulse__num" data-count-to="89">89</span>
+              <span class="pulse__delta">livestream actualizat</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Gear catalogat</span>
+              <span class="pulse__num" data-count-to="2418" data-count-format="comma">2,418</span>
+              <span class="pulse__delta is-down">+ 24 săpt. asta</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SPOTLIGHT TEZAUR
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="spotlight-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Tezaur · Spotlight săptămâna asta</span>
+          <h2 class="block__title" id="spotlight-title">Gear al săptămânii<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Tezaur.html">Vezi pagina</a>
+      </header>
+
+      <div class="spotlight">
+        <div class="spotlight__media">
+          <div class="gear-fill" data-gear="prophet-6">
+            <img class="gear-fill__photo" src="https://i.ytimg.com/vi/m65rAfsjllw/maxresdefault.jpg" alt="Sequential Prophet-6" loading="lazy" onerror="this.remove()" />
+            <span class="gear-fill__label">Sequential Prophet-6 Desktop</span>
+          </div>
+        </div>
+
+        <div class="spotlight__body">
+          <span class="spotlight__brand">// Sequential</span>
+          <h3 class="spotlight__model">Prophet-6<br/>Desktop</h3>
+          <p class="spotlight__desc">
+            Hexafonic analog cu VCO discrete și efecte stereo. Continuarea spirituală a Prophet-5 —
+            mai cald, mai politicos, dar tot cu acel <em>character</em> care făcea ca toți cei din 1981
+            să cumpere unul fără să gândească.
+          </p>
+
+          <div class="spec-table">
+            <div class="spec-table__cell"><span class="k">// Polifonie</span><span class="v">6 voci</span></div>
+            <div class="spec-table__cell"><span class="k">// Anul lansării</span><span class="v">2015</span></div>
+            <div class="spec-table__cell"><span class="k">// Oscilatori / voce</span><span class="v">2 VCO + sub</span></div>
+            <div class="spec-table__cell"><span class="k">// Filtru</span><span class="v">Low-pass 4-pol</span></div>
+            <div class="spec-table__cell"><span class="k">// Form factor</span><span class="v">Desktop</span></div>
+            <div class="spec-table__cell"><span class="k">// MSRP la lansare</span><span class="v">€ 1.799</span></div>
+          </div>
+
+          <div class="spotlight__row">
+            <div class="spotlight__own"><b>34</b> &nbsp;persoane dețin acest gear pe Sintezaur</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FROM THE CATALOG
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="catalog-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Tezaur · Selecție aleatoare</span>
+          <h2 class="block__title" id="catalog-title">Din catalog<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Tezaur.html">Explorează tezaurul</a>
+      </header>
+
+      <div class="catalog" id="catalog" data-reveal-stagger></div>
+    </section>
+
+    <!-- ============================================================
+         LOGGED-IN ACTION STRIP
+         ============================================================ -->
+    <section class="cta-strip crosses" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="cta-strip__a">
+        <h2 class="cta-strip__title">Postează.</h2>
+        <p>Pune ceva la vânzare, deschide o discuție sau propune un articol pentru revistă.</p>
+        <div class="cta-strip__actions">
+          <a class="btn-ghost" href="#">Anunț nou →</a>
+          <a class="btn-ghost" href="Forum - Nou.html">Thread nou →</a>
+          <a class="btn-ghost" href="#">Trimite articol →</a>
+        </div>
+      </div>
+      <div class="cta-strip__b">
+        <div class="newsletter">
+          <span class="newsletter__label">// Newsletter Sintezaur — săptămânal</span>
+          <div class="newsletter__row">
+            <input type="email" placeholder="email@domeniu.ro" value="tudor.ionescu@gmail.com" />
+            <button type="button">Abonat ✓</button>
+          </div>
+          <p style="margin:0; font-size:12px; color:var(--fg-muted)">
+            Ești abonat. Poți opri oricând din <a href="#" style="color:var(--accent); border-bottom:1px solid currentColor">Setări · Preferințe notificări</a>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       MOBILE DRAWER + SCRIM
+       ============================================================ -->
+  <div class="scrim" data-scrim hidden></div>
+  <aside class="drawer" data-drawer aria-label="Meniu cont" hidden>
+    <header class="drawer__head">
+      <div class="drawer__user">
+        <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+        <div>
+          <div class="drawer__name">Tudor Ionescu</div>
+          <div class="drawer__handle">@tudor.i</div>
+        </div>
+      </div>
+      <button class="icon-btn" data-drawer-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+    </header>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Navigare</span>
+      <a class="drawer__item is-active" href="Home.html">Acasă</a>
+      <a class="drawer__item" href="Tezaur.html">Tezaur</a>
+      <a class="drawer__item" href="Bazar.html">Bazar</a>
+      <a class="drawer__item" href="Revista.html">Revistă</a>
+      <a class="drawer__item" href="Forum.html">Forum</a>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Activitate</span>
+      <a class="drawer__item" href="Cont - Favorite.html">
+        <svg><use href="#i-heart"/></svg> Favorite
+      </a>
+      <a class="drawer__item" href="Cont - Mesaje.html">
+        <svg><use href="#i-mail"/></svg> Mesaje
+        <span class="drawer__badge">2</span>
+      </a>
+      <button class="drawer__item" type="button" data-theme-toggle>
+        <svg class="icon-sun"><use href="#i-sun"/></svg>
+        <svg class="icon-moon"><use href="#i-moon"/></svg>
+        Schimbă tema
+      </button>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Cont</span>
+      <a class="drawer__item" href="Cont - Setari.html"><svg><use href="#i-cog"/></svg> Setări</a>
+      <a class="drawer__item" href="#"><svg><use href="#i-megaphone"/></svg> Anunțurile mele</a>
+      <button class="drawer__item" type="button" data-feedback-open>
+        <svg><use href="#i-doc"/></svg> Trimite feedback
+      </button>
+      <a class="drawer__item" href="Admin - Dashboard.html">
+        <svg><use href="#i-shield"/></svg> Dashboard
+        <span class="drawer__badge" style="background:var(--accent);color:var(--accent-fg)">admin</span>
+      </a>
+    </div>
+
+    <div class="drawer__sec" style="border-bottom:0">
+      <button class="drawer__item is-danger" type="button">
+        <svg><use href="#i-logout"/></svg> Ieși din cont
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       FEEDBACK MODAL
+       ============================================================ -->
+  <div class="modal-back" data-modal hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+      <header class="modal__head">
+        <h3 id="fb-title">Trimite feedback</h3>
+        <button class="icon-btn" data-modal-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+      </header>
+      <div class="modal__body">
+        <label class="form-row">
+          <span>// Categorie</span>
+          <select>
+            <option>Sugestie de feature</option>
+            <option>Bug / eroare</option>
+            <option>Conținut / raport</option>
+            <option>Altele</option>
+          </select>
+        </label>
+        <label class="form-row">
+          <span>// Mesaj</span>
+          <textarea rows="6" placeholder="Spune-ne ce am putea face mai bine. Cu cât mai specific, cu atât mai bine."></textarea>
+        </label>
+        <p style="margin:0; font-size:12px; color:var(--fg-muted)">
+          Trimitem mesajul cu user_id-ul tău (<code style="font-family:var(--font-mono); color:var(--fg)">u_8472</code>) atașat — răspundem pe email în 1-2 zile lucrătoare.
+        </p>
+      </div>
+      <footer class="modal__foot">
+        <button class="btn-ghost" type="button" data-modal-close>Anulează</button>
+        <button class="btn-login" type="button">Trimite →</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="/">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="/despre">Despre</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/termeni">Termeni</a></li>
+            <li><a href="/confidentialitate">Confidențialitate</a></li>
+            <li><a href="/rss">RSS</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       Data + behaviors
+       ============================================================ -->
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+
+      function apply(mode) {
+        root.setAttribute('data-theme', mode);
+      }
+      const saved = localStorage.getItem(KEY) || 'dark';
+      apply(saved);
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+          const next = cur === 'dark' ? 'light' : 'dark';
+          localStorage.setItem(KEY, next);
+          apply(next);
+        });
+      });
+    })();
+
+    // ---------- AVATAR COLORING (deterministic hue from user_id) ----------
+    function hashHue(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      return h % 360;
+    }
+    function applyAvatarColor(el) {
+      const uid = el.dataset.uid || 'anon';
+      const hue = hashHue(uid);
+      // mid-saturation, mid-lightness so it works across themes
+      const bg = `oklch(0.58 0.14 ${hue})`;
+      // pick white or black for contrast — oklch lightness 0.58 → white text reads well across hues
+      const fg = 'oklch(0.98 0 0)';
+      el.style.background = bg;
+      el.style.color = fg;
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      // initials
+      const init = el.dataset.initials || el.textContent.trim().slice(0, 2).toUpperCase();
+      el.textContent = init;
+    }
+    document.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+
+    // ---------- AVATAR DROPDOWN ----------
+    (function avatarMenu() {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      function open() {
+        drop.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      function close() {
+        drop.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+      }
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        drop.hidden ? open() : close();
+      });
+      document.addEventListener('click', e => {
+        if (!menu.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+      });
+    })();
+
+    // ---------- MOBILE DRAWER ----------
+    (function drawer() {
+      const drawer = document.querySelector('[data-drawer]');
+      const scrim = document.querySelector('[data-scrim]');
+      if (!drawer || !scrim) return;
+      function open() {
+        drawer.hidden = false;
+        scrim.hidden = false;
+        // force a frame so transition triggers
+        requestAnimationFrame(() => {
+          drawer.classList.add('is-open');
+          scrim.classList.add('is-open');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        drawer.classList.remove('is-open');
+        scrim.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 240);
+      }
+      document.querySelectorAll('[data-burger]').forEach(b => b.addEventListener('click', open));
+      document.querySelectorAll('[data-drawer-close]').forEach(b => b.addEventListener('click', close));
+      scrim.addEventListener('click', close);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    })();
+
+    // ---------- FEEDBACK MODAL ----------
+    (function feedback() {
+      const modal = document.querySelector('[data-modal]');
+      if (!modal) return;
+      function open() {
+        modal.hidden = false;
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { modal.hidden = true; }, 200);
+      }
+      document.querySelectorAll('[data-feedback-open]').forEach(b => b.addEventListener('click', e => {
+        e.preventDefault();
+        // close drawer & avatar drop if open
+        document.querySelector('[data-drawer]')?.classList.remove('is-open');
+        document.querySelector('[data-scrim]')?.classList.remove('is-open');
+        const drop = document.querySelector('.avatar-drop');
+        if (drop) drop.hidden = true;
+        open();
+      }));
+      document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', close));
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+    })();
+
+    // Fill any [data-gear] container with its SVG illustration
+    function fillGears(scope) {
+      (scope || document).querySelectorAll('[data-gear]').forEach(el => {
+        if (el.dataset.gearFilled) return;
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+          el.dataset.gearFilled = '1';
+        }
+      });
+    }
+    fillGears();
+
+    // ---------- BAZAR LISTINGS ----------
+    const LISTINGS = [
+      { brand: "Roland", model: "Juno-60", key: "juno-60", photo: "https://www.rolandcloud.com/getmedia/99d1b61e-eb64-444e-95dd-491a6e5efcaa/JUNO-60-HK-1-LFT-smaller.png", price: "4 200", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "București", sellerInit: "AB", rating: "4.9", count: "23 vânzări" },
+      { brand: "Korg", model: "Minilogue XD", key: "minilogue-xd", photo: "https://korgusshop.com/cdn/shop/files/minilogue_xd_inverted_image.jpg?v=1720030025&width=1200", price: "2 850", cur: "RON", cond: "Ca nou", chip: "nou", loc: "Cluj-Napoca", sellerInit: "MR", rating: "5.0", count: "8 vânzări" },
+      { brand: "Moog", model: "Subsequent 37", key: "subsequent-37", price: "5 990", cur: "RON", cond: "Bun", chip: "very_good", loc: "Timișoara", sellerInit: "DA", rating: "4.7", count: "14 vânzări" },
+      { brand: "Behringer", model: "Model D", key: "model-d", photo: "https://dt7v1i9vyp3mf.cloudfront.net/styles/news_large/s3/imagelibrary/B/BehringerModelD_01-KpMPqNs9xNDsKI7jXXKkQy5HsOTdEOOF.jpg", price: "1 450", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "Brașov", sellerInit: "VP", rating: "4.8", count: "11 vânzări" },
+      { brand: "Elektron", model: "Digitakt II", key: "digitakt-ii", photo: "https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg", price: "4 100", cur: "RON", cond: "Ca nou", chip: "nou", loc: "București", sellerInit: "LS", rating: "5.0", count: "32 vânzări" },
+      { brand: "Arturia", model: "MicroFreak", key: "microfreak", price: "1 750", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "Iași", sellerInit: "GO", rating: "4.6", count: "5 vânzări" },
+      { brand: "Make Noise", model: "0-Coast", key: "0-coast", price: "2 200", cur: "RON", cond: "Bun", chip: "very_good", loc: "Sibiu", sellerInit: "RT", rating: "4.9", count: "18 vânzări" },
+      { brand: "Yamaha", model: "DX7 Mk1", key: "dx7", price: "3 500", cur: "RON", cond: "Bun · service done", chip: "very_good", loc: "Constanța", sellerInit: "MN", rating: "4.8", count: "7 vânzări" }
+    ];
+
+    function gearMedia(key, label, photo) {
+      const img = photo ? `<img class="gear-fill__photo" src="${photo}" alt="${label}" loading="lazy" onerror="this.remove()" />` : '';
+      return `<div class="gear-fill" data-gear="${key}">${img}<span class="gear-fill__label">${label}</span></div>`;
+    }
+
+    function listingHref(l) {
+      return l.key === 'juno-60' ? 'Bazar - Roland Juno-60.html' : '#';
+    }
+
+    document.getElementById('bazar-scroll').innerHTML = LISTINGS.map(l => `
+      <a class="listing" href="${listingHref(l)}" style="text-decoration:none; color:inherit;">
+        <div class="listing__media">
+          ${gearMedia(l.key, l.brand + ' · ' + l.model, l.photo)}
+          <span class="listing__chip" data-cond="${l.chip}">${l.cond}</span>
+          <button class="listing__heart" aria-label="Salvează"><svg><use href="#i-heart"/></svg></button>
+        </div>
+        <div class="listing__body">
+          <div class="listing__brand">// ${l.brand}</div>
+          <div class="listing__title">${l.model}</div>
+          <div class="listing__row">
+            <div class="listing__price">${l.price}<small>${l.cur}</small></div>
+            <div class="listing__loc">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pin"/></svg>
+              ${l.loc}
+            </div>
+          </div>
+          <div class="listing__seller">
+            <span class="avatar" style="width:22px;height:22px;font-size:10px">${l.sellerInit}</span>
+            <span><span class="star">★</span> ${l.rating}</span>
+            <span style="opacity:.5">·</span>
+            <span>${l.count}</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    // Heart toggle (stop propagation so card link doesn't fire)
+    document.querySelectorAll('.listing__heart').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        btn.classList.toggle('is-on');
+      });
+    });
+
+    // ---------- FORUM THREADS ----------
+    const THREADS = [
+      { cat: "Tezaur · Întrebări", title: "Probleme cu MIDI sync între Digitakt II și OP-1 field — clock drift după 30 min", author: "rares.s", replies: 24, last: "acum 12 min", avatar: "RS" },
+      { cat: "Modular", title: "Primul rack 84HP — ce module sunt obligatorii și ce e marketing?", author: "anaaaaa", replies: 67, last: "acum 1 oră", avatar: "AN" },
+      { cat: "Bazar · Schimb", title: "Schimb Juno-60 cu Prophet-6 desktop + diferență. Cum stabilim diferența corect?", author: "vladpetre", replies: 18, last: "acum 2 ore", avatar: "VP" },
+      { cat: "Producție", title: "Cel mai bun preamp pentru vocale lo-fi sub 2000 RON — recomandări reale", author: "mihaela_m", replies: 41, last: "acum 3 ore", avatar: "MM" },
+      { cat: "Software", title: "ROLI Seaboard merită în 2026? Pentru cine produce ambient și texturi", author: "tudor.b", replies: 9, last: "acum 4 ore", avatar: "TB" }
+    ];
+
+    document.getElementById('forum-list').innerHTML = THREADS.map(t => `
+      <a class="thread" href="#">
+        <span class="thread__avatar">${t.avatar}</span>
+        <div class="thread__body">
+          <span class="thread__cat">// ${t.cat}</span>
+          <span class="thread__title">${t.title}</span>
+          <span class="thread__meta">@${t.author}</span>
+        </div>
+        <div class="thread__replies">${t.replies}<small>răspunsuri</small></div>
+        <div class="thread__activity">${t.last}</div>
+      </a>
+    `).join('');
+
+    // ---------- CATALOG ----------
+    const CATALOG = [
+      { brand: "Roland", model: "TR-808", key: "tr-808", photo: "https://www.drumcollector.com/wp-content/uploads/2018/03/Roland_TR-808_Rhythm_Composer_01_Header.jpg", tags: ["Drum machine", "Vintage"], owners: 12 },
+      { brand: "Korg", model: "MS-20", key: "ms-20", tags: ["Mono", "Semi-modular"], owners: 18 },
+      { brand: "Moog", model: "Matriarch", key: "matriarch", tags: ["Para", "Semi-modular"], owners: 7 },
+      { brand: "Elektron", model: "Octatrack MKII", key: "octatrack-mk2", tags: ["Sampler", "Performance"], owners: 23 },
+      { brand: "Teenage Eng.", model: "OP-1 Field", key: "op-1-field", tags: ["Portabil", "Sampler"], owners: 41 },
+      { brand: "Sequential", model: "Take 5", key: "take-5", tags: ["Poly", "Analog"], owners: 9 }
+    ];
+
+    document.getElementById('catalog').innerHTML = CATALOG.map(g => `
+      <a class="gear" href="#">
+        <div class="gear__media">${gearMedia(g.key, g.brand + ' · ' + g.model)}</div>
+        <div class="gear__brand">// ${g.brand}</div>
+        <div class="gear__model">${g.model}</div>
+        <div class="gear__tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="gear__own"><b>${g.owners}</b> persoane dețin</div>
+      </a>
+    `).join('');
+
+    // Run gear filler again for dynamically-added markup
+    fillGears();
+
+    // ---------- HERO ROTATOR (placeholder behavior) ----------
+    (function heroRotator() {
+      const counter = document.querySelector('.hero__counter');
+      let i = 1, total = 4;
+      const prev = document.querySelector('[data-hero-prev]');
+      const next = document.querySelector('[data-hero-next]');
+      function set(n) { i = ((n - 1 + total) % total) + 1; counter.textContent = String(i).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'); }
+      prev.addEventListener('click', () => set(i - 1));
+      next.addEventListener('click', () => set(i + 1));
+    })();
+  </script>
+
+</body>
+</html>

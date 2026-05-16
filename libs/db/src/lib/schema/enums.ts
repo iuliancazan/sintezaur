@@ -81,6 +81,24 @@ export const gearCategoryEnum = pgEnum('gear_category', [
 export type GearCategory = (typeof gearCategoryEnum.enumValues)[number];
 
 /**
+ * Editorial / moderation lifecycle for Tezaur entries (spec §7.2 —
+ * community contributions). A row is created as `draft`, becomes
+ * `submitted` when the contributor clicks "Trimite la moderare",
+ * `approved` (curator-side) flips `published` to true, `rejected`
+ * sends it back with `rejection_reason` for editing & re-submission.
+ *
+ * Distinct from the legacy `published` boolean which stays for backward
+ * compatibility — `approved` implies `published = true`.
+ */
+export const gearStateEnum = pgEnum('gear_state', [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+]);
+export type GearState = (typeof gearStateEnum.enumValues)[number];
+
+/**
  * Form factor — physical chassis style. Shared across categories so
  * filtering UI can offer "all keyboards" or "all desktop modules"
  * cross-category.

@@ -7,6 +7,67 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), versionare pe 
 
 ## [Unreleased]
 
+### M11 — Tezaur contributor flow (in progress)
+
+Allow any authenticated user to contribute a new gear entry to
+Tezaur with a community-moderation workflow (spec §7.2 — was
+previously blocked behind `curator+` role). Shipped in sub-phases
+A (backend) → B (FE form) → C (drafts list + nav) → D (close).
+
+#### M11-A — Backend foundation (state enum + ME endpoints)
+
+- **Migration `0014_gear_moderation.sql`** — adds
+  `gear_state` enum {draft, submitted, approved, rejected}
+  with `state` defaulting to 'draft', plus tracking columns
+  `rejection_reason`, `submitted_at`, `reviewed_at`,
+  `reviewed_by` (FK to users.id). Backfills existing rows
+  with `published=true` → `state='approved'`. Two new
+  indexes: `gear_state_idx (state, submitted_at)` for the
+  moderation queue listing, `gear_created_by_state_idx` for
+  the "my contributions" page.
+- **Drizzle schema sync** — `gearStateEnum` added to
+  `libs/db/src/lib/schema/enums.ts`; `gear` table extended
+  with the new columns; `GEAR_STATES` literal exported from
+  `@sintezaur/shared` so FE / DTOs can reference without
+  pulling drizzle into the browser bundle.
+- **`MeContributorController` (new, `/api/me/tezaur/*`)** —
+  auth-only (no role gate). Endpoints: `GET drafts`,
+  `POST gear` (create draft, all fields optional for
+  auto-save), `GET /PATCH/DELETE gear/:id`, `POST gear/:id/
+  submit` (validates min required set then transitions
+  draft→submitted), `POST/DELETE gear/:id/images`, `PATCH
+  gear/:id/images/reorder`, `POST/DELETE gear/:id/links`,
+  `POST/DELETE gear/:id/relationships`. All mutations run
+  through `assertOwnsEditableDraft` (ownership + state must
+  be draft|rejected) so a user can't tamper with another
+  user's draft or with an approved entry.
+- **`PublicTezaurController` extended** — `GET /api/tezaur/
+  meta/brands` (distinct brand counts top 200, public for
+  auto-suggest) + `GET /api/tezaur/meta/families` (lifted
+  from admin so contributors can pick from existing series
+  before submit).
+- **`AdminTezaurController` extended** — `GET /api/admin/
+  tezaur/moderation?state=submitted&page=` + `POST gear/:id/
+  approve` (state=approved + flips published=true; ready
+  for public lists) + `POST gear/:id/reject` (state=rejected,
+  `rejection_reason` text required, contributor sees the
+  reason in their drafts list and can re-edit + re-submit).
+  Audit-logged via existing `edit_gear` action with
+  decision in details.
+- **`TezaurService` helpers** — `descriptionFromText`
+  converts plain textarea text into Tiptap minimal JSON
+  (split on blank lines into paragraph nodes) + escaped
+  HTML for SSR; `lookupOrCreateFamily` resolves a free-text
+  family label to a `gear_families` row (auto-creates with
+  slugified name when not found) so contributors don't
+  manage slugs; `mergeTaglineIntoSpecs` keeps the design's
+  one-liner tagline inside `specs.tagline`.
+- **DTOs new** — `MeCreateGearDto` / `MeUpdateGearDto` with
+  all fields optional (auto-save can patch a partial draft),
+  plus `tagline` and `descriptionText` fields; `RejectGearDto`
+  with required reason (10–1000 chars); `ListModerationQueueDto`
+  with state + pagination.
+
 ### M13 — Site design import v05 (out-of-order before M11)
 
 Re-skin progresiv al `apps/site` la design-ul v05

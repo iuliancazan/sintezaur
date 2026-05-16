@@ -30,6 +30,7 @@ import {
   gearCategoryEnum,
   gearLinkKindEnum,
   gearRelationshipTypeEnum,
+  gearStateEnum,
   gearVideoProviderEnum,
   imageVariantEnum,
   localeEnum,
@@ -77,8 +78,31 @@ export const gear = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     slug: text('slug').notNull(),
-    /** Editorial state: drafts not visible publicly. */
+    /**
+     * Legacy editorial flag — kept for backward compatibility and used
+     * by `listPublic` / `findBySlug` to gate visibility. Set true when
+     * `state` transitions to `approved`; false otherwise.
+     */
     published: boolean('published').notNull().default(false),
+    /**
+     * Moderation lifecycle (spec §7.2 — community Tezaur contributions).
+     * `draft` = author still editing; `submitted` = sent to curator
+     * queue; `approved` = curator-published (also flips `published`);
+     * `rejected` = sent back with `rejectionReason`, author may edit
+     * and resubmit. Admin-created rows can land directly in `approved`
+     * via the admin endpoint.
+     */
+    state: gearStateEnum('state').notNull().default('draft'),
+    /** Curator's reason text when `state = 'rejected'`. NULL otherwise. */
+    rejectionReason: text('rejection_reason'),
+    /** Timestamp when contributor clicked "Trimite la moderare". */
+    submittedAt: timestamp('submitted_at', { withTimezone: true }),
+    /** Timestamp of last approve/reject decision. */
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    /** Curator/admin who last approved or rejected. */
+    reviewedBy: uuid('reviewed_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
 
     /** Family grouping (optional — standalone items can have null). */
     familyId: uuid('family_id').references(() => gearFamilies.id, {
@@ -153,6 +177,10 @@ export const gear = pgTable(
     index('gear_published_idx').on(t.published, t.deletedAt),
     /** Surface "still in production" filter without scanning. */
     index('gear_in_production_idx').on(t.yearDiscontinued),
+    /** Moderation queue listing (state=submitted ordered by submittedAt). */
+    index('gear_state_idx').on(t.state, t.submittedAt),
+    /** "My contributions" listing (created_by + state). */
+    index('gear_created_by_state_idx').on(t.createdBy, t.state),
   ],
 );
 

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AdminTezaurController } from './admin-tezaur.controller';
 import { GearReviewService } from './gear-review.service';
+import { MeContributorController } from './me-contributor.controller';
 import { MeTezaurController } from './me-tezaur.controller';
 import { PublicTezaurController } from './public-tezaur.controller';
 import { TezaurService } from './tezaur.service';
@@ -15,6 +16,7 @@ import { UserGearStatusService } from './user-gear-status.service';
     AdminTezaurController,
     PublicTezaurController,
     MeTezaurController,
+    MeContributorController,
   ],
   providers: [TezaurService, GearReviewService, UserGearStatusService],
   exports: [TezaurService],

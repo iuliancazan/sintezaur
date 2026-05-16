@@ -1,5 +1,7 @@
 import {
+  BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   Logger,
@@ -34,6 +36,9 @@ import type {
   CreateGearRelationshipDto,
   CreateGearVideoDto,
   ListGearQueryDto,
+  ListModerationQueueDto,
+  MeCreateGearDto,
+  MeUpdateGearDto,
   UpdateGearDto,
   UpdateGearFamilyDto,
   UpsertGearDescriptionDto,
@@ -1025,5 +1030,682 @@ export class TezaurService {
       .where(eq(gearFamilies.slug, slug))
       .limit(1);
     return rows.length > 0;
+  }
+
+  /* ============================================================
+     M11 — community contributor flow (spec §7.2)
+
+     `me*` methods run with ownership checks against `gear.createdBy`
+     and only allow mutation when the gear is in an editable state
+     (`draft` or `rejected`). Admin / curator endpoints use the
+     existing `update/softDelete/attachImage/...` surface.
+     ============================================================ */
+
+  /**
+   * Create a new gear row in `state='draft'` owned by `userId`. All
+   * fields are optional at this stage; the submit endpoint validates
+   * the required set before transitioning. Returns the new row's id
+   * so the FE can immediately start uploading images and patching
+   * additional fields.
+   */
+  async meCreateDraft(
+    userId: string,
+    dto: MeCreateGearDto,
+  ): Promise<{ id: string; slug: string }> {
+    const brand = dto.brand?.trim() || 'Necunoscut';
+    const model = dto.model?.trim() || 'Draft fără model';
+    const slugCandidate = slugFromParts(brand, model);
+    const slug = await uniqueSlug(slugCandidate, (s) => this.gearSlugExists(s));
+
+    const familyId = dto.familyLabel
+      ? await this.lookupOrCreateFamily(dto.familyLabel, userId)
+      : null;
+
+    const { body, bodyHtml } = this.descriptionFromText(dto.descriptionText);
+    const specs = this.mergeTaglineIntoSpecs(dto.specs, dto.tagline);
+
+    const [row] = await this.db
+      .insert(gear)
+      .values({
+        slug,
+        category: dto.category ?? 'synthesizer',
+        brand,
+        model,
+        formFactor: dto.formFactor,
+        familyId,
+        yearReleased: dto.yearReleased,
+        yearDiscontinued: dto.yearDiscontinued,
+        msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString(),
+        specs,
+        published: false,
+        state: 'draft',
+        createdBy: userId,
+        updatedBy: userId,
+      })
+      .returning({ id: gear.id, slug: gear.slug });
+
+    if (dto.descriptionText !== undefined) {
+      await this.upsertDescription(
+        row.id,
+        { lang: 'ro', body, bodyHtml },
+        userId,
+      );
+    }
+
+    return row;
+  }
+
+  /**
+   * Fetch own draft regardless of state. Used by the editor to load a
+   * draft for "Continuă editare" and by the drafts list page.
+   */
+  async meGetDraft(
+    gearId: string,
+    userId: string,
+  ): Promise<{
+    gear: typeof gear.$inferSelect;
+    family: { id: string; slug: string; name: string } | null;
+    images: (typeof gearImages.$inferSelect)[];
+    links: (typeof gearLinks.$inferSelect)[];
+    relationships: {
+      parent: {
+        id: string;
+        relId: string;
+        slug: string;
+        brand: string;
+        model: string;
+        type: string;
+        note: string | null;
+      }[];
+    };
+    description: { body: unknown; bodyHtml: string } | null;
+  }> {
+    const [gearRow] = await this.db
+      .select()
+      .from(gear)
+      .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
+      .limit(1);
+    if (!gearRow) throw new NotFoundException(`gear ${gearId} not found`);
+    if (gearRow.createdBy !== userId) {
+      throw new ForbiddenException('Not your draft.');
+    }
+
+    const [familyRow] = gearRow.familyId
+      ? await this.db
+          .select({
+            id: gearFamilies.id,
+            slug: gearFamilies.slug,
+            name: gearFamilies.name,
+          })
+          .from(gearFamilies)
+          .where(eq(gearFamilies.id, gearRow.familyId))
+          .limit(1)
+      : [];
+
+    const images = await this.db
+      .select()
+      .from(gearImages)
+      .where(eq(gearImages.gearId, gearRow.id))
+      .orderBy(asc(gearImages.position));
+
+    const links = await this.db
+      .select()
+      .from(gearLinks)
+      .where(eq(gearLinks.gearId, gearRow.id))
+      .orderBy(asc(gearLinks.position));
+
+    const parentRels = await this.db
+      .select({
+        relId: gearRelationships.id,
+        id: gear.id,
+        slug: gear.slug,
+        brand: gear.brand,
+        model: gear.model,
+        type: gearRelationships.type,
+        note: gearRelationships.note,
+      })
+      .from(gearRelationships)
+      .innerJoin(gear, eq(gear.id, gearRelationships.childGearId))
+      .where(eq(gearRelationships.parentGearId, gearRow.id));
+
+    const [desc_] = await this.db
+      .select({
+        body: gearDescriptions.body,
+        bodyHtml: gearDescriptions.bodyHtml,
+      })
+      .from(gearDescriptions)
+      .where(
+        and(eq(gearDescriptions.gearId, gearRow.id), eq(gearDescriptions.lang, 'ro')),
+      )
+      .limit(1);
+
+    return {
+      gear: gearRow,
+      family: familyRow ?? null,
+      images,
+      links,
+      relationships: { parent: parentRels },
+      description: desc_ ?? null,
+    };
+  }
+
+  /** Patch an editable own draft. */
+  async meUpdateDraft(
+    gearId: string,
+    userId: string,
+    dto: MeUpdateGearDto,
+  ): Promise<void> {
+    const current = await this.assertOwnsEditableDraft(gearId, userId);
+
+    // Slug stays stable unless brand/model change AND the row hasn't
+    // been published yet. Approved-then-edited rows keep their slug.
+    let nextSlug = current.slug;
+    const nextBrand = dto.brand?.trim() ?? current.brand;
+    const nextModel = dto.model?.trim() ?? current.model;
+    if (
+      !current.published &&
+      (nextBrand !== current.brand || nextModel !== current.model)
+    ) {
+      nextSlug = await uniqueSlug(
+        slugFromParts(nextBrand, nextModel),
+        (s) => this.gearSlugExists(s, gearId),
+      );
+    }
+
+    const familyId =
+      dto.familyLabel === undefined
+        ? current.familyId
+        : dto.familyLabel === '' || dto.familyLabel === null
+          ? null
+          : await this.lookupOrCreateFamily(dto.familyLabel, userId);
+
+    const nextSpecs = this.mergeTaglineIntoSpecs(
+      dto.specs ?? (current.specs as Record<string, unknown>),
+      dto.tagline,
+    );
+
+    await this.db
+      .update(gear)
+      .set({
+        slug: nextSlug,
+        ...(dto.category !== undefined && { category: dto.category }),
+        ...(dto.brand !== undefined && { brand: nextBrand }),
+        ...(dto.model !== undefined && { model: nextModel }),
+        ...(dto.formFactor !== undefined && { formFactor: dto.formFactor }),
+        familyId,
+        ...(dto.yearReleased !== undefined && { yearReleased: dto.yearReleased }),
+        ...(dto.yearDiscontinued !== undefined && {
+          yearDiscontinued: dto.yearDiscontinued,
+        }),
+        ...(dto.msrpAtLaunchEur !== undefined && {
+          msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString() ?? null,
+        }),
+        specs: nextSpecs,
+        updatedAt: new Date(),
+        updatedBy: userId,
+      })
+      .where(eq(gear.id, gearId));
+
+    if (dto.descriptionText !== undefined) {
+      const { body, bodyHtml } = this.descriptionFromText(dto.descriptionText);
+      await this.upsertDescription(gearId, { lang: 'ro', body, bodyHtml }, userId);
+    }
+  }
+
+  /**
+   * Soft-delete an own draft. Allowed only while editable
+   * (`draft` / `rejected`) — once submitted the row is in the
+   * moderator's hands. Approved rows can only be removed by an admin
+   * via `softDeleteGear`.
+   */
+  async meDeleteDraft(gearId: string, userId: string): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.db
+      .update(gear)
+      .set({ deletedAt: new Date(), updatedBy: userId })
+      .where(eq(gear.id, gearId));
+  }
+
+  /**
+   * Transition `draft` / `rejected` → `submitted`. Enforces the
+   * minimum required field set; the contributor sees the missing-field
+   * checklist live in the editor so this is a defensive validation.
+   */
+  async meSubmitDraft(gearId: string, userId: string): Promise<void> {
+    const current = await this.assertOwnsEditableDraft(gearId, userId);
+
+    const missing: string[] = [];
+    if (!current.brand || current.brand === 'Necunoscut') missing.push('brand');
+    if (!current.model || current.model === 'Draft fără model')
+      missing.push('model');
+    if (!current.category) missing.push('category');
+    if (!current.yearReleased) missing.push('yearReleased');
+
+    const [imgCount] = await this.db
+      .select({ count: sql<number>`count(distinct ${gearImages.sourceId})::int` })
+      .from(gearImages)
+      .where(eq(gearImages.gearId, gearId));
+    if ((imgCount?.count ?? 0) < 1) missing.push('images');
+
+    const [desc_] = await this.db
+      .select({ len: sql<number>`length(${gearDescriptions.bodyHtml})::int` })
+      .from(gearDescriptions)
+      .where(
+        and(eq(gearDescriptions.gearId, gearId), eq(gearDescriptions.lang, 'ro')),
+      )
+      .limit(1);
+    if ((desc_?.len ?? 0) < 80) missing.push('description');
+
+    if (missing.length) {
+      throw new BadRequestException({
+        message: 'Lipsesc câmpuri obligatorii.',
+        missing,
+      });
+    }
+
+    await this.db
+      .update(gear)
+      .set({
+        state: 'submitted',
+        submittedAt: new Date(),
+        rejectionReason: null,
+        updatedAt: new Date(),
+        updatedBy: userId,
+      })
+      .where(eq(gear.id, gearId));
+  }
+
+  /** List own contributions (drafts + submitted + rejected + approved). */
+  async meListMyDrafts(userId: string): Promise<
+    {
+      id: string;
+      slug: string;
+      brand: string;
+      model: string;
+      category: string;
+      state: string;
+      rejectionReason: string | null;
+      submittedAt: Date | null;
+      updatedAt: Date;
+      thumb: string | null;
+    }[]
+  > {
+    return this.db
+      .select({
+        id: gear.id,
+        slug: gear.slug,
+        brand: gear.brand,
+        model: gear.model,
+        category: gear.category,
+        state: gear.state,
+        rejectionReason: gear.rejectionReason,
+        submittedAt: gear.submittedAt,
+        updatedAt: gear.updatedAt,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${gearImages}
+          WHERE ${gearImages.gearId} = ${gear.id}
+            AND ${gearImages.variant} = 'square_thumb'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(gear)
+      .where(and(eq(gear.createdBy, userId), isNull(gear.deletedAt)))
+      .orderBy(desc(gear.updatedAt));
+  }
+
+  /* ---------- me/images ---------- */
+
+  async meAttachImage(
+    gearId: string,
+    userId: string,
+    file: Express.Multer.File,
+    caption?: string,
+  ): Promise<{ sourceId: string }> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    return this.attachImage(gearId, userId, file, caption);
+  }
+
+  async meDetachImage(
+    gearId: string,
+    userId: string,
+    sourceId: string,
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.detachImage(gearId, sourceId);
+  }
+
+  /** Reorder the gallery — `sourceIds` is the new top-to-bottom order. */
+  async meReorderImages(
+    gearId: string,
+    userId: string,
+    sourceIds: string[],
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    // Apply positions in a single transaction.
+    await this.db.transaction(async (tx) => {
+      for (let i = 0; i < sourceIds.length; i++) {
+        await tx
+          .update(gearImages)
+          .set({ position: i })
+          .where(
+            and(
+              eq(gearImages.gearId, gearId),
+              eq(gearImages.sourceId, sourceIds[i]),
+            ),
+          );
+      }
+    });
+  }
+
+  /* ---------- me/links ---------- */
+
+  async meAddLink(
+    gearId: string,
+    userId: string,
+    dto: CreateGearLinkDto,
+  ): Promise<{ id: string }> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    return this.addLink(gearId, dto, userId);
+  }
+
+  async meRemoveLink(
+    gearId: string,
+    userId: string,
+    linkId: string,
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+    await this.removeLink(gearId, linkId);
+  }
+
+  /* ---------- me/relationships ---------- */
+
+  async meAddRelationship(
+    parentGearId: string,
+    userId: string,
+    dto: CreateGearRelationshipDto,
+  ): Promise<{ id: string }> {
+    await this.assertOwnsEditableDraft(parentGearId, userId);
+    return this.addRelationship(parentGearId, dto, userId);
+  }
+
+  async meRemoveRelationship(
+    parentGearId: string,
+    userId: string,
+    relId: string,
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(parentGearId, userId);
+    await this.db
+      .delete(gearRelationships)
+      .where(
+        and(
+          eq(gearRelationships.id, relId),
+          eq(gearRelationships.parentGearId, parentGearId),
+        ),
+      );
+  }
+
+  /* ============================================================
+     Public auto-suggest endpoints (brand list + family list).
+     ============================================================ */
+
+  async listBrandsPublic(): Promise<{ name: string; count: number }[]> {
+    return this.db
+      .select({
+        name: gear.brand,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(gear)
+      .where(and(eq(gear.published, true), isNull(gear.deletedAt)))
+      .groupBy(gear.brand)
+      .orderBy(desc(sql`count(*)`), asc(gear.brand))
+      .limit(200);
+  }
+
+  /* ============================================================
+     Admin: moderation queue + approve / reject.
+     ============================================================ */
+
+  async listModeration(
+    q: ListModerationQueueDto,
+  ): Promise<{
+    items: {
+      id: string;
+      slug: string;
+      brand: string;
+      model: string;
+      category: string;
+      state: string;
+      submittedAt: Date | null;
+      createdBy: string | null;
+      thumb: string | null;
+    }[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  }> {
+    const page = q.page ?? 1;
+    const pageSize = Math.min(q.pageSize ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+    const offset = (page - 1) * pageSize;
+    const state = q.state ?? 'submitted';
+
+    const where = and(eq(gear.state, state), isNull(gear.deletedAt));
+
+    const items = await this.db
+      .select({
+        id: gear.id,
+        slug: gear.slug,
+        brand: gear.brand,
+        model: gear.model,
+        category: gear.category,
+        state: gear.state,
+        submittedAt: gear.submittedAt,
+        createdBy: gear.createdBy,
+        thumb: sql<string | null>`(
+          SELECT path FROM ${gearImages}
+          WHERE ${gearImages.gearId} = ${gear.id}
+            AND ${gearImages.variant} = 'square_thumb'
+          ORDER BY position ASC
+          LIMIT 1
+        )`,
+      })
+      .from(gear)
+      .where(where)
+      .orderBy(asc(gear.submittedAt))
+      .limit(pageSize)
+      .offset(offset);
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(gear)
+      .where(where);
+
+    return {
+      items,
+      page,
+      pageSize,
+      totalCount: count,
+      totalPages: Math.max(1, Math.ceil(count / pageSize)),
+    };
+  }
+
+  async approveGear(
+    gearId: string,
+    actorId: string,
+    req?: Request,
+  ): Promise<void> {
+    const [current] = await this.db
+      .select()
+      .from(gear)
+      .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
+      .limit(1);
+    if (!current) throw new NotFoundException(`gear ${gearId} not found`);
+
+    await this.db
+      .update(gear)
+      .set({
+        state: 'approved',
+        published: true,
+        rejectionReason: null,
+        reviewedAt: new Date(),
+        reviewedBy: actorId,
+        updatedAt: new Date(),
+        updatedBy: actorId,
+      })
+      .where(eq(gear.id, gearId));
+
+    await this.audit.record({
+      actorId,
+      action: 'edit_gear',
+      targetType: 'gear',
+      targetId: gearId,
+      details: { decision: 'approve', previousState: current.state },
+      req,
+    });
+  }
+
+  async rejectGear(
+    gearId: string,
+    actorId: string,
+    reason: string,
+    req?: Request,
+  ): Promise<void> {
+    const [current] = await this.db
+      .select()
+      .from(gear)
+      .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
+      .limit(1);
+    if (!current) throw new NotFoundException(`gear ${gearId} not found`);
+
+    await this.db
+      .update(gear)
+      .set({
+        state: 'rejected',
+        published: false,
+        rejectionReason: reason,
+        reviewedAt: new Date(),
+        reviewedBy: actorId,
+        updatedAt: new Date(),
+        updatedBy: actorId,
+      })
+      .where(eq(gear.id, gearId));
+
+    await this.audit.record({
+      actorId,
+      action: 'edit_gear',
+      targetType: 'gear',
+      targetId: gearId,
+      details: { decision: 'reject', reason, previousState: current.state },
+      req,
+    });
+  }
+
+  /* ============================================================
+     internals — contributor flow
+     ============================================================ */
+
+  /**
+   * Ensure `userId` owns this gear and it is in an editable state.
+   * Throws NotFound / Forbidden / Conflict as appropriate.
+   */
+  private async assertOwnsEditableDraft(
+    gearId: string,
+    userId: string,
+  ): Promise<typeof gear.$inferSelect> {
+    const [row] = await this.db
+      .select()
+      .from(gear)
+      .where(and(eq(gear.id, gearId), isNull(gear.deletedAt)))
+      .limit(1);
+    if (!row) throw new NotFoundException(`gear ${gearId} not found`);
+    if (row.createdBy !== userId) {
+      throw new ForbiddenException('Not your draft.');
+    }
+    if (row.state !== 'draft' && row.state !== 'rejected') {
+      throw new ConflictException(
+        `Draftul nu mai poate fi editat (stare: ${row.state}). Așteaptă decizia moderatorului.`,
+      );
+    }
+    return row;
+  }
+
+  /**
+   * Find a family by exact name (case-insensitive) under any brand, or
+   * create one with `{ name: label, slug: slugify(label) }`. Returns
+   * the family id. Contributors don't need to manage slugs; we derive.
+   */
+  private async lookupOrCreateFamily(
+    label: string,
+    actorId: string,
+  ): Promise<string> {
+    const trimmed = label.trim();
+    if (!trimmed) return '';
+    const [existing] = await this.db
+      .select({ id: gearFamilies.id })
+      .from(gearFamilies)
+      .where(ilike(gearFamilies.name, trimmed))
+      .limit(1);
+    if (existing) return existing.id;
+    const slug = await uniqueSlug(slugify(trimmed), (s) =>
+      this.familySlugExists(s),
+    );
+    const [row] = await this.db
+      .insert(gearFamilies)
+      .values({ slug, name: trimmed })
+      .returning({ id: gearFamilies.id });
+    await this.audit.record({
+      actorId,
+      action: 'create_gear_family',
+      targetType: 'gear_family',
+      targetId: row.id,
+      details: { name: trimmed, autoCreated: true },
+    });
+    return row.id;
+  }
+
+  /**
+   * Convert plain-text description into Tiptap JSON + escaped HTML.
+   * Blank lines split paragraphs. No inline marks; the contributor
+   * editor is intentionally simple — curators can add bold/italic
+   * later via the admin Tiptap.
+   */
+  private descriptionFromText(text: string | undefined): {
+    body: Record<string, unknown>;
+    bodyHtml: string;
+  } {
+    const raw = (text ?? '').trim();
+    if (!raw) {
+      return { body: { type: 'doc', content: [] }, bodyHtml: '' };
+    }
+    const paragraphs = raw.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+    return {
+      body: {
+        type: 'doc',
+        content: paragraphs.map((p) => ({
+          type: 'paragraph',
+          content: [{ type: 'text', text: p }],
+        })),
+      },
+      bodyHtml: paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join(''),
+    };
+  }
+
+  /**
+   * Tagline lives inside `specs.tagline` so it travels with the gear
+   * row (matches the design which shows it above the long description
+   * in the live preview card).
+   */
+  private mergeTaglineIntoSpecs(
+    specs: Record<string, unknown> | null | undefined,
+    tagline: string | undefined,
+  ): Record<string, unknown> {
+    const merged = { ...(specs ?? {}) };
+    if (tagline !== undefined) {
+      const trimmed = tagline.trim();
+      if (trimmed) merged.tagline = trimmed;
+      else delete merged.tagline;
+    }
+    return merged;
   }
 }

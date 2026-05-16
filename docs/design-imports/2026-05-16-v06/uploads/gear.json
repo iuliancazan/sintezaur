@@ -1,0 +1,71 @@
+{
+  "brand": "Roland",
+  "model": "JUPITER-X",
+  "category": "synthesizer",
+  "form_factor": "keyboard",
+  "year_released": 2020,
+  "year_discontinued": null,
+  "msrp_at_launch_eur": null,
+  "msrp_at_launch_usd": 2499,
+  "msrp_source_url": "https://www.roland.com/us/company/press_releases/2019/ROLAND-DEBUTS-ALL-NEW-JUPITER-X-SYNTHESIZER-LINEUP/",
+
+  "family_name": "Roland JUPITER series",
+
+  "latest_firmware_version": null,
+  "firmware_notes_url": null,
+
+  "specs": {
+    "type": "hybrid",
+    "polyphony": null,
+    "oscillators_per_voice": null,
+    "filter_type": null,
+    "has_keyboard": true,
+    "key_count": 61,
+    "has_sequencer": false,
+    "has_arpeggiator": true,
+    "midi_io": ["din_in", "din_out", "usb"],
+    "cv_gate": false
+  },
+
+  "links": [
+    {
+      "kind": "manufacturer",
+      "url": "https://www.roland.com/global/products/jupiter-x/",
+      "label": "Pagina oficială Roland JUPITER-X"
+    },
+    {
+      "kind": "other",
+      "url": "https://www.roland.com/us/company/press_releases/2019/ROLAND-DEBUTS-ALL-NEW-JUPITER-X-SYNTHESIZER-LINEUP/",
+      "label": "Press release lansare (2019)"
+    }
+  ],
+
+  "videos": [],
+
+  "relationships": [
+    {
+      "type": "inspired_by",
+      "to_brand": "Roland",
+      "to_model": "JUPITER-8",
+      "note": "JUPITER-X include o recreare prin modelare a JUPITER-8 (1981) ca Model sonor"
+    },
+    {
+      "type": "variant",
+      "to_brand": "Roland",
+      "to_model": "JUPITER-Xm",
+      "note": "JUPITER-Xm este versiunea portabilă cu 37 mini-clape — același motor ZEN-Core"
+    }
+  ],
+
+  "sources": [
+    "https://www.roland.com/global/products/jupiter-x/",
+    "https://www.roland.com/us/company/press_releases/2019/ROLAND-DEBUTS-ALL-NEW-JUPITER-X-SYNTHESIZER-LINEUP/",
+    "https://www.musicradar.com/news/roland-revives-a-classic-synth-brand-with-the-new-premium-jupiter-x",
+    "https://synthanatomy.com/2019/09/roland-jupiter-x-xm-new-multi-timbral-digital-synthesizers-announced-new.html"
+  ],
+
+  "scraping_meta": {
+    "scraped_at": "2026-05-15T00:00:00Z",
+    "agent_notes": "Anunțat sept 2019, livrare aprilie 2020. ZEN-Core engine, polyphony max ~256 voci dar variază în funcție de Model — las null. 5 parts (4 play + 1 rhythm)."
+  }
+}

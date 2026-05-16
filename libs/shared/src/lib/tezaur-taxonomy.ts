@@ -135,6 +135,20 @@ export const CATEGORIES_WITH_TYPE: ReadonlyArray<GearCategoryLiteral> = [
   'eurorack_module',
 ];
 
+/**
+ * Moderation lifecycle for community Tezaur contributions (spec §7.2).
+ * Mirrors `gearStateEnum` in `@sintezaur/db`. UI surfaces all four
+ * values; the contributor's "Drafturile mele" page shows `draft`,
+ * `submitted`, `rejected`; the moderation queue shows `submitted`.
+ */
+export const GEAR_STATES = [
+  'draft',
+  'submitted',
+  'approved',
+  'rejected',
+] as const;
+export type GearStateLiteral = (typeof GEAR_STATES)[number];
+
 /* Personal-collection statuses (spec §8.1). */
 export const USER_GEAR_STATUS_FLAGS = [
   'owned',

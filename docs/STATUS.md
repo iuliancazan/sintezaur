@@ -6,7 +6,35 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13** ✅ — Site design import v05 complete.
+**Last shipped:** **M11-A** — Tezaur contributor backend (state enum + ME endpoints).
+Migration `0014_gear_moderation.sql` adaugă enum `gear_state`
+{draft, submitted, approved, rejected} + coloane `state` (default
+'draft'), `rejection_reason`, `submitted_at`, `reviewed_at`,
+`reviewed_by` FK pe `users`. Backfill: 109 rows existente cu
+`published=true` → `state='approved'`. Două index-uri noi
+(`gear_state_idx` pe state+submitted_at pentru queue moderare,
+`gear_created_by_state_idx` pentru lista „drafturile mele").
+`TezaurService` extins cu metode `me*`: `meCreateDraft`,
+`meGetDraft`, `meUpdateDraft`, `meDeleteDraft`, `meSubmitDraft`
+(validează min set înainte de transiție draft→submitted),
+`meListMyDrafts`, `meAttachImage`/`Detach`/`Reorder`, `meAddLink`/
+`Remove`, `meAddRelationship`/`Remove`. Toate `me*` rulează prin
+helper-ul privat `assertOwnsEditableDraft` care verifică ownership
+(`createdBy === userId`) + state editabil (`draft`|`rejected`).
+Helper-uri noi: `lookupOrCreateFamily` (FE poate da label text →
+service rezolvă la `gear_families` row, lookup-or-create cu
+slug auto), `descriptionFromText` (plain text → Tiptap minimal
+JSON + escaped HTML, split pe `\n\n`), `mergeTaglineIntoSpecs`
+(păstrează `specs.tagline`). Public endpoints: `GET /api/tezaur/
+meta/brands` (distinct brand counts top 200), `GET /api/tezaur/
+meta/families` (lift din admin). Admin: `GET /admin/tezaur/
+moderation?state=submitted&page=` + `POST /admin/tezaur/gear/:id/
+approve` (state=approved + published=true) + `POST .../reject`
+(state=rejected + rejection_reason). Controller nou
+`MeContributorController` la `/api/me/tezaur/*` (auth required,
+no role gate).
+
+**Last shipped (previous):** **M13** ✅ — Site design import v05 complete.
 Toate sub-fazele A–G livrate pe `main` (vezi tabelul M13 de mai
 jos). `docs/testing/m13-testing.md` scris cu plan complet de
 testare manuală pe stack-ul deployed (foundation + 5 secțiuni +

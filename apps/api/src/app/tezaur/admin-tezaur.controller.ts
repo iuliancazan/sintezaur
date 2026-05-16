@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   Req,
   UploadedFile,
   UseGuards,
@@ -34,6 +35,8 @@ import type {
   CreateGearLinkDto,
   CreateGearRelationshipDto,
   CreateGearVideoDto,
+  ListModerationQueueDto,
+  RejectGearDto,
   UpdateGearDto,
   UpdateGearFamilyDto,
   UpsertGearDescriptionDto,
@@ -240,6 +243,36 @@ export class AdminTezaurController {
   @Get('families')
   listFamilies() {
     return this.tezaur.listFamilies();
+  }
+
+  /* ============================================================
+     moderation queue (community contributions per spec §7.2)
+     ============================================================ */
+
+  @Get('moderation')
+  listModeration(@Query() q: ListModerationQueueDto) {
+    return this.tezaur.listModeration(q);
+  }
+
+  @Post('gear/:id/approve')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async approveGear(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    await this.tezaur.approveGear(id, user.sub, req);
+  }
+
+  @Post('gear/:id/reject')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async rejectGear(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: RejectGearDto,
+    @CurrentUser() user: AuthenticatedUser,
+    @Req() req: Request,
+  ) {
+    await this.tezaur.rejectGear(id, user.sub, dto.reason, req);
   }
 
   /* mod-hide review */

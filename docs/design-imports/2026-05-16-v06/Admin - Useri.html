@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark" data-density="comfortable">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur Admin — Useri</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.admin.css" />
+  <script src="reveals.js"></script>
+</head>
+<body class="admin-body" data-screen-label="Admin · Useri">
+
+  <!-- SVG sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-chev-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M14 6l-6 6 6 6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5.5 5"/></symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="3" y="4" width="18" height="4"/><path d="M5 8v12h14V8"/><path d="M10 12h4"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="8" cy="9" r="1.5"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 4h7a3 3 0 0 1 3 3v13"/><path d="M20 4h-7a3 3 0 0 0-3 3v13"/><path d="M4 4v15h7"/><path d="M20 4v15h-7"/></symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16v12H8l-4 4V5z"/></symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M5 21V4h12l-2 4 2 4H5"/></symbol>
+      <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><rect x="4" y="3" width="16" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/><path d="M3 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></symbol>
+      <symbol id="i-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M12 2l3 4 5 1-3 4 1 5-6-2-6 2 1-5-3-4 5-1z"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 7h12M4 12h8M4 17h14"/><circle cx="18" cy="7" r="2"/><circle cx="14" cy="12" r="2"/><circle cx="20" cy="17" r="2"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M5 5h7M5 5v14h14v-7M14 4h6v6M11 13l9-9"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M12 4v12M6 12l6 6 6-6M4 20h16"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+      <symbol id="i-chev-d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 10l6 6 6-6"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+      <symbol id="i-density" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 5h16M4 12h16M4 19h16"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="admin-shell" id="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="side">
+      <a class="side__brand" href="Home.html"><img src="assets/logo-black.png" alt="" /><span class="side__brand-text">Sintezaur</span></a>
+      <div class="side__scroll">
+        <div class="side__group">Operare</div>
+        <a class="side__item" href="Admin - Dashboard.html"><svg><use href="#i-grid"/></svg><span class="side__item-label">Dashboard</span></a>
+        <a class="side__item is-active" href="Admin - Useri.html"><svg><use href="#i-users"/></svg><span class="side__item-label">Useri</span><span class="side__item-badge is-warn">3</span></a>
+        <div class="side__group">Conținut</div>
+        <a class="side__item" href="#"><svg><use href="#i-archive"/></svg><span class="side__item-label">Tezaur</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-tag"/></svg><span class="side__item-label">Bazar</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-book"/></svg><span class="side__item-label">Revistă</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-chat"/></svg><span class="side__item-label">Forum</span></a>
+        <div class="side__group">Sistem</div>
+        <a class="side__item" href="#"><svg><use href="#i-flag"/></svg><span class="side__item-label">Rapoarte</span><span class="side__item-badge">7</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-log"/></svg><span class="side__item-label">Audit log</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-coins"/></svg><span class="side__item-label">Currency rates</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-badge"/></svg><span class="side__item-label">Badges</span></a>
+        <a class="side__item" href="#"><svg><use href="#i-sliders"/></svg><span class="side__item-label">Config</span></a>
+      </div>
+      <div class="side__foot">
+        <button class="side__collapse" data-collapse><svg><use href="#i-chev-l"/></svg><span>Restrânge</span></button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="atop">
+        <label class="atop__search" for="top-search">
+          <svg><use href="#i-search"/></svg>
+          <input id="top-search" type="text" placeholder="Caută user, gear, listing, articol, thread… (ID sau text)" />
+          <kbd>⌘K</kbd>
+        </label>
+        <div class="atop__tools">
+          <button class="atop__btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg><span class="dot-warn"></span></button>
+          <button class="atop__btn" data-theme-toggle aria-label="Schimbă tema">
+            <svg class="icon-sun"><use href="#i-sun"/></svg>
+            <svg class="icon-moon"><use href="#i-moon"/></svg>
+          </button>
+          <button class="atop__btn atop__density" data-density-toggle aria-label="Schimbă densitatea" title="Densitate: comfortable">
+            <svg><use href="#i-density"/></svg>
+            <span class="atop__density-dot"></span>
+          </button>
+          <a class="atop__btn" href="Home.html"><svg><use href="#i-external"/></svg></a>
+          <button class="atop__avatar">
+            <span class="avt">AC</span>
+            <span style="text-align:left"><span class="name">Alexandru C.</span><span class="role">admin</span></span>
+            <span class="chev">▾</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main__pad">
+
+        <nav class="crumb">
+          <a href="Admin - Dashboard.html">Admin</a>
+          <span class="sep">/</span>
+          <span class="cur">Useri</span>
+        </nav>
+
+        <div class="ph-row">
+          <div class="ph-title-block">
+            <h1 class="ph-title">Useri</h1>
+            <p class="ph-sub"><b style="color:var(--fg)">2,418</b> utilizatori înregistrați · <b style="color:var(--accent)">3</b> awaiting editor approval</p>
+          </div>
+          <div class="ph-actions">
+            <button class="btn btn--ghost"><svg><use href="#i-download"/></svg>Export CSV</button>
+            <button class="btn btn--primary"><svg><use href="#i-plus"/></svg>Adaugă user</button>
+          </div>
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filterbar" role="toolbar" aria-label="Filtrează useri">
+          <div class="fb-search">
+            <svg><use href="#i-search"/></svg>
+            <input type="text" placeholder="username · email · nume real…" value="" />
+          </div>
+          <button class="fb-select" type="button">
+            <span class="lbl">Rol</span>
+            <span class="val">moderator <span class="count">2</span></span>
+            <span class="chev">▾</span>
+          </button>
+          <button class="fb-select" type="button">
+            <span class="lbl">Trust</span>
+            <span class="val">phone_verified <span class="count">1</span></span>
+            <span class="chev">▾</span>
+          </button>
+          <button class="fb-select" type="button">
+            <span class="lbl">Status</span>
+            <span class="val">active</span>
+            <span class="chev">▾</span>
+          </button>
+          <button class="fb-select" type="button">
+            <span class="lbl">Înregistrat</span>
+            <span class="val">ultimele 30 zile</span>
+            <span class="chev">▾</span>
+          </button>
+          <button class="fb-reset" type="button">
+            <svg width="11" height="11"><use href="#i-x"/></svg>
+            Reset
+          </button>
+        </div>
+
+        <!-- Bulk actions strip -->
+        <div class="bulk">
+          <span class="bulk__count"><b>3</b>useri selectați</span>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--fg-muted);letter-spacing:.04em">@radu.m, @ioana.b, @stefan.p</span>
+          <span class="bulk__sep"></span>
+          <button class="btn btn--ghost btn--sm">Grant editor</button>
+          <button class="btn btn--ghost btn--sm">Trimite mesaj</button>
+          <button class="btn btn--danger btn--sm">Ban</button>
+          <button class="btn btn--quiet btn--sm" aria-label="Închide bulk"><svg width="12" height="12"><use href="#i-x"/></svg></button>
+        </div>
+
+        <!-- Users table -->
+        <section class="card">
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th style="width:34px"><span class="tbl__check is-mixed" aria-label="Selectează toți"></span></th>
+                  <th class="is-sortable is-sorted">User <span class="sort">▾</span></th>
+                  <th class="is-sortable">Email <span class="sort">⇅</span></th>
+                  <th>Rol</th>
+                  <th>Trust level</th>
+                  <th class="is-sortable">Member since <span class="sort">⇅</span></th>
+                  <th class="is-sortable" style="text-align:right">Tranzacții <span class="sort">⇅</span></th>
+                  <th class="is-sortable">Last active <span class="sort">⇅</span></th>
+                  <th>Status</th>
+                  <th style="width:60px"></th>
+                </tr>
+              </thead>
+              <tbody id="users-body"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span class="pager__per">
+              Afișează <select><option>50</option><option>100</option><option>200</option></select> pe pagină
+            </span>
+            <span>Afișând <b style="color:var(--fg)">1–50</b> din <b style="color:var(--fg)">2,418</b></span>
+            <span class="pager__nums">
+              <button disabled>‹</button>
+              <button class="is-on">1</button>
+              <button>2</button>
+              <button>3</button>
+              <button>4</button>
+              <button>…</button>
+              <button>49</button>
+              <button>›</button>
+            </span>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = (m) => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    (function collapse(){
+      const KEY = 'sintezaur-admin-side';
+      const shell = document.getElementById('shell');
+      const btn = document.querySelector('[data-collapse]');
+      if (localStorage.getItem(KEY) === '1') shell.classList.add('is-collapsed');
+      btn.addEventListener('click', () => {
+        shell.classList.toggle('is-collapsed');
+        localStorage.setItem(KEY, shell.classList.contains('is-collapsed') ? '1' : '0');
+      });
+    })();
+
+    // ---------- DENSITY TOGGLE ----------
+    (function density(){
+      const KEY = 'sintezaur-admin-density';
+      const ORDER = ['compact', 'comfortable', 'spacious'];
+      const LABEL = { compact: 'Compact', comfortable: 'Comfortable', spacious: 'Spațios' };
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-density-toggle]');
+      const apply = (d) => {
+        root.setAttribute('data-density', d);
+        btn.title = 'Densitate: ' + LABEL[d] + ' · click pentru următoarea';
+        btn.setAttribute('aria-label', 'Densitate: ' + LABEL[d]);
+      };
+      apply(localStorage.getItem(KEY) || 'comfortable');
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-density') || 'comfortable';
+        const next = ORDER[(ORDER.indexOf(cur) + 1) % ORDER.length];
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // ---------- USERS DATA ----------
+    const USERS = [
+      { id:"usr_4421", init:"VP", name:"Vlad Petre",         handle:"vladpetre",   email:"vlad.petre@protonmail.com",  role:"moderator", trust:"id",    member:"14 mai 2026", since:"acum 2 luni",   tx:47,  active:"acum 12 min",  status:"active",   sel:false, hi:true },
+      { id:"usr_8421", init:"RM", name:"Radu Munteanu",      handle:"radu.m",      email:"radu.munteanu@gmail.com",     role:"editor",    trust:"phone", member:"02 apr 2026", since:"acum 1 lună",   tx:8,   active:"acum 34 min",  status:"active",   sel:true,  pending:true },
+      { id:"usr_8918", init:"AC", name:"Alexandru Cosmin",   handle:"alex.c",      email:"alex@sintezaur.ro",           role:"admin",     trust:"id",    member:"01 ian 2026", since:"acum 4 luni",   tx:0,   active:"acum",         status:"active",   sel:false, hi:false },
+      { id:"usr_3301", init:"IB", name:"Ioana Bălan",        handle:"ioana.b",     email:"ioana.balan@yahoo.com",       role:"user",      trust:"phone", member:"19 mar 2026", since:"acum 2 luni",   tx:23,  active:"acum 1 oră",   status:"active",   sel:true,  pending:true },
+      { id:"usr_2918", init:"SP", name:"Ștefan Popa",        handle:"stefan.p",    email:"stefan.popa@outlook.com",     role:"user",      trust:"email", member:"04 feb 2026", since:"acum 3 luni",   tx:11,  active:"acum 3 ore",   status:"active",   sel:true,  pending:true },
+      { id:"usr_1842", init:"LS", name:"Laura Sima",         handle:"laura.s",     email:"laura.s@gmail.com",           role:"user",      trust:"phone", member:"22 ian 2026", since:"acum 4 luni",   tx:32,  active:"acum 5 ore",   status:"active",   sel:false },
+      { id:"usr_5510", init:"DA", name:"Dan Albu",           handle:"dan.a",       email:"dan.albu@protonmail.com",     role:"user",      trust:"id",    member:"30 nov 2025", since:"acum 5 luni",   tx:71,  active:"ieri",         status:"active",   sel:false },
+      { id:"usr_8901", init:"AD", name:"adscam",             handle:"adscam",      email:"noreply@disposable.tld",      role:"user",      trust:"none",  member:"12 mai 2026", since:"acum 2 zile",   tx:0,   active:"acum 4 zile",  status:"banned",   sel:false, banReason:"spam · permanent" },
+      { id:"usr_6644", init:"MR", name:"Mihai Radu",         handle:"mod.radu",    email:"mihai.radu@sintezaur.ro",     role:"moderator", trust:"id",    member:"14 feb 2026", since:"acum 3 luni",   tx:14,  active:"acum 6 min",   status:"active",   sel:false },
+      { id:"usr_7720", init:"GO", name:"Geo Olteanu",        handle:"geo.r",       email:"geo.r@gmail.com",             role:"user",      trust:"email", member:"08 mai 2026", since:"acum 6 zile",   tx:1,   active:"acum 22 min",  status:"active",   sel:false },
+      { id:"usr_8843", init:"RT", name:"Raul Țîrcă",         handle:"raul.t",      email:"raul.tirca@yahoo.com",        role:"user",      trust:"phone", member:"17 dec 2025", since:"acum 5 luni",   tx:18,  active:"acum 1 zi",    status:"active",   sel:false },
+      { id:"usr_4477", init:"AN", name:"Ana Niculescu",      handle:"anaaaaa",     email:"ana.n@protonmail.com",        role:"user",      trust:"phone", member:"03 oct 2025", since:"acum 7 luni",   tx:42,  active:"acum 9 min",   status:"active",   sel:false },
+      { id:"usr_2200", init:"DA", name:"Daniel A.",          handle:"spam.daniel", email:"daniel.banat@gmail.com",      role:"user",      trust:"email", member:"22 apr 2026", since:"acum 3 săpt",   tx:0,   active:"acum 5 zile",  status:"banned",   sel:false, banReason:"30 zile · phishing" },
+      { id:"usr_9921", init:"AB", name:"Andrei Bran",        handle:"andrei.b",    email:"andrei.b@gmail.com",          role:"user",      trust:"id",    member:"11 sep 2025", since:"acum 8 luni",   tx:54,  active:"acum 12 ore",  status:"active",   sel:false },
+      { id:"usr_3344", init:"MN", name:"Mihnea Nistor",      handle:"mn.studio",   email:"contact@mnstudio.ro",         role:"user",      trust:"phone", member:"28 aug 2025", since:"acum 9 luni",   tx:7,   active:"acum 2 zile",  status:"active",   sel:false },
+      { id:"usr_5511", init:"CS", name:"Cristian Stancu",    handle:"cris.s",      email:"cris.stancu@outlook.com",     role:"user",      trust:"email", member:"04 iul 2025", since:"acum 10 luni",  tx:3,   active:"acum 18 zile", status:"deleted",  sel:false },
+    ];
+
+    const ROLE_LABELS = { admin:"Admin", moderator:"Moderator", editor:"Editor", user:"User" };
+    const TRUST_LABELS = { id:"ID verified", phone:"Phone verified", email:"Email verified", none:"Unverified" };
+    const STATUS_LABELS = { active:"Active", banned:"Banned", deleted:"Deleted" };
+
+    document.getElementById('users-body').innerHTML = USERS.map(u => {
+      const trustClass = `bdg--trust-${u.trust}`;
+      return `
+      <tr class="${u.sel?'is-selected':''}">
+        <td><span class="tbl__check ${u.sel?'is-on':''}" data-row="${u.id}"></span></td>
+        <td>
+          <div class="tbl__user">
+            <span class="avt">${u.init}</span>
+            <div style="min-width:0">
+              <div class="name">${u.name} ${u.pending?'<span style="color:var(--accent);font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;padding:1px 5px;border:1px solid var(--accent);margin-left:6px;text-transform:uppercase;background:var(--warn-soft);">awaiting</span>':''}</div>
+              <div class="sub">@${u.handle} · <span style="opacity:.7">${u.id}</span></div>
+            </div>
+          </div>
+        </td>
+        <td class="tbl__mono">${u.email}</td>
+        <td><span class="bdg bdg--role-${u.role}">${ROLE_LABELS[u.role]}</span></td>
+        <td><span class="bdg ${trustClass}">${TRUST_LABELS[u.trust]}</span></td>
+        <td class="tbl__mono">${u.member}<br><span style="font-size:10px;opacity:.7">${u.since}</span></td>
+        <td class="tbl__mono" style="text-align:right;color:var(--fg)">${u.tx}</td>
+        <td class="tbl__mono">${u.active}</td>
+        <td>
+          <span class="bdg bdg--status-${u.status}">${STATUS_LABELS[u.status]}</span>
+          ${u.banReason?`<div style="font-family:var(--font-mono);font-size:10px;color:var(--danger);margin-top:3px;letter-spacing:.04em">${u.banReason}</div>`:''}
+        </td>
+        <td style="text-align:right">
+          <a class="tbl__action" href="Admin - User Edit.html" aria-label="Edit ${u.handle}"><svg width="14" height="14" fill="currentColor"><use href="#i-more"/></svg></a>
+        </td>
+      </tr>
+    `;}).join('');
+
+    // Row checkbox toggle
+    document.querySelectorAll('[data-row]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation();
+        el.classList.toggle('is-on');
+        const tr = el.closest('tr');
+        tr.classList.toggle('is-selected', el.classList.contains('is-on'));
+      });
+    });
+  </script>
+</body>
+</html>

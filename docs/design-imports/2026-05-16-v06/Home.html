@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur — Home</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="01 Home">
+
+  <!-- ============================================================
+       SVG sprite — icons
+       ============================================================ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 12a8 8 0 0 0 0-8" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+        <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="/">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link is-active" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+
+        <button class="icon-btn" data-theme-toggle aria-label="Schimă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <button class="btn-ghost" type="button">Înregistrare</button>
+        <button class="btn-login" type="button">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ============================================================
+         HERO
+         ============================================================ -->
+    <section class="hero crosses" aria-labelledby="hero-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="hero__grid">
+        <div class="hero__media">
+          <div class="gear-fill" data-gear="juno-60">
+            <img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="Roland Juno-60" loading="lazy" onerror="this.remove()" />
+            <span class="gear-fill__label">Foto · Roland Juno-60</span>
+          </div>
+          <div class="hero__rotator">
+            <button aria-label="Anterior" data-hero-prev>‹</button>
+            <span class="hero__counter">01 / 04</span>
+            <button aria-label="Următorul" data-hero-next>›</button>
+          </div>
+        </div>
+
+        <div class="hero__body">
+          <div>
+            <div class="hero__meta">
+              <span class="pill is-accent">Featured</span>
+              <span class="pill is-live">Live · Revistă</span>
+              <span>14 Mai 2026</span>
+            </div>
+            <h1 class="hero__title" id="hero-title">Cum sună<br/>România prin<br/>Juno-60</h1>
+            <p class="hero__lede">
+              Portret cu Khidja și colecția lor de polifonice analogice. O conversație despre tuning instabil,
+              despre Bucureștiul de noapte și despre de ce un Juno reparat de mâna a treia poate fi
+              cel mai bun preț pe care o să-l plătești vreodată pentru un sunet.
+            </p>
+          </div>
+
+          <div class="hero__footer">
+            <div class="hero__byline">
+              <span class="avatar">AM</span>
+              <span>Andrei Mihalache</span>
+              <span style="opacity:.5">·</span>
+              <span>12 min citire</span>
+            </div>
+            <a class="block__cta" href="#">Citește</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         LATEST IN REVISTA
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="revista-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Revistă</span>
+          <h2 class="block__title" id="revista-title">Ultimele citite<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Revista.html">Vezi toate articolele</a>
+      </header>
+
+      <div class="block__body">
+        <div class="revista-grid" data-reveal-stagger>
+
+          <a class="article is-big" href="#">
+            <div class="article__media">
+              <div class="gear-fill" data-gear="pro-1">
+                <img class="gear-fill__photo" src="https://cdn.mos.cms.futurecdn.net/Kf8saVxuLCi9ZDaTZVypj4.jpg" alt="Behringer Pro-1" loading="lazy" onerror="this.remove()" />
+                <span class="gear-fill__label">Behringer Pro-1</span>
+              </div>
+            </div>
+            <div class="article__body">
+              <span class="article__pill">// Recenzie</span>
+              <h3 class="article__title">Behringer Pro-1 — clona Pro-One ajunge sub 400 €. Merită hype-ul?</h3>
+              <p class="article__excerpt">
+                Trei săptămâni cu Pro-1 în setup. Diferențele față de original sunt acolo, dar
+                discuția nu mai e despre fidelitate — e despre cine își permite ce.
+              </p>
+              <div class="article__byline">
+                <span class="avatar">RP</span>
+                <span>Radu Popescu</span>
+                <span class="sep">·</span>
+                <span>12 mai · 8 min</span>
+              </div>
+            </div>
+          </a>
+
+          <div class="revista-side">
+            <a class="article is-small" href="#">
+              <div class="article__media">
+                <div class="gear-fill" data-gear="volca-fm">
+                  <img class="gear-fill__photo" src="https://cdn.korg.com/ro/products/upload/497a8c904235c795605923a8d6860810_sp.jpg" alt="Korg Volca FM" loading="lazy" onerror="this.remove()" />
+                  <span class="gear-fill__label">Korg Volca FM</span>
+                </div>
+              </div>
+              <div class="article__body">
+                <span class="article__pill">// Tutorial</span>
+                <h3 class="article__title">7 patch-uri esențiale pe Volca FM — de la basuri la bell-uri</h3>
+                <div class="article__byline">
+                  <span class="avatar">MD</span>
+                  <span>Maria Dragomir</span>
+                  <span class="sep">·</span>
+                  <span>11 mai · 6 min</span>
+                </div>
+              </div>
+            </a>
+
+            <a class="article is-small" href="#">
+              <div class="article__media">
+                <div class="gear-fill" data-gear="portrait-studio">
+                  <img class="gear-fill__photo" src="https://geo-media.beatport.com/image_size/590x404/6a703041-524c-4360-81b2-388837c1cee5.jpg" alt="Cosmin TRG" loading="lazy" onerror="this.remove()" />
+                  <span class="gear-fill__label">Foto · Cosmin TRG</span>
+                </div>
+              </div>
+              <div class="article__body">
+                <span class="article__pill">// Interviu</span>
+                <h3 class="article__title">Cosmin TRG: „Setup-ul de live e ca o conversație cu tine de acum trei ani"</h3>
+                <div class="article__byline">
+                  <span class="avatar">EI</span>
+                  <span>Elena Iliescu</span>
+                  <span class="sep">·</span>
+                  <span>09 mai · 14 min</span>
+                </div>
+              </div>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         HOT IN BAZAR
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="bazar-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Bazar · Hot acum</span>
+          <h2 class="block__title" id="bazar-title">Pe piață<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Bazar.html">Toate listingurile</a>
+      </header>
+
+      <div class="block__body">
+        <div class="bazar-scroll" id="bazar-scroll" data-reveal-stagger>
+          <!-- Listing cards inserted via JS for compactness -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ACTIVE IN FORUM
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="forum-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Forum · Activitate recentă</span>
+          <h2 class="block__title" id="forum-title">Se vorbește<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Forum.html">Mergi pe forum</a>
+      </header>
+
+      <div class="block__body">
+        <div class="forum-with-pulse">
+          <div class="forum-list" id="forum-list" data-reveal-stagger></div>
+          <aside class="pulse pulse--aside" aria-label="Pulsul platformei" data-reveal-stagger>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Listinguri noi · azi</span>
+              <span class="pulse__num" data-count-to="47">47</span>
+              <span class="pulse__delta">↑ 12 față de ieri</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Articole · săpt.</span>
+              <span class="pulse__num" data-count-to="12">12</span>
+              <span class="pulse__delta">↑ 3 vs. săpt. trecută</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Threaduri active</span>
+              <span class="pulse__num" data-count-to="89">89</span>
+              <span class="pulse__delta">livestream actualizat</span>
+            </div>
+            <div class="pulse__cell">
+              <span class="pulse__label">// Gear catalogat</span>
+              <span class="pulse__num" data-count-to="2418" data-count-format="comma">2,418</span>
+              <span class="pulse__delta is-down">+ 24 săpt. asta</span>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SPOTLIGHT TEZAUR
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="spotlight-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Tezaur · Spotlight săptămâna asta</span>
+          <h2 class="block__title" id="spotlight-title">Gear al săptămânii<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Tezaur.html">Vezi pagina</a>
+      </header>
+
+      <div class="spotlight">
+        <div class="spotlight__media">
+          <div class="gear-fill" data-gear="prophet-6">
+            <img class="gear-fill__photo" src="https://i.ytimg.com/vi/m65rAfsjllw/maxresdefault.jpg" alt="Sequential Prophet-6" loading="lazy" onerror="this.remove()" />
+            <span class="gear-fill__label">Sequential Prophet-6 Desktop</span>
+          </div>
+        </div>
+
+        <div class="spotlight__body">
+          <span class="spotlight__brand">// Sequential</span>
+          <h3 class="spotlight__model">Prophet-6<br/>Desktop</h3>
+          <p class="spotlight__desc">
+            Hexafonic analog cu VCO discrete și efecte stereo. Continuarea spirituală a Prophet-5 —
+            mai cald, mai politicos, dar tot cu acel <em>character</em> care făcea ca toți cei din 1981
+            să cumpere unul fără să gândească.
+          </p>
+
+          <div class="spec-table">
+            <div class="spec-table__cell"><span class="k">// Polifonie</span><span class="v">6 voci</span></div>
+            <div class="spec-table__cell"><span class="k">// Anul lansării</span><span class="v">2015</span></div>
+            <div class="spec-table__cell"><span class="k">// Oscilatori / voce</span><span class="v">2 VCO + sub</span></div>
+            <div class="spec-table__cell"><span class="k">// Filtru</span><span class="v">Low-pass 4-pol</span></div>
+            <div class="spec-table__cell"><span class="k">// Form factor</span><span class="v">Desktop</span></div>
+            <div class="spec-table__cell"><span class="k">// MSRP la lansare</span><span class="v">€ 1.799</span></div>
+          </div>
+
+          <div class="spotlight__row">
+            <div class="spotlight__own"><b>34</b> &nbsp;persoane dețin acest gear pe Sintezaur</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         FROM THE CATALOG
+         ============================================================ -->
+    <section class="block crosses" aria-labelledby="catalog-title" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <header class="block__head">
+        <div>
+          <span class="block__sub">Tezaur · Selecție aleatoare</span>
+          <h2 class="block__title" id="catalog-title">Din catalog<span class="dot">.</span></h2>
+        </div>
+        <a class="block__cta" href="Tezaur.html">Explorează tezaurul</a>
+      </header>
+
+      <div class="catalog" id="catalog" data-reveal-stagger></div>
+    </section>
+
+    <!-- ============================================================
+         FOOTER CTA
+         ============================================================ -->
+    <section class="cta-strip crosses" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="cta-strip__a">
+        <h2 class="cta-strip__title">Fă-ți<br/>cont.</h2>
+        <p>Catalog complet, listinguri salvate, alerte de preț, abonamente la threaduri și colecția ta personală — gratuit, mereu.</p>
+        <button class="btn-ghost" type="button">Înregistrare →</button>
+      </div>
+      <div class="cta-strip__b">
+        <div class="newsletter">
+          <span class="newsletter__label">// Newsletter Sintezaur — săptămânal</span>
+          <div class="newsletter__row">
+            <input type="email" placeholder="email@domeniu.ro" />
+            <button type="button">Abonează-te</button>
+          </div>
+          <p style="margin:0; font-size:12px; color:var(--fg-muted)">
+            Cele mai bune materiale și un rezumat onest al pieței. Fără spam. Te dezabonezi cu un click.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="/">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="/despre">Despre</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/termeni">Termeni</a></li>
+            <li><a href="/confidentialitate">Confidențialitate</a></li>
+            <li><a href="/rss">RSS</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       Data + behaviors
+       ============================================================ -->
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+
+      function apply(mode) {
+        root.setAttribute('data-theme', mode);
+      }
+      const saved = localStorage.getItem(KEY) || 'dark';
+      apply(saved);
+
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+        const next = cur === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // Fill any [data-gear] container with its SVG illustration
+    function fillGears(scope) {
+      (scope || document).querySelectorAll('[data-gear]').forEach(el => {
+        if (el.dataset.gearFilled) return;
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+          el.dataset.gearFilled = '1';
+        }
+      });
+    }
+    fillGears();
+
+    // ---------- BAZAR LISTINGS ----------
+    const LISTINGS = [
+      { brand: "Roland", model: "Juno-60", key: "juno-60", photo: "https://www.rolandcloud.com/getmedia/99d1b61e-eb64-444e-95dd-491a6e5efcaa/JUNO-60-HK-1-LFT-smaller.png", price: "4 200", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "București", sellerInit: "AB", rating: "4.9", count: "23 vânzări" },
+      { brand: "Korg", model: "Minilogue XD", key: "minilogue-xd", photo: "https://korgusshop.com/cdn/shop/files/minilogue_xd_inverted_image.jpg?v=1720030025&width=1200", price: "2 850", cur: "RON", cond: "Ca nou", chip: "nou", loc: "Cluj-Napoca", sellerInit: "MR", rating: "5.0", count: "8 vânzări" },
+      { brand: "Moog", model: "Subsequent 37", key: "subsequent-37", price: "5 990", cur: "RON", cond: "Bun", chip: "very_good", loc: "Timișoara", sellerInit: "DA", rating: "4.7", count: "14 vânzări" },
+      { brand: "Behringer", model: "Model D", key: "model-d", photo: "https://dt7v1i9vyp3mf.cloudfront.net/styles/news_large/s3/imagelibrary/B/BehringerModelD_01-KpMPqNs9xNDsKI7jXXKkQy5HsOTdEOOF.jpg", price: "1 450", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "Brașov", sellerInit: "VP", rating: "4.8", count: "11 vânzări" },
+      { brand: "Elektron", model: "Digitakt II", key: "digitakt-ii", photo: "https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg", price: "4 100", cur: "RON", cond: "Ca nou", chip: "nou", loc: "București", sellerInit: "LS", rating: "5.0", count: "32 vânzări" },
+      { brand: "Arturia", model: "MicroFreak", key: "microfreak", price: "1 750", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "Iași", sellerInit: "GO", rating: "4.6", count: "5 vânzări" },
+      { brand: "Make Noise", model: "0-Coast", key: "0-coast", price: "2 200", cur: "RON", cond: "Bun", chip: "very_good", loc: "Sibiu", sellerInit: "RT", rating: "4.9", count: "18 vânzări" },
+      { brand: "Yamaha", model: "DX7 Mk1", key: "dx7", price: "3 500", cur: "RON", cond: "Bun · service done", chip: "very_good", loc: "Constanța", sellerInit: "MN", rating: "4.8", count: "7 vânzări" }
+    ];
+
+    function gearMedia(key, label, photo) {
+      const img = photo ? `<img class="gear-fill__photo" src="${photo}" alt="${label}" loading="lazy" onerror="this.remove()" />` : '';
+      return `<div class="gear-fill" data-gear="${key}">${img}<span class="gear-fill__label">${label}</span></div>`;
+    }
+
+    function listingHref(l) {
+      return l.key === 'juno-60' ? 'Bazar - Roland Juno-60.html' : '#';
+    }
+
+    document.getElementById('bazar-scroll').innerHTML = LISTINGS.map(l => `
+      <a class="listing" href="${listingHref(l)}" style="text-decoration:none; color:inherit;">
+        <div class="listing__media">
+          ${gearMedia(l.key, l.brand + ' · ' + l.model, l.photo)}
+          <span class="listing__chip" data-cond="${l.chip}">${l.cond}</span>
+          <button class="listing__heart" aria-label="Salvează"><svg><use href="#i-heart"/></svg></button>
+        </div>
+        <div class="listing__body">
+          <div class="listing__brand">// ${l.brand}</div>
+          <div class="listing__title">${l.model}</div>
+          <div class="listing__row">
+            <div class="listing__price">${l.price}<small>${l.cur}</small></div>
+            <div class="listing__loc">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><use href="#i-pin"/></svg>
+              ${l.loc}
+            </div>
+          </div>
+          <div class="listing__seller">
+            <span class="avatar" style="width:22px;height:22px;font-size:10px">${l.sellerInit}</span>
+            <span><span class="star">★</span> ${l.rating}</span>
+            <span style="opacity:.5">·</span>
+            <span>${l.count}</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    // Heart toggle (stop propagation so card link doesn't fire)
+    document.querySelectorAll('.listing__heart').forEach(btn => {
+      btn.addEventListener('click', e => {
+        e.preventDefault(); e.stopPropagation();
+        btn.classList.toggle('is-on');
+      });
+    });
+
+    // ---------- FORUM THREADS ----------
+    const THREADS = [
+      { cat: "Tezaur · Întrebări", title: "Probleme cu MIDI sync între Digitakt II și OP-1 field — clock drift după 30 min", author: "rares.s", replies: 24, last: "acum 12 min", avatar: "RS" },
+      { cat: "Modular", title: "Primul rack 84HP — ce module sunt obligatorii și ce e marketing?", author: "anaaaaa", replies: 67, last: "acum 1 oră", avatar: "AN" },
+      { cat: "Bazar · Schimb", title: "Schimb Juno-60 cu Prophet-6 desktop + diferență. Cum stabilim diferența corect?", author: "vladpetre", replies: 18, last: "acum 2 ore", avatar: "VP" },
+      { cat: "Producție", title: "Cel mai bun preamp pentru vocale lo-fi sub 2000 RON — recomandări reale", author: "mihaela_m", replies: 41, last: "acum 3 ore", avatar: "MM" },
+      { cat: "Software", title: "ROLI Seaboard merită în 2026? Pentru cine produce ambient și texturi", author: "tudor.b", replies: 9, last: "acum 4 ore", avatar: "TB" }
+    ];
+
+    document.getElementById('forum-list').innerHTML = THREADS.map(t => `
+      <a class="thread" href="#">
+        <span class="thread__avatar">${t.avatar}</span>
+        <div class="thread__body">
+          <span class="thread__cat">// ${t.cat}</span>
+          <span class="thread__title">${t.title}</span>
+          <span class="thread__meta">@${t.author}</span>
+        </div>
+        <div class="thread__replies">${t.replies}<small>răspunsuri</small></div>
+        <div class="thread__activity">${t.last}</div>
+      </a>
+    `).join('');
+
+    // ---------- CATALOG ----------
+    const CATALOG = [
+      { brand: "Roland", model: "TR-808", key: "tr-808", photo: "https://www.drumcollector.com/wp-content/uploads/2018/03/Roland_TR-808_Rhythm_Composer_01_Header.jpg", tags: ["Drum machine", "Vintage"], owners: 12 },
+      { brand: "Korg", model: "MS-20", key: "ms-20", tags: ["Mono", "Semi-modular"], owners: 18 },
+      { brand: "Moog", model: "Matriarch", key: "matriarch", tags: ["Para", "Semi-modular"], owners: 7 },
+      { brand: "Elektron", model: "Octatrack MKII", key: "octatrack-mk2", tags: ["Sampler", "Performance"], owners: 23 },
+      { brand: "Teenage Eng.", model: "OP-1 Field", key: "op-1-field", tags: ["Portabil", "Sampler"], owners: 41 },
+      { brand: "Sequential", model: "Take 5", key: "take-5", tags: ["Poly", "Analog"], owners: 9 }
+    ];
+
+    document.getElementById('catalog').innerHTML = CATALOG.map(g => `
+      <a class="gear" href="#">
+        <div class="gear__media">${gearMedia(g.key, g.brand + ' · ' + g.model)}</div>
+        <div class="gear__brand">// ${g.brand}</div>
+        <div class="gear__model">${g.model}</div>
+        <div class="gear__tags">${g.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="gear__own"><b>${g.owners}</b> persoane dețin</div>
+      </a>
+    `).join('');
+
+    // Run gear filler again for dynamically-added markup
+    fillGears();
+
+    // ---------- HERO ROTATOR (placeholder behavior) ----------
+    (function heroRotator() {
+      const counter = document.querySelector('.hero__counter');
+      let i = 1, total = 4;
+      const prev = document.querySelector('[data-hero-prev]');
+      const next = document.querySelector('[data-hero-next]');
+      function set(n) { i = ((n - 1 + total) % total) + 1; counter.textContent = String(i).padStart(2, '0') + ' / ' + String(total).padStart(2, '0'); }
+      prev.addEventListener('click', () => set(i - 1));
+      next.addEventListener('click', () => set(i + 1));
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Adaugă în Tezaur — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+</head>
+<body data-screen-label="07 Tezaur — adaugă item">
+
+  <!-- SVG sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M15 6l-6 6 6 6"/>
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>
+      </symbol>
+      <symbol id="i-drag" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+        <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+        <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+      </symbol>
+      <symbol id="i-caret-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link is-active" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <span class="avatar">TI</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Tezaur.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Înapoi la Tezaur
+      </a>
+      <span class="sep">·</span>
+      <a href="Tezaur.html">Tezaur</a>
+      <span class="sep">/</span>
+      <span class="cur">Adaugă piesă nouă</span>
+    </nav>
+
+    <!-- HEADER -->
+    <section class="ta-header crosses" aria-labelledby="ta-title">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div>
+        <p class="ta-header__sub">Tezaur · Contribuție comunitate</p>
+        <h1 class="ta-header__title" id="ta-title">Adaugă în<br/>Tezaur<span class="dot">.</span></h1>
+      </div>
+      <div>
+        <p class="ta-header__lede">
+          Completezi o piesă nouă pentru enciclopedie — sintetizator, drum machine, sampler, eurorack
+          sau orice altceva. Ce salvezi aici devine pagină de detaliu pe care orice membru o poate vedea
+          și extinde. <strong style="color:var(--fg)">Trimitem la moderare</strong> înainte de publicare.
+        </p>
+        <div class="ta-header__steps">
+          <div class="ta-step is-done">
+            <span class="ta-step__num"><b>01</b> <span class="tick">✓</span> identificare</span>
+            <span class="ta-step__label">Brand & model</span>
+          </div>
+          <div class="ta-step is-current">
+            <span class="ta-step__num"><b>02</b> în lucru</span>
+            <span class="ta-step__label">Imagini & descriere</span>
+          </div>
+          <div class="ta-step is-todo">
+            <span class="ta-step__num"><b>03</b> următor</span>
+            <span class="ta-step__label">Specificații</span>
+          </div>
+          <div class="ta-step is-todo">
+            <span class="ta-step__num"><b>04</b> final</span>
+            <span class="ta-step__label">Trimite</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN -->
+    <div class="ta-main">
+
+      <!-- ===================== LEFT: form ===================== -->
+      <form id="ta-form" onsubmit="event.preventDefault()">
+
+        <!-- ---------- IDENTIFICARE ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 01 · Identificare</span>
+              <h2>Brand & model</h2>
+            </div>
+            <div class="ta-sec__hint">
+              <b>Auto-completat</b> din Roland Cloud API
+            </div>
+          </header>
+          <div class="ta-sec__body">
+            <div class="ta-grid">
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-brand">Brand <span class="req">*</span> <span class="hint">186 în tezaur · scrie pentru a căuta sau adăuga nou</span></label>
+                <div class="ta-select ta-select--combo" data-name="brand" data-value="Roland" id="f-brand">
+                  <div class="ta-select__btn">
+                    <input type="text" class="ta-select__search" placeholder="Caută sau scrie brand nou…" value="Roland" />
+                    <span class="ta-select__caret-wrap" aria-hidden="true"><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></span>
+                  </div>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__group">Branduri populare</div>
+                    <div class="ta-select__opt is-selected" data-v="Roland">Roland<span class="ta-select__opt-meta">412 piese</span></div>
+                    <div class="ta-select__opt" data-v="Korg">Korg<span class="ta-select__opt-meta">326</span></div>
+                    <div class="ta-select__opt" data-v="Yamaha">Yamaha<span class="ta-select__opt-meta">198</span></div>
+                    <div class="ta-select__opt" data-v="Moog">Moog<span class="ta-select__opt-meta">184</span></div>
+                    <div class="ta-select__opt" data-v="Behringer">Behringer<span class="ta-select__opt-meta">154</span></div>
+                    <div class="ta-select__opt" data-v="Arturia">Arturia<span class="ta-select__opt-meta">112</span></div>
+                    <div class="ta-select__opt" data-v="Sequential">Sequential<span class="ta-select__opt-meta">96</span></div>
+                    <div class="ta-select__opt" data-v="Novation">Novation<span class="ta-select__opt-meta">86</span></div>
+                    <div class="ta-select__opt" data-v="Elektron">Elektron<span class="ta-select__opt-meta">78</span></div>
+                    <div class="ta-select__opt" data-v="Waldorf">Waldorf<span class="ta-select__opt-meta">64</span></div>
+                    <div class="ta-select__opt" data-v="Make Noise">Make Noise<span class="ta-select__opt-meta">58</span></div>
+                    <div class="ta-select__opt" data-v="Teenage Engineering">Teenage Engineering<span class="ta-select__opt-meta">42</span></div>
+                    <div class="ta-select__opt" data-v="Oberheim">Oberheim<span class="ta-select__opt-meta">32</span></div>
+                    <div class="ta-select__opt" data-v="Dave Smith Inst.">Dave Smith Inst.<span class="ta-select__opt-meta">28</span></div>
+                    <div class="ta-select__opt" data-v="Access">Access<span class="ta-select__opt-meta">14</span></div>
+                    <div class="ta-select__opt" data-v="Buchla">Buchla<span class="ta-select__opt-meta">9</span></div>
+                    <div class="ta-select__empty">Niciun brand cu acest nume nu e încă în Tezaur.</div>
+                    <div class="ta-select__opt ta-select__opt--add" data-add>Adaugă brand nou</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-model">Model <span class="req">*</span></label>
+                <input id="f-model" type="text" value="JUPITER-X" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Categorie <span class="req">*</span> <span class="hint">18 categorii în tezaur</span></label>
+                <div class="ta-select" data-name="cat" data-value="sintetizator">
+                  <button class="ta-select__btn" type="button" aria-haspopup="listbox">
+                    <span class="ta-select__val">Sintetizator</span>
+                    <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                  </button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__group">Sinteza & ritmica</div>
+                    <div class="ta-select__opt is-selected" data-v="sintetizator">Sintetizator<span class="ta-select__opt-meta">1 842</span></div>
+                    <div class="ta-select__opt" data-v="drum-machine">Drum machine<span class="ta-select__opt-meta">198</span></div>
+                    <div class="ta-select__opt" data-v="groovebox">Groovebox<span class="ta-select__opt-meta">98</span></div>
+                    <div class="ta-select__opt" data-v="sampler">Sampler<span class="ta-select__opt-meta">142</span></div>
+                    <div class="ta-select__opt" data-v="sequencer">Sequencer hardware<span class="ta-select__opt-meta">62</span></div>
+                    <div class="ta-select__opt" data-v="workstation">Workstation<span class="ta-select__opt-meta">88</span></div>
+                    <div class="ta-select__group">Modular & control</div>
+                    <div class="ta-select__opt" data-v="eurorack">Eurorack · modul<span class="ta-select__opt-meta">86</span></div>
+                    <div class="ta-select__opt" data-v="semi-modular">Semi-modular<span class="ta-select__opt-meta">42</span></div>
+                    <div class="ta-select__opt" data-v="controller">Controller MIDI<span class="ta-select__opt-meta">128</span></div>
+                    <div class="ta-select__opt" data-v="interface">Interfață audio / MIDI<span class="ta-select__opt-meta">94</span></div>
+                    <div class="ta-select__opt" data-v="mixer">Mixer / table<span class="ta-select__opt-meta">76</span></div>
+                    <div class="ta-select__group">Keys & acustic</div>
+                    <div class="ta-select__opt" data-v="stage-piano">Stage piano<span class="ta-select__opt-meta">54</span></div>
+                    <div class="ta-select__opt" data-v="orga">Orgă / Combo<span class="ta-select__opt-meta">38</span></div>
+                    <div class="ta-select__opt" data-v="theremin">Theremin / instrument neconvențional<span class="ta-select__opt-meta">12</span></div>
+                    <div class="ta-select__group">Procesare & efecte</div>
+                    <div class="ta-select__opt" data-v="pedala">Pedală / stompbox<span class="ta-select__opt-meta">196</span></div>
+                    <div class="ta-select__opt" data-v="fx-rack">FX rack / procesor<span class="ta-select__opt-meta">52</span></div>
+                    <div class="ta-select__opt" data-v="vocoder">Vocoder<span class="ta-select__opt-meta">18</span></div>
+                    <div class="ta-select__opt" data-v="tape">Tape machine · 4-track · reel-to-reel<span class="ta-select__opt-meta">24</span></div>
+                    <div class="ta-select__empty">Nicio categorie găsită.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Form factor</label>
+                <div class="ta-chips" role="radiogroup">
+                  <input type="radio" name="ff" id="ff-key" checked /><label for="ff-key">Keyboard</label>
+                  <input type="radio" name="ff" id="ff-desk" /><label for="ff-desk">Desktop</label>
+                  <input type="radio" name="ff" id="ff-rack" /><label for="ff-rack">Rack</label>
+                  <input type="radio" name="ff" id="ff-modul" /><label for="ff-modul">Modular</label>
+                  <input type="radio" name="ff" id="ff-pedal" /><label for="ff-pedal">Pedală</label>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-year">An lansare <span class="req">*</span></label>
+                <input id="f-year" type="number" value="2020" min="1900" max="2030" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-disc">An discontinuare <span class="hint">lasă gol = în producție</span></label>
+                <input id="f-disc" type="number" placeholder="—" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-family">Familie / serie</label>
+                <input id="f-family" type="text" value="Roland JUPITER series" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-msrp">Preț lansare (MSRP) <span class="hint">USD</span></label>
+                <div class="ta-field__input-row">
+                  <input id="f-msrp" type="number" value="2499" />
+                  <span class="unit">USD</span>
+                </div>
+              </div>
+            </div>
+            <p class="ta-src-row" style="margin-top:14px">
+              <span>Sursă:</span>
+              <span class="ta-src is-auto">auto · roland.com</span>
+              <span class="ta-src">manual</span>
+              <span style="margin-left:auto">verificat la 15 Mai 2026</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- ---------- IMAGINI ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 02 · Galerie</span>
+              <h2>Imagini</h2>
+            </div>
+            <div class="ta-sec__hint">
+              <b>3 / 12</b> încărcate · trage să resortezi · prima e cover
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <div class="ta-drop" id="ta-drop" tabindex="0">
+              <div class="ta-drop__icon">
+                <svg width="28" height="28"><use href="#i-upload"/></svg>
+              </div>
+              <div class="ta-drop__primary">
+                Trage imagini aici sau <u>alege de pe disc</u>
+              </div>
+              <div class="ta-drop__sub">
+                PNG / JPG / WEBP · max <b>8 MB</b> per imagine · max <b>12</b> imagini per piesă<br/>
+                Recomandare: front, top, back, detalii panou, semnătură serie
+              </div>
+            </div>
+
+            <div class="ta-imgs" id="ta-imgs">
+              <div class="ta-img" draggable="true" data-i="0">
+                <img class="ta-img__photo" src="assets/jupiter-x-01.jpg" alt="Jupiter-X — perspectivă" />
+                <span class="ta-img__num">01</span>
+                <span class="ta-img__cover">cover</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-img" draggable="true" data-i="1">
+                <img class="ta-img__photo" src="assets/jupiter-x-02.jpg" alt="Jupiter-X — top" />
+                <span class="ta-img__num">02</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-img" draggable="true" data-i="2">
+                <img class="ta-img__photo" src="assets/jupiter-x-03.jpg" alt="Jupiter-X — back" />
+                <span class="ta-img__num">03</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <button class="ta-img ta-img--add" type="button" id="ta-add-more" aria-label="Adaugă mai multe">+</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- DESCRIERE ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 02 · Conținut</span>
+              <h2>Descriere</h2>
+            </div>
+            <div class="ta-sec__hint">
+              Markdown limitat: <b>** bold **</b> · <b>* italic *</b>
+            </div>
+          </header>
+          <div class="ta-sec__body">
+            <div class="ta-grid">
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label" for="f-tag">Tagline <span class="hint">o linie · ce-l face memorabil</span></label>
+                <input id="f-tag" type="text" value="Flagship ZEN-Core. Analog Behavior Modeling pentru JUPITER-8, JUNO-106 și SH-101 într-un singur instrument." />
+              </div>
+
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label" for="f-desc">Descriere lungă <span class="req">*</span> <span class="hint">2–6 paragrafe · 1500–4000 caractere</span></label>
+                <textarea id="f-desc" rows="12">Roland JUPITER-X este un sintetizator polifonic cu 61 de clape (cu aftertouch), anunțat în septembrie 2019 și disponibil din aprilie 2020. Este flagship-ul liniei ZEN-Core a Roland, alături de JUPITER-Xm (varianta portabilă) și, mai târziu, JUNO-X.
+
+JUPITER-X folosește motorul digital ZEN-Core cu Analog Behavior Modeling (ABM) pentru a recrea cu fidelitate clasice ca JUPITER-8 (1981), JUNO-106, SH-101 și XV-5080, plus piane RD și un vocoder integrat. Arhitectura include cinci părți (patru părți play + o parte de ritm), 4000+ tonuri presetate, 256 tonuri user și 90+ kit-uri de tobe.
+
+Designul reia elementele estetice ale flagship-urilor Roland din anii '80, cu **construcție metalică premium**, slidere reale pentru editare directă, butoane dedicate pentru funcții importante și un display LCD pentru navigare. Conectivitatea include MIDI 5-pin IN/OUT, USB-to-Host, intrare microfon XLR/jack, AUX in, ieșiri TS și XLR balansate.
+
+JUPITER-X are I-Arpeggio (algoritmi inteligenți pentru pattern-uri evolutive), efecte ZEN-Core complete (multi-effects, reverb, chorus, delay, EQ master, compresor) și suport pentru Model Expansions descărcabile prin Roland Cloud (JUPITER-8, JD-800, JX-8P, SH-101, Vocal Designer și altele). Suportă și Roland Cloud Connect cu adaptorul wireless WC-1 pentru încărcare wireless de Model Expansions.</textarea>
+                <div class="ta-field__counter" id="desc-counter"><b id="desc-num">1 458</b> / 4 000 caractere</div>
+              </div>
+
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">Tag-uri <span class="hint">descriu sunetul / tehnologia · max 8</span></label>
+                <div class="ta-chips" role="group">
+                  <input type="checkbox" id="t-poly" checked /><label for="t-poly">Polifonic</label>
+                  <input type="checkbox" id="t-hyb" checked /><label for="t-hyb">Hibrid</label>
+                  <input type="checkbox" id="t-flag" checked /><label for="t-flag">Flagship</label>
+                  <input type="checkbox" id="t-zen" checked /><label for="t-zen">ZEN-Core</label>
+                  <input type="checkbox" id="t-mod" checked /><label for="t-mod">Modeling</label>
+                  <input type="checkbox" id="t-mono" /><label for="t-mono">Monofonic</label>
+                  <input type="checkbox" id="t-vint" /><label for="t-vint">Vintage</label>
+                  <input type="checkbox" id="t-fm" /><label for="t-fm">FM</label>
+                  <input type="checkbox" id="t-wave" /><label for="t-wave">Wavetable</label>
+                  <input type="checkbox" id="t-semi" /><label for="t-semi">Semi-modular</label>
+                  <input type="checkbox" id="t-rom" /><label for="t-rom">Rompler</label>
+                  <input type="checkbox" id="t-grail" /><label for="t-grail">Holy grail</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- SPECIFICAȚII ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Date tehnice</span>
+              <h2>Specificații</h2>
+            </div>
+            <div class="ta-sec__hint">Lasă gol orice nu știi sigur · alții pot completa ulterior</div>
+          </header>
+          <div class="ta-sec__body">
+
+            <p class="ta-sub-h">Sinteză</p>
+            <div class="ta-grid ta-grid--3" style="margin-bottom:24px">
+              <div class="ta-field">
+                <label class="ta-field__label">Tip sinteză</label>
+                <div class="ta-select" data-name="synth-type" data-value="hybrid">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Hibrid (digital + analog modeling)</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="hybrid">Hibrid (digital + analog modeling)</div>
+                    <div class="ta-select__opt" data-v="analog">Analog (VCO real)</div>
+                    <div class="ta-select__opt" data-v="digital">Digital</div>
+                    <div class="ta-select__opt" data-v="fm">FM</div>
+                    <div class="ta-select__opt" data-v="wavetable">Wavetable</div>
+                    <div class="ta-select__opt" data-v="modeling">Physical modeling</div>
+                    <div class="ta-select__opt" data-v="sample">Sample-based / ROMpler</div>
+                    <div class="ta-select__opt" data-v="granular">Granular</div>
+                    <div class="ta-select__opt" data-v="additive">Additive</div>
+                    <div class="ta-select__opt" data-v="vector">Vector / phase distortion</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Polifonie <span class="hint">voci</span></label>
+                <input type="number" placeholder="ex. 8 · 16 · 256" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Osc / voce</label>
+                <input type="number" placeholder="ex. 2" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Tip filtru</label>
+                <input type="text" placeholder="ex. LPF 24 dB · multimode" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Arpeggiator</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" checked /><span class="ta-toggle__sw"></span>
+                  <span>Are I-Arpeggio</span>
+                </label>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Sequencer onboard</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" /><span class="ta-toggle__sw"></span>
+                  <span>Nu are</span>
+                </label>
+              </div>
+            </div>
+
+            <p class="ta-sub-h">Keyboard & control</p>
+            <div class="ta-grid ta-grid--3" style="margin-bottom:24px">
+              <div class="ta-field">
+                <label class="ta-field__label">Are clape?</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" checked /><span class="ta-toggle__sw"></span>
+                  <span>Da</span>
+                </label>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Nr. clape</label>
+                <input type="number" value="61" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Aftertouch</label>
+                <div class="ta-select" data-name="aftertouch" data-value="channel">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Channel (mono)</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="channel">Channel (mono)</div>
+                    <div class="ta-select__opt" data-v="poly">Poly aftertouch</div>
+                    <div class="ta-select__opt" data-v="mpe">MPE</div>
+                    <div class="ta-select__opt" data-v="none">Nu are</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p class="ta-sub-h">Conectivitate</p>
+            <div class="ta-grid" style="margin-bottom:18px">
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">MIDI I/O</label>
+                <div class="ta-chips" role="group">
+                  <input type="checkbox" id="m-din-in" checked /><label for="m-din-in">DIN in (5-pin)</label>
+                  <input type="checkbox" id="m-din-out" checked /><label for="m-din-out">DIN out</label>
+                  <input type="checkbox" id="m-din-thru" /><label for="m-din-thru">DIN thru</label>
+                  <input type="checkbox" id="m-usb" checked /><label for="m-usb">USB host</label>
+                  <input type="checkbox" id="m-trs" /><label for="m-trs">TRS MIDI</label>
+                  <input type="checkbox" id="m-bt" /><label for="m-bt">Bluetooth MIDI</label>
+                </div>
+              </div>
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">Ieșiri audio</label>
+                <div class="ta-chips" role="group">
+                  <input type="checkbox" id="o-trs" checked /><label for="o-trs">TS / TRS L+R</label>
+                  <input type="checkbox" id="o-xlr" checked /><label for="o-xlr">XLR balansate</label>
+                  <input type="checkbox" id="o-phn" checked /><label for="o-phn">Phones</label>
+                  <input type="checkbox" id="o-aux" checked /><label for="o-aux">AUX in</label>
+                  <input type="checkbox" id="o-mic" checked /><label for="o-mic">Mic in (XLR/TRS)</label>
+                  <input type="checkbox" id="o-cv" /><label for="o-cv">CV / gate out</label>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Pedale</label>
+                <input type="text" value="2× footswitch · 1× expression" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Memorie patch-uri</label>
+                <input type="text" value="4 000+ presets · 256 user" />
+              </div>
+            </div>
+
+            <p class="ta-sub-h">Fizic</p>
+            <div class="ta-grid ta-grid--3">
+              <div class="ta-field">
+                <label class="ta-field__label">Greutate</label>
+                <div class="ta-field__input-row">
+                  <input type="number" step="0.1" placeholder="ex. 12.0" />
+                  <span class="unit">kg</span>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Dimensiuni (L×l×h)</label>
+                <input type="text" placeholder="ex. 109 × 39 × 12 cm" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Alimentare</label>
+                <input type="text" value="100–240 V AC, intern" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- RELAȚII ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Context</span>
+              <h2>Relații cu alte piese</h2>
+            </div>
+            <div class="ta-sec__hint">Astea construiesc graful Tezaurului — variante, predecesori, inspirații</div>
+          </header>
+          <div class="ta-sec__body">
+            <div class="ta-rows" id="ta-rel-rows">
+              <div class="ta-rel">
+                <div class="ta-select ta-select--compact" data-value="inspired">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Inspirat de</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="inspired">Inspirat de</div>
+                    <div class="ta-select__opt" data-v="predecessor">Predecesor</div>
+                    <div class="ta-select__opt" data-v="successor">Succesor</div>
+                    <div class="ta-select__opt" data-v="variant">Variantă</div>
+                    <div class="ta-select__opt" data-v="clone">Clonă / replică</div>
+                    <div class="ta-select__opt" data-v="series">Aparține seriei</div>
+                    <div class="ta-select__opt" data-v="reissue">Reissue / reediție</div>
+                  </div>
+                </div>
+                <input type="text" value="Roland" placeholder="Brand" />
+                <input type="text" value="JUPITER-8" placeholder="Model" />
+                <input type="text" value="Recreare prin modelare a JUPITER-8 (1981) ca Model sonor" placeholder="Notă (opțional)" />
+                <button type="button" class="ta-row__del" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-rel">
+                <div class="ta-select ta-select--compact" data-value="variant">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Variantă</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt" data-v="inspired">Inspirat de</div>
+                    <div class="ta-select__opt" data-v="predecessor">Predecesor</div>
+                    <div class="ta-select__opt" data-v="successor">Succesor</div>
+                    <div class="ta-select__opt is-selected" data-v="variant">Variantă</div>
+                    <div class="ta-select__opt" data-v="clone">Clonă / replică</div>
+                    <div class="ta-select__opt" data-v="series">Aparține seriei</div>
+                    <div class="ta-select__opt" data-v="reissue">Reissue / reediție</div>
+                  </div>
+                </div>
+                <input type="text" value="Roland" placeholder="Brand" />
+                <input type="text" value="JUPITER-Xm" placeholder="Model" />
+                <input type="text" value="Versiunea portabilă cu 37 mini-clape — același motor ZEN-Core" placeholder="Notă (opțional)" />
+                <button type="button" class="ta-row__del" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+            </div>
+            <button type="button" class="ta-add-row" id="ta-add-rel">Adaugă relație</button>
+          </div>
+        </section>
+
+        <!-- ---------- LINKURI ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Surse</span>
+              <h2>Linkuri & resurse</h2>
+            </div>
+          </header>
+          <div class="ta-sec__body">
+            <div class="ta-rows" id="ta-link-rows">
+              <div class="ta-row">
+                <div class="ta-select ta-select--compact" data-value="manufacturer">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Producător</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="manufacturer">Producător</div>
+                    <div class="ta-select__opt" data-v="manual">Manual PDF</div>
+                    <div class="ta-select__opt" data-v="service">Service notes</div>
+                    <div class="ta-select__opt" data-v="wikipedia">Wikipedia</div>
+                    <div class="ta-select__opt" data-v="video">Recenzie video</div>
+                    <div class="ta-select__opt" data-v="reverb">Reverb price guide</div>
+                    <div class="ta-select__opt" data-v="other">Altă sursă</div>
+                  </div>
+                </div>
+                <input type="text" value="Pagina oficială Roland JUPITER-X" placeholder="Etichetă" />
+                <input type="url" value="https://www.roland.com/global/products/jupiter-x/" placeholder="URL" />
+                <button type="button" class="ta-row__del" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-row">
+                <div class="ta-select ta-select--compact" data-value="other">
+                  <button class="ta-select__btn" type="button"><span class="ta-select__val">Altă sursă</span><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt" data-v="manufacturer">Producător</div>
+                    <div class="ta-select__opt" data-v="manual">Manual PDF</div>
+                    <div class="ta-select__opt" data-v="service">Service notes</div>
+                    <div class="ta-select__opt" data-v="wikipedia">Wikipedia</div>
+                    <div class="ta-select__opt" data-v="video">Recenzie video</div>
+                    <div class="ta-select__opt" data-v="reverb">Reverb price guide</div>
+                    <div class="ta-select__opt is-selected" data-v="other">Altă sursă</div>
+                  </div>
+                </div>
+                <input type="text" value="Press release lansare (2019)" placeholder="Etichetă" />
+                <input type="url" value="https://www.roland.com/us/company/press_releases/2019/ROLAND-DEBUTS-ALL-NEW-JUPITER-X" placeholder="URL" />
+                <button type="button" class="ta-row__del" aria-label="Șterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+            </div>
+            <button type="button" class="ta-add-row" id="ta-add-link">Adaugă link</button>
+          </div>
+        </section>
+      </form>
+
+      <!-- ===================== RIGHT: sticky sidebar ===================== -->
+      <aside class="ta-side">
+
+        <!-- preview -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">
+            Previzualizare card
+            <span style="color:var(--fg-muted); font-size:9px;">live</span>
+          </header>
+          <div class="ta-side__body">
+            <div class="ta-preview">
+              <div class="ta-preview__media">
+                <img id="prev-img" src="assets/jupiter-x-01.jpg" alt="Preview" />
+              </div>
+              <div class="ta-preview__brand">// <span id="prev-brand">Roland</span></div>
+              <div class="ta-preview__model" id="prev-model">JUPITER-X</div>
+              <div class="ta-preview__tags" id="prev-tags">
+                <span>Polifonic</span>
+                <span>Hibrid</span>
+                <span>Flagship</span>
+                <span>ZEN-Core</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; padding-top:10px; border-top:1px dashed var(--line); font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-muted);">
+                <span>// nou în Tezaur</span>
+                <span><span id="prev-year">2020</span></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- completion -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">
+            Completare
+            <span class="ta-status">
+              <span class="ta-status__dot"></span> draft
+            </span>
+          </header>
+          <div class="ta-side__body">
+            <div class="ta-meter" style="--p: 72%">
+              <div class="ta-meter__top">
+                <span>Progres</span>
+                <span><b>72</b>%</span>
+              </div>
+              <div class="ta-meter__bar"></div>
+            </div>
+
+            <div class="ta-checklist">
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Brand & model</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Categorie & form factor</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>An lansare</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>≥ 3 imagini</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Descriere (1 458 caract.)</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Tag-uri (5)</span></div>
+              <div class="ta-checklist__item"><span class="mark">·</span><span>Specs: filtru + polifonie</span></div>
+              <div class="ta-checklist__item"><span class="mark">·</span><span>Dimensiuni & greutate</span></div>
+              <div class="ta-checklist__item"><span class="mark">·</span><span>≥ 1 sursă verificabilă</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTAs -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Acțiuni</header>
+          <div class="ta-side__body">
+            <div class="ta-cta-row">
+              <button class="ta-cta ta-cta--primary" type="button">Trimite la moderare →</button>
+              <button class="ta-cta ta-cta--ghost" type="button">Salvează ca draft</button>
+              <button class="ta-cta ta-cta--danger-text" type="button">Renunță & întoarce-te</button>
+            </div>
+            <p style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-subtle); margin:8px 0 0; line-height:1.55;">
+              * Moderarea durează 1–3 zile lucrătoare. Vei primi notificare când e publicat.
+            </p>
+          </div>
+        </section>
+
+        <!-- tips -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Sfaturi rapide</header>
+          <div class="ta-side__body">
+            <div class="ta-tips">
+              <div class="ta-tips__item">
+                <span class="n">01</span>
+                <span><strong>Fotografii curate.</strong> Front, top, back, detalii panou. Lumină difuză, fundal neutru. Evită filtrele.</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">02</span>
+                <span><strong>Descrie cum sună.</strong> Mai mult decât specs — la ce gen merge, care era contextul cultural când a apărut, cu ce se compară.</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">03</span>
+                <span><strong>Citează surse.</strong> Producător, Wikipedia, manualul oficial. Fără surse, intră la coadă mai lentă de moderare.</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">04</span>
+                <span><strong>Lasă gol ce nu știi.</strong> Comunitatea completează. E ok să ai un draft parțial — alții îl extind.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidențialitate</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- THEME ----------
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // ---------- LIVE PREVIEW SYNC ----------
+    const brand = document.getElementById('f-brand');
+    const model = document.getElementById('f-model');
+    const year = document.getElementById('f-year');
+    const prevB = document.getElementById('prev-brand');
+    const prevM = document.getElementById('prev-model');
+    const prevY = document.getElementById('prev-year');
+    const prevTags = document.getElementById('prev-tags');
+    brand.addEventListener('ta-select-change', e => prevB.textContent = e.detail.value);
+    model.addEventListener('input', () => prevM.textContent = model.value || '—');
+    year.addEventListener('input', () => prevY.textContent = year.value || '—');
+
+    // Sync tag chips to preview
+    function syncTags() {
+      const on = [...document.querySelectorAll('.ta-chips input[type="checkbox"][id^="t-"]:checked + label')]
+        .map(l => l.textContent.trim());
+      prevTags.innerHTML = on.slice(0, 4).map(t => `<span>${t}</span>`).join('') || '<span style="opacity:.4">— fără tag-uri —</span>';
+    }
+    document.querySelectorAll('.ta-chips input[type="checkbox"][id^="t-"]').forEach(c => c.addEventListener('change', syncTags));
+
+    // ---------- TEXTAREA COUNTER ----------
+    const desc = document.getElementById('f-desc');
+    const descNum = document.getElementById('desc-num');
+    function fmtN(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+    desc.addEventListener('input', () => descNum.textContent = fmtN(desc.value.length));
+
+    // ---------- DRAG TO REORDER IMAGES ----------
+    const imgs = document.getElementById('ta-imgs');
+    let dragEl = null;
+    imgs.addEventListener('dragstart', e => {
+      const tile = e.target.closest('.ta-img');
+      if (!tile || tile.classList.contains('ta-img--add')) return;
+      dragEl = tile;
+      tile.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (_) {}
+    });
+    imgs.addEventListener('dragend', () => {
+      if (dragEl) dragEl.classList.remove('is-dragging');
+      imgs.querySelectorAll('.is-over').forEach(t => t.classList.remove('is-over'));
+      dragEl = null;
+      renumber();
+    });
+    imgs.addEventListener('dragover', e => {
+      e.preventDefault();
+      const over = e.target.closest('.ta-img');
+      if (!over || over === dragEl || over.classList.contains('ta-img--add') || !dragEl) return;
+      imgs.querySelectorAll('.is-over').forEach(t => t.classList.remove('is-over'));
+      over.classList.add('is-over');
+      // Insert before or after based on horizontal position
+      const r = over.getBoundingClientRect();
+      const after = (e.clientX - r.left) > r.width / 2;
+      if (after) over.after(dragEl);
+      else over.before(dragEl);
+    });
+    imgs.addEventListener('drop', e => e.preventDefault());
+
+    function renumber() {
+      const tiles = imgs.querySelectorAll('.ta-img:not(.ta-img--add)');
+      tiles.forEach((t, i) => {
+        let num = t.querySelector('.ta-img__num');
+        if (num) num.textContent = String(i + 1).padStart(2, '0');
+        t.querySelectorAll('.ta-img__cover').forEach(c => c.remove());
+        if (i === 0) {
+          const cov = document.createElement('span');
+          cov.className = 'ta-img__cover';
+          cov.textContent = 'cover';
+          t.appendChild(cov);
+        }
+      });
+      // Update preview image to first
+      const first = tiles[0]?.querySelector('img');
+      if (first) document.getElementById('prev-img').src = first.src;
+    }
+
+    // ---------- DELETE TILE ----------
+    imgs.addEventListener('click', e => {
+      const del = e.target.closest('.ta-img__del');
+      if (del) {
+        del.closest('.ta-img').remove();
+        renumber();
+      }
+    });
+
+    // ---------- DROPZONE (visual feedback only — no actual upload) ----------
+    const drop = document.getElementById('ta-drop');
+    ;['dragenter', 'dragover'].forEach(ev =>
+      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('is-hover'); })
+    );
+    ;['dragleave', 'drop'].forEach(ev =>
+      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('is-hover'); })
+    );
+
+    // ---------- ADD RELATION / LINK rows ----------
+    function cloneRow(sourceSel, container) {
+      const row = document.querySelector(sourceSel).cloneNode(true);
+      row.querySelectorAll('input').forEach(i => { i.value = ''; });
+      // Reset the dropdown in the cloned row to its first option
+      row.querySelectorAll('.ta-select').forEach(sel => {
+        const firstOpt = sel.querySelector('.ta-select__opt:not(.ta-select__opt--add)');
+        if (firstOpt) {
+          sel.querySelectorAll('.ta-select__opt.is-selected').forEach(o => o.classList.remove('is-selected'));
+          firstOpt.classList.add('is-selected');
+          sel.dataset.value = firstOpt.dataset.v || '';
+          const val = sel.querySelector('.ta-select__val');
+          if (val) val.textContent = firstOpt.firstChild.textContent.trim();
+        }
+        sel.classList.remove('is-open', 'is-empty');
+        initSelect(sel); // wire up the cloned dropdown
+      });
+      container.appendChild(row);
+    }
+    document.getElementById('ta-add-rel').addEventListener('click', () => {
+      cloneRow('#ta-rel-rows .ta-rel', document.getElementById('ta-rel-rows'));
+    });
+    document.getElementById('ta-add-link').addEventListener('click', () => {
+      cloneRow('#ta-link-rows .ta-row', document.getElementById('ta-link-rows'));
+    });
+    document.addEventListener('click', e => {
+      const del = e.target.closest('.ta-row__del');
+      if (del && (del.closest('.ta-row') || del.closest('.ta-rel'))) {
+        const row = del.closest('.ta-row') || del.closest('.ta-rel');
+        if (row.parentElement.children.length > 1) row.remove();
+      }
+    });
+
+    // ---------- CUSTOM DROPDOWNS ----------
+    function initSelect(el) {
+      const btn = el.querySelector('.ta-select__btn');
+      const menu = el.querySelector('.ta-select__menu');
+      const valDisplay = el.querySelector('.ta-select__val');
+      const search = el.querySelector('.ta-select__search');
+      const caretWrap = el.querySelector('.ta-select__caret-wrap');
+      const isCombo = el.classList.contains('ta-select--combo');
+
+      function openMenu() {
+        // close other open ones
+        document.querySelectorAll('.ta-select.is-open').forEach(o => { if (o !== el) o.classList.remove('is-open'); });
+        el.classList.add('is-open');
+        if (search) {
+          // select-all so user can type to replace
+          requestAnimationFrame(() => { search.focus(); search.select(); });
+        }
+      }
+      function closeMenu() { el.classList.remove('is-open'); el.classList.remove('is-empty'); }
+      function toggleMenu() { el.classList.contains('is-open') ? closeMenu() : openMenu(); }
+
+      function setValue(value, label, opt) {
+        el.dataset.value = value;
+        if (valDisplay) valDisplay.textContent = label;
+        if (search) search.value = label;
+        el.querySelectorAll('.ta-select__opt.is-selected').forEach(o => o.classList.remove('is-selected'));
+        if (opt) opt.classList.add('is-selected');
+        el.dispatchEvent(new CustomEvent('ta-select-change', { detail: { value, label }, bubbles: true }));
+      }
+
+      if (btn && !isCombo) {
+        btn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+      }
+      if (isCombo) {
+        if (caretWrap) caretWrap.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+        if (search) {
+          search.addEventListener('focus', () => openMenu());
+          search.addEventListener('click', e => { e.stopPropagation(); openMenu(); });
+          search.addEventListener('input', () => {
+            const q = search.value.toLowerCase().trim();
+            let visible = 0;
+            el.querySelectorAll('.ta-select__opt').forEach(o => {
+              if (o.classList.contains('ta-select__opt--add')) return;
+              const txt = (o.firstChild && o.firstChild.textContent || o.textContent).toLowerCase();
+              const match = !q || txt.includes(q);
+              o.classList.toggle('is-hidden', !match);
+              if (match) visible++;
+            });
+            el.classList.toggle('is-empty', visible === 0);
+            // update add-new label
+            const addOpt = el.querySelector('.ta-select__opt--add');
+            if (addOpt) {
+              addOpt.textContent = visible === 0 && search.value
+                ? 'Adaugă „' + search.value + '" ca brand nou'
+                : 'Adaugă brand nou';
+            }
+          });
+        }
+      }
+
+      menu.addEventListener('click', e => {
+        e.stopPropagation();
+        const opt = e.target.closest('.ta-select__opt');
+        if (!opt) return;
+        if (opt.classList.contains('ta-select__opt--add')) {
+          const newVal = (search && search.value || '').trim();
+          if (!newVal) {
+            // focus search to let user type
+            if (search) search.focus();
+            return;
+          }
+          setValue(newVal, newVal, null);
+          // visually flash the field to confirm
+          const sbtn = el.querySelector('.ta-select__btn');
+          if (sbtn) {
+            sbtn.animate(
+              [{ borderColor: 'var(--accent)' }, { borderColor: 'var(--accent)' }, { borderColor: '' }],
+              { duration: 600 }
+            );
+          }
+          closeMenu();
+          return;
+        }
+        const v = opt.dataset.v || opt.textContent.trim();
+        // grab the visible label text but not the meta span
+        const meta = opt.querySelector('.ta-select__opt-meta');
+        const label = meta
+          ? opt.textContent.replace(meta.textContent, '').trim()
+          : opt.textContent.trim();
+        setValue(v, label, opt);
+        closeMenu();
+      });
+    }
+
+    document.querySelectorAll('.ta-select').forEach(initSelect);
+
+    // Close any open dropdown on outside click / Escape
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.ta-select')) {
+        document.querySelectorAll('.ta-select.is-open').forEach(s => s.classList.remove('is-open'));
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.ta-select.is-open').forEach(s => s.classList.remove('is-open'));
+      }
+    });
+  </script>
+</body>
+</html>
