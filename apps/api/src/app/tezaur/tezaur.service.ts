@@ -930,7 +930,19 @@ export class TezaurService {
     images: (typeof gearImages.$inferSelect)[];
     videos: (typeof gearVideos.$inferSelect)[];
     links: (typeof gearLinks.$inferSelect)[];
-    description: { body: unknown; bodyHtml: string } | null;
+    description: {
+      body: unknown;
+      bodyHtml: string;
+      lang: 'ro' | 'en';
+      isTranslated: boolean;
+    } | null;
+    /**
+     * Resolved tagline for the requested locale + a translation flag.
+     * Order: `tagline_en` (when lang=en) → `tagline_ro` → legacy
+     * `specs.tagline`. `isTranslated` is true only when the EN column
+     * itself was populated (RO is the implicit fallback).
+     */
+    tagline: { value: string | null; isTranslated: boolean };
     relationships: {
       parent: { id: string; slug: string; brand: string; model: string; type: string }[];
       child: { id: string; slug: string; brand: string; model: string; type: string }[];
@@ -1008,13 +1020,54 @@ export class TezaurService {
       .where(eq(gearLinks.gearId, gearRow.id))
       .orderBy(asc(gearLinks.position));
 
-    const [desc_] = await this.db
+    // Try the requested locale first. When the EN translation is
+    // missing we fall back to RO and tag the response as untranslated
+    // so the site can show a "translation pending" badge.
+    const [primary] = await this.db
       .select({ body: gearDescriptions.body, bodyHtml: gearDescriptions.bodyHtml })
       .from(gearDescriptions)
       .where(
         and(eq(gearDescriptions.gearId, gearRow.id), eq(gearDescriptions.lang, lang)),
       )
       .limit(1);
+    let descRow: { body: unknown; bodyHtml: string; lang: 'ro' | 'en' } | null = null;
+    if (primary && (primary.bodyHtml || Object.keys((primary.body as Record<string, unknown>) ?? {}).length)) {
+      descRow = { ...primary, lang };
+    } else if (lang === 'en') {
+      const [fallback] = await this.db
+        .select({
+          body: gearDescriptions.body,
+          bodyHtml: gearDescriptions.bodyHtml,
+        })
+        .from(gearDescriptions)
+        .where(
+          and(eq(gearDescriptions.gearId, gearRow.id), eq(gearDescriptions.lang, 'ro')),
+        )
+        .limit(1);
+      if (fallback) descRow = { ...fallback, lang: 'ro' };
+    }
+    const description = descRow
+      ? {
+          body: descRow.body,
+          bodyHtml: descRow.bodyHtml,
+          lang: descRow.lang,
+          isTranslated: descRow.lang === lang,
+        }
+      : null;
+
+    // Tagline resolution mirrors the description fallback. New columns
+    // win when populated; the legacy `specs.tagline` field stays as the
+    // ultimate RO source for catalog entries imported before M16.
+    const legacyTagline = (gearRow.specs as { tagline?: unknown })?.tagline;
+    const taglineRoValue = gearRow.taglineRo ?? (typeof legacyTagline === 'string' ? legacyTagline : null);
+    const taglineEnValue = gearRow.taglineEn;
+    const tagline =
+      lang === 'en'
+        ? {
+            value: taglineEnValue ?? taglineRoValue,
+            isTranslated: !!taglineEnValue,
+          }
+        : { value: taglineRoValue, isTranslated: true };
 
     // Parent-side: rows where THIS gear is the parent (so the "child"
     // is the related gear we want to display).
@@ -1088,7 +1141,8 @@ export class TezaurService {
       images,
       videos,
       links,
-      description: desc_ ?? null,
+      description,
+      tagline,
       relationships: { parent: parentRels, child: childRels },
       officialThread,
       relatedThreadsCount: count,

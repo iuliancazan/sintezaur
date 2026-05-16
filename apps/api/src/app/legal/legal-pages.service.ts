@@ -14,8 +14,14 @@ import { LEGAL_SLUG_VALUES, type LegalSlug, UpdateLegalPageDto } from './legal.d
 export class LegalPagesService {
   constructor(@Inject(DATABASE) private readonly db: SintezaurDb) {}
 
-  /** Public surface — content + last-updated stamp, no internal fields. */
-  async getBySlug(slug: string) {
+  /**
+   * Public surface — content + last-updated stamp, no internal fields.
+   * `lang` picks between RO (default) and EN columns; the EN fields
+   * fall back to RO when missing, and the response carries an
+   * `isTranslated` flag so the site can show a "translation pending"
+   * banner.
+   */
+  async getBySlug(slug: string, lang: 'ro' | 'en' = 'ro') {
     if (!isLegalSlug(slug)) {
       throw new NotFoundException(`legal page "${slug}" not found`);
     }
@@ -25,6 +31,9 @@ export class LegalPagesService {
         title: legalPages.title,
         bodyMd: legalPages.bodyMd,
         metaDescription: legalPages.metaDescription,
+        titleEn: legalPages.titleEn,
+        bodyMdEn: legalPages.bodyMdEn,
+        metaDescriptionEn: legalPages.metaDescriptionEn,
         updatedAt: legalPages.updatedAt,
       })
       .from(legalPages)
@@ -33,7 +42,27 @@ export class LegalPagesService {
     if (!row) {
       throw new NotFoundException(`legal page "${slug}" not found`);
     }
-    return row;
+    if (lang === 'en') {
+      const hasEn = !!(row.titleEn && row.bodyMdEn);
+      return {
+        slug: row.slug,
+        title: row.titleEn ?? row.title,
+        bodyMd: row.bodyMdEn ?? row.bodyMd,
+        metaDescription: row.metaDescriptionEn ?? row.metaDescription,
+        updatedAt: row.updatedAt,
+        lang: hasEn ? 'en' : 'ro',
+        isTranslated: hasEn,
+      };
+    }
+    return {
+      slug: row.slug,
+      title: row.title,
+      bodyMd: row.bodyMd,
+      metaDescription: row.metaDescription,
+      updatedAt: row.updatedAt,
+      lang: 'ro' as const,
+      isTranslated: true,
+    };
   }
 
   /**

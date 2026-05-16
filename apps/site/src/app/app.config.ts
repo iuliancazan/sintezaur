@@ -22,6 +22,7 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
 import { I18nService } from './i18n/i18n.service';
+import { localeInterceptor } from './i18n/locale.interceptor';
 import { detectInitialLocale } from './i18n/locale.service';
 import { httpErrorInterceptor } from './ui/http-error.interceptor';
 import { UmamiService } from './analytics/umami.service';
@@ -35,7 +36,10 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(
       withFetch(),
-      withInterceptors([authInterceptor, httpErrorInterceptor]),
+      // The locale interceptor stamps every API request with the
+      // active locale BEFORE the auth interceptor sees it — keeps
+      // /api/auth/me etc. consistent with the rest of the surface.
+      withInterceptors([localeInterceptor, authInterceptor, httpErrorInterceptor]),
     ),
     provideAnimationsAsync(),
     providePrimeNG({

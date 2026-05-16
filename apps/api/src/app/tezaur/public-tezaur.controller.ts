@@ -50,8 +50,14 @@ export class PublicTezaurController {
   }
 
   @Get(':slug')
-  async detail(@Param('slug') slug: string) {
-    const data = await this.tezaur.findBySlug(slug, 'ro');
+  async detail(
+    @Param('slug') slug: string,
+    @Query('locale') localeParam?: string,
+  ) {
+    // M16-E: caller-supplied locale (RO default). Anything other than
+    // 'en' falls back to 'ro' so we never serve a 500 for a typo.
+    const lang: 'ro' | 'en' = localeParam === 'en' ? 'en' : 'ro';
+    const data = await this.tezaur.findBySlug(slug, lang);
     if (!data) {
       // Try a slug redirect (spec §7.13). On hit, return 410-ish hint —
       // the site router will issue an HTTP 301 client-side.

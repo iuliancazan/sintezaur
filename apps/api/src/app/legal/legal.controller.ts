@@ -53,8 +53,12 @@ export class LegalPagesController {
 
   @Get('legal/:slug')
   @Public()
-  getOne(@Param('slug') slug: string) {
-    return this.pages.getBySlug(slug);
+  getOne(
+    @Param('slug') slug: string,
+    @Query('locale') localeParam?: string,
+  ) {
+    const lang: 'ro' | 'en' = localeParam === 'en' ? 'en' : 'ro';
+    return this.pages.getBySlug(slug, lang);
   }
 
   @Get('admin/legal')
