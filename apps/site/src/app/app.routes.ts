@@ -1,5 +1,6 @@
 import { Route } from '@angular/router';
 import { authGuard, editorGuard } from './auth/auth.guard';
+import { localeGuard } from './i18n/locale.guard';
 
 /**
  * Site routes. M1 ships auth + a stub home; section routes
@@ -361,6 +362,25 @@ const sectionRoutes: Route[] = [
   },
 ];
 
+/**
+ * Stitch the `localeGuard` onto every route (recursively into
+ * children). The guard auto-redirects any bare-path navigation
+ * (`/tezaur`, `/bazar/...`) to its `/en/...` mirror when the user
+ * is on the English locale, so we don't have to localize every
+ * `routerLink` by hand.
+ */
+function withLocaleGuard(routes: Route[]): Route[] {
+  return routes.map((r) => ({
+    ...r,
+    canActivate: r.canActivate
+      ? [localeGuard, ...r.canActivate]
+      : [localeGuard],
+    children: r.children ? withLocaleGuard(r.children) : r.children,
+  }));
+}
+
+const sectionRoutesGuarded = withLocaleGuard(sectionRoutes);
+
 export const appRoutes: Route[] = [
   // English mirror — same route tree, prefix `/en`. The `data.locale`
   // flag is read by `LocaleService` to flip the i18n bundle and to
@@ -368,8 +388,8 @@ export const appRoutes: Route[] = [
   {
     path: 'en',
     data: { locale: 'en' as const },
-    children: sectionRoutes,
+    children: sectionRoutesGuarded,
   },
   // Romanian (default) — bare root, no prefix.
-  ...sectionRoutes,
+  ...sectionRoutesGuarded,
 ];

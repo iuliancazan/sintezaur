@@ -227,15 +227,15 @@ export class App {
   }
 
   goToFavorites(): void {
-    void this.router.navigate(['/cont/favorite']);
+    void this.router.navigateByUrl(this.locale.localizeUrl('/cont/favorite'));
   }
 
   goToMessages(): void {
-    void this.router.navigate(['/cont/mesaje']);
+    void this.router.navigateByUrl(this.locale.localizeUrl('/cont/mesaje'));
   }
 
   goToSearch(): void {
-    void this.router.navigate(['/cautare']);
+    void this.router.navigateByUrl(this.locale.localizeUrl('/cautare'));
   }
 
   toggleLocale(): void {
@@ -265,12 +265,16 @@ export class App {
   readonly themeLightLabel = computed(() => this.i18n.t('app.nav.theme_light'));
   readonly themeDarkLabel = computed(() => this.i18n.t('app.nav.theme_dark'));
 
+  // Run every section link through `localizeUrl` so a click on
+  // EN-mode points to `/en/tezaur` from the start — keeps the URL bar
+  // crisp without relying on `localeGuard`'s redirect. The guard is
+  // still wired as a safety net for routerLinks deeper in the tree.
   readonly navLinks = computed<SzNavLink[]>(() => [
-    { label: this.i18n.t('app.section.home'), routerLink: '/' },
-    { label: this.i18n.t('app.section.tezaur'), routerLink: '/tezaur' },
-    { label: this.i18n.t('app.section.bazar'), routerLink: '/bazar' },
-    { label: this.i18n.t('app.section.revista'), routerLink: '/revista' },
-    { label: this.i18n.t('app.section.forum'), routerLink: '/forum' },
+    { label: this.i18n.t('app.section.home'), routerLink: this.locale.localizeUrl('/') },
+    { label: this.i18n.t('app.section.tezaur'), routerLink: this.locale.localizeUrl('/tezaur') },
+    { label: this.i18n.t('app.section.bazar'), routerLink: this.locale.localizeUrl('/bazar') },
+    { label: this.i18n.t('app.section.revista'), routerLink: this.locale.localizeUrl('/revista') },
+    { label: this.i18n.t('app.section.forum'), routerLink: this.locale.localizeUrl('/forum') },
   ]);
 
   readonly topbarUser = computed<SzTopbarUser | null>(() => {
