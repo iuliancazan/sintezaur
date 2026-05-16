@@ -380,13 +380,23 @@ export class TezaurAddPage {
   readonly rejectionReason = signal<string | null>(null);
   readonly images = signal<TezaurDraftImage[]>([]);
 
-  /** Current user has curator/admin/superadmin role + is NOT the draft owner. */
+  /**
+   * Set from the URL query param `?mod=1` — the moderation queue card
+   * appends it when opening a draft so the editor opens in moderator
+   * mode even if the current user happens to be the draft's creator
+   * (e.g. solo admin testing the flow). Without the flag, the user
+   * gets the regular contributor view of their own draft.
+   */
+  readonly modParam = signal(false);
+
+  /** Active moderator-edit mode in this view (URL flag OR viewing someone else's draft). */
   readonly isModeratorViewingOther = computed(() => {
     const user = this.auth.currentUser();
     if (!user) return false;
     if (!hasAnyRole(user, ['curator', 'admin', 'superadmin'])) return false;
     const createdBy = this.draftCreatedBy();
-    return createdBy !== null && createdBy !== user.id;
+    const isOther = createdBy !== null && createdBy !== user.id;
+    return isOther || this.modParam();
   });
 
   /** Mod approval/rejection from inside the editor. */
@@ -550,6 +560,8 @@ export class TezaurAddPage {
       ]);
       this.brandSuggestions.set(brands);
       this.familySuggestions.set(families);
+
+      this.modParam.set(this.route.snapshot.queryParamMap.get('mod') === '1');
 
       const draftId = this.route.snapshot.queryParamMap.get('draft');
       if (draftId) {

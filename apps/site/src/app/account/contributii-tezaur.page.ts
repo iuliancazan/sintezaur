@@ -417,7 +417,7 @@ type TabKey = 'mine' | 'queue';
                       <h3 class="mod-card__title">
                         <a
                           [routerLink]="['/tezaur/adauga']"
-                          [queryParams]="{ draft: item.id }"
+                          [queryParams]="{ draft: item.id, mod: 1 }"
                         >
                           {{ item.brand }} · {{ item.model }}
                         </a>
@@ -437,7 +437,7 @@ type TabKey = 'mine' | 'queue';
                       <a
                         class="mod-btn mod-btn--ghost"
                         [routerLink]="['/tezaur/adauga']"
-                        [queryParams]="{ draft: item.id }"
+                        [queryParams]="{ draft: item.id, mod: 1 }"
                       >
                         <svg width="13" height="13"><use href="#i-edit" /></svg>
                         {{ 'contributii_tezaur.action_open_editor' | t }}
