@@ -13,7 +13,10 @@ import {
 import { and, asc, eq, isNull } from 'drizzle-orm';
 
 interface SitemapUrl {
-  loc: string;
+  /** Locale-relative path (e.g. `/tezaur/foo`). The serializer emits
+   *  this URL once per locale (RO bare, EN under `/en/`) and links
+   *  both via `xhtml:link rel="alternate"`. */
+  path: string;
   lastmod?: string;
   changefreq?:
     | 'always'
@@ -79,12 +82,11 @@ export class SitemapService {
   }
 
   private async collect(): Promise<SitemapUrl[]> {
-    const base = this.siteBaseUrl();
     const out: SitemapUrl[] = [];
 
     for (const p of STATIC_PAGES) {
       out.push({
-        loc: `${base}${p.path}`,
+        path: p.path,
         changefreq: p.changefreq,
         priority: p.priority,
       });
@@ -98,7 +100,7 @@ export class SitemapService {
       .orderBy(asc(gear.slug));
     for (const g of gearRows) {
       out.push({
-        loc: `${base}/tezaur/${g.slug}`,
+        path: `/tezaur/${g.slug}`,
         lastmod: g.updatedAt.toISOString().slice(0, 10),
         changefreq: 'weekly',
         priority: 0.7,
@@ -114,7 +116,7 @@ export class SitemapService {
       .where(and(eq(listings.status, 'active'), isNull(listings.removedAt)));
     for (const l of listingRows) {
       out.push({
-        loc: `${base}/bazar/${l.slug}`,
+        path: `/bazar/${l.slug}`,
         lastmod: l.updatedAt.toISOString().slice(0, 10),
         changefreq: 'weekly',
         priority: 0.5,
@@ -132,7 +134,7 @@ export class SitemapService {
       .where(eq(articles.status, 'published'));
     for (const a of articleRows) {
       out.push({
-        loc: `${base}/revista/${a.slug}`,
+        path: `/revista/${a.slug}`,
         lastmod: (a.updatedAt ?? a.publishedAt ?? new Date())
           .toISOString()
           .slice(0, 10),
@@ -148,7 +150,7 @@ export class SitemapService {
       .from(forumCategories);
     for (const c of categoryRows) {
       out.push({
-        loc: `${base}/forum/${c.slug}`,
+        path: `/forum/${c.slug}`,
         changefreq: 'daily',
         priority: 0.6,
       });
@@ -169,7 +171,7 @@ export class SitemapService {
       .where(isNull(forumThreads.deletedAt));
     for (const th of threadRows) {
       out.push({
-        loc: `${base}/forum/${th.categorySlug}/${th.slug}`,
+        path: `/forum/${th.categorySlug}/${th.slug}`,
         lastmod: th.updatedAt.toISOString().slice(0, 10),
         changefreq: 'weekly',
         priority: th.pinnedAt ? 0.6 : 0.4,
@@ -185,7 +187,7 @@ export class SitemapService {
       })
       .from(legalPages);
     for (const l of legalRows) {
-      const idx = out.findIndex((u) => u.loc === `${base}/${l.slug}`);
+      const idx = out.findIndex((u) => u.path === `/${l.slug}`);
       if (idx !== -1) {
         out[idx].lastmod = l.updatedAt.toISOString().slice(0, 10);
       }
@@ -194,23 +196,39 @@ export class SitemapService {
     return out;
   }
 
+  /**
+   * Emit each path twice — once per locale — and cross-link both
+   * via `xhtml:link rel="alternate"`. Google reads the alternates
+   * to surface the right language version per visitor; the
+   * `x-default` hint points crawlers to RO when no locale matches.
+   */
   private serialize(urls: SitemapUrl[]): string {
+    const base = this.siteBaseUrl();
     const head =
       '<?xml version="1.0" encoding="UTF-8"?>\n' +
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-    const body = urls
-      .map((u) => {
-        const parts = [`  <url>`, `    <loc>${escapeXml(u.loc)}</loc>`];
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n' +
+      '        xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+    const blocks: string[] = [];
+    for (const u of urls) {
+      const roUrl = `${base}${u.path}`;
+      const enUrl = `${base}/en${u.path === '/' ? '' : u.path}` || `${base}/en`;
+      const alternates =
+        `    <xhtml:link rel="alternate" hreflang="ro" href="${escapeXml(roUrl)}"/>\n` +
+        `    <xhtml:link rel="alternate" hreflang="en" href="${escapeXml(enUrl)}"/>\n` +
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${escapeXml(roUrl)}"/>`;
+      for (const locUrl of [roUrl, enUrl]) {
+        const parts = [`  <url>`, `    <loc>${escapeXml(locUrl)}</loc>`];
         if (u.lastmod) parts.push(`    <lastmod>${u.lastmod}</lastmod>`);
         if (u.changefreq)
           parts.push(`    <changefreq>${u.changefreq}</changefreq>`);
         if (u.priority != null)
           parts.push(`    <priority>${u.priority.toFixed(1)}</priority>`);
+        parts.push(alternates);
         parts.push('  </url>');
-        return parts.join('\n');
-      })
-      .join('\n');
-    return `${head}\n${body}\n</urlset>\n`;
+        blocks.push(parts.join('\n'));
+      }
+    }
+    return `${head}\n${blocks.join('\n')}\n</urlset>\n`;
   }
 }
 

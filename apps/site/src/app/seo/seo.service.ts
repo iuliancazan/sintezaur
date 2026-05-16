@@ -51,6 +51,9 @@ export class SeoService {
 
   private readonly JSONLD_ID = 'sintezaur-jsonld';
   private readonly CANONICAL_ID = 'sintezaur-canonical';
+  private readonly ALTERNATE_RO_ID = 'sintezaur-alternate-ro';
+  private readonly ALTERNATE_EN_ID = 'sintezaur-alternate-en';
+  private readonly ALTERNATE_DEFAULT_ID = 'sintezaur-alternate-default';
 
   set(input: PageMeta): void {
     const fullTitle = input.title ? `${input.title}${SUFFIX}` : 'Sintezaur';
@@ -81,6 +84,19 @@ export class SeoService {
     this.upsert('name', 'twitter:image', ogImage);
 
     this.setCanonical(canonicalUrl);
+    // M16-J: emit `hreflang` alternates for the same path in the
+    // other locale. We derive both URLs from the canonical path so
+    // callers don't have to think about locale prefixes.
+    this.setAlternates(input.canonicalPath ?? '/');
+    // Locale-aware og:locale — flips between RO and EN based on the
+    // canonical URL's prefix.
+    if ((input.canonicalPath ?? '/').startsWith('/en')) {
+      this.upsert('property', 'og:locale', 'en_US');
+      this.upsert('property', 'og:locale:alternate', 'ro_RO');
+    } else {
+      this.upsert('property', 'og:locale', 'ro_RO');
+      this.upsert('property', 'og:locale:alternate', 'en_US');
+    }
 
     // Clear any previously-set JSON-LD so the new page starts clean.
     // Pages that want JSON-LD call `setJsonLd()` AFTER `set()`.
@@ -155,6 +171,38 @@ export class SeoService {
       head.appendChild(link);
     }
     link.setAttribute('href', url);
+  }
+
+  /**
+   * Cross-link the current page with its other-locale counterpart.
+   * `path` is the canonical path of the active page (may or may not
+   * start with `/en`). We always emit three tags: ro, en, x-default
+   * (RO) — Google needs all three for correct language selection.
+   */
+  private setAlternates(path: string): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const head = this.document.head;
+    if (!head) return;
+    const isEn = path === '/en' || path.startsWith('/en/');
+    const bare = isEn ? (path === '/en' ? '/' : path.slice(3)) : path;
+    const roUrl = `${SITE_BASE_URL}${bare}`;
+    const enUrl = `${SITE_BASE_URL}${bare === '/' ? '/en' : `/en${bare}`}`;
+    this.upsertAlternate(this.ALTERNATE_RO_ID, 'ro', roUrl);
+    this.upsertAlternate(this.ALTERNATE_EN_ID, 'en', enUrl);
+    this.upsertAlternate(this.ALTERNATE_DEFAULT_ID, 'x-default', roUrl);
+  }
+
+  private upsertAlternate(id: string, hreflang: string, href: string): void {
+    const head = this.document.head;
+    let link = this.document.getElementById(id) as HTMLLinkElement | null;
+    if (!link) {
+      link = this.document.createElement('link');
+      link.setAttribute('id', id);
+      link.setAttribute('rel', 'alternate');
+      link.setAttribute('hreflang', hreflang);
+      head.appendChild(link);
+    }
+    link.setAttribute('href', href);
   }
 }
 
