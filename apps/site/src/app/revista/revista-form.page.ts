@@ -90,7 +90,8 @@ interface GearSearchHit {
             <span>{{ 'revista.form.title_label' | t }} *</span>
             <input
               type="text"
-              [(ngModel)]="form.title"
+              [ngModel]="form.title"
+              (ngModelChange)="onFormFieldChange('title', $event)"
               name="title"
               required
               minlength="3"
@@ -114,7 +115,11 @@ interface GearSearchHit {
           <div class="rf-row">
             <label class="rf-input">
               <span>{{ 'revista.form.category_label' | t }} *</span>
-              <select [(ngModel)]="form.category" name="category">
+              <select
+                [ngModel]="form.category"
+                (ngModelChange)="onFormFieldChange('category', $event)"
+                name="category"
+              >
                 @for (c of categories; track c) {
                   <option [value]="c">{{ 'revista.cat.' + c | t }}</option>
                 }
@@ -566,9 +571,31 @@ export class RevistaFormPage {
   readonly submitError = signal<string | null>(null);
 
   readonly isEdit = computed(() => this.existingId() !== null);
-  readonly canSave = computed(
-    () => this.form.title.trim().length >= 3 && !!this.form.category,
-  );
+
+  /**
+   * Bumped on every form-field change so signal-based computeds
+   * (`canSave`) re-run. `this.form` is a plain object — assignments to
+   * `form.title` etc. don't notify the signal graph, so without this
+   * the button gates stay frozen at their first evaluation (empty form
+   * → canSave === false → both Salvează / Publică stuck disabled even
+   * after the user fills the title and picks a category).
+   */
+  readonly formTick = signal(0);
+
+  readonly canSave = computed(() => {
+    this.formTick();
+    return this.form.title.trim().length >= 3 && !!this.form.category;
+  });
+
+  /** Setter wrapper: assigns + bumps the tick. Use from `(ngModelChange)`
+   *  on any input whose value participates in a computed. */
+  onFormFieldChange<K extends 'title' | 'excerpt' | 'category'>(
+    key: K,
+    value: (typeof this.form)[K],
+  ): void {
+    this.form[key] = value;
+    this.formTick.update((n) => n + 1);
+  }
 
   gearSearch = '';
   readonly gearHits = signal<GearSearchHit[]>([]);
