@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { SzAvatarComponent, SzIconComponent } from '@sintezaur/ui';
+import { SzAvatarComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
@@ -31,7 +31,6 @@ import {
     CommonModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
     SzAvatarComponent,
     AttachmentListComponent,
     AttachmentBoxComponent,
@@ -42,8 +41,8 @@ import {
       <article class="rd">
         <!-- BREADCRUMB -->
         <nav class="rd-crumb" aria-label="Breadcrumb">
-          <a routerLink="/revista">
-            <sz-icon name="back" [size]="14" />
+          <a routerLink="/revista" style="display:inline-flex;align-items:center;gap:6px;">
+            <svg width="14" height="14"><use href="#i-back"/></svg>
             {{ 'revista.back_to_list' | t }}
           </a>
           <span class="sep">·</span>

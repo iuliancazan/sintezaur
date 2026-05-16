@@ -14,6 +14,63 @@ Re-skin progresiv al `apps/site` la design-ul v05
 (A foundation → B Home → C Bazar → D Tezaur → E Revistă →
 F Forum → G Cont + close).
 
+#### M13-E — Revista list rewrite to V05 + detail icon swap (single commit, _SHA TBD_)
+
+- **`revista-list.page.ts` full rewrite** to match V05's
+  `Revista.html` magazine layout:
+  - `.rev-header crosses` with title + lede + editor CTA when
+    the current user has `editor`/`admin`/`superadmin` role.
+  - `.rev-tabs` pillar tabs over the 6 article categories
+    (All + reviews / tutorials / news / interviews / buying
+    guides / hardware deep-dives). Counts: `all` shows total;
+    per-category counts deferred until we add a counts endpoint.
+  - `.rev-hero crosses` featured-article block: shows only on
+    the default "all" view + page 1 (`heroArticle()` computed).
+    Article picture + overlay gradient with Featured pill +
+    category pill + pub date + title + excerpt + byline
+    (initial-avatar).
+  - `.rev-main` 2-col grid: `.rev-grid` left + `.rev-side`
+    right (sticky).
+  - `.rev-grid` renders `gridArticles()` (response.items minus
+    hero pick): first card `.is-big` span-2 with side-by-side
+    media + body; subsequent cards small in 2-col with media
+    on top. Cards carry `.gear-fill__photo` + label + optional
+    `.rev-card__new` badge for articles < 7 days old.
+  - `.rev-side` blocks: "Cele mai citite" top-5 list (uses
+    `sideTopList()` = response[0..5]) + newsletter signup
+    block with inline form.
+  - Existing follow-strip kept (page-local style) for logged-in
+    users on a specific category — strip lets them follow /
+    unfollow that category for email notifications.
+
+- **Style block** trimmed from ~330 lines to ~50 lines —
+  kept only `.rev-results-row` counter + `.rev-follow` strip.
+  All `.rev-header / tabs / hero / main / grid / card / side`
+  inherited from v05.css globally.
+
+- **New helpers**: `initials()`, `formatShortDate()`,
+  `isNewArticle()` (< 7 days).
+
+- **i18n**: 8 new keys (`revista.featured`, `revista.new_badge`,
+  `revista.tabs_aria`, `revista.side_top_read`,
+  `revista.side_newsletter_head/body/placeholder`,
+  `revista.pagination.show_count`).
+
+- **`revista-detail.page.ts`**: pragmatic minimal change for
+  M13-E — SzIconComponent import removed, `<sz-icon name="back">`
+  in breadcrumb replaced with `<svg><use href="#i-back"/>`. The
+  page's scoped `.rd-*` layout is kept fully functional; full
+  rewrite to V05's `.ad-*` (Article Detail) markup is a deferred
+  polish pass — out of scope for M13-E to preserve session
+  budget for Forum + Cont (M13-F + M13-G).
+
+- **Build clean**. revista-list bundle: 18 kB → 15.6 kB lazy
+  chunk; revista-detail unchanged (~15.6 kB).
+
+- **Out of scope** (follow-ups): per-category count endpoint,
+  Revista detail full V05 `.ad-*` rewrite, V05 `.rev-side`
+  authors block (needs an authors-summary endpoint).
+
 #### M13-D — Tezaur list + detail re-aligned to V05 (single commit `cafb77f`)
 
 Both Tezaur pages were already using V05's `.tez-*` / `.td-*`

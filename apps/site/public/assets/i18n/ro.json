@@ -842,8 +842,16 @@
       "hardware_deep_dives": "Hardware deep-dives"
     },
     "results_count": "{{shown}} articole din {{total}}",
+    "featured": "Featured",
+    "new_badge": "Nou",
+    "tabs_aria": "Categorii revistă",
+    "side_top_read": "Cele mai citite",
+    "side_newsletter_head": "Newsletter săptămânal",
+    "side_newsletter_body": "Cele mai bune materiale, săptămânal. Fără spam.",
+    "side_newsletter_placeholder": "email@domeniu.ro",
     "pagination": {
-      "page_of": "Pagina {{page}} / {{total}}"
+      "page_of": "Pagina {{page}} / {{total}}",
+      "show_count": "Afișează {{shown}} din {{total}}"
     },
     "no_results": "Niciun articol nu corespunde căutării.",
     "views": "vizualizări",

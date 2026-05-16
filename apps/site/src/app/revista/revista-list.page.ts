@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { SzIconComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { I18nService } from '../i18n/i18n.service';
 import { SeoService } from '../seo/seo.service';
@@ -18,12 +17,22 @@ import {
   ARTICLE_CATEGORIES,
   RevistaService,
   type ArticleCategoryLiteral,
+  type ArticleListItem,
   type ArticleListResponse,
 } from './revista.service';
 
 const SORT_OPTIONS = ['newest', 'oldest', 'most_viewed'] as const;
 const PAGE_SIZE = 12;
 
+/**
+ * Revista list — V05 magazine layout (M13-E).
+ *
+ * Sections:
+ *   .rev-header (big title + lede + optional editor CTA) →
+ *   .rev-tabs (pillar tabs: all + 6 categories) →
+ *   .rev-hero (featured = articles[0] when on "all" view) →
+ *   .rev-main { .rev-grid + .rev-side (top-list + newsletter) }
+ */
 @Component({
   selector: 'app-revista-list-page',
   standalone: true,
@@ -32,89 +41,92 @@ const PAGE_SIZE = 12;
     FormsModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
     EmptyStateComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
-      <!-- HEADER -->
-      <section class="rv-header crosses">
+      <!-- HEADER (V05: .rev-header) -->
+      <section class="rev-header crosses">
         <span class="crosses-tl"></span><span class="crosses-tr"></span>
         <div>
-          <p class="rv-header__sub">{{ 'revista.page_eyebrow' | t }}</p>
-          <h1 class="rv-header__title">
-            {{ 'revista.page_title' | t }}<span class="dot">.</span>
-          </h1>
+          <p class="rev-header__sub">{{ 'revista.page_eyebrow' | t }}</p>
+          <h1>{{ 'revista.page_title' | t }}<span class="dot">.</span></h1>
         </div>
         <div>
-          <p class="rv-header__lede">{{ 'revista.page_lede' | t }}</p>
+          <p class="rev-header__lede">{{ 'revista.page_lede' | t }}</p>
           @if (canEdit()) {
-            <a class="rv-header__cta" routerLink="/revista/nou">
+            <a class="block__cta" routerLink="/revista/nou" style="margin-top:14px;">
               + {{ 'revista.new_article' | t }}
             </a>
           }
         </div>
       </section>
 
-      <!-- TOOLBAR -->
-      <div class="rv-toolbar crosses">
-        <span class="crosses-tl"></span><span class="crosses-tr"></span>
-        <label class="rv-search">
-          <sz-icon name="search" [size]="16" />
-          <input
-            type="search"
-            [placeholder]="i18n.t('revista.search_placeholder')"
-            [value]="qText()"
-            (input)="onSearchInput($any($event.target).value)"
-          />
-        </label>
-        <div class="rv-sort">
-          <span class="rv-sort__label">// {{ 'revista.sort.label' | t }}</span>
-          <select
-            [value]="sort()"
-            (change)="setSort($any($event.target).value)"
-          >
-            @for (s of sortOptions; track s) {
-              <option [value]="s">{{ 'revista.sort.' + s | t }}</option>
-            }
-          </select>
-          <sz-icon name="caret-down" [size]="14" class="rv-sort__caret" />
-        </div>
-      </div>
-
-      <!-- CATEGORY CHIPS -->
-      <nav class="rv-cats">
-        <button
-          type="button"
-          class="rv-cat"
+      <!-- PILLAR TABS (V05: .rev-tabs) -->
+      <nav class="rev-tabs" [attr.aria-label]="i18n.t('revista.tabs_aria')">
+        <a
           [class.is-active]="category() === null"
-          (click)="setCategory(null)"
-        >
-          {{ 'revista.cat.all' | t }}
-        </button>
+          [routerLink]="['/revista']"
+          (click)="setCategory(null); $event.preventDefault()"
+        >{{ 'revista.cat.all' | t }} <span class="count">{{ response()?.totalCount ?? '—' }}</span></a>
         @for (cat of categories; track cat) {
-          <button
-            type="button"
-            class="rv-cat"
+          <a
             [class.is-active]="category() === cat"
-            (click)="setCategory(cat)"
-          >
-            {{ 'revista.cat.' + cat | t }}
-          </button>
+            [routerLink]="['/revista']"
+            [queryParams]="{ category: cat }"
+            (click)="setCategory(cat); $event.preventDefault()"
+          >{{ 'revista.cat.' + cat | t }}</a>
         }
       </nav>
 
-      <!-- FOLLOW STRIP (per-category toggle for logged-in users) -->
+      <!-- FEATURED HERO (V05: .rev-hero) — articles[0] on "all" view -->
+      @if (heroArticle(); as h) {
+        <a class="rev-hero crosses" [routerLink]="['/revista', h.slug]" style="display:block;color:inherit;text-decoration:none;">
+          <span class="crosses-tl"></span><span class="crosses-tr"></span>
+          <div class="rev-hero__media">
+            <div class="gear-fill">
+              @if (h.heroThumb) {
+                <img class="gear-fill__photo" [src]="revista.imageUrl(h.heroThumb)" [alt]="h.title" loading="lazy" />
+              }
+            </div>
+            <div class="rev-hero__overlay">
+              <div class="rev-hero__meta">
+                <span class="pill is-accent">{{ 'revista.featured' | t }}</span>
+                <span class="pill" style="background:rgba(255,255,255,0.1); color:#fff; border-color:rgba(255,255,255,0.3)">
+                  {{ 'revista.cat.' + h.category | t }}
+                </span>
+                @if (h.publishedAt) {
+                  <span style="font-family:var(--font-mono);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7)">
+                    {{ formatDate(h.publishedAt) }}
+                  </span>
+                }
+              </div>
+              <h2 class="rev-hero__title">{{ h.title }}</h2>
+              @if (h.excerpt) {
+                <p class="rev-hero__excerpt">{{ h.excerpt }}</p>
+              }
+              <div class="rev-hero__byline">
+                <span class="avatar" style="background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:#fff">
+                  {{ initials(h.author.fullName || h.author.username) }}
+                </span>
+                <span>{{ h.author.fullName || h.author.username }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      }
+
+      <!-- FOLLOW STRIP (logged-in, on a specific category) -->
       @if (category() !== null && auth.currentUser()) {
-        <div class="rv-follow">
-          <span class="rv-follow__label">
-            <sz-icon name="bell" [size]="14" />
+        <div class="rev-follow">
+          <span class="rev-follow__label">
+            <svg width="14" height="14"><use href="#i-bell"/></svg>
             {{ 'revista.follow.prompt' | t: { category: catLabel(category()!) } }}
           </span>
           <button
             type="button"
-            class="rv-follow__btn"
+            class="rev-follow__btn"
             [class.is-on]="isFollowed(category()!)"
             [disabled]="followBusy()"
             (click)="toggleFollow(category()!)"
@@ -128,430 +140,200 @@ const PAGE_SIZE = 12;
         </div>
       }
 
-      <!-- GRID -->
-      @if (response(); as r) {
-        <div class="rv-results">
-          <span>
-            <span class="accent">// </span>
-            {{
-              'revista.results_count' | t: { shown: r.items.length, total: r.totalCount }
-            }}
-          </span>
-          @if (r.totalPages > 1) {
+      <!-- MAIN: grid + side rail (V05: .rev-main) -->
+      <div class="rev-main">
+        <div>
+          <div class="rev-results-row">
             <span>
-              {{
-                'revista.pagination.page_of' | t: { page: r.page, total: r.totalPages }
-              }}
+              <span class="accent">// </span>
+              @if (response(); as r) {
+                {{ 'revista.results_count' | t: { shown: r.items.length, total: r.totalCount } }}
+              } @else if (loading()) {
+                {{ 'app.loading' | t }}
+              }
             </span>
+            @if (response(); as r) {
+              <span>{{ 'revista.pagination.page_of' | t: { page: r.page, total: r.totalPages } }}</span>
+            }
+          </div>
+
+          @if (response(); as r) {
+            @if (r.items.length === 0) {
+              <app-empty-state
+                icon="📰"
+                [title]="'Niciun articol pentru filtrele alese'"
+                [lede]="'Revista crește pe măsură ce comunitatea contribuie. Vezi toate articolele publicate sau încearcă altă categorie.'"
+                ctaLabel="Toate articolele"
+                ctaRouterLink="/revista"
+              />
+            } @else {
+              <div class="rev-grid">
+                @for (a of gridArticles(); track a.id; let i = $index) {
+                  <a
+                    class="rev-card"
+                    [class.is-big]="i === 0 && gridArticles().length > 1"
+                    [routerLink]="['/revista', a.slug]"
+                  >
+                    <div class="rev-card__media">
+                      <div class="gear-fill" [attr.data-gear]="a.slug">
+                        @if (a.heroThumb) {
+                          <img class="gear-fill__photo" [src]="revista.imageUrl(a.heroThumb)" [alt]="a.title" loading="lazy" />
+                        }
+                      </div>
+                      @if (isNewArticle(a)) {
+                        <span class="rev-card__new">{{ 'revista.new_badge' | t }}</span>
+                      }
+                    </div>
+                    <div class="rev-card__body">
+                      <span class="rev-card__pill">// {{ 'revista.cat.' + a.category | t }}</span>
+                      <h3 class="rev-card__title">{{ a.title }}</h3>
+                      @if (a.excerpt) {
+                        <p class="rev-card__excerpt">{{ a.excerpt }}</p>
+                      }
+                      <div class="rev-card__byline">
+                        <span class="avatar" style="width:24px;height:24px;font-size:10px">
+                          {{ initials(a.author.fullName || a.author.username) }}
+                        </span>
+                        <span>{{ a.author.fullName || a.author.username }}</span>
+                        @if (a.publishedAt) {
+                          <span style="opacity:.5">·</span>
+                          <span>{{ formatShortDate(a.publishedAt) }}</span>
+                        }
+                      </div>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+
+            <!-- PAGINATION (.tez-pag from v05.css) -->
+            @if (r.totalPages > 1) {
+              <nav class="tez-pag" aria-label="Pagination">
+                <span>
+                  {{ 'revista.pagination.show_count' | t: { shown: r.items.length, total: r.totalCount } }}
+                </span>
+                <div class="tez-pag__nums">
+                  <button
+                    type="button"
+                    class="tez-pag__num"
+                    [class.is-disabled]="r.page === 1"
+                    [disabled]="r.page === 1"
+                    (click)="goToPage(r.page - 1)"
+                  >‹</button>
+                  @for (p of paginationPages(); track p) {
+                    @if (p === '…') {
+                      <span class="tez-pag__num is-ellipsis">…</span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="tez-pag__num"
+                        [class.is-active]="p === r.page"
+                        (click)="goToPage($any(p))"
+                      >{{ p }}</button>
+                    }
+                  }
+                  <button
+                    type="button"
+                    class="tez-pag__num"
+                    [class.is-disabled]="r.page === r.totalPages"
+                    [disabled]="r.page === r.totalPages"
+                    (click)="goToPage(r.page + 1)"
+                  >›</button>
+                </div>
+              </nav>
+            }
           }
         </div>
 
-        @if (r.items.length === 0) {
-          <app-empty-state
-            icon="📰"
-            [title]="'Niciun articol pentru filtrele alese'"
-            [lede]="'Revista crește pe măsură ce comunitatea contribuie. Vezi toate articolele publicate sau încearcă altă categorie.'"
-            ctaLabel="Toate articolele"
-            ctaRouterLink="/revista"
-          />
-        } @else {
-          <div class="rv-grid">
-            @for (a of r.items; track a.id) {
-              <a class="rv-card" [routerLink]="['/revista', a.slug]">
-                <div class="rv-card__media">
-                  @if (a.heroThumb) {
-                    <img
-                      [src]="revista.imageUrl(a.heroThumb)"
-                      [alt]="a.title"
-                      loading="lazy"
-                    />
-                  } @else {
-                    <div class="rv-card__ph">·</div>
-                  }
-                  <span class="rv-card__cat">{{ 'revista.cat.' + a.category | t }}</span>
-                </div>
-                <div class="rv-card__body">
-                  <h2>{{ a.title }}</h2>
-                  @if (a.excerpt) {
-                    <p>{{ a.excerpt }}</p>
-                  }
-                  <div class="rv-card__meta">
-                    <span class="rv-card__author">
-                      &#64;{{ a.author.username }}
-                    </span>
-                    @if (a.publishedAt) {
-                      <span class="sep">·</span>
-                      <time>{{ formatDate(a.publishedAt) }}</time>
-                    }
-                    <span class="sep">·</span>
-                    <span>{{ a.viewCount }} {{ 'revista.views' | t }}</span>
-                  </div>
-                </div>
-              </a>
-            }
-          </div>
-        }
+        <!-- Side rail (V05: .rev-side) -->
+        <aside class="rev-side">
+          @if (sideTopList().length > 0) {
+            <div class="rev-side__block">
+              <header class="rev-side__head">{{ 'revista.side_top_read' | t }}</header>
+              <div class="rev-side__list">
+                @for (a of sideTopList(); track a.id; let i = $index) {
+                  <a [routerLink]="['/revista', a.slug]">
+                    <span class="num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                    <span class="ttl">{{ a.title }}</span>
+                  </a>
+                }
+              </div>
+            </div>
+          }
 
-        <!-- PAGINATION -->
-        @if (r.totalPages > 1) {
-          <nav class="rv-pag">
-            <button
-              type="button"
-              [disabled]="r.page === 1"
-              (click)="goToPage(r.page - 1)"
-            >‹</button>
-            @for (p of paginationPages(); track p) {
-              @if (p === '…') {
-                <span class="is-ellipsis">…</span>
-              } @else {
+          <div class="rev-side__block">
+            <header class="rev-side__head">{{ 'revista.side_newsletter_head' | t }}</header>
+            <div style="padding:18px;">
+              <p style="margin:0 0 14px;font-size:13px;color:var(--fg-muted);">
+                {{ 'revista.side_newsletter_body' | t }}
+              </p>
+              <div style="display:flex;">
+                <input
+                  type="email"
+                  [placeholder]="i18n.t('revista.side_newsletter_placeholder')"
+                  style="flex:1;padding:10px 12px;background:var(--bg);border:1px solid var(--line-strong);border-right:0;font-family:var(--font-mono);font-size:13px;color:var(--fg);outline:0;"
+                />
                 <button
                   type="button"
-                  [class.is-active]="p === r.page"
-                  (click)="goToPage($any(p))"
-                >{{ p }}</button>
-              }
-            }
-            <button
-              type="button"
-              [disabled]="r.page === r.totalPages"
-              (click)="goToPage(r.page + 1)"
-            >›</button>
-          </nav>
-        }
-      } @else if (loading()) {
-        <p class="rv-empty">{{ 'app.loading' | t }}</p>
-      }
+                  style="padding:10px 14px;background:var(--accent);color:var(--accent-fg);font-family:var(--font-mono);font-size:10px;letter-spacing:0.14em;text-transform:uppercase;font-weight:600;border:0;min-height:auto;"
+                >→</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   `,
   styles: [
     `
       :host { display: block; }
-
-      .rv-header {
-        position: relative;
-        padding: clamp(40px, 6vw, 72px) clamp(20px, 3vw, 36px) clamp(28px, 4vw, 44px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: var(--gutter-y) 0 24px;
-        display: grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 32px;
-        align-items: end;
-      }
-      .rv-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(70px, 11vw, 160px);
-        line-height: 0.85;
-        text-transform: uppercase;
-        margin: 0;
-        padding-top: 0.22em;
-        letter-spacing: 0.005em;
-      }
-      .rv-header__title .dot { color: var(--accent); }
-      .rv-header__sub {
+      /* All .rev-* / .tez-pag structural classes are provided by
+         v05.css globally. Page-locals below cover only follow strip
+         (custom) + results-row counter. */
+      .rev-results-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 14px;
         font-family: var(--font-mono);
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--fg-muted);
-        margin: 0 0 14px;
-      }
-      .rv-header__sub::before { content: '* '; color: var(--accent); }
-      .rv-header__lede {
-        color: var(--fg-muted);
-        font-size: 15px;
-        max-width: 42ch;
-        margin: 0 0 18px;
-        text-wrap: pretty;
-      }
-      .rv-header__cta {
-        display: inline-block;
-        padding: 12px 18px;
-        background: var(--accent);
-        color: var(--bg);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        text-decoration: none;
-      }
-
-      .rv-toolbar {
-        position: sticky;
-        top: 64px;
-        z-index: 50;
-        background: color-mix(in oklab, var(--bg) 90%, transparent);
-        backdrop-filter: blur(10px) saturate(140%);
-        -webkit-backdrop-filter: blur(10px) saturate(140%);
-        border: var(--grid-line) solid var(--line);
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 0;
-      }
-      .rv-search {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 14px 18px;
-        border-right: 1px solid var(--line);
-        min-height: 44px;
-      }
-      .rv-search input {
-        flex: 1;
-        background: none;
-        border: 0;
-        outline: 0;
-        font-family: var(--font-ui);
-        font-size: 15px;
-        color: var(--fg);
-      }
-      .rv-search sz-icon { color: var(--fg-muted); }
-
-      .rv-sort {
-        display: flex;
-        align-items: center;
-        position: relative;
-      }
-      .rv-sort__label {
-        padding: 0 14px;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--fg-muted);
-      }
-      .rv-sort select {
-        background: none;
-        border: 0;
-        border-left: 1px solid var(--line);
-        padding: 14px 32px 14px 14px;
-        font-family: var(--font-mono);
-        font-size: 12px;
         letter-spacing: 0.08em;
-        color: var(--fg);
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-      }
-      .rv-sort select:focus { outline: none; color: var(--accent); }
-      .rv-sort__caret {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
         color: var(--fg-muted);
-      }
-
-      .rv-cats {
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        padding: 16px 0;
-      }
-      .rv-cat {
-        padding: 8px 14px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: var(--fg-muted);
-        cursor: pointer;
       }
-      .rv-cat:hover { color: var(--fg); border-color: var(--line-strong); }
-      .rv-cat.is-active {
-        background: var(--accent);
-        color: var(--bg);
-        border-color: var(--accent);
-      }
-
-      .rv-follow {
+      .rev-results-row .accent { color: var(--accent); }
+      .rev-follow {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 10px 14px;
-        margin: 0 0 12px;
+        padding: 12px 18px;
         background: var(--bg-elev);
         border: 1px solid var(--line);
-        flex-wrap: wrap;
+        margin-bottom: 24px;
+        font-family: var(--font-mono);
+        font-size: 12px;
       }
-      .rv-follow__label {
+      .rev-follow__label {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
         color: var(--fg-muted);
       }
-      .rv-follow__label sz-icon { color: var(--accent); }
-      .rv-follow__btn {
+      .rev-follow__btn {
         padding: 6px 12px;
         background: transparent;
         border: 1px solid var(--line-strong);
         color: var(--fg);
         font-family: var(--font-mono);
         font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        cursor: pointer;
-      }
-      .rv-follow__btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-      .rv-follow__btn.is-on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-      .rv-follow__btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-      .rv-results {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        margin: 8px 0 12px;
-      }
-      .rv-results .accent { color: var(--accent); }
-      .rv-empty {
-        text-align: center;
-        padding: 60px 20px;
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 13px;
-        border: 1px dashed var(--line);
-      }
-
-      .rv-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
-        margin-bottom: var(--gutter-y);
-      }
-      .rv-card {
-        display: flex;
-        flex-direction: column;
-        text-decoration: none;
-        color: var(--fg);
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        transition: border-color 0.15s ease;
-      }
-      .rv-card:hover { border-color: var(--accent); }
-      .rv-card__media {
-        position: relative;
-        aspect-ratio: 16 / 9;
-        background: var(--bg);
-        overflow: hidden;
-      }
-      .rv-card__media img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-      }
-      .rv-card__ph {
-        display: grid;
-        place-items: center;
-        height: 100%;
-        color: var(--fg-subtle);
-        font-family: var(--font-mono);
-        font-size: 12px;
-      }
-      .rv-card__cat {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        padding: 4px 8px;
-        background: color-mix(in oklab, var(--bg) 88%, transparent);
-        border: 1px solid var(--accent);
-        color: var(--accent);
-        font-family: var(--font-mono);
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-      }
-      .rv-card__body { padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
-      .rv-card__body h2 {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: 18px;
-        line-height: 1.2;
-        margin: 0;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .rv-card__body p {
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.5;
-        color: var(--fg-muted);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      .rv-card__meta {
-        display: inline-flex;
-        gap: 6px;
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
         letter-spacing: 0.1em;
-        color: var(--fg-muted);
-        margin-top: auto;
-        flex-wrap: wrap;
-      }
-      .rv-card__author { color: var(--accent); }
-      .rv-card__meta .sep { color: var(--fg-subtle); }
-
-      .rv-pag {
-        display: inline-flex;
-        gap: 4px;
-        margin: 20px auto 60px;
-        justify-content: center;
-        width: 100%;
-      }
-      .rv-pag button,
-      .rv-pag .is-ellipsis {
-        min-width: 32px;
-        min-height: 32px;
-        padding: 0 8px;
-        display: inline-grid;
-        place-items: center;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 12px;
+        text-transform: uppercase;
         cursor: pointer;
+        min-height: auto;
       }
-      .rv-pag button:hover:not(:disabled) {
-        color: var(--fg);
-        border-color: var(--line-strong);
-      }
-      .rv-pag button.is-active {
-        background: var(--accent);
-        color: var(--bg);
-        border-color: var(--accent);
-      }
-      .rv-pag button:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-      .rv-pag .is-ellipsis { border: 0; background: transparent; cursor: default; }
-
-      @media (max-width: 1100px) {
-        .rv-header { grid-template-columns: 1fr; gap: 18px; }
-        .rv-grid { grid-template-columns: repeat(2, 1fr); }
-      }
-      @media (max-width: 720px) {
-        .rv-grid { grid-template-columns: 1fr; }
-        .rv-toolbar { grid-template-columns: 1fr; }
-      }
+      .rev-follow__btn.is-on { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+      .rev-follow__btn:disabled { opacity: 0.5; cursor: wait; }
     `,
   ],
 })
@@ -577,12 +359,31 @@ export class RevistaListPage {
   readonly followedCategories = signal<Set<ArticleCategoryLiteral>>(new Set());
   readonly followBusy = signal(false);
 
+  /** Featured hero = first article only when on the "all" tab (no filter
+      + first page). On filtered or paginated views, hero stays hidden and
+      every article goes into the grid. */
+  readonly heroArticle = computed<ArticleListItem | null>(() => {
+    if (this.category() !== null || this.page() > 1) return null;
+    return this.response()?.items[0] ?? null;
+  });
+
+  /** Articles for the .rev-grid — exclude the hero pick. */
+  readonly gridArticles = computed<ArticleListItem[]>(() => {
+    const items = this.response()?.items ?? [];
+    if (this.heroArticle()) return items.slice(1);
+    return items;
+  });
+
+  /** Side-rail top-list = items 2..6 of the response (different from grid). */
+  readonly sideTopList = computed<ArticleListItem[]>(() => {
+    const items = this.response()?.items ?? [];
+    return items.slice(0, 5);
+  });
+
   readonly canEdit = computed(() => {
     const u = this.auth.currentUser();
     if (!u) return false;
-    return u.roles.some(
-      (r) => r === 'editor' || r === 'admin' || r === 'superadmin',
-    );
+    return u.roles.some((r) => r === 'editor' || r === 'admin' || r === 'superadmin');
   });
 
   readonly paginationPages = computed<(number | '…')[]>(() => {
@@ -610,12 +411,9 @@ export class RevistaListPage {
     });
     this.route.queryParamMap.subscribe((params) => {
       this.qText.set(params.get('q') ?? '');
-      this.category.set(
-        (params.get('category') as ArticleCategoryLiteral | null) ?? null,
-      );
+      this.category.set((params.get('category') as ArticleCategoryLiteral | null) ?? null);
       this.sort.set(
-        (params.get('sort') as (typeof SORT_OPTIONS)[number] | null) ??
-          'newest',
+        (params.get('sort') as (typeof SORT_OPTIONS)[number] | null) ?? 'newest',
       );
       this.page.set(Number(params.get('page') ?? '1') || 1);
       void this.fetch();
@@ -693,6 +491,26 @@ export class RevistaListPage {
       month: 'short',
       year: 'numeric',
     });
+  }
+
+  formatShortDate(iso: string): string {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    const months = ['ian', 'feb', 'mar', 'apr', 'mai', 'iun', 'iul', 'aug', 'sep', 'oct', 'noi', 'dec'];
+    return `${d.getDate()} ${months[d.getMonth()]}`;
+  }
+
+  initials(name: string): string {
+    if (!name) return '—';
+    const parts = name.trim().split(/[\s._-]+/).filter(Boolean);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  isNewArticle(a: ArticleListItem): boolean {
+    if (!a.publishedAt) return false;
+    const days = (Date.now() - new Date(a.publishedAt).getTime()) / 86400000;
+    return days >= 0 && days < 7;
   }
 
   private syncUrl(): void {

@@ -6,7 +6,26 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M13-D** — Tezaur list + detail re-aligned la V05.
+**Last shipped:** **M13-E** — Revista list rewrite la V05 + detail icon swap.
+`revista-list.page.ts` complet rescris cu markup V05: `.rev-header`
+(big title + lede + optional editor CTA), `.rev-tabs` pillar tabs
+peste cele 6 categorii (active state pe selectat), `.rev-hero` cu
+overlay gradient (featured = `articles[0]` doar pe "all" view +
+page 1), `.rev-main` 2-col cu `.rev-grid` (primul card = `.is-big`
+span-2 + restul small) + `.rev-side` (Cele mai citite top 5 + bloc
+newsletter). Cards folosesc `.gear-fill__photo`+`.gear-fill__label`
+ca pe Home/Bazar/Tezaur (uniform). Computed signals noi:
+`heroArticle()`, `gridArticles()`, `sideTopList()`, `isNewArticle()`
+(< 7 zile → badge „Nou"). Style block redus de la ~330 la ~50 linii
+(doar `.rev-results-row` + `.rev-follow` page-locals). 8 chei i18n
+noi (`revista.featured/new_badge/tabs_aria/side_top_read/
+side_newsletter_*/pagination.show_count`). `revista-detail.page.ts`:
+doar `SzIconComponent` scos + `<sz-icon name="back">` → sprite
+`<use href="#i-back"/>`. Layout `.rd-*` scoped păstrat funcțional —
+rewrite la V05's `.ad-*` (Article Detail) e un polish pass viitor
+(out of scope pentru M13-E pragmatic). Bundle revista-list 18→15.6 kB.
+
+**Last shipped (previous):** **M13-D** — Tezaur list + detail re-aligned la V05.
 Ambele template-uri foloseau deja clase V05 `.tez-*` / `.td-*`; munca
 a fost trim-uirea blocurilor `styles:` (v05.css le furnizează acum
 global) + scoaterea `SzIconComponent` în favoarea sprite-ului V05
@@ -111,7 +130,15 @@ Light = default. `home.page.ts` șters (înlocuit de
 `dashboard.page.ts`). Acest milestone a fost executat
 out-of-order — M11 (Tezaur contributor) rămâne next.
 
-**Next up:** **M13-E** — Revista list + detail per
+**Next up:** **M13-F** — Forum 5 pages per
+`docs/design-imports/2026-05-16-v05/Forum.html` + `Forum -
+Cauta.html` + `Forum - Nou.html` + `Forum - Tezaur Intrebari.html`
++ `Forum - Thread TR-808.html`. V05 forum design include un layout
+`.fm-*` distinct cu header, action row tabs, categorii list cu
+număr/descriere/sub-chips/activity și sticky trending sidebar,
+plus `styles.forum.css` separat (1952 linii — thread post layout,
+reply card, mention chip, gear-tag). **Skipped from earlier plan:**
+_M13-E legacy_ — Revista list + detail per
 `docs/design-imports/2026-05-16-v05/Revista.html` și `Revista - Cum
 suna Romania prin Juno-60.html`. Magazine layout: `.rev-header`
 (big title + lede), `.rev-tabs` pillar tabs, `.rev-hero` featured
@@ -280,6 +307,7 @@ E (Revistă) / F (Forum) / G (Cont + close).
 | C1  | `5d5c541` | done | Bazar list re-aligned la V05: clase `.tez-*` globale (header/toolbar/main/rail/check/pag) + cards switched la `.bz-grid > .listing` (uniform cu Home bazar-scroll) + `.bz-actions` row. Style block 500→50 linii. Bundle 32→22 kB. |
 | C2  | `a635f18` | done | Bazar detail rewrite V05 1:1: `.td-crumb` breadcrumb, `.bd-hero` cu `.bd-gallery` (main+chip+counter+nav+thumbs) și `.bd-info` (topline+title+price-row+chips+deal+CTAs+posted). `.bd-main` 2-col cu `.bd-desc` (innerHTML) + `looking_for`/`condition_note` + `.bd-mini-specs` (link Tezaur) + `.bd-similar` cu `bz-grid` din `recentlySold`; sidebar cu seller block (3 stats + Block/Report + contact textarea) + safety tips 4-item. SzAvatar/Badge/Button/Icon scoase. 21 chei i18n noi. |
 | D   | `cafb77f` | done | Tezaur list + detail re-aligned la V05. Ambele foloseau deja `.tez-*`/`.td-*` — work a fost trim de styles + SzIcon → sprite V05. List: stiluri 404→6 reguli (`.tez-results-row`, `.tez-empty`), bundle 23.6→13.0 kB, kbd ⌘K. Detail: stiluri 663→13 reguli (`.muted`, `.td-empty`, gallery photo/ph, `.td-buy*`, `.td-official*`), bundle 40.0→26.4 kB. SzBadge/Avatar/Button păstrate pe panourile Detalii/Specs/Recenzii. |
+| E   | _TBD_ | done | Revista list rewrite V05 1:1: `.rev-header` (title+lede), `.rev-tabs` pillar tabs, `.rev-hero` cu overlay gradient (featured `articles[0]` doar pe "all"+page1), `.rev-main` 2-col cu `.rev-grid` (`.is-big` span-2 + small) + `.rev-side` (Top 5 + newsletter). `gear-fill` cards. 8 chei i18n noi. Bundle 18→15.6 kB. Detail: doar `SzIconComponent` scos; layout `.rd-*` scoped păstrat (rewrite la V05's `.ad-*` = polish pass viitor). |
 | D   | _TBD_ | pending | Tezaur list + detail. |
 | E   | _TBD_ | pending | Revista list + detail. |
 | F   | _TBD_ | pending | Forum (list, thread, category, new, search). |
