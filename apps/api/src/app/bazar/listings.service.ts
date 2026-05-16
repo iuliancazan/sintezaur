@@ -11,6 +11,7 @@ import {
   DATABASE,
   type SintezaurDb,
   gear,
+  gearImages,
   listingPhotos,
   listingPriceHistory,
   listings,
@@ -739,12 +740,33 @@ export class ListingsService {
         sellerAvgRating: userReviewAggregate.avgRating,
         sellerReviewCount: userReviewAggregate.reviewCount,
         sellerTransactionCount: userReviewAggregate.transactionCount,
-        thumb: sql<string | null>`(
-          SELECT path FROM ${listingPhotos}
-          WHERE ${listingPhotos.listingId} = ${listings.id}
-            AND ${listingPhotos.variant} = 'landscape_4x3_medium'
-          ORDER BY position ASC
-          LIMIT 1
+        // Prefer the listing's own landscape thumb. When the seller didn't
+        // upload photos to the listing (common when they reused a gear
+        // pre-filled from Tezaur), fall back to the linked gear's first
+        // landscape thumb so the card still has a visual — better than an
+        // empty grey tile.
+        thumb: sql<string | null>`COALESCE(
+          (
+            SELECT path FROM ${listingPhotos}
+            WHERE ${listingPhotos.listingId} = ${listings.id}
+              AND ${listingPhotos.variant} = 'landscape_4x3_medium'
+            ORDER BY position ASC
+            LIMIT 1
+          ),
+          (
+            SELECT path FROM ${gearImages}
+            WHERE ${gearImages.gearId} = ${listings.gearId}
+              AND ${gearImages.variant} = 'landscape_4x3_medium'
+            ORDER BY position ASC
+            LIMIT 1
+          ),
+          (
+            SELECT path FROM ${gearImages}
+            WHERE ${gearImages.gearId} = ${listings.gearId}
+              AND ${gearImages.variant} = 'square_medium'
+            ORDER BY position ASC
+            LIMIT 1
+          )
         )`,
       })
       .from(listings)
