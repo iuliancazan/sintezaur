@@ -17,23 +17,6 @@ import { ArticleListItem, RevistaService } from './revista/revista.service';
 import { SeoService } from './seo/seo.service';
 import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
 
-interface PulseCell {
-  label: string;
-  value: string;
-  delta: string;
-  deltaTone: 'flat' | 'down';
-}
-
-interface ForumThreadStub {
-  category: string;
-  title: string;
-  authorHandle: string;
-  authorInitials: string;
-  replies: number;
-  activity: string;
-  link: string;
-}
-
 /**
  * Home — site landing page, V05 design 1:1 (M13-B).
  *
@@ -93,11 +76,6 @@ interface ForumThreadStub {
                 <span class="gear-fill__label">{{ 'home.featured_chip' | t }}</span>
               </div>
             }
-            <div class="hero__rotator">
-              <button type="button" aria-label="Anterior">‹</button>
-              <span class="hero__counter">01 / {{ heroSlots() }}</span>
-              <button type="button" aria-label="Următorul">›</button>
-            </div>
           </div>
 
           <div class="hero__body">
@@ -287,32 +265,11 @@ interface ForumThreadStub {
           <a class="block__cta" routerLink="/forum">{{ 'home.forum_cta' | t }}</a>
         </header>
 
-        <div class="block__body">
-          <div class="forum-with-pulse">
-            <div class="forum-list">
-              @for (t of forumThreads; track t.title) {
-                <a class="thread" [routerLink]="t.link">
-                  <span class="thread__avatar">{{ t.authorInitials }}</span>
-                  <div class="thread__body">
-                    <span class="thread__cat">// {{ t.category }}</span>
-                    <span class="thread__title">{{ t.title }}</span>
-                    <span class="thread__meta">{{ '@' + t.authorHandle }}</span>
-                  </div>
-                  <div class="thread__replies">{{ t.replies }}<small>{{ 'home.forum_replies' | t }}</small></div>
-                  <div class="thread__activity">{{ t.activity }}</div>
-                </a>
-              }
-            </div>
-            <aside class="pulse pulse--aside" aria-label="Pulsul platformei">
-              @for (p of pulseCells; track p.label) {
-                <div class="pulse__cell">
-                  <span class="pulse__label">// {{ p.label }}</span>
-                  <span class="pulse__num">{{ p.value }}</span>
-                  <span class="pulse__delta" [class.is-down]="p.deltaTone === 'down'">{{ p.delta }}</span>
-                </div>
-              }
-            </aside>
-          </div>
+        <div
+          class="block__body"
+          style="padding:40px 20px;text-align:center;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;"
+        >
+          {{ 'home.forum_empty' | t }}
         </div>
       </section>
 
@@ -471,7 +428,6 @@ export class HomePage implements OnInit {
     () => this.revistaArticles()[1] ?? null,
   );
   readonly revistaSide = computed(() => this.revistaArticles().slice(2, 4));
-  readonly heroSlots = computed(() => Math.min(4, this.revistaArticles().length || 4));
   readonly welcomeFirstName = computed(() => {
     const u = this.auth.currentUser();
     if (!u) return '';
@@ -482,21 +438,6 @@ export class HomePage implements OnInit {
 
   readonly spotlight = computed(() => this.tezaurList()[0] ?? null);
   readonly catalog = computed(() => this.tezaurList().slice(1, 7));
-
-  readonly forumThreads: ForumThreadStub[] = [
-    { category: 'Tezaur · Întrebări', title: 'Probleme cu MIDI sync între Digitakt II și OP-1 field — clock drift după 30 min', authorHandle: 'rares.s', authorInitials: 'RS', replies: 24, activity: 'acum 12 min', link: '/forum' },
-    { category: 'Modular', title: 'Primul rack 84HP — ce module sunt obligatorii și ce e marketing?', authorHandle: 'anaaaaa', authorInitials: 'AN', replies: 67, activity: 'acum 1 oră', link: '/forum' },
-    { category: 'Bazar · Schimb', title: 'Schimb Juno-60 cu Prophet-6 desktop + diferență. Cum stabilim diferența corect?', authorHandle: 'vladpetre', authorInitials: 'VP', replies: 18, activity: 'acum 2 ore', link: '/forum' },
-    { category: 'Producție', title: 'Cel mai bun preamp pentru vocale lo-fi sub 2000 RON — recomandări reale', authorHandle: 'mihaela_m', authorInitials: 'MM', replies: 41, activity: 'acum 3 ore', link: '/forum' },
-    { category: 'Software', title: 'ROLI Seaboard merită în 2026? Pentru cine produce ambient și texturi', authorHandle: 'tudor.b', authorInitials: 'TB', replies: 9, activity: 'acum 4 ore', link: '/forum' },
-  ];
-
-  readonly pulseCells: PulseCell[] = [
-    { label: 'Listinguri noi · azi', value: '—', delta: 'din /bazar', deltaTone: 'flat' },
-    { label: 'Articole · săpt.', value: '—', delta: 'din /revista', deltaTone: 'flat' },
-    { label: 'Threaduri active', value: '—', delta: 'din /forum', deltaTone: 'flat' },
-    { label: 'Gear catalogat', value: '—', delta: 'din /tezaur', deltaTone: 'flat' },
-  ];
 
   constructor() {
     this.seo.set({
