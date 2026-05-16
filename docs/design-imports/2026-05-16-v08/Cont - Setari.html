@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur — Home</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+  /* ============================================================
+     LOGGED-IN — topbar, avatar, dropdown, drawer, modal
+     ============================================================ */
+
+  /* --- icon badge (notif/mesaje count) --- */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  /* --- avatar (with deterministic hue + initials fallback) --- */
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    /* color set inline via JS */
+  }
+
+  /* --- avatar trigger button --- */
+  .avatar-menu { position: relative; }
+  .avatar-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 6px 2px 2px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+
+  .avatar-icon { padding: 0 !important; border-color: transparent !important; }
+  .avatar-icon:hover { border-color: var(--line) !important; }
+
+  /* --- dropdown panel --- */
+  .avatar-drop {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60;
+    padding: 6px;
+    transform-origin: top right;
+    animation: avatar-drop-in 0.16s ease;
+  }
+  @keyframes avatar-drop-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  [data-theme="light"] .avatar-drop {
+    box-shadow: 0 18px 48px -12px rgba(60, 50, 20, 0.18);
+  }
+
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px;
+    margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name {
+    font-weight: 600; font-size: 14px; color: var(--fg);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .avatar-drop__handle {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted); margin-top: 3px;
+  }
+
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 13px;
+    color: var(--fg);
+    text-align: left;
+    border-radius: 2px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__item.is-danger:hover svg { color: oklch(0.82 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger { color: oklch(0.45 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger:hover { background: oklch(0.94 0.06 28); color: oklch(0.38 0.20 28); }
+
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    color: var(--fg-muted);
+    border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* --- mobile vs desktop visibility --- */
+  .tools__mobile { display: none !important; }
+  @media (max-width: 860px) {
+    .tools__desktop { display: none !important; }
+    .tools__mobile  { display: inline-flex !important; }
+  }
+  @media (max-width: 640px) {
+    /* original styles.css hides .nav on small; that's fine */
+    /* keep our 4 mobile icons visible — override the .btn-login hide which doesn't apply here */
+  }
+
+  /* --- mobile drawer --- */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(360px, 92vw);
+    height: 100dvh;
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.24s ease;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .drawer.is-open { transform: translateX(0); }
+
+  .drawer__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .drawer__user { display: flex; align-items: center; gap: 12px; }
+  .drawer__name { font-weight: 600; font-size: 14px; }
+  .drawer__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+
+  .drawer__sec {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer__sec-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-subtle);
+    padding: 8px 8px 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .drawer__item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 11px 8px;
+    font-size: 14px;
+    color: var(--fg);
+    text-align: left;
+    background: transparent; border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .drawer__item:hover { background: var(--bg-elev); }
+  .drawer__item svg { width: 18px; height: 18px; color: var(--fg-muted); flex-shrink: 0; }
+  .drawer__item .drawer__badge {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px;
+    background: var(--accent); color: var(--accent-fg);
+    border-radius: 999px;
+  }
+  .drawer__item.is-active { color: var(--accent); }
+  .drawer__item.is-danger { color: oklch(0.72 0.16 28); }
+  [data-theme="light"] .drawer__item.is-danger { color: oklch(0.45 0.18 28); }
+
+  /* --- modal --- */
+  .modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 110;
+    display: grid; place-items: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+  .modal-back.is-open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(520px, 100%);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6);
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.18s ease;
+  }
+  .modal-back.is-open .modal { transform: scale(1) translateY(0); }
+  .modal__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal__head h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; }
+  .modal__body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .modal__foot {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .form-row { display: flex; flex-direction: column; gap: 6px; }
+  .form-row > span {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 2px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .form-row textarea { min-height: 110px; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+  /* --- bottom CTA actions list --- */
+  .cta-strip__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cta-strip__a .btn-ghost { padding: 10px 16px; font-size: 13px; }
+
+  /* --- close hidden attribute when JS toggles open --- */
+  [hidden] { display: none !important; }
+
+  /* ============================================================
+     ACCOUNT PAGE COMMON — page head, tabs, forms, lists
+     ============================================================ */
+  .page-head {
+    padding: 56px 0 28px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 28px;
+  }
+  .page-head .block__sub {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .page-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    margin: 0 0 12px;
+    text-transform: uppercase;
+  }
+  .page-title .dot { color: var(--accent); }
+  .page-lede {
+    margin: 0; max-width: 60ch;
+    font-size: 17px; color: var(--fg-muted);
+  }
+
+  /* --- Tabs row --- */
+  .tabs-row {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 36px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0;
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+    position: relative;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab.is-active {
+    color: var(--fg);
+    border-bottom-color: var(--accent);
+  }
+  .tab__count {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 10px;
+    color: var(--fg-muted);
+  }
+  .tab.is-active .tab__count {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  .tab-panel[hidden] { display: none; }
+
+  /* --- Settings 2-col layout --- */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 56px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 56px;
+  }
+  .settings-grid:last-of-type { border-bottom: 0; }
+  .settings-side h3 {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.10em;
+    color: var(--fg);
+    margin: 0 0 12px;
+  }
+  .settings-side h3::before { content: "// "; color: var(--accent); }
+  .settings-side p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+  .settings-form { display: flex; flex-direction: column; gap: 18px; max-width: 560px; }
+  .settings-form .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .settings-form .form-row > span { color: var(--fg-muted); }
+  .settings-form .hint { font-size: 12px; color: var(--fg-subtle); margin-top: 4px; }
+
+  @media (max-width: 800px) {
+    .settings-grid { grid-template-columns: 1fr; gap: 24px; padding-bottom: 40px; margin-bottom: 40px; }
+    .settings-form .row-2 { grid-template-columns: 1fr; }
+  }
+
+  /* --- Form actions --- */
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 6px;
+  }
+  .btn-primary {
+    padding: 11px 22px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-danger {
+    padding: 11px 22px;
+    background: transparent;
+    color: oklch(0.72 0.16 28);
+    border: 1px solid oklch(0.55 0.18 28);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .btn-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  [data-theme="light"] .btn-danger { color: oklch(0.45 0.18 28); border-color: oklch(0.55 0.18 28); }
+
+  /* --- Avatar uploader --- */
+  .avatar-up {
+    display: flex; align-items: center; gap: 18px;
+    padding: 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+  }
+  .avatar-up__pic .avatar { width: 72px; height: 72px; font-size: 24px; }
+  .avatar-up__ctl { display: flex; flex-direction: column; gap: 6px; }
+  .avatar-up__row { display: flex; gap: 8px; }
+  .avatar-up__btn {
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .avatar-up__btn:hover { border-color: var(--fg-muted); }
+  .avatar-up__btn.is-danger { color: oklch(0.72 0.16 28); border-color: transparent; }
+  .avatar-up__hint { font-size: 12px; color: var(--fg-subtle); }
+
+  /* --- Toggle (notifications) --- */
+  .toggle-list { display: flex; flex-direction: column; gap: 0; }
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 24px;
+    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .toggle-row:last-child { border-bottom: 0; }
+  .toggle-row__label { font-size: 14px; color: var(--fg); font-weight: 500; }
+  .toggle-row__hint { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+  .toggle-row__head { font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: 0.10em; text-align: center; min-width: 56px; }
+  .toggle {
+    position: relative;
+    width: 38px; height: 22px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    flex-shrink: 0;
+  }
+  .toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    background: var(--fg-muted);
+    border-radius: 50%;
+    transition: left 0.18s ease, background 0.15s ease;
+  }
+  .toggle.is-on { background: var(--accent); border-color: var(--accent); }
+  .toggle.is-on::after { left: 18px; background: var(--accent-fg); }
+
+  /* --- Generic list rows (blocked users, saved searches, subscriptions, listings cards) --- */
+  .acc-list { display: flex; flex-direction: column; }
+  .acc-row {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .acc-row:last-child { border-bottom: 0; }
+  .acc-row__body { flex: 1; min-width: 0; }
+  .acc-row__title { font-weight: 600; font-size: 15px; color: var(--fg); margin: 0 0 4px; }
+  .acc-row__meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+  .acc-row__meta .sep { opacity: 0.4; margin: 0 6px; }
+
+  /* empty state */
+  .empty {
+    padding: 64px 24px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    background: var(--bg-card);
+  }
+  .empty__icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 16px;
+    color: var(--fg-subtle);
+  }
+  .empty__title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    color: var(--fg);
+  }
+  .empty__lede {
+    margin: 0 auto;
+    max-width: 40ch;
+    color: var(--fg-muted);
+    font-size: 14px;
+  }
+  </style>
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="Cont · Setări">
+
+  <!-- ============================================================
+       SVG sprite — icons
+       ============================================================ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 12a8 8 0 0 0 0-8" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+        <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="3" y="5" width="18" height="14"/><path d="M3.5 6l8.5 7 8.5-7"/>
+      </symbol>
+      <symbol id="i-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.5a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.5a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>
+      </symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/>
+      </symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/>
+      </symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13 7l4 4"/>
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="/">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+
+        <button class="icon-btn has-badge" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></button>
+
+        <a class="icon-btn tools__desktop" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+
+        <a class="icon-btn has-badge tools__desktop" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+
+        <button class="icon-btn tools__desktop" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <div class="avatar-menu tools__desktop" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item" href="Cont - Articolele Mele.html" role="menuitem">
+              <svg><use href="#i-pen"/></svg> Articolele mele
+              <span class="avatar-drop__tag">8</span>
+            </a>
+            <a class="avatar-drop__item" href="#" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem" data-feedback-open>
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+
+            <div class="avatar-drop__sep"></div>
+
+            <a class="avatar-drop__item is-admin" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+
+            <div class="avatar-drop__sep"></div>
+
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+
+        <!-- mobile-only: avatar mic + burger -->
+        <button class="icon-btn avatar-icon tools__mobile" aria-label="Cont" data-burger>
+          <span class="avatar avatar--sm" data-uid="u_8472" data-initials="TI">TI</span>
+        </button>
+        <button class="icon-btn tools__mobile" aria-label="Meniu" data-burger>
+          <svg><use href="#i-burger"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- ============================================================
+         PAGE HEAD
+         ============================================================ -->
+    <header class="page-head crosses" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <span class="block__sub">// Cont</span>
+      <h1 class="page-title">Setări<span class="dot">.</span></h1>
+      <p class="page-lede">Profilul, datele de contact și preferințele tale pe Sintezaur. Tot ce setezi aici se aplică instant pe toate secțiunile platformei.</p>
+    </header>
+
+    <!-- ============================================================
+         TABS
+         ============================================================ -->
+    <div class="tabs-row" role="tablist" data-tabs>
+      <button class="tab is-active" role="tab" data-tab="profil">Profil</button>
+      <button class="tab" role="tab" data-tab="parola">Parolă</button>
+      <button class="tab" role="tab" data-tab="email">Email</button>
+      <button class="tab" role="tab" data-tab="date">Datele mele</button>
+      <button class="tab" role="tab" data-tab="notif">Preferințe notificări</button>
+      <button class="tab" role="tab" data-tab="blocati">Utilizatori blocați <span class="tab__count">3</span></button>
+    </div>
+
+    <!-- PROFIL -->
+    <section class="tab-panel" data-panel="profil">
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Identitate publică</h3>
+          <p>Cum apari în Bazar, pe Forum și în Tezaur. Numele afișat poate fi diferit de username — username-ul rămâne unic și apare în URL-uri.</p>
+        </aside>
+        <form class="settings-form" onsubmit="event.preventDefault()">
+          <div class="row-2">
+            <label class="form-row">
+              <span>// Nume afișat</span>
+              <input type="text" value="Tudor Ionescu" />
+            </label>
+            <label class="form-row">
+              <span>// Username</span>
+              <input type="text" value="tudor.i" />
+              <span class="hint">sintezaur.ro/u/tudor.i — schimbarea forțează redirecturi pe URL-urile vechi.</span>
+            </label>
+          </div>
+          <label class="form-row">
+            <span>// Bio</span>
+            <textarea rows="3" placeholder="O linie despre tine">Producer + colecționar — Roland & Sequential, ocazional Elektron. București.</textarea>
+            <span class="hint">Maxim 200 caractere. Apare pe pagina ta publică și pe cardurile de Bazar.</span>
+          </label>
+          <div class="row-2">
+            <label class="form-row">
+              <span>// Locație</span>
+              <input type="text" value="București, RO" />
+            </label>
+            <label class="form-row">
+              <span>// Website / Bandcamp</span>
+              <input type="url" placeholder="https://" value="https://tudor.bandcamp.com" />
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Salvează modificările</button>
+            <span class="hint">Modificat ultima dată acum 14 zile.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Poză de profil</h3>
+          <p>Dacă nu încarci nimic, folosim inițialele tale pe un fundal generat determinist din user_id. JPG/PNG, max 5 MB.</p>
+        </aside>
+        <div class="settings-form">
+          <div class="avatar-up">
+            <div class="avatar-up__pic">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+            </div>
+            <div class="avatar-up__ctl">
+              <div class="avatar-up__row">
+                <button type="button" class="avatar-up__btn">Încarcă imagine</button>
+                <button type="button" class="avatar-up__btn is-danger">Șterge</button>
+              </div>
+              <span class="avatar-up__hint">Folosești fallback-ul auto.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAROLA -->
+    <section class="tab-panel" data-panel="parola" hidden>
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Schimbă parola</h3>
+          <p>Minim 10 caractere, cu cel puțin o literă mare, o cifră și un simbol. Te delogăm din toate sesiunile celelalte după schimbare.</p>
+        </aside>
+        <form class="settings-form" onsubmit="event.preventDefault()">
+          <label class="form-row"><span>// Parola actuală</span><input type="password" /></label>
+          <label class="form-row">
+            <span>// Parola nouă</span><input type="password" />
+            <span class="hint">Sintezaur nu permite reutilizarea ultimelor 3 parole.</span>
+          </label>
+          <label class="form-row"><span>// Confirmă parola nouă</span><input type="password" /></label>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Schimbă parola</button>
+            <a href="#" style="color:var(--fg-muted); border-bottom:1px solid currentColor; font-size:13px">Am uitat parola actuală</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Sesiuni active</h3>
+          <p>Locurile unde ai fost logat în ultimele 30 zile. Termini orice sesiune cu un click.</p>
+        </aside>
+        <div class="settings-form" style="max-width: none">
+          <div class="acc-list">
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="sess-1" data-initials="MX">MX</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">Chrome · macOS — București <span style="font-size:11px; color:var(--accent); margin-left:8px">● sesiune curentă</span></div>
+                <div class="acc-row__meta">79.119.x.x <span class="sep">·</span> Activ acum</div>
+              </div>
+            </div>
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="sess-2" data-initials="iP">iP</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">Safari · iPhone 15</div>
+                <div class="acc-row__meta">86.124.x.x <span class="sep">·</span> Acum 2 zile</div>
+              </div>
+              <button class="avatar-up__btn is-danger" type="button">Termină</button>
+            </div>
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="sess-3" data-initials="Fi">Fi</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">Firefox · Linux — Cluj-Napoca</div>
+                <div class="acc-row__meta">109.99.x.x <span class="sep">·</span> Acum 8 zile</div>
+              </div>
+              <button class="avatar-up__btn is-danger" type="button">Termină</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- EMAIL -->
+    <section class="tab-panel" data-panel="email" hidden>
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Adresa de email</h3>
+          <p>Folosită pentru autentificare, recuperare cont și notificări tranzacționale. Restul preferințelor de email se setează în <em>Preferințe notificări</em>.</p>
+        </aside>
+        <form class="settings-form" onsubmit="event.preventDefault()">
+          <label class="form-row">
+            <span>// Email actual</span>
+            <input type="email" value="tudor.ionescu@gmail.com" readonly style="opacity:.75" />
+            <span class="hint"><span style="color: oklch(0.72 0.18 145)">✓ Verificat</span> · 12 noiembrie 2024</span>
+          </label>
+          <label class="form-row">
+            <span>// Email nou</span>
+            <input type="email" placeholder="nou@email.ro" />
+            <span class="hint">Trimitem un link de confirmare. Adresa veche rămâne activă până confirmi.</span>
+          </label>
+          <label class="form-row">
+            <span>// Parola actuală (confirmare)</span>
+            <input type="password" />
+          </label>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Schimbă email-ul</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- DATELE MELE -->
+    <section class="tab-panel" data-panel="date" hidden>
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Exportă datele tale</h3>
+          <p>Conform GDPR Art. 20 (portabilitatea datelor) — primești într-un ZIP profil, anunțuri postate, threaduri, mesaje, favorite și colecția ta de gear.</p>
+        </aside>
+        <form class="settings-form" onsubmit="event.preventDefault()">
+          <label class="form-row">
+            <span>// Format</span>
+            <select>
+              <option>JSON (machine-readable)</option>
+              <option>CSV (pe categorii)</option>
+              <option>HTML (citibil în browser)</option>
+            </select>
+          </label>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Generează export ↓</button>
+            <span class="hint">Linkul de download apare aici și pe email în ~10 minute.</span>
+          </div>
+        </form>
+      </div>
+
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3 style="color: oklch(0.72 0.16 28)">Șterge contul</h3>
+          <p>Anunțurile active sunt închise, mesajele anonimizate (rămân vizibile pentru destinatar), threadurile rămân cu autor „Utilizator șters". Acțiunea este ireversibilă.</p>
+        </aside>
+        <form class="settings-form" onsubmit="event.preventDefault()">
+          <label class="form-row">
+            <span>// Motivul plecării (opțional)</span>
+            <select>
+              <option>— Selectează —</option>
+              <option>Nu mai sunt activ în muzică</option>
+              <option>Folosesc altă platformă</option>
+              <option>Probleme cu platforma</option>
+              <option>Altul</option>
+            </select>
+          </label>
+          <label class="form-row">
+            <span>// Tastează „șterge contul" pentru a confirma</span>
+            <input type="text" placeholder="șterge contul" />
+          </label>
+          <div class="form-actions">
+            <button class="btn-danger" type="submit">Șterge contul definitiv</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- NOTIFICARI -->
+    <section class="tab-panel" data-panel="notif" hidden>
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Bazar</h3>
+          <p>Activitate legată de anunțurile tale și de listingurile salvate.</p>
+        </aside>
+        <div class="settings-form" style="max-width: none">
+          <div class="toggle-list">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Mesaj nou la un anunț al meu</div>
+                <div class="toggle-row__hint">Cineva îți scrie pe un listing activ.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle is-on" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Ofertă primită</div>
+                <div class="toggle-row__hint">Buyer face ofertă sub prețul cerut.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Alertă de preț la căutările salvate</div>
+                <div class="toggle-row__hint">Apare un listing nou care se potrivește cu o căutare salvată.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle is-on" type="button"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Forum</h3>
+          <p>Răspunsuri, mențiuni și threaduri urmărite.</p>
+        </aside>
+        <div class="settings-form" style="max-width: none">
+          <div class="toggle-list">
+            <div class="toggle-row">
+              <div><div class="toggle-row__label">Răspuns la threadul meu</div></div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-row__label">Mențiune @tudor.i</div></div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle is-on" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Activitate pe threaduri abonate</div>
+                <div class="toggle-row__hint">Setezi separat per thread din pagina threadului.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle" type="button"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Revistă & platformă</h3>
+          <p>Conținut editorial și anunțuri de sistem.</p>
+        </aside>
+        <div class="settings-form" style="max-width: none">
+          <div class="toggle-list">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Newsletter săptămânal</div>
+                <div class="toggle-row__hint">Vinerea dimineața — top articole și piață.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle is-on" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div><div class="toggle-row__label">Articol nou de la editor urmărit</div></div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle" type="button"></button></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-row__label">Anunțuri sistem & securitate</div>
+                <div class="toggle-row__hint">Esențiale — nu pot fi dezactivate.</div>
+              </div>
+              <div><div class="toggle-row__head">In-app</div><button class="toggle is-on" type="button" disabled style="opacity:.5; cursor:not-allowed"></button></div>
+              <div><div class="toggle-row__head">Email</div><button class="toggle is-on" type="button" disabled style="opacity:.5; cursor:not-allowed"></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOCATI -->
+    <section class="tab-panel" data-panel="blocati" hidden>
+      <div class="settings-grid">
+        <aside class="settings-side">
+          <h3>Utilizatori blocați</h3>
+          <p>Nu-ți vor mai vedea anunțurile, nu-ți pot scrie, nu pot răspunde la threadurile tale. Pe Forum, mesajele lor apar pentru tine colapsate cu „Conținut blocat".</p>
+        </aside>
+        <div class="settings-form" style="max-width: none">
+          <div class="acc-list">
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="u_blk_1" data-initials="GS">GS</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">Gigel S.</div>
+                <div class="acc-row__meta">@gigel.s <span class="sep">·</span> Blocat acum 3 luni</div>
+              </div>
+              <button class="avatar-up__btn" type="button">Deblochează</button>
+            </div>
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="u_blk_2" data-initials="AB">AB</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">anon.bucuresti</div>
+                <div class="acc-row__meta">@anon.bucuresti <span class="sep">·</span> Blocat acum 7 luni</div>
+              </div>
+              <button class="avatar-up__btn" type="button">Deblochează</button>
+            </div>
+            <div class="acc-row">
+              <span class="avatar avatar--md" data-uid="u_blk_3" data-initials="VV">VV</span>
+              <div class="acc-row__body">
+                <div class="acc-row__title">vlad_v</div>
+                <div class="acc-row__meta">@vlad_v <span class="sep">·</span> Blocat acum 1 an</div>
+              </div>
+              <button class="avatar-up__btn" type="button">Deblochează</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       MOBILE DRAWER + SCRIM
+       ============================================================ -->
+  <div class="scrim" data-scrim hidden></div>
+  <aside class="drawer" data-drawer aria-label="Meniu cont" hidden>
+    <header class="drawer__head">
+      <div class="drawer__user">
+        <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+        <div>
+          <div class="drawer__name">Tudor Ionescu</div>
+          <div class="drawer__handle">@tudor.i</div>
+        </div>
+      </div>
+      <button class="icon-btn" data-drawer-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+    </header>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Navigare</span>
+      <a class="drawer__item" href="Home.html">Acasă</a>
+      <a class="drawer__item" href="Tezaur.html">Tezaur</a>
+      <a class="drawer__item" href="Bazar.html">Bazar</a>
+      <a class="drawer__item" href="Revista.html">Revistă</a>
+      <a class="drawer__item" href="Forum.html">Forum</a>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Activitate</span>
+      <a class="drawer__item" href="Cont - Favorite.html">
+        <svg><use href="#i-heart"/></svg> Favorite
+      </a>
+      <a class="drawer__item" href="Cont - Mesaje.html">
+        <svg><use href="#i-mail"/></svg> Mesaje
+        <span class="drawer__badge">2</span>
+      </a>
+      <button class="drawer__item" type="button" data-theme-toggle>
+        <svg class="icon-sun"><use href="#i-sun"/></svg>
+        <svg class="icon-moon"><use href="#i-moon"/></svg>
+        Schimbă tema
+      </button>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Cont</span>
+      <a class="drawer__item is-active" href="Cont - Setari.html"><svg><use href="#i-cog"/></svg> Setări</a>
+      <a class="drawer__item" href="Cont - Articolele Mele.html"><svg><use href="#i-pen"/></svg> Articolele mele</a>
+      <a class="drawer__item" href="#"><svg><use href="#i-megaphone"/></svg> Anunțurile mele</a>
+      <button class="drawer__item" type="button" data-feedback-open>
+        <svg><use href="#i-doc"/></svg> Trimite feedback
+      </button>
+      <a class="drawer__item" href="Admin - Dashboard.html">
+        <svg><use href="#i-shield"/></svg> Dashboard
+        <span class="drawer__badge" style="background:var(--accent);color:var(--accent-fg)">admin</span>
+      </a>
+    </div>
+
+    <div class="drawer__sec" style="border-bottom:0">
+      <button class="drawer__item is-danger" type="button">
+        <svg><use href="#i-logout"/></svg> Ieși din cont
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       FEEDBACK MODAL
+       ============================================================ -->
+  <div class="modal-back" data-modal hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+      <header class="modal__head">
+        <h3 id="fb-title">Trimite feedback</h3>
+        <button class="icon-btn" data-modal-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+      </header>
+      <div class="modal__body">
+        <label class="form-row">
+          <span>// Categorie</span>
+          <select>
+            <option>Sugestie de feature</option>
+            <option>Bug / eroare</option>
+            <option>Conținut / raport</option>
+            <option>Altele</option>
+          </select>
+        </label>
+        <label class="form-row">
+          <span>// Mesaj</span>
+          <textarea rows="6" placeholder="Spune-ne ce am putea face mai bine. Cu cât mai specific, cu atât mai bine."></textarea>
+        </label>
+        <p style="margin:0; font-size:12px; color:var(--fg-muted)">
+          Trimitem mesajul cu user_id-ul tău (<code style="font-family:var(--font-mono); color:var(--fg)">u_8472</code>) atașat — răspundem pe email în 1-2 zile lucrătoare.
+        </p>
+      </div>
+      <footer class="modal__foot">
+        <button class="btn-ghost" type="button" data-modal-close>Anulează</button>
+        <button class="btn-login" type="button">Trimite →</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="/">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="/despre">Despre</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/termeni">Termeni</a></li>
+            <li><a href="/confidentialitate">Confidențialitate</a></li>
+            <li><a href="/rss">RSS</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       Data + behaviors
+       ============================================================ -->
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+
+      function apply(mode) {
+        root.setAttribute('data-theme', mode);
+      }
+      const saved = localStorage.getItem(KEY) || 'dark';
+      apply(saved);
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+          const next = cur === 'dark' ? 'light' : 'dark';
+          localStorage.setItem(KEY, next);
+          apply(next);
+        });
+      });
+    })();
+
+    // ---------- AVATAR COLORING (deterministic hue from user_id) ----------
+    function hashHue(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      return h % 360;
+    }
+    function applyAvatarColor(el) {
+      const uid = el.dataset.uid || 'anon';
+      const hue = hashHue(uid);
+      // mid-saturation, mid-lightness so it works across themes
+      const bg = `oklch(0.58 0.14 ${hue})`;
+      // pick white or black for contrast — oklch lightness 0.58 → white text reads well across hues
+      const fg = 'oklch(0.98 0 0)';
+      el.style.background = bg;
+      el.style.color = fg;
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      // initials
+      const init = el.dataset.initials || el.textContent.trim().slice(0, 2).toUpperCase();
+      el.textContent = init;
+    }
+    document.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+
+    // ---------- AVATAR DROPDOWN ----------
+    (function avatarMenu() {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      function open() {
+        drop.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      function close() {
+        drop.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+      }
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        drop.hidden ? open() : close();
+      });
+      document.addEventListener('click', e => {
+        if (!menu.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+      });
+    })();
+
+    // ---------- MOBILE DRAWER ----------
+    (function drawer() {
+      const drawer = document.querySelector('[data-drawer]');
+      const scrim = document.querySelector('[data-scrim]');
+      if (!drawer || !scrim) return;
+      function open() {
+        drawer.hidden = false;
+        scrim.hidden = false;
+        // force a frame so transition triggers
+        requestAnimationFrame(() => {
+          drawer.classList.add('is-open');
+          scrim.classList.add('is-open');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        drawer.classList.remove('is-open');
+        scrim.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 240);
+      }
+      document.querySelectorAll('[data-burger]').forEach(b => b.addEventListener('click', open));
+      document.querySelectorAll('[data-drawer-close]').forEach(b => b.addEventListener('click', close));
+      scrim.addEventListener('click', close);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    })();
+
+    // ---------- FEEDBACK MODAL ----------
+    (function feedback() {
+      const modal = document.querySelector('[data-modal]');
+      if (!modal) return;
+      function open() {
+        modal.hidden = false;
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { modal.hidden = true; }, 200);
+      }
+      document.querySelectorAll('[data-feedback-open]').forEach(b => b.addEventListener('click', e => {
+        e.preventDefault();
+        // close drawer & avatar drop if open
+        document.querySelector('[data-drawer]')?.classList.remove('is-open');
+        document.querySelector('[data-scrim]')?.classList.remove('is-open');
+        const drop = document.querySelector('.avatar-drop');
+        if (drop) drop.hidden = true;
+        open();
+      }));
+      document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', close));
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+    })();
+
+    // Fill any [data-gear] container with its SVG illustration
+    function fillGears(scope) {
+      (scope || document).querySelectorAll('[data-gear]').forEach(el => {
+        if (el.dataset.gearFilled) return;
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+          el.dataset.gearFilled = '1';
+        }
+      });
+    }
+    fillGears();
+
+    // ---------- TABS ----------
+    (function tabs() {
+      const row = document.querySelector('[data-tabs]');
+      if (!row) return;
+      const tabs = row.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          tabs.forEach(t => t.classList.toggle('is-active', t === tab));
+          panels.forEach(p => { p.hidden = p.dataset.panel !== target; });
+        });
+      });
+    })();
+
+    // ---------- TOGGLES ----------
+    document.querySelectorAll('.toggle').forEach(t => {
+      t.addEventListener('click', () => {
+        if (t.disabled) return;
+        t.classList.toggle('is-on');
+        t.setAttribute('aria-pressed', t.classList.contains('is-on'));
+      });
+    });
+  </script>
+
+</body>
+</html>

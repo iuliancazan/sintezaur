@@ -34,6 +34,32 @@ export interface TezaurMyDraft {
   thumb: string | null;
 }
 
+export interface TezaurModerationItem {
+  id: string;
+  slug: string;
+  brand: string;
+  model: string;
+  category: string;
+  state: GearState;
+  submittedAt: string | null;
+  createdBy: string | null;
+  thumb: string | null;
+}
+
+export interface TezaurModerationResponse {
+  items: TezaurModerationItem[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface TezaurModerationQuery {
+  state?: GearState;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface TezaurDraftPayload {
   brand?: string;
   model?: string;
@@ -359,6 +385,46 @@ export class TezaurService {
     return firstValueFrom(
       this.http.delete<void>(
         `${this.base}/me/tezaur/gear/${gearId}/relationships/${relId}`,
+      ),
+    );
+  }
+
+  /* ============================================================
+     Moderation queue (curator+ only) — site-side surface so the
+     "De moderat" tab on /cont/contributii-tezaur can read and act
+     on submitted gear without sending users into the dashboard.
+     ============================================================ */
+
+  listModerationQueue(
+    query: TezaurModerationQuery = {},
+  ): Promise<TezaurModerationResponse> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(query)) {
+      if (v === undefined || v === null || v === '') continue;
+      params = params.set(k, String(v));
+    }
+    return firstValueFrom(
+      this.http.get<TezaurModerationResponse>(
+        `${this.base}/admin/tezaur/moderation`,
+        { params },
+      ),
+    );
+  }
+
+  approveModerationItem(gearId: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/admin/tezaur/gear/${gearId}/approve`,
+        {},
+      ),
+    );
+  }
+
+  rejectModerationItem(gearId: string, reason: string): Promise<void> {
+    return firstValueFrom(
+      this.http.post<void>(
+        `${this.base}/admin/tezaur/gear/${gearId}/reject`,
+        { reason },
       ),
     );
   }

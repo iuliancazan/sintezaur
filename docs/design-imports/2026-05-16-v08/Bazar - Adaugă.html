@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vinde un produs — Bazar — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+
+  <style>
+    /* ------- page-local extensions on top of styles.css ------- */
+
+    /* Pre-fill banner — "ai pornit din Tezaur" */
+    .bz-add-link {
+      display: grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+      margin-bottom: 18px;
+    }
+    .bz-add-link__thumb {
+      position: relative;
+      width: 56px; height: 42px;
+      border: 1px solid var(--line);
+      background: var(--bg-card-2);
+      overflow: hidden;
+    }
+    .bz-add-link__thumb .gear-fill { padding: 12%; }
+    .bz-add-link__txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .bz-add-link__k {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fg-muted);
+    }
+    .bz-add-link__k::before { content: "// "; color: var(--accent); }
+    .bz-add-link__v { font-size: 14px; color: var(--fg); font-weight: 500; }
+    .bz-add-link__v a { color: var(--accent); text-decoration: none; }
+    .bz-add-link__v a:hover { text-decoration: underline; }
+    .bz-add-link__cta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border: 1px solid var(--line-strong);
+      color: var(--fg-muted);
+      background: transparent;
+      cursor: pointer;
+      transition: color .12s, border-color .12s;
+    }
+    .bz-add-link__cta:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Condition rating - 5-step segmented */
+    .bz-cond {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .bz-cond input { display: none; }
+    .bz-cond label {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      cursor: pointer;
+      transition: color .12s, border-color .12s, background .12s;
+    }
+    .bz-cond label:hover { border-color: var(--fg-muted); color: var(--fg); }
+    .bz-cond input:checked + label {
+      border-color: var(--accent);
+      background: var(--bg-card);
+      color: var(--fg);
+    }
+    .bz-cond label .num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: var(--fg-subtle);
+    }
+    .bz-cond input:checked + label .num { color: var(--accent); }
+    .bz-cond label .ttl {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.005em;
+    }
+    .bz-cond label .sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--fg-subtle);
+      text-transform: none;
+      letter-spacing: 0.02em;
+    }
+
+    /* Deal-type — three large radio cards */
+    .bz-deal {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .bz-deal input { display: none; }
+    .bz-deal label {
+      cursor: pointer;
+      padding: 14px 16px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color .12s, background .12s, color .12s;
+    }
+    .bz-deal label:hover { border-color: var(--fg-muted); }
+    .bz-deal input:checked + label {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+    .bz-deal label .ic {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.01em;
+      color: var(--fg-muted);
+    }
+    .bz-deal input:checked + label .ic { color: var(--accent); }
+    .bz-deal label .ttl {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+    .bz-deal label .sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--fg-subtle);
+      line-height: 1.4;
+    }
+
+    /* Hide swap-wanted when deal=sell */
+    .bz-swap-wanted { display: none; }
+    body[data-deal="schimb"] .bz-swap-wanted,
+    body[data-deal="vand-schimb"] .bz-swap-wanted { display: block; }
+
+    /* Price input — extra-large display look */
+    .bz-price {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 0;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      transition: border-color .12s;
+    }
+    .bz-price:focus-within { border-color: var(--accent); }
+    .bz-price input {
+      border: 0 !important;
+      background: transparent !important;
+      padding: 14px 18px !important;
+      font-family: var(--font-display) !important;
+      font-size: 32px !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.005em !important;
+      color: var(--fg) !important;
+    }
+    .bz-price input::placeholder { color: var(--fg-subtle); }
+    /* hide spinners */
+    .bz-price input::-webkit-outer-spin-button,
+    .bz-price input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .bz-price input[type=number] { -moz-appearance: textfield; }
+
+    .bz-price__cur {
+      padding: 0 14px;
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      border-left: 1px dashed var(--line);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--fg-muted);
+      letter-spacing: 0.08em;
+    }
+    .bz-price__cur b { color: var(--fg); font-weight: 500; }
+    .bz-price__conv {
+      padding: 0 18px 0 14px;
+      align-self: stretch;
+      display: grid;
+      place-items: center;
+      border-left: 1px dashed var(--line);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-subtle);
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+    .bz-price__conv b { color: var(--fg-muted); font-weight: 500; }
+
+    /* Included items chip grid (8 col) */
+    .bz-incl {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .bz-incl input { display: none; }
+    .bz-incl label {
+      cursor: pointer;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      font-size: 13px;
+      color: var(--fg-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: border-color .12s, color .12s, background .12s;
+    }
+    .bz-incl label::before {
+      content: "○";
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--fg-subtle);
+      line-height: 1;
+    }
+    .bz-incl input:checked + label::before { content: "✓"; color: var(--accent); }
+    .bz-incl input:checked + label { color: var(--fg); border-color: var(--line-strong); background: var(--bg-card); }
+    .bz-incl label:hover { border-color: var(--fg-muted); }
+
+    /* Custom missing input */
+    .bz-incl-add {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .bz-incl-add input {
+      padding: 9px 12px !important;
+      font-size: 13px !important;
+    }
+    .bz-incl-add button {
+      padding: 0 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: color .12s, border-color .12s;
+    }
+    .bz-incl-add button:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* Delivery — three radio cards stacked horizontally */
+    .bz-deliv {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .bz-deliv input { display: none; }
+    .bz-deliv label {
+      cursor: pointer;
+      padding: 12px 14px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: border-color .12s, background .12s;
+    }
+    .bz-deliv label:hover { border-color: var(--fg-muted); }
+    .bz-deliv input:checked + label { border-color: var(--accent); background: var(--bg-card); }
+    .bz-deliv label .ttl { font-size: 14px; color: var(--fg); font-weight: 600; }
+    .bz-deliv label .sub { font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle); }
+
+    /* Payment chip grid (smaller chips) */
+    .bz-payment {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .bz-payment input { display: none; }
+    .bz-payment label {
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      color: var(--fg-muted);
+      cursor: pointer;
+      transition: color .12s, border-color .12s, background .12s;
+    }
+    .bz-payment label:hover { color: var(--fg); border-color: var(--fg-muted); }
+    .bz-payment input:checked + label {
+      color: var(--accent-fg);
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Live preview card — uses real .listing styling */
+    .bz-prev-card {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      overflow: hidden;
+    }
+    .bz-prev-card .listing__media { aspect-ratio: 4/3; }
+    .bz-prev-card .listing__body { padding: 14px 16px 16px; }
+
+    /* Trust strip in sidebar */
+    .bz-trust {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-muted);
+      line-height: 1.55;
+    }
+    .bz-trust__row { display: grid; grid-template-columns: 18px 1fr; gap: 8px; align-items: start; }
+    .bz-trust__row .ic { color: var(--accent); font-weight: 600; }
+    .bz-trust__row strong { color: var(--fg); font-weight: 600; }
+    .bz-trust hr {
+      border: 0;
+      border-top: 1px dashed var(--line);
+      margin: 4px 0;
+    }
+
+    /* Small note under heading */
+    .bz-note {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg-subtle);
+      letter-spacing: 0.02em;
+      margin: 0 0 14px;
+      line-height: 1.55;
+    }
+    .bz-note b { color: var(--fg-muted); font-weight: 500; }
+
+    /* Visibility helpers for the existing ta- form */
+    .bz-side-est {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border: 1px solid var(--line);
+      background: var(--bg-card);
+    }
+    .bz-side-est__cell {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .bz-side-est__cell + .bz-side-est__cell { border-left: 1px dashed var(--line); }
+    .bz-side-est__k {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--fg-subtle);
+    }
+    .bz-side-est__v {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--fg);
+      line-height: 1.05;
+      letter-spacing: 0.005em;
+    }
+    .bz-side-est__v small {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--fg-muted);
+      letter-spacing: 0.08em;
+      margin-left: 4px;
+    }
+    .bz-side-est__sub {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--fg-subtle);
+      letter-spacing: 0.04em;
+    }
+    .bz-side-est__sub.up { color: var(--accent); }
+
+    @media (max-width: 1000px) {
+      .bz-cond { grid-template-columns: repeat(2, 1fr); }
+      .bz-deal { grid-template-columns: 1fr; }
+      .bz-incl { grid-template-columns: repeat(2, 1fr); }
+      .bz-deliv { grid-template-columns: 1fr; }
+      .bz-price { grid-template-columns: 1fr; }
+      .bz-price__cur, .bz-price__conv { border-left: 0; border-top: 1px dashed var(--line); padding: 8px 18px; justify-items: start; }
+    }
+  </style>
+</head>
+<body data-screen-label="08 Bazar — adaugă listing" data-deal="vand">
+
+  <!-- SVG sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+        <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M15 6l-6 6 6 6"/>
+      </symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M12 16V4M6 10l6-6 6 6M4 20h16"/>
+      </symbol>
+      <symbol id="i-drag" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+        <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+        <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+      </symbol>
+      <symbol id="i-caret-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M2 7h12v9H2zM14 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link is-active" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <span class="avatar">TI</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Bazar.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Înapoi la Bazar
+      </a>
+      <span class="sep">·</span>
+      <a href="Bazar.html">Bazar</a>
+      <span class="sep">/</span>
+      <span class="cur">Vinde un produs · draft</span>
+    </nav>
+
+    <!-- HEADER -->
+    <section class="ta-header crosses" aria-labelledby="bza-title">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div>
+        <p class="ta-header__sub">Bazar · Listing nou</p>
+        <h1 class="ta-header__title" id="bza-title">Vinde un<br/>produs<span class="dot">.</span></h1>
+      </div>
+      <div>
+        <p class="ta-header__lede">
+          Postezi un anunţ care apare la <strong style="color:var(--fg)">312 producători activi</strong> din Bazar.
+          Listare gratuită, fără comision, mesaje directe. <strong style="color:var(--fg)">Nu mediem tranzacţia</strong> —
+          ne ocupăm doar de descoperire şi reputaţie. Anunţul rămâne activ 60 de zile şi-l poţi reînnoi.
+        </p>
+        <div class="ta-header__steps">
+          <div class="ta-step is-done">
+            <span class="ta-step__num"><b>01</b> <span class="tick">✓</span> identificare</span>
+            <span class="ta-step__label">Ce vinzi</span>
+          </div>
+          <div class="ta-step is-current">
+            <span class="ta-step__num"><b>02</b> în lucru</span>
+            <span class="ta-step__label">Imagini & condiție</span>
+          </div>
+          <div class="ta-step is-todo">
+            <span class="ta-step__num"><b>03</b> următor</span>
+            <span class="ta-step__label">Preţ & livrare</span>
+          </div>
+          <div class="ta-step is-todo">
+            <span class="ta-step__num"><b>04</b> final</span>
+            <span class="ta-step__label">Publică</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN -->
+    <div class="ta-main">
+
+      <!-- ===================== LEFT: form ===================== -->
+      <form id="bza-form" onsubmit="event.preventDefault()">
+
+        <!-- ---------- CE VINZI (identificare + titlu + descriere) ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 01 · Ce vinzi</span>
+              <h2>Identificare & descriere</h2>
+            </div>
+            <div class="ta-sec__hint">
+              <b>Legat</b> de pagina din Tezaur · scoate dacă vrei
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <!-- Link to Tezaur entry (pre-filled state) -->
+            <div class="bz-add-link" id="bz-link-box">
+              <div class="bz-add-link__thumb">
+                <div class="gear-fill" data-gear="digitakt-ii">
+                  <img class="gear-fill__photo" src="https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg" alt="Elektron Digitakt II" onerror="this.remove()" />
+                </div>
+              </div>
+              <div class="bz-add-link__txt">
+                <span class="bz-add-link__k">Conectat la Tezaur</span>
+                <span class="bz-add-link__v">
+                  <a href="#">Elektron · Digitakt II</a>
+                  <span style="color:var(--fg-subtle); font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; margin-left:8px">2024 · Drum machine · Digital</span>
+                </span>
+              </div>
+              <button type="button" class="bz-add-link__cta" id="bz-link-clear">Schimbă</button>
+            </div>
+
+            <p class="bz-note">
+              <b>Nu găseşti piesa?</b> Completează manual mai jos şi cere adăugarea ei în Tezaur — voluntarii o pun pe radar în 1–3 zile.
+            </p>
+
+            <div class="ta-grid">
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-brand">Brand <span class="req">*</span> <span class="hint">186 în Tezaur</span></label>
+                <div class="ta-select ta-select--combo" data-name="brand" data-value="Elektron" id="f-brand">
+                  <div class="ta-select__btn">
+                    <input type="text" class="ta-select__search" placeholder="Caută sau scrie brand nou…" value="Elektron" />
+                    <span class="ta-select__caret-wrap" aria-hidden="true"><svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg></span>
+                  </div>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__group">Branduri populare</div>
+                    <div class="ta-select__opt" data-v="Roland">Roland<span class="ta-select__opt-meta">412 piese</span></div>
+                    <div class="ta-select__opt" data-v="Korg">Korg<span class="ta-select__opt-meta">326</span></div>
+                    <div class="ta-select__opt" data-v="Yamaha">Yamaha<span class="ta-select__opt-meta">198</span></div>
+                    <div class="ta-select__opt" data-v="Moog">Moog<span class="ta-select__opt-meta">184</span></div>
+                    <div class="ta-select__opt" data-v="Behringer">Behringer<span class="ta-select__opt-meta">154</span></div>
+                    <div class="ta-select__opt" data-v="Arturia">Arturia<span class="ta-select__opt-meta">112</span></div>
+                    <div class="ta-select__opt is-selected" data-v="Elektron">Elektron<span class="ta-select__opt-meta">78</span></div>
+                    <div class="ta-select__opt" data-v="Sequential">Sequential<span class="ta-select__opt-meta">96</span></div>
+                    <div class="ta-select__opt" data-v="Novation">Novation<span class="ta-select__opt-meta">86</span></div>
+                    <div class="ta-select__opt" data-v="Waldorf">Waldorf<span class="ta-select__opt-meta">64</span></div>
+                    <div class="ta-select__opt" data-v="Make Noise">Make Noise<span class="ta-select__opt-meta">58</span></div>
+                    <div class="ta-select__opt" data-v="Teenage Engineering">Teenage Engineering<span class="ta-select__opt-meta">42</span></div>
+                    <div class="ta-select__empty">Niciun brand cu acest nume nu e încă în Tezaur.</div>
+                    <div class="ta-select__opt ta-select__opt--add" data-add>Adaugă brand nou</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-model">Model <span class="req">*</span></label>
+                <input id="f-model" type="text" value="Digitakt II" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Categorie <span class="req">*</span></label>
+                <div class="ta-select" data-name="cat" data-value="drum-machine">
+                  <button class="ta-select__btn" type="button" aria-haspopup="listbox">
+                    <span class="ta-select__val">Drum machine</span>
+                    <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                  </button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__group">Sinteză & ritmică</div>
+                    <div class="ta-select__opt" data-v="sintetizator">Sintetizator<span class="ta-select__opt-meta">186</span></div>
+                    <div class="ta-select__opt is-selected" data-v="drum-machine">Drum machine<span class="ta-select__opt-meta">42</span></div>
+                    <div class="ta-select__opt" data-v="groovebox">Groovebox<span class="ta-select__opt-meta">18</span></div>
+                    <div class="ta-select__opt" data-v="sampler">Sampler<span class="ta-select__opt-meta">38</span></div>
+                    <div class="ta-select__opt" data-v="sequencer">Sequencer hardware<span class="ta-select__opt-meta">12</span></div>
+                    <div class="ta-select__opt" data-v="workstation">Workstation<span class="ta-select__opt-meta">22</span></div>
+                    <div class="ta-select__group">Modular & control</div>
+                    <div class="ta-select__opt" data-v="eurorack">Eurorack · modul<span class="ta-select__opt-meta">28</span></div>
+                    <div class="ta-select__opt" data-v="semi-modular">Semi-modular<span class="ta-select__opt-meta">14</span></div>
+                    <div class="ta-select__opt" data-v="controller">Controller MIDI<span class="ta-select__opt-meta">36</span></div>
+                    <div class="ta-select__opt" data-v="interface">Interfaţă audio / MIDI<span class="ta-select__opt-meta">42</span></div>
+                    <div class="ta-select__group">Procesare & efecte</div>
+                    <div class="ta-select__opt" data-v="pedala">Pedală / stompbox<span class="ta-select__opt-meta">76</span></div>
+                    <div class="ta-select__opt" data-v="fx-rack">FX rack / procesor<span class="ta-select__opt-meta">18</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">An fabricaţie <span class="hint">acest exemplar</span></label>
+                <input id="f-year" type="number" value="2024" min="1950" max="2026" />
+              </div>
+
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label" for="f-title">Titlu listing <span class="req">*</span> <span class="hint">max 80 caractere · apare în grid</span></label>
+                <input id="f-title" type="text" maxlength="80" value="Elektron Digitakt II — ca nou, cumpărat 11.2025, garanție activă" />
+              </div>
+
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label" for="f-tag">Subtitlu <span class="hint">o linie · ce-i diferit la el</span></label>
+                <input id="f-tag" type="text" value="Versiunea MKII cu 16 track-uri, dual filtre per voce. Folosit live de 4 ori, restul timpului pe birou." />
+              </div>
+
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label" for="f-desc">Descriere lungă <span class="req">*</span> <span class="hint">800–3 000 caractere · spune motivul vânzării, ce conține, defecte, dacă faci video</span></label>
+                <textarea id="f-desc" rows="10">L-am cumpărat pe 14 noiembrie 2025 de la Thomann, cu chitanță și garanție de 3 ani — garanția e activă până în noiembrie 2028 și e transferabilă pe noul proprietar (am verificat la Elektron support, e ok cu cesiunea).
+
+Folosit în 4 reprize live (la Control, Apollo 111, două festivaluri în Cluj) și restul timpului a stat pe birou ca aux drum machine lângă Octatrack. Niciodată în turneu cu maşină rece-cald, niciodată afară pe ploaie. Are toate updateurile de OS la zi (1.31 din ianuarie 2026).
+
+Vine cu **cutia originală**, sursa Elektron PSU-3 (cu adaptor EU), manual print, sticker Elektron şi cardul de garanție. Adaug și un Decksaver dedicat (cumpărat separat, costă 180 RON nou) care nu îl mai folosesc.
+
+Motivul vânzării: schimb la un Syntakt mk2 — am nevoie de partea analog pentru proiectul nou, Digitakt rămâne minunat dar mi-e redundant lângă MPC Live II.
+
+Pot face video scurt cu pornit, sequencer rulând și export prin USB direct în Ableton — scrie-mi pe mesaj şi-l trimit personalizat.</textarea>
+                <div class="ta-field__counter" id="desc-counter"><b id="desc-num">1 142</b> / 3 000 caractere</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- IMAGINI ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 02 · Galerie</span>
+              <h2>Fotografii ale exemplarului</h2>
+            </div>
+            <div class="ta-sec__hint">
+              <b>3 / 12</b> încărcate · trage să resortezi · prima e cover
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <div class="ta-drop" id="ta-drop" tabindex="0">
+              <div class="ta-drop__icon">
+                <svg width="28" height="28"><use href="#i-upload"/></svg>
+              </div>
+              <div class="ta-drop__primary">
+                Trage poze aici sau <u>alege de pe disc</u>
+              </div>
+              <div class="ta-drop__sub">
+                PNG / JPG / WEBP · max <b>8 MB</b> per poză · max <b>12</b> poze per anunţ<br/>
+                <b>NU</b> folosi poze de pe site-ul producătorului — listingurile cu poze stock se ascund automat
+              </div>
+            </div>
+
+            <div class="ta-imgs" id="ta-imgs">
+              <div class="ta-img" draggable="true" data-i="0">
+                <img class="ta-img__photo" src="https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg" alt="Digitakt II · perspectivă" />
+                <span class="ta-img__num">01</span>
+                <span class="ta-img__cover">cover</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Şterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-img" draggable="true" data-i="1">
+                <img class="ta-img__photo" src="https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg" alt="Digitakt II · panou" />
+                <span class="ta-img__num">02</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Şterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <div class="ta-img" draggable="true" data-i="2">
+                <img class="ta-img__photo" src="https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg" alt="Digitakt II · spate" />
+                <span class="ta-img__num">03</span>
+                <span class="ta-img__handle"><svg width="11" height="11"><use href="#i-drag"/></svg> drag</span>
+                <button class="ta-img__del" type="button" aria-label="Şterge"><svg><use href="#i-x"/></svg></button>
+              </div>
+              <button class="ta-img ta-img--add" type="button" aria-label="Adaugă mai multe">+</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- CONDIŢIE ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 02 · Starea exemplarului</span>
+              <h2>Condiţie</h2>
+            </div>
+            <div class="ta-sec__hint">
+              Fii corect — review-urile celorlalți depind de asta
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <p class="ta-sub-h" style="margin-top:0">Starea generală</p>
+            <div class="bz-cond" role="radiogroup" aria-label="Condiţie">
+              <input type="radio" name="cond" id="c-new" />
+              <label for="c-new"><span class="num">10/10</span><span class="ttl">Ca nou</span><span class="sub">cumpărat &lt; 6 luni</span></label>
+
+              <input type="radio" name="cond" id="c-vgood" checked />
+              <label for="c-vgood"><span class="num">9/10</span><span class="ttl">Foarte bun</span><span class="sub">folosit ușor, fără urme</span></label>
+
+              <input type="radio" name="cond" id="c-good" />
+              <label for="c-good"><span class="num">7/10</span><span class="ttl">Bun</span><span class="sub">urme minore de uz</span></label>
+
+              <input type="radio" name="cond" id="c-used" />
+              <label for="c-used"><span class="num">5/10</span><span class="ttl">Folosit</span><span class="sub">urme vizibile, funcţional</span></label>
+
+              <input type="radio" name="cond" id="c-parts" />
+              <label for="c-parts"><span class="num">—</span><span class="ttl">Piese</span><span class="sub">defect / pentru reparat</span></label>
+            </div>
+
+            <p class="ta-sub-h" style="margin-top:24px">Defecte cunoscute <span style="text-transform:none; letter-spacing:0; font-family:var(--font-ui); font-size:11px; color:var(--fg-subtle); margin-left:8px;">opţional — dar declararea creşte încrederea</span></p>
+            <div class="ta-field">
+              <textarea id="f-defects" rows="3" placeholder="Ex. mic spaţiu între encoder 3 şi panou. O zgârietură de 5 mm pe colţul stâng (vizibil în poza 02)." style="min-height:80px">Niciun defect cunoscut. Cosmetic 10/10, electronic 10/10. (Vezi pozele 02 şi 03 — colţuri şi sticker serie.)</textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- PREŢ & TRANZACŢIE ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Preţ</span>
+              <h2>Cât ceri</h2>
+            </div>
+            <div class="ta-sec__hint">
+              Estimare automată: <b>3 600–4 200 RON</b> · 8 vânzări similare în 12 luni
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <p class="ta-sub-h" style="margin-top:0">Preţ cerut <span style="text-transform:none; letter-spacing:0; font-family:var(--font-ui); font-size:11px; color:var(--fg-subtle); margin-left:8px;">poţi alege RON sau EUR · vom afişa ambele</span></p>
+            <div class="bz-price">
+              <input id="f-price" type="number" min="0" step="50" value="3800" />
+              <div class="bz-price__cur">
+                <span><b>RON</b> · LEI</span>
+              </div>
+              <div class="bz-price__conv">
+                ≈ <b id="f-price-eur">765 €</b> · curs BNR 4.97
+              </div>
+            </div>
+
+            <div class="ta-grid ta-grid--3" style="margin-top:18px">
+              <div class="ta-field">
+                <label class="ta-field__label">Negociabil?</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" id="f-negotiable" checked /><span class="ta-toggle__sw"></span>
+                  <span>Accept oferte</span>
+                </label>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Preţ minim acceptat <span class="hint">privat · nu se afişează</span></label>
+                <div class="ta-field__input-row">
+                  <input type="number" value="3500" />
+                  <span class="unit">RON</span>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Refuz oferte sub</label>
+                <div class="ta-field__input-row">
+                  <input type="number" value="3200" />
+                  <span class="unit">RON · auto-respinge</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="ta-sub-h" style="margin-top:24px">Tip tranzacţie <span style="text-transform:none; letter-spacing:0; font-family:var(--font-ui); font-size:11px; color:var(--fg-subtle); margin-left:8px;">apare ca filtru în Bazar</span></p>
+            <div class="bz-deal" role="radiogroup" aria-label="Tranzacţie">
+              <input type="radio" name="deal" id="d-vand" checked />
+              <label for="d-vand">
+                <span class="ic">→ RON</span>
+                <span class="ttl">Vând</span>
+                <span class="sub">Schimb pe bani.<br/>Tranzacţia standard.</span>
+              </label>
+
+              <input type="radio" name="deal" id="d-schimb" />
+              <label for="d-schimb">
+                <span class="ic">↔ gear</span>
+                <span class="ttl">Schimb</span>
+                <span class="sub">Caut altă piesă în loc.<br/>Niciun ban nu trece.</span>
+              </label>
+
+              <input type="radio" name="deal" id="d-mixt" />
+              <label for="d-mixt">
+                <span class="ic">→ RON · ↔ gear</span>
+                <span class="ttl">Vând sau schimb</span>
+                <span class="sub">Deschis la ambele,<br/>cu ofertă suplimentară în bani.</span>
+              </label>
+            </div>
+
+            <!-- Swap-wanted (auto-show when deal != vand) -->
+            <div class="bz-swap-wanted" style="margin-top:18px">
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">Ce caut la schimb <span class="hint">listează modele / branduri concrete</span></label>
+                <textarea id="f-swap" rows="3" placeholder="Ex. Elektron Syntakt mk2, Roland MC-707, sau orice 6-voci analog cu MIDI. Nu mă interesează plugin-uri sau soft.">Elektron Syntakt mk2 sau MC-707. Aş accepta și un Take 5 cu adaos.</textarea>
+              </div>
+            </div>
+
+            <p class="ta-sub-h" style="margin-top:24px">Plată acceptată</p>
+            <div class="bz-payment">
+              <input type="checkbox" id="p-cash" checked /><label for="p-cash">Cash la ridicare</label>
+              <input type="checkbox" id="p-op" checked /><label for="p-op">Ordin de plată (OP)</label>
+              <input type="checkbox" id="p-revolut" checked /><label for="p-revolut">Revolut</label>
+              <input type="checkbox" id="p-card" /><label for="p-card">Card · POS mobil</label>
+              <input type="checkbox" id="p-paypal" /><label for="p-paypal">PayPal · doar &quot;Goods&quot;</label>
+              <input type="checkbox" id="p-crypto" /><label for="p-crypto">Crypto · BTC/ETH</label>
+              <input type="checkbox" id="p-rate" /><label for="p-rate">În rate · max 3 luni</label>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- LIVRARE & LOCAŢIE ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Livrare</span>
+              <h2>Unde & cum ajunge</h2>
+            </div>
+            <div class="ta-sec__hint">
+              Locaţia apare publică doar la nivel de <b>oraş + sector</b>
+            </div>
+          </header>
+          <div class="ta-sec__body">
+
+            <div class="bz-deliv" role="radiogroup" aria-label="Livrare">
+              <input type="radio" name="deliv" id="dl-pickup" />
+              <label for="dl-pickup">
+                <span class="ttl">Doar ridicare</span>
+                <span class="sub">Cumpărătorul vine la mine. Cel mai sigur pentru gear scump.</span>
+              </label>
+
+              <input type="radio" name="deliv" id="dl-ship" />
+              <label for="dl-ship">
+                <span class="ttl">Doar livrare</span>
+                <span class="sub">Eu îl ambalez şi-l expediez (Fan / DPD / Sameday).</span>
+              </label>
+
+              <input type="radio" name="deliv" id="dl-both" checked />
+              <label for="dl-both">
+                <span class="ttl">Ambele</span>
+                <span class="sub">Decide cumpărătorul — ridicare sau curier.</span>
+              </label>
+            </div>
+
+            <p class="ta-sub-h">Locaţie</p>
+            <div class="ta-grid ta-grid--3" style="margin-bottom:18px">
+              <div class="ta-field">
+                <label class="ta-field__label">Oraş <span class="req">*</span></label>
+                <div class="ta-select" data-name="city" data-value="bucuresti">
+                  <button class="ta-select__btn" type="button">
+                    <span class="ta-select__val">București</span>
+                    <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                  </button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="bucuresti">București<span class="ta-select__opt-meta">98</span></div>
+                    <div class="ta-select__opt" data-v="cluj">Cluj-Napoca<span class="ta-select__opt-meta">48</span></div>
+                    <div class="ta-select__opt" data-v="tm">Timișoara<span class="ta-select__opt-meta">34</span></div>
+                    <div class="ta-select__opt" data-v="is">Iași<span class="ta-select__opt-meta">28</span></div>
+                    <div class="ta-select__opt" data-v="bv">Brașov<span class="ta-select__opt-meta">22</span></div>
+                    <div class="ta-select__opt" data-v="sb">Sibiu<span class="ta-select__opt-meta">14</span></div>
+                    <div class="ta-select__opt" data-v="ct">Constanța<span class="ta-select__opt-meta">12</span></div>
+                    <div class="ta-select__opt" data-v="cv">Craiova<span class="ta-select__opt-meta">8</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Sector / cartier</label>
+                <input type="text" value="Sector 3 · Vitan" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Punct de întâlnire <span class="hint">vizibil doar la confirmare</span></label>
+                <input type="text" value="Metrou Mihai Bravu sau acasă" />
+              </div>
+            </div>
+
+            <p class="ta-sub-h">Cost livrare</p>
+            <div class="ta-grid ta-grid--3">
+              <div class="ta-field">
+                <label class="ta-field__label">Cine plăteşte livrarea</label>
+                <div class="ta-select" data-name="ship-pay" data-value="buyer">
+                  <button class="ta-select__btn" type="button">
+                    <span class="ta-select__val">Cumpărătorul plăteşte</span>
+                    <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                  </button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt is-selected" data-v="buyer">Cumpărătorul plăteşte</div>
+                    <div class="ta-select__opt" data-v="seller">Eu plătesc (livrare gratuită)</div>
+                    <div class="ta-select__opt" data-v="split">50/50 · împărţit</div>
+                    <div class="ta-select__opt" data-v="fixed">Sumă fixă (vezi mai jos)</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Estimare cost</label>
+                <div class="ta-field__input-row">
+                  <input type="number" value="45" />
+                  <span class="unit">RON · curier asigurat</span>
+                </div>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Doar în România?</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" checked /><span class="ta-toggle__sw"></span>
+                  <span>Da · doar livrare internă</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ---------- CONTACT ---------- -->
+        <section class="ta-sec">
+          <header class="ta-sec__head">
+            <div>
+              <span class="ta-sec__kicker">Pasul 03 · Contact</span>
+              <h2>Cum te contactează</h2>
+            </div>
+            <div class="ta-sec__hint">
+              Mesageria Sintezaur e <b>mereu activă</b> · restul e opţional
+            </div>
+          </header>
+          <div class="ta-sec__body">
+            <div class="ta-grid ta-grid--3">
+              <div class="ta-field">
+                <label class="ta-field__label">Mesaje pe Sintezaur</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" checked disabled /><span class="ta-toggle__sw"></span>
+                  <span>Activ · obligatoriu</span>
+                </label>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Arată număr telefon</label>
+                <label class="ta-toggle" style="margin-top:4px">
+                  <input type="checkbox" /><span class="ta-toggle__sw"></span>
+                  <span>Doar după mesaj</span>
+                </label>
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label">Timp răspuns aşteptat</label>
+                <div class="ta-select" data-name="resp" data-value="2-4h">
+                  <button class="ta-select__btn" type="button">
+                    <span class="ta-select__val">2–4 ore</span>
+                    <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                  </button>
+                  <div class="ta-select__menu" role="listbox">
+                    <div class="ta-select__opt" data-v="1h">Sub o oră</div>
+                    <div class="ta-select__opt is-selected" data-v="2-4h">2–4 ore</div>
+                    <div class="ta-select__opt" data-v="day">În aceeaşi zi</div>
+                    <div class="ta-select__opt" data-v="2day">1–2 zile</div>
+                    <div class="ta-select__opt" data-v="slow">Mai lent · scriu seara</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <!-- ===================== RIGHT: sticky sidebar ===================== -->
+      <aside class="ta-side">
+
+        <!-- LIVE PREVIEW — uses real .listing card -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">
+            Aşa apare în grid
+            <span style="margin-left:auto; color:var(--fg-subtle); font-size:9px;">live</span>
+          </header>
+          <div class="ta-side__body">
+            <div class="bz-prev-card listing" id="bz-prev-card">
+              <div class="listing__media">
+                <div class="gear-fill" data-gear="digitakt-ii">
+                  <img class="gear-fill__photo" id="prev-img" src="https://cdn.mos.cms.futurecdn.net/An9nsabBDnFG4k9HprgXXm.jpg" alt="" onerror="this.remove()" />
+                </div>
+                <span class="listing__chip" id="prev-cond" data-cond="very_good">Foarte bun</span>
+                <button class="listing__heart" type="button" aria-label="Salvează"><svg><use href="#i-heart"/></svg></button>
+              </div>
+              <div class="listing__body">
+                <div class="listing__brand">// <span id="prev-brand">Elektron</span></div>
+                <div class="listing__title" id="prev-model">Digitakt II</div>
+                <div class="listing__row">
+                  <div class="listing__price"><span id="prev-price">3 800</span><small><span id="prev-cur">RON</span></small></div>
+                  <div class="listing__loc">
+                    <svg width="11" height="11"><use href="#i-pin"/></svg>
+                    <span id="prev-loc">București</span>
+                  </div>
+                </div>
+                <div class="listing__seller">
+                  <span class="avatar" style="width:22px;height:22px;font-size:10px">TI</span>
+                  <span><span class="star">★</span> 4.8</span>
+                  <span style="opacity:.5">·</span>
+                  <span>12 vânzări</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PRICE INTELLIGENCE -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Estimare preţ</header>
+          <div class="ta-side__body">
+            <div class="bz-side-est">
+              <div class="bz-side-est__cell">
+                <span class="bz-side-est__k">Mediu RO</span>
+                <span class="bz-side-est__v">3 900<small>RON</small></span>
+                <span class="bz-side-est__sub">8 vânzări · 12 luni</span>
+              </div>
+              <div class="bz-side-est__cell">
+                <span class="bz-side-est__k">Preţul tău</span>
+                <span class="bz-side-est__v" style="color:var(--accent)">3 800<small>RON</small></span>
+                <span class="bz-side-est__sub up">↓ 2.6% sub mediu</span>
+              </div>
+            </div>
+            <p style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.04em; color:var(--fg-subtle); margin:0; line-height:1.55;">
+              Estimare bazată pe vânzări încheiate în Bazar + Reverb (RO/EU) în ultimele 12 luni pentru acelaşi model în condiţie similară.
+            </p>
+          </div>
+        </section>
+
+        <!-- COMPLETION -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">
+            Completare
+            <span class="ta-status">
+              <span class="ta-status__dot"></span> draft
+            </span>
+          </header>
+          <div class="ta-side__body">
+            <div class="ta-meter" style="--p: 88%">
+              <div class="ta-meter__top">
+                <span>Progres</span>
+                <span><b>88</b>%</span>
+              </div>
+              <div class="ta-meter__bar"></div>
+            </div>
+
+            <div class="ta-checklist">
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Brand & model</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Categorie & an</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>≥ 3 fotografii proprii</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Titlu listing</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Descriere (1 142 caract.)</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Condiţie selectată</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Preţ + tranzacţie</span></div>
+              <div class="ta-checklist__item is-done"><span class="mark">✓</span><span>Locaţie + livrare</span></div>
+              <div class="ta-checklist__item"><span class="mark">·</span><span>Confirmare nr. telefon</span></div>
+              <div class="ta-checklist__item"><span class="mark">·</span><span>Citire termeni vânzător</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTAs -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Acţiuni</header>
+          <div class="ta-side__body">
+            <div class="ta-cta-row">
+              <button class="ta-cta ta-cta--primary" type="button">Publică listing →</button>
+              <button class="ta-cta ta-cta--ghost" type="button">Salvează ca draft</button>
+              <button class="ta-cta ta-cta--ghost" type="button">Previzualizează ca vizitator</button>
+              <button class="ta-cta ta-cta--danger-text" type="button">Renunţă & întoarce-te</button>
+            </div>
+            <p style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-subtle); margin:8px 0 0; line-height:1.55;">
+              * Listingul apare imediat în Bazar — fără moderare. Vânzătorii cu ≥ 3 review-uri ies fără verificare manuală.
+            </p>
+          </div>
+        </section>
+
+        <!-- SAFETY / TRUST -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Reguli & siguranţă</header>
+          <div class="ta-side__body">
+            <div class="bz-trust">
+              <div class="bz-trust__row">
+                <span class="ic">1</span>
+                <span><strong>Poze proprii, nu stock.</strong> Listingurile cu poze de pe site-ul producătorului se ascund automat de algoritm.</span>
+              </div>
+              <div class="bz-trust__row">
+                <span class="ic">2</span>
+                <span><strong>Preţuri în RON sau EUR</strong>, nu USD. Curs BNR la zi pentru afişarea dublă.</span>
+              </div>
+              <div class="bz-trust__row">
+                <span class="ic">3</span>
+                <span><strong>Sintezaur nu mediază plata.</strong> Cumpărătorul vede instrumentul la tine sau primeşte video înainte de transfer.</span>
+              </div>
+              <hr/>
+              <div class="bz-trust__row">
+                <span class="ic">✦</span>
+                <span><strong>Listingul rămâne activ 60 de zile.</strong> Notificare cu 7 zile înainte de expirare — reînnoieşti în 1 click.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TIPS -->
+        <section class="ta-side__block">
+          <header class="ta-side__head">Sfaturi rapide</header>
+          <div class="ta-side__body">
+            <div class="ta-tips">
+              <div class="ta-tips__item">
+                <span class="n">01</span>
+                <span><strong>Spune motivul vânzării.</strong> Cumpărătorii încrederea o iau din context, nu din specs. „Trec la X" funcţionează mai bine ca „nu-l mai folosesc".</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">02</span>
+                <span><strong>Cinci poze minim.</strong> Front, top, spate, seria, defectele dacă există. Lumină difuză, fundal neutru, fără filtre.</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">03</span>
+                <span><strong>Preţ în intervalul vânzărilor recente.</strong> Sub mediu &gt; 10% atrage suspiciune. Peste mediu &gt; 15% se vinde greu.</span>
+              </div>
+              <div class="ta-tips__item">
+                <span class="n">04</span>
+                <span><strong>Oferă video la cerere.</strong> Un clip de 30s cu instrumentul pornit triplează rata de mesaje în primele 48h.</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista şi forumul producţiei muzicale în limba română.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidenţialitate</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la Bucureşti</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- THEME ----------
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // ---------- INJECT GEAR SVG ----------
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // ---------- LIVE PREVIEW SYNC ----------
+    const brand = document.getElementById('f-brand');
+    const model = document.getElementById('f-model');
+    const price = document.getElementById('f-price');
+    const priceEur = document.getElementById('f-price-eur');
+    const prevB = document.getElementById('prev-brand');
+    const prevM = document.getElementById('prev-model');
+    const prevP = document.getElementById('prev-price');
+    const prevCond = document.getElementById('prev-cond');
+
+    function fmtN(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+    brand.addEventListener('ta-select-change', e => { prevB.textContent = e.detail.value; });
+    model.addEventListener('input', () => prevM.textContent = model.value || '—');
+
+    function updatePrice() {
+      const n = parseInt(price.value || '0', 10);
+      prevP.textContent = fmtN(n);
+      priceEur.textContent = Math.round(n / 4.97) + ' €';
+    }
+    price.addEventListener('input', updatePrice);
+
+    // Condition radio → preview chip
+    const CONDS = {
+      'c-new':   { label: 'Ca nou',     data: 'nou' },
+      'c-vgood': { label: 'Foarte bun', data: 'very_good' },
+      'c-good':  { label: 'Bun',        data: 'very_good' },
+      'c-used':  { label: 'Folosit',    data: 'very_good' },
+      'c-parts': { label: 'Pentru piese', data: 'very_good' }
+    };
+    document.querySelectorAll('input[name="cond"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const conf = CONDS[r.id];
+        if (conf) {
+          prevCond.textContent = conf.label;
+          prevCond.setAttribute('data-cond', conf.data);
+        }
+      });
+    });
+
+    // Deal-type → toggle swap-wanted block
+    const DEAL_MAP = { 'd-vand': 'vand', 'd-schimb': 'schimb', 'd-mixt': 'vand-schimb' };
+    document.querySelectorAll('input[name="deal"]').forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.checked) document.body.setAttribute('data-deal', DEAL_MAP[r.id] || 'vand');
+      });
+    });
+
+    // City select → preview location
+    const citySel = document.querySelector('[data-name="city"]');
+    if (citySel) {
+      citySel.addEventListener('ta-select-change', e => {
+        document.getElementById('prev-loc').textContent = e.detail.label;
+      });
+    }
+
+    // ---------- TEXTAREA COUNTER ----------
+    const desc = document.getElementById('f-desc');
+    const descNum = document.getElementById('desc-num');
+    desc.addEventListener('input', () => descNum.textContent = fmtN(desc.value.length));
+
+    // ---------- DRAG TO REORDER IMAGES ----------
+    const imgs = document.getElementById('ta-imgs');
+    let dragEl = null;
+    imgs.addEventListener('dragstart', e => {
+      const tile = e.target.closest('.ta-img');
+      if (!tile || tile.classList.contains('ta-img--add')) return;
+      dragEl = tile;
+      tile.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      try { e.dataTransfer.setData('text/plain', ''); } catch (_) {}
+    });
+    imgs.addEventListener('dragend', () => {
+      if (dragEl) dragEl.classList.remove('is-dragging');
+      imgs.querySelectorAll('.is-over').forEach(t => t.classList.remove('is-over'));
+      dragEl = null;
+      renumber();
+    });
+    imgs.addEventListener('dragover', e => {
+      e.preventDefault();
+      const over = e.target.closest('.ta-img');
+      if (!over || over === dragEl || over.classList.contains('ta-img--add') || !dragEl) return;
+      imgs.querySelectorAll('.is-over').forEach(t => t.classList.remove('is-over'));
+      over.classList.add('is-over');
+      const r = over.getBoundingClientRect();
+      const after = (e.clientX - r.left) > r.width / 2;
+      if (after) over.after(dragEl);
+      else over.before(dragEl);
+    });
+    imgs.addEventListener('drop', e => e.preventDefault());
+
+    function renumber() {
+      const tiles = imgs.querySelectorAll('.ta-img:not(.ta-img--add)');
+      tiles.forEach((t, i) => {
+        let num = t.querySelector('.ta-img__num');
+        if (num) num.textContent = String(i + 1).padStart(2, '0');
+        t.querySelectorAll('.ta-img__cover').forEach(c => c.remove());
+        if (i === 0) {
+          const cov = document.createElement('span');
+          cov.className = 'ta-img__cover';
+          cov.textContent = 'cover';
+          t.appendChild(cov);
+        }
+      });
+    }
+
+    imgs.addEventListener('click', e => {
+      const del = e.target.closest('.ta-img__del');
+      if (del) {
+        del.closest('.ta-img').remove();
+        renumber();
+      }
+    });
+
+    // ---------- DROPZONE FEEDBACK ----------
+    const drop = document.getElementById('ta-drop');
+    ;['dragenter', 'dragover'].forEach(ev =>
+      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('is-hover'); })
+    );
+    ;['dragleave', 'drop'].forEach(ev =>
+      drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('is-hover'); })
+    );
+
+    // ---------- LINK-TO-TEZAUR CLEAR ----------
+    const linkClear = document.getElementById('bz-link-clear');
+    if (linkClear) {
+      linkClear.addEventListener('click', () => {
+        const box = document.getElementById('bz-link-box');
+        if (box) box.style.display = 'none';
+      });
+    }
+
+    // ---------- INCLUDED-ITEMS ADD ----------
+    const inclWrap = document.getElementById('bz-incl');
+    const inclAdd = document.querySelector('.bz-incl-add');
+    if (inclAdd) {
+      inclAdd.querySelector('button').addEventListener('click', () => {
+        const inp = inclAdd.querySelector('input');
+        const v = inp.value.trim();
+        if (!v) return;
+        const id = 'i-custom-' + Date.now();
+        const c = document.createElement('input');
+        c.type = 'checkbox'; c.id = id; c.checked = true;
+        const l = document.createElement('label');
+        l.setAttribute('for', id);
+        l.textContent = v;
+        inclWrap.appendChild(c);
+        inclWrap.appendChild(l);
+        inp.value = '';
+      });
+    }
+
+    // ---------- CUSTOM DROPDOWNS (from Tezaur - Adaugă) ----------
+    function initSelect(el) {
+      const btn = el.querySelector('.ta-select__btn');
+      const menu = el.querySelector('.ta-select__menu');
+      const valDisplay = el.querySelector('.ta-select__val');
+      const search = el.querySelector('.ta-select__search');
+      const caretWrap = el.querySelector('.ta-select__caret-wrap');
+      const isCombo = el.classList.contains('ta-select--combo');
+
+      function openMenu() {
+        document.querySelectorAll('.ta-select.is-open').forEach(o => { if (o !== el) o.classList.remove('is-open'); });
+        el.classList.add('is-open');
+        if (search) requestAnimationFrame(() => { search.focus(); search.select(); });
+      }
+      function closeMenu() { el.classList.remove('is-open'); el.classList.remove('is-empty'); }
+      function toggleMenu() { el.classList.contains('is-open') ? closeMenu() : openMenu(); }
+
+      function setValue(value, label, opt) {
+        el.dataset.value = value;
+        if (valDisplay) valDisplay.textContent = label;
+        if (search) search.value = label;
+        el.querySelectorAll('.ta-select__opt.is-selected').forEach(o => o.classList.remove('is-selected'));
+        if (opt) opt.classList.add('is-selected');
+        el.dispatchEvent(new CustomEvent('ta-select-change', { detail: { value, label }, bubbles: true }));
+      }
+
+      if (btn && !isCombo) {
+        btn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+      }
+      if (isCombo) {
+        if (caretWrap) caretWrap.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+        if (search) {
+          search.addEventListener('focus', () => openMenu());
+          search.addEventListener('click', e => { e.stopPropagation(); openMenu(); });
+          search.addEventListener('input', () => {
+            const q = search.value.toLowerCase().trim();
+            let visible = 0;
+            el.querySelectorAll('.ta-select__opt').forEach(o => {
+              if (o.classList.contains('ta-select__opt--add')) return;
+              const txt = (o.firstChild && o.firstChild.textContent || o.textContent).toLowerCase();
+              const match = !q || txt.includes(q);
+              o.classList.toggle('is-hidden', !match);
+              if (match) visible++;
+            });
+            el.classList.toggle('is-empty', visible === 0);
+            const addOpt = el.querySelector('.ta-select__opt--add');
+            if (addOpt) {
+              addOpt.textContent = visible === 0 && search.value
+                ? 'Adaugă „' + search.value + '" ca brand nou'
+                : 'Adaugă brand nou';
+            }
+          });
+        }
+      }
+
+      menu.addEventListener('click', e => {
+        e.stopPropagation();
+        const opt = e.target.closest('.ta-select__opt');
+        if (!opt) return;
+        if (opt.classList.contains('ta-select__opt--add')) {
+          const newVal = (search && search.value || '').trim();
+          if (!newVal) { if (search) search.focus(); return; }
+          setValue(newVal, newVal, null);
+          closeMenu();
+          return;
+        }
+        const v = opt.dataset.v || opt.textContent.trim();
+        const meta = opt.querySelector('.ta-select__opt-meta');
+        const label = meta
+          ? opt.textContent.replace(meta.textContent, '').trim()
+          : opt.textContent.trim();
+        setValue(v, label, opt);
+        closeMenu();
+      });
+    }
+
+    document.querySelectorAll('.ta-select').forEach(initSelect);
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.ta-select')) {
+        document.querySelectorAll('.ta-select.is-open').forEach(s => s.classList.remove('is-open'));
+      }
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.ta-select.is-open').forEach(s => s.classList.remove('is-open'));
+      }
+    });
+  </script>
+</body>
+</html>

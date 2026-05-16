@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contribuții Tezaur — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+
+  <style>
+  /* ============================================================
+     Account-page common (page head, tabs, avatar drop) — copied
+     from Cont - Setari so this page stands on its own.
+     ============================================================ */
+
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute; top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    line-height: 16px; text-align: center; border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] {
+    font-family: var(--font-mono); font-weight: 700;
+    letter-spacing: 0.02em; border-radius: 999px;
+  }
+
+  .avatar-menu { position: relative; }
+  .avatar-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 6px 2px 2px;
+    border: 1px solid transparent; border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+
+  .avatar-drop {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0,0,0,0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60; padding: 6px;
+    transform-origin: top right;
+    animation: avatar-drop-in 0.16s ease;
+  }
+  @keyframes avatar-drop-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  [data-theme="light"] .avatar-drop { box-shadow: 0 18px 48px -12px rgba(60,50,20,0.18); }
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px; margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line); background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name { font-weight: 600; font-size: 14px; color: var(--fg); }
+  .avatar-drop__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); margin-top: 3px; }
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; font-size: 13px; color: var(--fg);
+    text-align: left; border-radius: 2px;
+    background: transparent; border: 0; cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-active { background: var(--bg-elev); color: var(--fg); }
+  .avatar-drop__item.is-active svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px; background: var(--bg-card-2);
+    border: 1px solid var(--line); color: var(--fg-muted); border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* page head */
+  .page-head { padding: 56px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+  .page-head .block__sub {
+    display: block;
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .page-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(48px, 7vw, 88px); line-height: 0.92;
+    letter-spacing: 0.01em; margin: 0 0 12px;
+    text-transform: uppercase;
+  }
+  .page-title .dot { color: var(--accent); }
+  .page-lede { margin: 0; max-width: 64ch; font-size: 17px; color: var(--fg-muted); }
+  .page-head__row { display: flex; align-items: end; gap: 36px; justify-content: space-between; flex-wrap: wrap; }
+  .page-head__cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 18px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid var(--accent);
+    transition: background 0.15s, transform 0.15s;
+  }
+  .page-head__cta:hover { background: var(--accent-2); transform: translateY(-1px); }
+  .page-head__cta .plus { font-size: 16px; line-height: 1; }
+
+  /* tabs */
+  .tabs-row {
+    display: flex; gap: 2px;
+    border-bottom: 1px solid var(--line);
+    margin: 0 0 28px; overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs-row::-webkit-scrollbar { display: none; }
+  .tab {
+    flex-shrink: 0; padding: 14px 18px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted); background: transparent;
+    border: 0; border-bottom: 2px solid transparent;
+    cursor: pointer; position: relative;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--fg); }
+  .tab.is-active { color: var(--fg); border-bottom-color: var(--accent); }
+  .tab__count {
+    display: inline-block; margin-left: 6px;
+    padding: 1px 6px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 999px; font-size: 10px; color: var(--fg-muted);
+  }
+  .tab.is-active .tab__count { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .tab__sub {
+    display: block; font-family: var(--font-mono);
+    font-size: 9px; letter-spacing: 0.10em;
+    color: var(--fg-subtle); margin-top: 3px;
+    text-transform: none; font-weight: 400;
+  }
+  .tab.is-active .tab__sub { color: var(--fg-muted); }
+  .tab-panel[hidden] { display: none; }
+
+  /* ============================================================
+     CONTRIBUTII MELE — summary strip
+     ============================================================ */
+  .cn-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    margin-bottom: 22px;
+  }
+  .cn-strip__cell {
+    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+    border-right: 1px dashed var(--line);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .cn-strip__cell:last-child { border-right: 0; }
+  .cn-strip__cell:hover { background: var(--bg-elev); }
+  .cn-strip__cell.is-active { background: var(--bg-elev); }
+  .cn-strip__cell.is-active::before {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 2px; background: var(--accent);
+  }
+  .cn-strip__k {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .cn-strip__v {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 30px; line-height: 1; letter-spacing: 0.005em;
+    color: var(--fg);
+  }
+  .cn-strip__v.up { color: oklch(0.78 0.16 145); }
+  .cn-strip__v.warn { color: var(--accent); }
+  .cn-strip__v.bad { color: oklch(0.72 0.18 28); }
+  .cn-strip__v.muted { color: var(--fg-muted); }
+  .cn-strip__sub { font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle); letter-spacing: 0.04em; }
+
+  /* toolbar (search + filters + view) */
+  .cn-toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: stretch;
+  }
+  .cn-search {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 14px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    transition: border-color 0.12s;
+  }
+  .cn-search:focus-within { border-color: var(--accent); }
+  .cn-search svg { width: 14px; height: 14px; color: var(--fg-muted); flex-shrink: 0; }
+  .cn-search input {
+    flex: 1; border: 0; background: transparent;
+    padding: 11px 0;
+    font-size: 14px; color: var(--fg);
+    outline: none;
+  }
+  .cn-search input::placeholder { color: var(--fg-subtle); }
+  .cn-search kbd {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px; color: var(--fg-muted);
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 2px;
+  }
+  .cn-sel {
+    position: relative;
+    display: inline-flex;
+    background: var(--bg); border: 1px solid var(--line-strong);
+  }
+  .cn-sel select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0; outline: none;
+    padding: 11px 36px 11px 14px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+    color: var(--fg); cursor: pointer;
+    min-width: 140px;
+  }
+  .cn-sel::after {
+    content: "▾"; position: absolute; right: 12px;
+    top: 50%; transform: translateY(-50%);
+    color: var(--fg-muted); pointer-events: none; font-size: 10px;
+  }
+  .cn-sel__label {
+    align-self: center; padding: 0 0 0 12px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-subtle); border-right: 1px dashed var(--line);
+    padding-right: 10px;
+  }
+
+  /* table */
+  .cn-tbl-wrap {
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    overflow-x: auto;
+  }
+  .cn-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cn-tbl thead th {
+    text-align: left;
+    padding: 11px 14px;
+    font-family: var(--font-mono); font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.10em;
+    color: var(--fg-muted); font-weight: 600;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+    white-space: nowrap;
+  }
+  .cn-tbl thead th.num { text-align: right; }
+  .cn-tbl thead th.is-sortable { cursor: pointer; user-select: none; }
+  .cn-tbl thead th.is-sortable:hover { color: var(--fg); }
+  .cn-tbl thead th.is-sorted { color: var(--accent); }
+  .cn-tbl thead th .sort { margin-left: 6px; opacity: 0.6; }
+  .cn-tbl tbody tr {
+    border-bottom: 1px solid var(--line);
+    transition: background 0.12s;
+  }
+  .cn-tbl tbody tr:hover { background: var(--bg-elev); }
+  .cn-tbl tbody tr:last-child { border-bottom: 0; }
+  .cn-tbl td { padding: 12px 14px; vertical-align: middle; }
+  .cn-tbl td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .cn-tbl td.t-meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+
+  .cn-gear {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .cn-gear__thumb {
+    position: relative;
+    width: 56px; height: 42px;
+    border: 1px solid var(--line);
+    background: var(--bg-card-2);
+    flex-shrink: 0; overflow: hidden;
+  }
+  .cn-gear__thumb .gear-fill { padding: 10%; }
+  .cn-gear__txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .cn-gear__brand {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.04em;
+  }
+  .cn-gear__brand::before { content: "// "; color: var(--accent); }
+  .cn-gear__model {
+    font-weight: 600; color: var(--fg);
+    font-size: 14px; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 28ch;
+  }
+  .cn-gear__model a { color: inherit; }
+  .cn-gear__model a:hover { color: var(--accent); }
+
+  /* type chips */
+  .cn-type {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .cn-type::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--fg-subtle);
+    display: block; flex-shrink: 0;
+  }
+  .cn-type[data-t="new"]::before { background: var(--accent); }
+  .cn-type[data-t="new"] { color: var(--fg); border-color: var(--accent); }
+  .cn-type[data-t="edit"]::before { background: oklch(0.72 0.10 230); }
+  .cn-type[data-t="photo"]::before { background: oklch(0.72 0.12 320); }
+  .cn-type[data-t="specs"]::before { background: oklch(0.78 0.14 165); }
+  .cn-type[data-t="history"]::before { background: oklch(0.75 0.14 60); }
+  .cn-type[data-t="brand"]::before { background: oklch(0.72 0.14 200); }
+
+  /* status pills */
+  .cn-stat {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px 3px 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .cn-stat::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--fg-subtle);
+  }
+  .cn-stat[data-s="approved"] { color: oklch(0.82 0.16 145); border-color: oklch(0.45 0.12 145); }
+  .cn-stat[data-s="approved"]::before { background: oklch(0.72 0.16 145); }
+  .cn-stat[data-s="auto"] { color: oklch(0.78 0.10 145); border-color: oklch(0.40 0.08 145); }
+  .cn-stat[data-s="auto"]::before { background: oklch(0.70 0.10 145); }
+  .cn-stat[data-s="pending"] { color: var(--accent); border-color: oklch(0.55 0.14 80); }
+  .cn-stat[data-s="pending"]::before { background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  .cn-stat[data-s="changes"] { color: oklch(0.82 0.14 60); border-color: oklch(0.50 0.12 60); }
+  .cn-stat[data-s="changes"]::before { background: oklch(0.78 0.14 60); }
+  .cn-stat[data-s="rejected"] { color: oklch(0.82 0.16 28); border-color: oklch(0.45 0.14 28); }
+  .cn-stat[data-s="rejected"]::before { background: oklch(0.72 0.18 28); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .cn-row-act {
+    display: inline-flex; gap: 4px;
+  }
+  .cn-row-act button, .cn-row-act a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg-muted); cursor: pointer;
+    transition: color 0.12s, border-color 0.12s, background 0.12s;
+  }
+  .cn-row-act button:hover, .cn-row-act a:hover {
+    color: var(--accent); border-color: var(--accent);
+  }
+  .cn-row-act svg { width: 13px; height: 13px; }
+
+  /* pagination */
+  .cn-pager {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px;
+    padding: 0 4px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted);
+  }
+  .cn-pager__ctrls { display: flex; gap: 4px; }
+  .cn-pager__ctrls button, .cn-pager__ctrls a {
+    min-width: 30px; padding: 6px 10px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg-muted); cursor: pointer;
+    font-family: var(--font-mono); font-size: 11px;
+    transition: color 0.12s, border-color 0.12s, background 0.12s;
+  }
+  .cn-pager__ctrls button:hover, .cn-pager__ctrls a:hover {
+    color: var(--fg); border-color: var(--fg-muted);
+  }
+  .cn-pager__ctrls .is-active {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+  }
+  .cn-pager__ctrls .is-dots { border: 0; background: transparent; cursor: default; color: var(--fg-subtle); }
+
+  /* ============================================================
+     DE MODERAT — moderator queue cards
+     ============================================================ */
+  .mod-hint {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 12px 16px;
+    border: 1px solid var(--accent);
+    background: oklch(0.55 0.14 80 / 0.08);
+    color: var(--fg);
+    margin-bottom: 18px;
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+  .mod-hint__ic {
+    color: var(--accent); font-weight: 700;
+    font-family: var(--font-mono); font-size: 14px;
+  }
+  .mod-hint__txt b { color: var(--accent); font-weight: 600; }
+  .mod-hint a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+  .mod-card {
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 110px 1fr 280px;
+    gap: 0;
+    transition: border-color 0.12s;
+  }
+  .mod-card:hover { border-color: var(--line-strong); }
+  .mod-card.is-priority { border-left: 3px solid var(--accent); }
+
+  .mod-card__thumb {
+    position: relative; aspect-ratio: 4/3;
+    background: var(--bg-card-2);
+    border-right: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .mod-card__thumb .gear-fill { padding: 10%; }
+  .mod-card__thumb-tag {
+    position: absolute; top: 8px; left: 8px;
+    padding: 3px 7px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg);
+  }
+  .mod-card__thumb-tag[data-t="new"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+  .mod-card__body {
+    padding: 14px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    min-width: 0;
+  }
+  .mod-card__head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mod-card__title {
+    font-weight: 600; font-size: 16px; color: var(--fg);
+    line-height: 1.2; margin: 0;
+  }
+  .mod-card__title a { color: inherit; }
+  .mod-card__title a:hover { color: var(--accent); }
+  .mod-card__meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .mod-card__meta .sep { color: var(--fg-subtle); }
+  .mod-card__user {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--fg);
+  }
+  .mod-card__user .avatar { width: 18px; height: 18px; font-size: 8px; }
+  .mod-card__user .trust {
+    color: var(--fg-subtle); font-size: 10px;
+    padding-left: 4px; border-left: 1px solid var(--line); margin-left: 2px;
+  }
+  .mod-card__user .trust b { color: oklch(0.78 0.16 145); font-weight: 600; }
+
+  /* diff preview */
+  .mod-diff {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-top: 4px;
+  }
+  .mod-diff__cell {
+    background: var(--bg);
+    padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+    font-size: 12px;
+  }
+  .mod-diff__cell.is-old { background: oklch(0.32 0.04 28 / 0.18); }
+  .mod-diff__cell.is-new { background: oklch(0.32 0.06 145 / 0.14); }
+  [data-theme="light"] .mod-diff__cell.is-old { background: oklch(0.92 0.04 28); }
+  [data-theme="light"] .mod-diff__cell.is-new { background: oklch(0.94 0.06 145); }
+  .mod-diff__k {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .mod-diff__k.is-old { color: oklch(0.78 0.10 28); }
+  .mod-diff__k.is-new { color: oklch(0.78 0.12 145); }
+  .mod-diff__v { color: var(--fg); line-height: 1.45; word-break: break-word; }
+  .mod-diff__v.is-mono { font-family: var(--font-mono); font-size: 11px; }
+
+  /* new-entry specs preview */
+  .mod-specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px 14px;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+  .mod-specs__k {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-subtle); margin-bottom: 2px;
+  }
+  .mod-specs__v { font-size: 12px; color: var(--fg); }
+
+  /* photo grid for photo contribs */
+  .mod-photos {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  }
+  .mod-photos__item {
+    position: relative; aspect-ratio: 4/3;
+    border: 1px solid var(--line);
+    background: var(--bg-card-2);
+    overflow: hidden;
+  }
+  .mod-photos__item img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* side: actions + flags */
+  .mod-card__side {
+    padding: 14px 16px;
+    border-left: 1px solid var(--line);
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 10px;
+    justify-content: space-between;
+  }
+  .mod-card__flags {
+    display: flex; flex-direction: column; gap: 4px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted);
+  }
+  .mod-card__flag {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .mod-card__flag .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--fg-subtle);
+  }
+  .mod-card__flag.is-ok .dot { background: oklch(0.72 0.16 145); }
+  .mod-card__flag.is-warn .dot { background: oklch(0.78 0.16 60); }
+  .mod-card__flag.is-bad .dot { background: oklch(0.72 0.18 28); }
+  .mod-card__flag b { color: var(--fg); font-weight: 500; }
+
+  .mod-card__actions { display: flex; flex-direction: column; gap: 5px; }
+  .mod-btn {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .mod-btn .key {
+    margin-left: auto;
+    font-size: 9px; letter-spacing: 0.08em;
+    color: var(--fg-subtle); font-weight: 400;
+    padding: 1px 5px; border: 1px solid var(--line);
+  }
+  .mod-btn:hover { border-color: var(--fg-muted); }
+  .mod-btn--ok { background: oklch(0.30 0.10 145); color: oklch(0.94 0.04 145); border-color: oklch(0.40 0.10 145); }
+  .mod-btn--ok:hover { background: oklch(0.36 0.12 145); border-color: oklch(0.50 0.14 145); }
+  .mod-btn--bad { color: oklch(0.82 0.16 28); }
+  .mod-btn--bad:hover { background: oklch(0.32 0.08 28 / 0.28); color: oklch(0.88 0.18 28); border-color: oklch(0.50 0.12 28); }
+  .mod-btn--ghost { border-color: var(--line); color: var(--fg-muted); }
+  .mod-btn--ghost:hover { color: var(--fg); }
+
+  /* bulk action bar */
+  .mod-bulk {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    margin-bottom: 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted);
+  }
+  .mod-bulk__count { color: var(--fg); }
+  .mod-bulk__count b { color: var(--accent); }
+  .mod-bulk__sep { width: 1px; height: 18px; background: var(--line); }
+  .mod-bulk__btn {
+    padding: 5px 10px; background: var(--bg); border: 1px solid var(--line-strong);
+    color: var(--fg); cursor: pointer;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color 0.12s, border-color 0.12s;
+  }
+  .mod-bulk__btn:hover { color: var(--accent); border-color: var(--accent); }
+  .mod-bulk__btn--bad:hover { color: oklch(0.82 0.16 28); border-color: oklch(0.55 0.16 28); }
+
+  /* small chip used inside meta */
+  .chip-cat {
+    display: inline-flex; align-items: center;
+    padding: 1px 7px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* empty state */
+  .cn-empty {
+    border: 1px dashed var(--line);
+    background: var(--bg-card);
+    padding: 48px 32px;
+    text-align: center;
+    color: var(--fg-muted);
+  }
+  .cn-empty h3 {
+    font-family: var(--font-display);
+    font-size: 28px; margin: 0 0 8px;
+    text-transform: uppercase;
+    color: var(--fg);
+    letter-spacing: 0.01em;
+  }
+  .cn-empty p { margin: 0 0 16px; font-size: 14px; }
+  .cn-empty .page-head__cta { display: inline-flex; }
+
+  /* sub-section heading inside a tab */
+  .cn-h {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    margin: 22px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .cn-h h2 {
+    font-family: var(--font-mono); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.10em;
+    color: var(--fg); font-weight: 600; margin: 0;
+  }
+  .cn-h h2::before { content: "// "; color: var(--accent); }
+  .cn-h .meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+  }
+
+  /* responsive */
+  @media (max-width: 1100px) {
+    .mod-card { grid-template-columns: 96px 1fr; }
+    .mod-card__side { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 800px) {
+    .cn-strip { grid-template-columns: repeat(2, 1fr); }
+    .cn-strip__cell:nth-child(odd) { border-right: 1px dashed var(--line); }
+    .cn-strip__cell { border-bottom: 1px dashed var(--line); }
+    .cn-strip__cell:nth-last-child(-n+2) { border-bottom: 0; }
+    .cn-toolbar { grid-template-columns: 1fr 1fr; }
+    .cn-search { grid-column: 1 / -1; }
+    .mod-card { grid-template-columns: 1fr; }
+    .mod-card__thumb { aspect-ratio: 16/6; border-right: 0; border-bottom: 1px solid var(--line); }
+    .mod-card__side { border-top: 1px solid var(--line); border-left: 0; }
+    .cn-tbl thead th.hide-sm, .cn-tbl td.hide-sm { display: none; }
+  }
+  </style>
+</head>
+<body data-screen-label="13 Cont — Contribuții Tezaur">
+
+  <!-- SVG SPRITE -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 6h18v12H3z"/><path d="M3 6l9 7 9-7"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/></symbol>
+      <symbol id="i-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13 7l4 4"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M14 6l4 4"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M5 12l5 5L20 7"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M5 5l14 14M19 5L5 19"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn has-badge" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></button>
+        <a class="icon-btn" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+        <a class="icon-btn has-badge" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <div class="avatar-menu" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item is-active" href="Cont - Contribuții.html" role="menuitem">
+              <svg><use href="#i-stack"/></svg> Contribuții Tezaur
+              <span class="avatar-drop__tag">12</span>
+            </a>
+            <a class="avatar-drop__item" href="Cont - Articolele Mele.html" role="menuitem">
+              <svg><use href="#i-pen"/></svg> Articolele mele
+              <span class="avatar-drop__tag">8</span>
+            </a>
+            <a class="avatar-drop__item" href="#" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem">
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+            <div class="avatar-drop__sep"></div>
+            <a class="avatar-drop__item" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+            <div class="avatar-drop__sep"></div>
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- PAGE HEAD -->
+    <header class="page-head crosses" data-reveal>
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="page-head__row">
+        <div>
+          <span class="block__sub">// Cont · Contribuții Tezaur</span>
+          <h1 class="page-title">Contribuții<span class="dot">.</span></h1>
+          <p class="page-lede">
+            Tot ce-ai adăugat în enciclopedia Sintezaur — piese noi, editări de specs, fotografii, corecții.
+            Aici vezi și ce e în coada de moderare, ce-a fost aprobat și ce-ai mai putea polișui.
+          </p>
+        </div>
+        <a class="page-head__cta" href="Tezaur - Adaugă.html">
+          <span class="plus">+</span> Adaugă în Tezaur
+        </a>
+      </div>
+    </header>
+
+    <!-- TABS -->
+    <div class="tabs-row" role="tablist" data-tabs>
+      <button class="tab is-active" role="tab" data-tab="mine">
+        Contribuțiile mele <span class="tab__count">147</span>
+      </button>
+      <button class="tab" role="tab" data-tab="queue">
+        De moderat <span class="tab__count">38</span>
+      </button>
+    </div>
+
+    <!-- ============================================================
+         TAB 1: CONTRIBUȚIILE MELE
+         ============================================================ -->
+    <section class="tab-panel" data-panel="mine">
+
+      <!-- summary strip (clickable to filter) -->
+      <div class="cn-strip">
+        <button class="cn-strip__cell is-active" data-filter="all" type="button">
+          <span class="cn-strip__k">// Total</span>
+          <span class="cn-strip__v">147</span>
+          <span class="cn-strip__sub">din mai 2023</span>
+        </button>
+        <button class="cn-strip__cell" data-filter="approved" type="button">
+          <span class="cn-strip__k">// Aprobate</span>
+          <span class="cn-strip__v up">128</span>
+          <span class="cn-strip__sub">87% rată acceptare</span>
+        </button>
+        <button class="cn-strip__cell" data-filter="pending" type="button">
+          <span class="cn-strip__k">// În moderare</span>
+          <span class="cn-strip__v warn">11</span>
+          <span class="cn-strip__sub">timp mediu ~2.4h</span>
+        </button>
+        <button class="cn-strip__cell" data-filter="changes" type="button">
+          <span class="cn-strip__k">// Modificări cerute</span>
+          <span class="cn-strip__v warn">5</span>
+          <span class="cn-strip__sub">așteaptă răspunsul tău</span>
+        </button>
+        <button class="cn-strip__cell" data-filter="rejected" type="button">
+          <span class="cn-strip__k">// Respinse</span>
+          <span class="cn-strip__v muted">3</span>
+          <span class="cn-strip__sub">poți vedea motivul</span>
+        </button>
+      </div>
+
+      <!-- toolbar -->
+      <div class="cn-toolbar">
+        <div class="cn-search">
+          <svg><use href="#i-search"/></svg>
+          <input type="search" placeholder="Caută în contribuțiile tale — brand, model, descriere…" />
+          <kbd>⌘ K</kbd>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">tip</span>
+          <select>
+            <option>Toate tipurile</option>
+            <option>Intrare nouă</option>
+            <option>Editare</option>
+            <option>Fotografii</option>
+            <option>Specs tehnice</option>
+            <option>Istoric / descriere</option>
+            <option>Brand nou</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">categorie</span>
+          <select>
+            <option>Toate</option>
+            <option>Sintetizator</option>
+            <option>Drum machine</option>
+            <option>Sampler</option>
+            <option>Groovebox</option>
+            <option>Eurorack</option>
+            <option>Efecte hw</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">interval</span>
+          <select>
+            <option>Toate timpurile</option>
+            <option>Ultimele 7 zile</option>
+            <option>Ultimele 30 zile</option>
+            <option>2026</option>
+            <option>2025</option>
+            <option>2024</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">sort</span>
+          <select>
+            <option>Cele mai recente</option>
+            <option>Cele mai vechi</option>
+            <option>Cele mai văzute</option>
+            <option>După status</option>
+            <option>După tip</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- IMPORTANT: items needing attention -->
+      <div class="cn-h">
+        <h2>Necesită răspuns</h2>
+      </div>
+
+      <div class="cn-tbl-wrap">
+        <table class="cn-tbl">
+          <thead>
+            <tr>
+              <th class="is-sortable is-sorted">Piesă <span class="sort">▾</span></th>
+              <th>Tip</th>
+              <th class="hide-sm">Categorie</th>
+              <th class="is-sortable hide-sm">Trimis <span class="sort">⇅</span></th>
+              <th>Status</th>
+              <th class="num hide-sm">Vizualizat</th>
+              <th style="width: 80px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="prophet-5"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Sequential</span>
+                    <span class="cn-gear__model"><a href="#">Prophet-5 Rev 4 — istoric &amp; reviziile A–D</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="history">istoric</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">14 mai 2026 · 09:22</td>
+              <td><span class="cn-stat" data-s="changes">modificări cerute</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Răspunde"><svg><use href="#i-edit"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="microfreak"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Arturia</span>
+                    <span class="cn-gear__model"><a href="#">MicroFreak — corecție polifonie (4 vs 6 voci)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="specs">specs</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">12 mai 2026 · 16:08</td>
+              <td><span class="cn-stat" data-s="changes">modificări cerute</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Răspunde"><svg><use href="#i-edit"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="tb-303"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Roland</span>
+                    <span class="cn-gear__model"><a href="#">TB-303 — 4 fotografii din colecția personală</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="photo">fotografii</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">9 mai 2026 · 21:44</td>
+              <td><span class="cn-stat" data-s="changes">modificări cerute</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Răspunde"><svg><use href="#i-edit"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cn-h">
+        <h2>Toate contribuțiile</h2>
+        <span class="meta">147 itemi</span>
+      </div>
+
+      <div class="cn-tbl-wrap">
+        <table class="cn-tbl">
+          <thead>
+            <tr>
+              <th class="is-sortable">Piesă <span class="sort">⇅</span></th>
+              <th>Tip</th>
+              <th class="hide-sm">Categorie</th>
+              <th class="is-sortable is-sorted hide-sm">Trimis <span class="sort">▾</span></th>
+              <th>Status</th>
+              <th class="num hide-sm">Vizualizat</th>
+              <th style="width: 80px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="digitakt-ii"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Elektron</span>
+                    <span class="cn-gear__model"><a href="#">Digitakt II — preț de piață actualizat (Q2 2026)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="specs">specs</span></td>
+              <td class="t-meta hide-sm">Drum machine</td>
+              <td class="t-meta hide-sm">azi · 11:42</td>
+              <td><span class="cn-stat" data-s="pending">în moderare</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="ob-x8"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Oberheim</span>
+                    <span class="cn-gear__model"><a href="#">OB-X8 — 6 fotografii panel + spate</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="photo">fotografii</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">azi · 09:08</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">1 248</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi în Tezaur"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="matriarch"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Moog</span>
+                    <span class="cn-gear__model"><a href="#">Matriarch — descriere lungă + patch bay diagram</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="edit">editare</span></td>
+              <td class="t-meta hide-sm">Semi-modular</td>
+              <td class="t-meta hide-sm">ieri · 22:11</td>
+              <td><span class="cn-stat" data-s="auto">auto-aprobat</span></td>
+              <td class="num t-meta hide-sm">486</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi în Tezaur"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="cs-80"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Yamaha</span>
+                    <span class="cn-gear__model"><a href="#">CS-80 — intrare nouă completă (specs + istoric + 8 poze)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="new">intrare nouă</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">ieri · 18:36</td>
+              <td><span class="cn-stat" data-s="pending">în moderare</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="polybrute"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Arturia</span>
+                    <span class="cn-gear__model"><a href="#">PolyBrute — corecție an lansare (2020 → 2019)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="specs">specs</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">ieri · 14:22</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">312</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="tr-909"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Roland</span>
+                    <span class="cn-gear__model"><a href="#">TR-909 — istoric versiuni ROM (1.0 → 1.1)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="history">istoric</span></td>
+              <td class="t-meta hide-sm">Drum machine</td>
+              <td class="t-meta hide-sm">acum 2 zile · 11:18</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">894</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="op-1-field"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Teenage Engineering</span>
+                    <span class="cn-gear__model"><a href="#">OP-1 Field — bug bek tape FX (firmware 2.1)</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="edit">editare</span></td>
+              <td class="t-meta hide-sm">Groovebox</td>
+              <td class="t-meta hide-sm">acum 3 zile · 19:55</td>
+              <td><span class="cn-stat" data-s="rejected">respins</span></td>
+              <td class="num t-meta hide-sm">—</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi motiv"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="juno-60"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Roland</span>
+                    <span class="cn-gear__model"><a href="#">Juno-60 — sectionare interviuri cu Ralph Dyck</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="history">istoric</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">acum 4 zile · 21:02</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">2 134</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="0-coast"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Make Noise</span>
+                    <span class="cn-gear__model"><a href="#">0-Coast — patch points și cv-mapping</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="specs">specs</span></td>
+              <td class="t-meta hide-sm">Semi-modular</td>
+              <td class="t-meta hide-sm">acum 5 zile</td>
+              <td><span class="cn-stat" data-s="auto">auto-aprobat</span></td>
+              <td class="num t-meta hide-sm">638</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="tr-808"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Roland</span>
+                    <span class="cn-gear__model"><a href="#">TR-808 — eseu „Sunet 808 în muzica RO 1990–2005"</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="history">istoric</span></td>
+              <td class="t-meta hide-sm">Drum machine</td>
+              <td class="t-meta hide-sm">acum 6 zile</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">4 218</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="prophet-6"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Sequential</span>
+                    <span class="cn-gear__model"><a href="#">Prophet-6 Desktop — 3 fotografii panou</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="photo">fotografii</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">acum 8 zile</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">1 092</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="generic-mono"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Hexenwerk</span>
+                    <span class="cn-gear__model"><a href="#">Hexenwerk (brand nou) — atelier mic Cluj, 4 produse</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="brand">brand nou</span></td>
+              <td class="t-meta hide-sm">—</td>
+              <td class="t-meta hide-sm">acum 10 zile</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">218</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="ms-20"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Korg</span>
+                    <span class="cn-gear__model"><a href="#">MS-20 Mini vs Original — comparativ specs</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="edit">editare</span></td>
+              <td class="t-meta hide-sm">Semi-modular</td>
+              <td class="t-meta hide-sm">acum 12 zile</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">1 762</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="volca-fm"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Korg</span>
+                    <span class="cn-gear__model"><a href="#">Volca FM 2 — adăugare istoric DX algos</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="history">istoric</span></td>
+              <td class="t-meta hide-sm">Groovebox</td>
+              <td class="t-meta hide-sm">acum 14 zile</td>
+              <td><span class="cn-stat" data-s="auto">auto-aprobat</span></td>
+              <td class="num t-meta hide-sm">528</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cn-gear">
+                  <div class="cn-gear__thumb"><div class="gear-fill" data-gear="take-5"></div></div>
+                  <div class="cn-gear__txt">
+                    <span class="cn-gear__brand">Sequential</span>
+                    <span class="cn-gear__model"><a href="#">Take 5 — corecție polifonie real-time</a></span>
+                  </div>
+                </div>
+              </td>
+              <td><span class="cn-type" data-t="specs">specs</span></td>
+              <td class="t-meta hide-sm">Sintetizator</td>
+              <td class="t-meta hide-sm">acum 17 zile</td>
+              <td><span class="cn-stat" data-s="approved">aprobat</span></td>
+              <td class="num t-meta hide-sm">412</td>
+              <td>
+                <div class="cn-row-act">
+                  <a href="#" title="Vezi"><svg><use href="#i-eye"/></svg></a>
+                  <button type="button" title="Mai mult"><svg><use href="#i-more"/></svg></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cn-pager">
+        <span>Arăt 1–15 din 147 contribuții</span>
+        <div class="cn-pager__ctrls">
+          <button type="button" disabled>← Înapoi</button>
+          <button type="button" class="is-active">1</button>
+          <button type="button">2</button>
+          <button type="button">3</button>
+          <button type="button">4</button>
+          <span class="is-dots">…</span>
+          <button type="button">10</button>
+          <button type="button">Înainte →</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ============================================================
+         TAB 2: DE MODERAT
+         ============================================================ -->
+    <section class="tab-panel" data-panel="queue" hidden>
+
+      <!-- moderator hint -->
+      <div class="mod-hint">
+        <span class="mod-hint__ic">!</span>
+        <span class="mod-hint__txt">
+          Vezi această filă pentru că ai rol de <b>moderator Tezaur</b>. Contribuțiile aici așteaptă o verificare umană
+          înainte să apară public. Acțiunile au efect imediat — vezi <a href="#">ghid moderare</a>.
+        </span>
+        <button class="mod-btn mod-btn--ghost" type="button">Setări auto-aprobare</button>
+      </div>
+
+      <!-- stats strip -->
+      <div class="cn-strip">
+        <div class="cn-strip__cell" style="cursor: default">
+          <span class="cn-strip__k">// În coadă</span>
+          <span class="cn-strip__v warn">38</span>
+          <span class="cn-strip__sub">12 cu prioritate</span>
+        </div>
+        <div class="cn-strip__cell" style="cursor: default">
+          <span class="cn-strip__k">// Procesate azi</span>
+          <span class="cn-strip__v">24</span>
+          <span class="cn-strip__sub">de tine + 3 mod</span>
+        </div>
+        <div class="cn-strip__cell" style="cursor: default">
+          <span class="cn-strip__k">// Timp mediu</span>
+          <span class="cn-strip__v">2.4<small style="font-family:var(--font-mono); font-size:11px; font-weight:400; color:var(--fg-muted); letter-spacing:0.08em; margin-left:4px">h</small></span>
+          <span class="cn-strip__sub">↓ 18% față de săptămâna trecută</span>
+        </div>
+        <div class="cn-strip__cell" style="cursor: default">
+          <span class="cn-strip__k">// Aprobate luna asta</span>
+          <span class="cn-strip__v up">204</span>
+          <span class="cn-strip__sub">de toți moderatorii</span>
+        </div>
+        <div class="cn-strip__cell" style="cursor: default">
+          <span class="cn-strip__k">// Rată acceptare</span>
+          <span class="cn-strip__v">82<small style="font-family:var(--font-mono); font-size:11px; font-weight:400; color:var(--fg-muted); letter-spacing:0.08em; margin-left:2px">%</small></span>
+          <span class="cn-strip__sub">vs ~78% media platformei</span>
+        </div>
+      </div>
+
+      <!-- toolbar -->
+      <div class="cn-toolbar">
+        <div class="cn-search">
+          <svg><use href="#i-search"/></svg>
+          <input type="search" placeholder="Caută în coadă — brand, model, user, motiv flag…" />
+          <kbd>⌘ K</kbd>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">tip</span>
+          <select>
+            <option>Toate tipurile</option>
+            <option>Intrare nouă</option>
+            <option>Editare specs</option>
+            <option>Fotografii</option>
+            <option>Istoric / descriere</option>
+            <option>Brand nou</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">categorie</span>
+          <select>
+            <option>Toate</option>
+            <option>Sintetizator</option>
+            <option>Drum machine</option>
+            <option>Sampler · Groovebox</option>
+            <option>Eurorack · modular</option>
+            <option>Efecte hardware</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">trust user</span>
+          <select>
+            <option>Toți userii</option>
+            <option>Trust 1+ (primă contribuție)</option>
+            <option>Trust 2+ (validat)</option>
+            <option>Trust 3+ (recurent)</option>
+            <option>Doar trust 1 (atenție)</option>
+          </select>
+        </div>
+        <div class="cn-sel">
+          <span class="cn-sel__label">sort</span>
+          <select>
+            <option>Prioritate ↓</option>
+            <option>Cele mai vechi în coadă</option>
+            <option>Cele mai noi</option>
+            <option>Cu flag-uri</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- bulk -->
+      <div class="mod-bulk">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+          <input type="checkbox" style="accent-color: var(--accent); transform: scale(1.1)" />
+          <span class="mod-bulk__count"><b>0</b> selectate · 38 vizibile</span>
+        </label>
+        <span class="mod-bulk__sep"></span>
+        <button class="mod-bulk__btn" type="button">Aprobă selecția</button>
+        <button class="mod-bulk__btn mod-bulk__btn--bad" type="button">Respinge selecția</button>
+        <span class="mod-bulk__sep"></span>
+        <button class="mod-bulk__btn" type="button">Cere modificări</button>
+        <span style="margin-left:auto">⌘+A pentru toate · ⌘+click pentru interval · J / K pentru navigare</span>
+      </div>
+
+      <!-- queue cards -->
+
+      <!-- 1: NEW ENTRY -->
+      <article class="mod-card is-priority">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="generic-poly"></div>
+          <span class="mod-card__thumb-tag" data-t="new">Intrare nouă</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Crumar · Spirit (1983) — synth analog flagship 6 voci</a></h3>
+            <span class="cn-type" data-t="new">intrare nouă</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_3214" data-initials="AM">AM</span>
+              <span>Alex Munteanu</span>
+              <span class="trust"><b>trust 3</b> · 42 contribuții · membru din 2024</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 2 ore</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Sintetizator</span>
+          </div>
+          <div class="mod-specs">
+            <div><div class="mod-specs__k">// An lansare</div><div class="mod-specs__v">1983</div></div>
+            <div><div class="mod-specs__k">// Polifonie</div><div class="mod-specs__v">6 voci</div></div>
+            <div><div class="mod-specs__k">// Arhitectură</div><div class="mod-specs__v">2 VCO / voce + sub</div></div>
+            <div><div class="mod-specs__k">// Filtru</div><div class="mod-specs__v">SSM2044 24dB LP</div></div>
+            <div><div class="mod-specs__k">// Tastatură</div><div class="mod-specs__v">61 taste · velocity</div></div>
+            <div><div class="mod-specs__k">// Patches</div><div class="mod-specs__v">80 (RAM) + tape</div></div>
+            <div><div class="mod-specs__k">// MIDI</div><div class="mod-specs__v">— (doar CV/Gate)</div></div>
+            <div><div class="mod-specs__k">// Producție</div><div class="mod-specs__v">~200 unități, IT</div></div>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-ok"><span class="dot"></span><b>Brand validat</b> · în Tezaur de 2023</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span><b>8 specs</b> completate · 0 lipsă</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span><b>5 fotografii</b> · niciuna stock</div>
+            <div class="mod-card__flag is-warn"><span class="dot"></span>Surse: 2 link-uri (vintagesynth, MM)</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Detalii complete</button>
+          </div>
+        </aside>
+      </article>
+
+      <!-- 2: EDIT (diff) -->
+      <article class="mod-card">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="dx7"></div>
+          <span class="mod-card__thumb-tag">Editare</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Yamaha · DX7 — corecție an producție și unități fabricate</a></h3>
+            <span class="cn-type" data-t="specs">specs</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_9082" data-initials="MC">MC</span>
+              <span>Mihai Costin</span>
+              <span class="trust"><b>trust 4</b> · 198 contribuții · cont 2022</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 4 ore</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Sintetizator</span>
+          </div>
+          <div class="mod-diff">
+            <div class="mod-diff__cell is-old">
+              <span class="mod-diff__k is-old">— vechi</span>
+              <span class="mod-diff__v"><b>Producție:</b> 1983–1987</span>
+              <span class="mod-diff__v"><b>Unități:</b> ~160 000</span>
+            </div>
+            <div class="mod-diff__cell is-new">
+              <span class="mod-diff__k is-new">+ nou</span>
+              <span class="mod-diff__v"><b>Producție:</b> 1983–1989 <em style="color:var(--fg-subtle)">(extins cu varianta DX7IID)</em></span>
+              <span class="mod-diff__v"><b>Unități:</b> ~200 000 (1983–1986: ~160 000; II: ~40 000)</span>
+            </div>
+          </div>
+          <div style="font-family:var(--font-mono); font-size:11px; color:var(--fg-muted); margin-top:2px">
+            // Justificare: <em>„Anuarul Yamaha 1990 (p.218) raportează 200k total DX7 family între 1983–1989. Vezi PDF atașat — Yamaha_Annual_1990.pdf"</em>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-ok"><span class="dot"></span><b>Sursă atașată</b> · PDF, 2.4 MB</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Editor cu istoric curat (198 / 200 aprobate)</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Modificare punctuală · 2 câmpuri</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Vezi diff complet</button>
+          </div>
+        </aside>
+      </article>
+
+      <!-- 3: PHOTOS -->
+      <article class="mod-card is-priority">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="jupiter-8"></div>
+          <span class="mod-card__thumb-tag">Fotografii</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Roland · Jupiter-8 — 7 fotografii din colecția personală</a></h3>
+            <span class="cn-type" data-t="photo">fotografii</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_5521" data-initials="DR">DR</span>
+              <span>Diana Radu</span>
+              <span class="trust"><b>trust 2</b> · 8 contribuții · cont nou (acum 3 luni)</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 6 ore</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Sintetizator</span>
+          </div>
+          <div class="mod-photos">
+            <div class="mod-photos__item"><div class="gear-fill" data-gear="jupiter-8" style="padding: 8%"></div></div>
+            <div class="mod-photos__item"><div class="gear-fill" data-gear="jupiter-8" style="padding: 8%"></div></div>
+            <div class="mod-photos__item"><div class="gear-fill" data-gear="jupiter-8" style="padding: 8%"></div></div>
+            <div class="mod-photos__item">
+              <div class="gear-fill" data-gear="jupiter-8" style="padding: 8%"></div>
+              <div style="position:absolute; inset:0; display:grid; place-items:center; background:oklch(0 0 0 / 0.55); color:var(--fg); font-family:var(--font-mono); font-size:13px; font-weight:600">+3</div>
+            </div>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-warn"><span class="dot"></span>User nou (3 luni) · revizuire suplimentară</div>
+            <div class="mod-card__flag is-warn"><span class="dot"></span>EXIF lipsește din 2 / 7 (poate fi screenshot)</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Reverse-image: 0 potriviri (nu sunt stock)</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Rezoluție ≥ 1600 px · light bun</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Vezi toate (7)</button>
+          </div>
+        </aside>
+      </article>
+
+      <!-- 4: HISTORY/DESCRIPTION EDIT -->
+      <article class="mod-card">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="sh-101"></div>
+          <span class="mod-card__thumb-tag">Istoric</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Roland · SH-101 — eseu „SH-101 la radio Tineretului 1985"</a></h3>
+            <span class="cn-type" data-t="history">istoric</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_7710" data-initials="SP">SP</span>
+              <span>Sorin Pop</span>
+              <span class="trust"><b>trust 4</b> · 312 contribuții · editor Revistă</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 8 ore</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Sintetizator</span>
+          </div>
+          <div class="mod-diff">
+            <div class="mod-diff__cell is-old">
+              <span class="mod-diff__k is-old">— secțiunea „România" actuală</span>
+              <span class="mod-diff__v" style="color: var(--fg-muted); font-style: italic">SH-101 a fost importat sporadic în România post-1990, dar nu există documentație despre folosirea lui în studio-urile vremii.</span>
+            </div>
+            <div class="mod-diff__cell is-new">
+              <span class="mod-diff__k is-new">+ adăugat (rescrie complet · 4 paragrafe, 1 240 cuvinte)</span>
+              <span class="mod-diff__v">Identificat în 3 înregistrări Radio Tineretului 1985–1987 (semnătura LFO + sub-osc caracteristic). Adus de Mircea Florian la întoarcerea din Berlin Vest, 1984…</span>
+              <span class="mod-diff__v" style="font-size:11px; color:var(--accent); margin-top: 4px">→ vezi diferența completă · 5 surse arhivă atașate</span>
+            </div>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Editor Revistă · auto-trust pe istoric RO</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>5 surse externe verificabile (radio archive)</div>
+            <div class="mod-card__flag is-warn"><span class="dot"></span>Rescrie complet — nu doar adăugare</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Vezi text integral</button>
+          </div>
+        </aside>
+      </article>
+
+      <!-- 5: NEW BRAND -->
+      <article class="mod-card">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="generic-eurorack"></div>
+          <span class="mod-card__thumb-tag">Brand nou</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Cerere brand nou: „Iași Electric" — atelier eurorack DIY</a></h3>
+            <span class="cn-type" data-t="brand">brand nou</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_2280" data-initials="VL">VL</span>
+              <span>Vlad L.</span>
+              <span class="trust"><b>trust 1</b> · primă contribuție · cont 2 săpt.</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 14 ore</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Eurorack</span>
+          </div>
+          <div class="mod-specs">
+            <div><div class="mod-specs__k">// Brand</div><div class="mod-specs__v">Iași Electric</div></div>
+            <div><div class="mod-specs__k">// Țară</div><div class="mod-specs__v">România · Iași</div></div>
+            <div><div class="mod-specs__k">// Activ din</div><div class="mod-specs__v">2023</div></div>
+            <div><div class="mod-specs__k">// Produse declarate</div><div class="mod-specs__v">4 module · 1 LFO, 1 VCO, 2 utilities</div></div>
+            <div><div class="mod-specs__k">// Website</div><div class="mod-specs__v" style="font-family:var(--font-mono); font-size:11px">iasielectric.ro</div></div>
+            <div><div class="mod-specs__k">// Producător</div><div class="mod-specs__v">PFA · Răzvan Toader</div></div>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-warn"><span class="dot"></span>User trust 1 · cont 14 zile</div>
+            <div class="mod-card__flag is-warn"><span class="dot"></span>Website activ, dar fără Instagram/cont social</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>PFA înregistrat verificat (ANAF API)</div>
+            <div class="mod-card__flag is-bad"><span class="dot"></span>0 review-uri externe · brand foarte nou</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Verifică sursa</button>
+          </div>
+        </aside>
+      </article>
+
+      <!-- 6: ANOTHER EDIT -->
+      <article class="mod-card">
+        <div class="mod-card__thumb">
+          <div class="gear-fill" data-gear="model-d"></div>
+          <span class="mod-card__thumb-tag">Editare</span>
+        </div>
+        <div class="mod-card__body">
+          <div class="mod-card__head">
+            <h3 class="mod-card__title"><a href="#">Behringer · Model D — actualizare preț de piață Q2 2026</a></h3>
+            <span class="cn-type" data-t="specs">specs</span>
+          </div>
+          <div class="mod-card__meta">
+            <span class="mod-card__user">
+              <span class="avatar avatar--sm" data-uid="u_1167" data-initials="GP">GP</span>
+              <span>George Pașcu</span>
+              <span class="trust"><b>trust 3</b> · 64 contribuții · cont 2023</span>
+            </span>
+            <span class="sep">·</span>
+            <span>trimis acum 1 zi</span>
+            <span class="sep">·</span>
+            <span class="chip-cat">Sintetizator</span>
+          </div>
+          <div class="mod-diff">
+            <div class="mod-diff__cell is-old">
+              <span class="mod-diff__k is-old">— vechi</span>
+              <span class="mod-diff__v is-mono">street price: <b>1 350 RON</b> · Q4 2025</span>
+              <span class="mod-diff__v is-mono">used avg: <b>900 RON</b> (12 vânzări)</span>
+            </div>
+            <div class="mod-diff__cell is-new">
+              <span class="mod-diff__k is-new">+ nou</span>
+              <span class="mod-diff__v is-mono">street price: <b>1 480 RON</b> · Q2 2026 <em style="color:var(--fg-subtle)">+ 9.6%</em></span>
+              <span class="mod-diff__v is-mono">used avg: <b>1 050 RON</b> (8 vânzări recente)</span>
+            </div>
+          </div>
+        </div>
+        <aside class="mod-card__side">
+          <div class="mod-card__flags">
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Auto-check Thomann/Bax confirmă</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>8 listings Bazar suport datele</div>
+            <div class="mod-card__flag is-ok"><span class="dot"></span>Editor cu istoric foarte curat</div>
+          </div>
+          <div class="mod-card__actions">
+            <button class="mod-btn mod-btn--ok" type="button"><svg width="13" height="13"><use href="#i-check"/></svg> Aprobă <span class="key">A</span></button>
+            <button class="mod-btn" type="button"><svg width="13" height="13"><use href="#i-edit"/></svg> Cere modificări <span class="key">M</span></button>
+            <button class="mod-btn mod-btn--bad" type="button"><svg width="13" height="13"><use href="#i-x"/></svg> Respinge <span class="key">R</span></button>
+            <button class="mod-btn mod-btn--ghost" type="button"><svg width="13" height="13"><use href="#i-eye"/></svg> Detalii</button>
+          </div>
+        </aside>
+      </article>
+
+      <div class="cn-pager">
+        <span>Arăt 1–6 din 38 itemi în coadă · 12 cu prioritate</span>
+        <div class="cn-pager__ctrls">
+          <button type="button" disabled>← Înapoi</button>
+          <button type="button" class="is-active">1</button>
+          <button type="button">2</button>
+          <button type="button">3</button>
+          <span class="is-dots">…</span>
+          <button type="button">7</button>
+          <button type="button">Înainte →</button>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <!-- ============================================================
+       JS — avatar dropdown + tabs + avatar coloring + gears
+       ============================================================ -->
+  <script>
+    // ---------- THEME ----------
+    (function theme(){
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const apply = t => root.setAttribute('data-theme', t);
+      apply(localStorage.getItem(KEY) || 'dark');
+      document.querySelectorAll('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => {
+        const next = (root.getAttribute('data-theme') === 'dark') ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      }));
+    })();
+
+    // ---------- AVATAR COLOR (deterministic from uid) ----------
+    function hashHue(s) {
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+      return Math.abs(h) % 360;
+    }
+    function applyAvatarColor(el) {
+      const uid = el.dataset.uid || 'anon';
+      const hue = hashHue(uid);
+      el.style.background = `oklch(0.58 0.14 ${hue})`;
+      el.style.color = 'oklch(0.98 0 0)';
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      const init = el.dataset.initials || el.textContent.trim().slice(0, 2).toUpperCase();
+      el.textContent = init;
+    }
+    document.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+
+    // ---------- AVATAR DROPDOWN ----------
+    (function avatarMenu() {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      function open() { drop.hidden = false; btn.setAttribute('aria-expanded', 'true'); }
+      function close() { drop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+      btn.addEventListener('click', e => { e.stopPropagation(); drop.hidden ? open() : close(); });
+      document.addEventListener('click', e => { if (!menu.contains(e.target)) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    })();
+
+    // ---------- TABS ----------
+    (function tabs() {
+      const row = document.querySelector('[data-tabs]');
+      if (!row) return;
+      const tabs = row.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          tabs.forEach(t => t.classList.toggle('is-active', t === tab));
+          panels.forEach(p => { p.hidden = p.dataset.panel !== target; });
+          // sync URL hash so refresh remembers
+          history.replaceState(null, '', '#' + target);
+        });
+      });
+      // restore from hash
+      const want = (location.hash || '').replace('#', '');
+      if (want) {
+        const tab = row.querySelector('[data-tab="' + want + '"]');
+        if (tab) tab.click();
+      }
+    })();
+
+    // ---------- GEAR FILL ----------
+    (function fillGears() {
+      document.querySelectorAll('[data-gear]').forEach(el => {
+        if (el.dataset.gearFilled) return;
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+          el.dataset.gearFilled = '1';
+        }
+      });
+    })();
+
+    // ---------- SUMMARY STRIP — clickable filter ----------
+    (function summaryFilter() {
+      const cells = document.querySelectorAll('[data-filter]');
+      cells.forEach(c => c.addEventListener('click', () => {
+        cells.forEach(x => x.classList.toggle('is-active', x === c));
+        // (real impl would filter the table — visual demo only)
+      }));
+    })();
+  </script>
+</body>
+</html>

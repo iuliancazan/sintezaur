@@ -258,8 +258,8 @@ export const appRoutes: Route[] = [
       {
         path: 'contributii-tezaur',
         loadComponent: () =>
-          import('./account/my-tezaur-drafts.page').then(
-            (m) => m.MyTezaurDraftsPage,
+          import('./account/contributii-tezaur.page').then(
+            (m) => m.ContributiiTezaurPage,
           ),
       },
       // M10-D: legacy favorites paths redirect into the new shell.
