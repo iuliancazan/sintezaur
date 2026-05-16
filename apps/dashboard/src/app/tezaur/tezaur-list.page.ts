@@ -84,14 +84,31 @@ import type { TezaurListItem } from './tezaur.types';
             <td>{{ $any(row).yearReleased ?? '—' }}</td>
             <td>{{ $any(row).ownersPublicCount }}</td>
             <td>
-              <a
-                sz-button
-                variant="ghost"
-                size="sm"
-                [routerLink]="['/tezaur', $any(row).id, 'edit']"
-              >
-                Edit
-              </a>
+              <div class="admin__row-actions">
+                <a
+                  sz-button
+                  variant="ghost"
+                  size="sm"
+                  [routerLink]="['/tezaur', $any(row).id, 'edit']"
+                >
+                  {{ 'tezaur.admin.actions.edit' | t }}
+                </a>
+                <button
+                  sz-button
+                  variant="ghost"
+                  size="sm"
+                  class="admin__row-action--danger"
+                  type="button"
+                  [disabled]="deletingId() === $any(row).id"
+                  (click)="onDelete($any(row))"
+                >
+                  {{
+                    deletingId() === $any(row).id
+                      ? ('tezaur.admin.actions.deleting' | t)
+                      : ('tezaur.admin.actions.delete' | t)
+                  }}
+                </button>
+              </div>
             </td>
           </tr>
         </ng-template>
@@ -181,6 +198,18 @@ import type { TezaurListItem } from './tezaur.types';
         text-align: center;
         color: var(--fg-muted);
       }
+      .admin__row-actions {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+      }
+      :host ::ng-deep .admin__row-action--danger button,
+      :host ::ng-deep .admin__row-action--danger {
+        color: oklch(0.55 0.16 28);
+      }
+      :host ::ng-deep .admin__row-action--danger:hover {
+        color: oklch(0.45 0.18 28);
+      }
     `,
   ],
 })
@@ -192,6 +221,7 @@ export class TezaurAdminListPage {
   readonly totalCount = signal(0);
   readonly loading = signal(false);
   readonly page = signal(1);
+  readonly deletingId = signal<string | null>(null);
   pageSize = 24;
   filterText = '';
 
@@ -217,6 +247,28 @@ export class TezaurAdminListPage {
       .split('_')
       .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
       .join(' ');
+  }
+
+  async onDelete(row: TezaurListItem): Promise<void> {
+    if (this.deletingId() !== null) return;
+    const title = this.i18n.t('tezaur.admin.delete.confirm_title', {
+      brand: row.brand,
+      model: row.model,
+    });
+    const body = this.i18n.t('tezaur.admin.delete.confirm_body');
+    if (!confirm(title + '\n\n' + body)) return;
+    this.deletingId.set(row.id);
+    try {
+      await this.tezaur.softDelete(row.id);
+      // Optimistic: drop the row locally so the user sees it gone immediately.
+      this.items.update((rows) => rows.filter((r) => r.id !== row.id));
+      this.totalCount.update((n) => Math.max(0, n - 1));
+    } catch (err) {
+      console.error('[tezaur-admin-list] delete failed', err);
+      alert(this.i18n.t('tezaur.admin.delete.error'));
+    } finally {
+      this.deletingId.set(null);
+    }
   }
 
   private async fetch(): Promise<void> {

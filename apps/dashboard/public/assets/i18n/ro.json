@@ -44,5 +44,38 @@
       "logged_in_as": "Conectat ca {{email}} (rol: {{role}})",
       "logout": "Ieși din cont"
     }
+  },
+  "tezaur": {
+    "admin": {
+      "list_title": "Tezaur",
+      "new_gear": "Adaugă piesă",
+      "filter_placeholder": "Caută brand, model, categorie…",
+      "table": {
+        "brand": "Brand",
+        "model": "Model",
+        "category": "Categorie",
+        "year": "An lansare",
+        "owners": "Dețin",
+        "actions": "Acțiuni"
+      },
+      "actions": {
+        "edit": "Editează",
+        "delete": "Șterge",
+        "deleting": "Șterg…"
+      },
+      "delete": {
+        "confirm_title": "Șterge piesa {{brand}} {{model}}?",
+        "confirm_body": "Ștergere soft — rândul rămâne în DB (cascadă pe imagini, link-uri, relații, descrieri) dar dispare din enciclopedie. Acțiunea poate fi anulată de superadmin din Audit log.",
+        "confirm_ok": "Da, șterge",
+        "confirm_cancel": "Anulează",
+        "error": "Nu am putut șterge piesa. Încearcă din nou."
+      }
+    },
+    "stats": {
+      "pieces": "piese"
+    },
+    "filters": {
+      "no_results": "Nicio piesă găsită."
+    }
   }
 }
