@@ -246,38 +246,58 @@ export class BazarFormPage {
 
   /* ---------- live preview ---------- */
   readonly previewBrand = computed(() => {
+    this.formTick();
     const g = this.selectedGear();
     if (g) return g.brand;
     return (this.form.controls['rawMake'].value as string) || '—';
   });
   readonly previewModel = computed(() => {
+    this.formTick();
     const g = this.selectedGear();
     if (g) return g.model;
     return (this.form.controls['rawModel'].value as string) || '—';
   });
-  readonly previewPrice = computed(() =>
-    this.formatThousands(this.form.controls['price'].value ?? 0),
-  );
-  readonly previewCurrency = computed(() =>
-    (this.form.controls['currency'].value as string).toUpperCase(),
-  );
-  readonly previewLocation = computed(
-    () => (this.form.controls['location'].value as string) || '—',
-  );
+  readonly previewPrice = computed(() => {
+    this.formTick();
+    return this.formatThousands(this.form.controls['price'].value ?? 0);
+  });
+  readonly previewCurrency = computed(() => {
+    this.formTick();
+    return (this.form.controls['currency'].value as string).toUpperCase();
+  });
+  readonly previewLocation = computed(() => {
+    this.formTick();
+    return (this.form.controls['location'].value as string) || '—';
+  });
   readonly previewConditionLabel = computed(() => {
+    this.formTick();
     const c = this.form.controls['condition'].value as string;
     return CONDITION_OPTIONS.find((o) => o.value === c)?.ttl ?? '—';
   });
-  readonly previewTagline = computed(
-    () => (this.form.controls['tagline'].value as string) || '',
-  );
+  readonly previewTagline = computed(() => {
+    this.formTick();
+    return (this.form.controls['tagline'].value as string) || '';
+  });
   readonly previewPhoto = computed(() => {
     const first = this.photoTiles()[0];
     return first ? this.bazar.imageUrl(first.thumbPath) : null;
   });
 
+  /**
+   * Bumped on every form valueChanges so the signal-based computeds
+   * below (checklist, descriptionLength, preview tagline, price
+   * conversion, etc.) re-run as the user types. `form.value` and
+   * `form.controls[x].value` aren't signals on their own, so without
+   * this nudge the memoized computeds would only refresh when an
+   * unrelated signal (e.g. `photoTiles()`) happens to change — that's
+   * the bug that made the character counter stay at 0 and the
+   * "Publică" gate stay disabled even after the user filled the form.
+   */
+  readonly formTick = signal(0);
+
   /** Live RON↔EUR display next to the price input. */
   readonly priceConversion = computed(() => {
+    this.formTick();
     const p = Number(this.form.controls['price'].value ?? 0);
     const cur = this.form.controls['currency'].value as string;
     if (!p) return null;
@@ -285,12 +305,14 @@ export class BazarFormPage {
     return `${this.formatThousands(Math.round(p / EUR_PER_RON))} RON`;
   });
 
-  readonly descriptionLength = computed(
-    () => (this.form.controls['descriptionText'].value as string).length,
-  );
+  readonly descriptionLength = computed(() => {
+    this.formTick();
+    return (this.form.controls['descriptionText'].value as string).length;
+  });
 
   /* ---------- checklist + progress ---------- */
   readonly checklist = computed(() => {
+    this.formTick();
     const v = this.form.value;
     const photoCount = this.photoTiles().length;
     const descLen = (v.descriptionText as string).length;
@@ -345,6 +367,10 @@ export class BazarFormPage {
     void this.bootstrap();
 
     this.form.valueChanges.subscribe(() => {
+      // Always bump the tick so view computeds (descriptionLength,
+      // checklist, previewTagline, etc.) re-evaluate — even during a
+      // suppressed load where we don't want to auto-save.
+      this.formTick.update((n) => n + 1);
       if (this.suppressDirty) return;
       this.dirty = true;
       this.scheduleAutoSave();
