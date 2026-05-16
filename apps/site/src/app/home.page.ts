@@ -133,10 +133,41 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         pointer-events: none;
         user-select: none;
       }
-      :host .hero__media .gear-fill { z-index: 1; }
+      /* .gear-fill ships with its own striped/gradient background — fine
+         on card thumbnails (pattern shows when no photo loads), but
+         inside the hero it covers our blurred backdrop. Strip the
+         background in this scope so layers stack: blur → photo. */
+      :host .hero__media .gear-fill {
+        z-index: 1;
+        background: transparent;
+        padding: 0;
+      }
       :host .gear-fill__photo--contain {
         object-fit: contain;
         background: transparent;
+      }
+
+      /* Hero rotator (prev / counter / next) — align to the bottom-right
+         corner mirroring the ELEKTRON label pill at bottom-left. All
+         three controls share the label's height so the cluster reads as
+         a row of equal-height pills. */
+      :host .hero__media .hero__rotator {
+        bottom: 10px;
+        right: 10px;
+        gap: 6px;
+      }
+      :host .hero__media .hero__rotator button {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        line-height: 1;
+      }
+      :host .hero__media .hero__counter {
+        padding: 4px 8px;
+        font-size: 10px;
+        line-height: 1.3;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
       }
 
     `,
