@@ -431,3 +431,25 @@ export class ListModerationQueueDto {
   @Max(100)
   pageSize?: number;
 }
+
+/* ============================================================
+   Image manual crop (contributor)
+   ============================================================ */
+
+export class SetImageCropDto {
+  @IsInt()
+  @Min(0)
+  x!: number;
+
+  @IsInt()
+  @Min(0)
+  y!: number;
+
+  @IsInt()
+  @Min(1)
+  w!: number;
+
+  @IsInt()
+  @Min(1)
+  h!: number;
+}

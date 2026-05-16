@@ -261,6 +261,15 @@ export const gearImages = pgTable(
     /** Gallery order; only meaningful per gear, not per variant. */
     position: integer('position').notNull().default(0),
 
+    /**
+     * Manual crop window in original image pixel coordinates.
+     * Shape: `{ x, y, w, h }`. Only meaningful when set on the row
+     * for the `original` variant — square variants are regenerated
+     * from `original` with this crop applied.
+     * NULL = use Sharp's automatic smart crop.
+     */
+    crop: jsonb('crop').$type<{ x: number; y: number; w: number; h: number } | null>(),
+
     uploadedBy: uuid('uploaded_by').references(() => users.id, {
       onDelete: 'set null',
     }),

@@ -367,6 +367,79 @@ export class StorageService {
     };
   }
 
+  /**
+   * Regenerate the square_thumb + square_medium variants from the
+   * stored `original`, applying a user-selected crop window (in
+   * original image pixel coordinates). Used by the manual cropper UI
+   * on the Tezaur add page. Returns the new variant rows ready to be
+   * persisted by the caller. The caller is responsible for deleting
+   * the old square variant keys from storage.
+   */
+  async regenerateSquareVariantsWithCrop(
+    scope: 'gear' | 'listing' | 'article',
+    entityId: string,
+    sourceId: string,
+    originalKey: string,
+    crop: { x: number; y: number; w: number; h: number },
+    actorId?: string | null,
+  ): Promise<{ variants: ProcessedVariant[] }> {
+    const buf = await this.driver.get(originalKey);
+    const meta = await sharp(buf).metadata();
+    if (!meta.width || !meta.height) {
+      throw new BadRequestException(
+        'Originalul nu are dimensiuni valide pentru crop.',
+      );
+    }
+    // Clamp to original bounds — bad input is treated as a clipped crop.
+    const x = Math.max(0, Math.min(crop.x, meta.width - 1));
+    const y = Math.max(0, Math.min(crop.y, meta.height - 1));
+    const w = Math.max(1, Math.min(crop.w, meta.width - x));
+    const h = Math.max(1, Math.min(crop.h, meta.height - y));
+
+    const module = IMAGE_SCOPE_TO_MODULE[scope];
+    const squareVariants = ['square_thumb', 'square_medium'] as const;
+    const variants: ProcessedVariant[] = [];
+
+    for (const variant of squareVariants) {
+      const size = IMAGE_VARIANT_SIZES[variant];
+      const { data, info } = await sharp(buf)
+        .extract({ left: x, top: y, width: w, height: h })
+        .resize(size.width, size.height, { fit: 'cover', position: 'centre' })
+        .jpeg({ quality: 84, mozjpeg: true })
+        .withMetadata({})
+        .toBuffer({ resolveWithObject: true });
+
+      const hash = StorageService.shortHash(data);
+      const key = `${scope}/${entityId}/${sourceId}/${variant}-${hash}.jpg`;
+      const put = await this.driver.put({
+        key,
+        body: data,
+        contentType: 'image/jpeg',
+      });
+      variants.push({
+        variant,
+        path: key,
+        width: info.width,
+        height: info.height,
+        sizeBytes: put.size,
+        mimeType: 'image/jpeg',
+      });
+      if (actorId) {
+        await this.quota.track({
+          userId: actorId,
+          module,
+          resourceId: entityId,
+          purpose: `image-${variant}`,
+          objectKey: key,
+          bytes: put.size,
+          contentType: 'image/jpeg',
+          fileType: 'image',
+        });
+      }
+    }
+    return { variants };
+  }
+
   private static async renderVariant(
     base: sharp.Sharp,
     variant: ImageVariantLiteral,

@@ -20,12 +20,14 @@ import { TPipe } from '../i18n/t.pipe';
 import {
   TezaurService,
   type GearState,
+  type ImageCropRect,
   type TezaurBrandSuggestion,
   type TezaurDraftDetail,
   type TezaurDraftImage,
   type TezaurDraftPayload,
   type TezaurFamilySuggestion,
 } from './tezaur.service';
+import { ImageCropperModalComponent } from './image-cropper-modal.component';
 
 /* ============================================================
    Static option tables — RO labels for backend enum literals.
@@ -221,7 +223,13 @@ interface LinkRow {
 @Component({
   selector: 'app-tezaur-add-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TPipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TPipe,
+    ImageCropperModalComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './tezaur-add.page.html',
   styles: [
@@ -370,12 +378,22 @@ export class TezaurAddPage {
   readonly relationships = signal<RelationshipRow[]>([]);
   readonly linkRows = signal<LinkRow[]>([]);
 
+  /** Source-id → original variant row, for the cropper. */
+  readonly originalsBySourceId = signal<Map<string, TezaurDraftImage>>(new Map());
+
   readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   readonly submitError = signal<string | null>(null);
   readonly submitMissing = signal<string[]>([]);
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly uploadingImages = signal(0);
+
+  /* ---------- cropper modal ---------- */
+  readonly cropperOpen = signal(false);
+  readonly cropperSourceId = signal<string | null>(null);
+  readonly cropperSrc = signal<string>('');
+  readonly cropperInitialCrop = signal<ImageCropRect | null>(null);
+  readonly cropperSaving = signal(false);
 
   /* ---------- auto-suggest ---------- */
   readonly brandSuggestions = signal<TezaurBrandSuggestion[]>([]);
@@ -533,6 +551,7 @@ export class TezaurAddPage {
     this.draftState.set(g.state);
     this.rejectionReason.set(g.rejectionReason);
     this.images.set(detail.images.filter((i) => i.variant === 'square_thumb'));
+    this.originalsBySourceId.set(this.buildOriginalsMap(detail.images));
     this.linkRows.set(
       detail.links.map((l) => ({
         linkId: l.id,
@@ -829,6 +848,52 @@ export class TezaurAddPage {
     if (!id) return;
     const detail = await this.tezaur.getDraft(id);
     this.images.set(detail.images.filter((i) => i.variant === 'square_thumb'));
+    this.originalsBySourceId.set(this.buildOriginalsMap(detail.images));
+  }
+
+  private buildOriginalsMap(
+    all: TezaurDraftImage[],
+  ): Map<string, TezaurDraftImage> {
+    const map = new Map<string, TezaurDraftImage>();
+    for (const i of all) {
+      if (i.variant === 'original') map.set(i.sourceId, i);
+    }
+    return map;
+  }
+
+  /* ---------- cropper modal ---------- */
+  openCropper(sourceId: string): void {
+    if (this.isLocked()) return;
+    const original = this.originalsBySourceId().get(sourceId);
+    if (!original) return;
+    this.cropperSourceId.set(sourceId);
+    this.cropperSrc.set(this.tezaur.imageUrl(original.path));
+    this.cropperInitialCrop.set(original.crop ?? null);
+    this.cropperOpen.set(true);
+  }
+
+  closeCropper(): void {
+    this.cropperOpen.set(false);
+    this.cropperSourceId.set(null);
+    this.cropperSrc.set('');
+    this.cropperInitialCrop.set(null);
+  }
+
+  async onCropperSave(crop: ImageCropRect): Promise<void> {
+    const id = this.draftId();
+    const sourceId = this.cropperSourceId();
+    if (!id || !sourceId) return;
+    this.cropperSaving.set(true);
+    try {
+      await this.tezaur.setDraftImageCrop(id, sourceId, crop);
+      await this.refreshImages();
+      this.closeCropper();
+    } catch (err) {
+      console.error('[tezaur-add] crop save failed', err);
+      alert(this.i18n.t('cropper.error'));
+    } finally {
+      this.cropperSaving.set(false);
+    }
   }
 
   /* ---------- drag-to-reorder ---------- */

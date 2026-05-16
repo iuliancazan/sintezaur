@@ -99,6 +99,13 @@
       "when": 1779030000000,
       "tag": "0015_listing_tagline_defects",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1779580000000,
+      "tag": "0016_gear_image_crop",
+      "breakpoints": true
     }
   ]
 }

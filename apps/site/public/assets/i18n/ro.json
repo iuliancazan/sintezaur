@@ -1299,6 +1299,20 @@
     "queued_note": "în coadă de moderare",
     "reject_label": "Motiv respingere"
   },
+  "cropper": {
+    "title": "Decupează imaginea",
+    "hint": "Trage imaginea pentru a alege portiunea, sau folosește slider-ul pentru zoom.",
+    "loading": "Se încarcă originalul…",
+    "zoom": "Zoom",
+    "reset": "Resetează",
+    "save": "Salvează",
+    "saving": "Salvez…",
+    "cancel": "Anulează",
+    "close": "Închide",
+    "edit_aria": "Editează decuparea acestei imagini",
+    "edit_tooltip": "Click pentru decupare",
+    "error": "Nu s-a putut salva decuparea. Încearcă din nou."
+  },
   "contributii_tezaur": {
     "breadcrumb": "Cont · Contribuții Tezaur",
     "title": "Contribuții",

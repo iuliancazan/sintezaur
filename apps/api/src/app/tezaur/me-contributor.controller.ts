@@ -27,6 +27,7 @@ import type {
   CreateGearRelationshipDto,
   MeCreateGearDto,
   MeUpdateGearDto,
+  SetImageCropDto,
 } from './tezaur.dto';
 
 /**
@@ -140,6 +141,22 @@ export class MeContributorController {
     @Body('sourceIds') sourceIds: string[],
   ) {
     await this.tezaur.meReorderImages(id, user.sub, sourceIds ?? []);
+  }
+
+  @Patch('gear/:id/images/:sourceId/crop')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async setImageCrop(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('sourceId', ParseUUIDPipe) sourceId: string,
+    @Body() dto: SetImageCropDto,
+  ) {
+    await this.tezaur.meSetImageCrop(id, user.sub, sourceId, {
+      x: dto.x,
+      y: dto.y,
+      w: dto.w,
+      h: dto.h,
+    });
   }
 
   /* ---------- links ---------- */

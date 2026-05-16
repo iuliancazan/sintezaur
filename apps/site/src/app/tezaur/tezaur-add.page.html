@@ -408,6 +408,15 @@
                   drag
                 </span>
                 <button
+                  class="ta-img__crop"
+                  type="button"
+                  [attr.aria-label]="i18n.t('cropper.edit_aria')"
+                  [title]="'cropper.edit_tooltip' | t"
+                  (click)="openCropper(img.sourceId)"
+                >
+                  <svg><use href="#i-edit"/></svg>
+                </button>
+                <button
                   class="ta-img__del"
                   type="button"
                   [attr.aria-label]="i18n.t('tezaur.add.img_delete_aria')"
@@ -845,9 +854,26 @@
         </header>
         <div class="ta-side__body">
           <div class="ta-preview">
-            <div class="ta-preview__media">
+            <div
+              class="ta-preview__media"
+              [class.is-clickable]="images().length > 0 && !isLocked()"
+              [attr.role]="images().length > 0 && !isLocked() ? 'button' : null"
+              [attr.tabindex]="images().length > 0 && !isLocked() ? 0 : null"
+              [attr.aria-label]="
+                images().length > 0 && !isLocked()
+                  ? (i18n.t('cropper.edit_aria'))
+                  : null
+              "
+              (click)="images().length > 0 && !isLocked() && openCropper(images()[0].sourceId)"
+              (keydown.enter)="images().length > 0 && !isLocked() && openCropper(images()[0].sourceId)"
+            >
               @if (previewImage()) {
                 <img [src]="previewImage()" [alt]="previewBrand() + ' ' + previewModel()" />
+                @if (images().length > 0 && !isLocked()) {
+                  <span class="ta-preview__crop-hint">
+                    {{ 'cropper.edit_tooltip' | t }}
+                  </span>
+                }
               } @else {
                 <div class="img-tile-empty">— fără imagine —</div>
               }
@@ -992,3 +1018,13 @@
     </aside>
   </div>
 </div>
+
+@if (cropperOpen()) {
+  <app-image-cropper-modal
+    [src]="cropperSrc()"
+    [initialCrop]="cropperInitialCrop()"
+    [saving]="cropperSaving"
+    (save)="onCropperSave($event)"
+    (cancel)="closeCropper()"
+  />
+}

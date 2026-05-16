@@ -1375,6 +1375,88 @@ export class TezaurService {
     await this.detachImage(gearId, sourceId);
   }
 
+  /**
+   * Apply a user-selected crop window to a draft image. Regenerates the
+   * square_thumb + square_medium variants from the original and swaps the
+   * DB rows to point to the new content-addressed keys. The crop window
+   * is also persisted on the row for the `original` variant so the user
+   * can re-open the cropper on the same crop.
+   */
+  async meSetImageCrop(
+    gearId: string,
+    userId: string,
+    sourceId: string,
+    crop: { x: number; y: number; w: number; h: number },
+  ): Promise<void> {
+    await this.assertOwnsEditableDraft(gearId, userId);
+
+    // Load all variants of this source so we can find the original
+    // (input for re-render) + the square keys we'll replace.
+    const rows = await this.db
+      .select({
+        id: gearImages.id,
+        variant: gearImages.variant,
+        path: gearImages.path,
+      })
+      .from(gearImages)
+      .where(
+        and(eq(gearImages.gearId, gearId), eq(gearImages.sourceId, sourceId)),
+      );
+    if (!rows.length) {
+      throw new NotFoundException(`image source ${sourceId} not found`);
+    }
+    const originalRow = rows.find((r) => r.variant === 'original');
+    if (!originalRow) {
+      throw new NotFoundException(
+        `original variant missing for source ${sourceId}`,
+      );
+    }
+
+    const { variants: newVariants } =
+      await this.storage.regenerateSquareVariantsWithCrop(
+        'gear',
+        gearId,
+        sourceId,
+        originalRow.path,
+        crop,
+        userId,
+      );
+
+    const oldSquareKeys = rows
+      .filter(
+        (r) => r.variant === 'square_thumb' || r.variant === 'square_medium',
+      )
+      .map((r) => r.path);
+
+    await this.db.transaction(async (tx) => {
+      for (const v of newVariants) {
+        await tx
+          .update(gearImages)
+          .set({
+            path: v.path,
+            width: v.width,
+            height: v.height,
+            sizeBytes: v.sizeBytes,
+            mimeType: v.mimeType,
+          })
+          .where(
+            and(
+              eq(gearImages.gearId, gearId),
+              eq(gearImages.sourceId, sourceId),
+              eq(gearImages.variant, v.variant),
+            ),
+          );
+      }
+      await tx
+        .update(gearImages)
+        .set({ crop })
+        .where(eq(gearImages.id, originalRow.id));
+    });
+
+    // Delete old square keys best-effort — DB is already updated.
+    await this.storage.deleteObjects(oldSquareKeys);
+  }
+
   /** Reorder the gallery — `sourceIds` is the new top-to-bottom order. */
   async meReorderImages(
     gearId: string,

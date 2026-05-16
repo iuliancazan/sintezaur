@@ -84,6 +84,15 @@ export interface TezaurDraftImage {
   height: number;
   position: number;
   caption: string | null;
+  /** Manual crop rect in original image coords; only set on `original` variant rows. */
+  crop?: { x: number; y: number; w: number; h: number } | null;
+}
+
+export interface ImageCropRect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }
 
 export interface TezaurDraftLink {
@@ -341,6 +350,19 @@ export class TezaurService {
       this.http.patch<void>(
         `${this.base}/me/tezaur/gear/${gearId}/images/reorder`,
         { sourceIds },
+      ),
+    );
+  }
+
+  setDraftImageCrop(
+    gearId: string,
+    sourceId: string,
+    crop: ImageCropRect,
+  ): Promise<void> {
+    return firstValueFrom(
+      this.http.patch<void>(
+        `${this.base}/me/tezaur/gear/${gearId}/images/${sourceId}/crop`,
+        crop,
       ),
     );
   }
