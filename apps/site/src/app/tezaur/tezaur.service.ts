@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { AppConfigService } from '@sintezaur/ui';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -183,6 +184,7 @@ export interface TezaurDetail {
 @Injectable({ providedIn: 'root' })
 export class TezaurService {
   private readonly http = inject(HttpClient);
+  private readonly appConfig = inject(AppConfigService);
   private readonly base = environment.apiBaseUrl;
 
   list(query: TezaurListQuery = {}): Promise<TezaurListResponse> {
@@ -202,11 +204,9 @@ export class TezaurService {
     );
   }
 
-  /** Absolute URL to an uploaded image variant (served by api on /uploads). */
-  imageUrl(relativePath: string): string {
-    // `apiBaseUrl` ends with /api; strip that to land on the host root
-    // where /uploads/* is served.
-    return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
+  /** Absolute URL to an uploaded image variant. Resolved against the storage public base. */
+  imageUrl(relativePath: string | null | undefined): string {
+    return this.appConfig.imageUrl(relativePath);
   }
 
   /* ============================================================
@@ -217,6 +217,18 @@ export class TezaurService {
     return firstValueFrom(
       this.http.get<TezaurBrandSuggestion[]>(
         `${this.base}/tezaur/meta/brands`,
+      ),
+    );
+  }
+
+  /**
+   * Contributor brand list — includes the caller's own drafts so a freshly
+   * created brand isn't missing from autocomplete while it's in moderation.
+   */
+  listMyBrandSuggestions(): Promise<TezaurBrandSuggestion[]> {
+    return firstValueFrom(
+      this.http.get<TezaurBrandSuggestion[]>(
+        `${this.base}/me/tezaur/meta/brands`,
       ),
     );
   }

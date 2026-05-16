@@ -8,6 +8,7 @@ import type {
   ListingSortLiteral,
   ListingStatusLiteral,
 } from '@sintezaur/shared';
+import { AppConfigService } from '@sintezaur/ui';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -311,6 +312,7 @@ export interface BazarListingDetail {
 @Injectable({ providedIn: 'root' })
 export class BazarService {
   private readonly http = inject(HttpClient);
+  private readonly appConfig = inject(AppConfigService);
   private readonly base = environment.apiBaseUrl;
 
   list(query: BazarListQuery = {}): Promise<BazarListResponse> {
@@ -674,8 +676,8 @@ export class BazarService {
     );
   }
 
-  /** Absolute URL to an uploaded image variant. */
-  imageUrl(relativePath: string): string {
-    return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
+  /** Absolute URL to an uploaded image variant. Resolved against the storage public base. */
+  imageUrl(relativePath: string | null | undefined): string {
+    return this.appConfig.imageUrl(relativePath);
   }
 }

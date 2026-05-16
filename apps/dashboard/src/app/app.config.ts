@@ -12,7 +12,12 @@ import {
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import { SintezaurPreset, provideSintezaurIcons } from '@sintezaur/ui';
+import {
+  AppConfigService,
+  SintezaurPreset,
+  provideSintezaurIcons,
+} from '@sintezaur/ui';
+import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
@@ -40,7 +45,13 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(async () => {
       const i18n = inject(I18nService);
       const auth = inject(AuthService);
-      await Promise.all([i18n.init('ro'), auth.loadCurrentUser()]);
+      const appConfig = inject(AppConfigService);
+      appConfig.setFallback(environment.imageBaseUrl);
+      await Promise.all([
+        i18n.init('ro'),
+        auth.loadCurrentUser(),
+        appConfig.bootstrap(environment.apiBaseUrl),
+      ]);
     }),
   ],
 };

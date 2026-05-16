@@ -12,7 +12,12 @@ import {
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
-import { SintezaurPreset, provideSintezaurIcons } from '@sintezaur/ui';
+import {
+  AppConfigService,
+  SintezaurPreset,
+  provideSintezaurIcons,
+} from '@sintezaur/ui';
+import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from './auth/auth.interceptor';
 import { AuthService } from './auth/auth.service';
@@ -47,15 +52,23 @@ export const appConfig: ApplicationConfig = {
      *   1. the RO bundle is loaded (no key-flash on first paint)
      *   2. /auth/me has resolved (no anonymous flash for already-
      *      logged-in users)
-     * Both run in parallel — the slower of the two gates boot.
+     *   3. /config has resolved (image URLs need the storage public
+     *      base — falls back to the env default if the fetch fails)
+     * Parallel — the slowest gates boot.
      */
     provideAppInitializer(async () => {
       const i18n = inject(I18nService);
       const auth = inject(AuthService);
       const umami = inject(UmamiService);
+      const appConfig = inject(AppConfigService);
+      appConfig.setFallback(environment.imageBaseUrl);
       // Umami is fire-and-forget — don't gate boot on its script load.
       umami.init();
-      await Promise.all([i18n.init('ro'), auth.loadCurrentUser()]);
+      await Promise.all([
+        i18n.init('ro'),
+        auth.loadCurrentUser(),
+        appConfig.bootstrap(environment.apiBaseUrl),
+      ]);
     }),
   ],
 };

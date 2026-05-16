@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { AppConfigService } from '@sintezaur/ui';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -28,6 +29,7 @@ export interface AdminArticlesResponse {
 @Injectable({ providedIn: 'root' })
 export class RevistaAdminService {
   private readonly http = inject(HttpClient);
+  private readonly appConfig = inject(AppConfigService);
   private readonly base = environment.apiBaseUrl;
 
   list(query: {
@@ -60,7 +62,7 @@ export class RevistaAdminService {
     );
   }
 
-  imageUrl(relativePath: string): string {
-    return `${this.base.replace(/\/api$/, '')}/uploads/${relativePath}`;
+  imageUrl(relativePath: string | null | undefined): string {
+    return this.appConfig.imageUrl(relativePath);
   }
 }

@@ -355,26 +355,31 @@
           </div>
         </header>
         <div class="ta-sec__body">
-          <label
+          <div
             class="ta-drop"
             tabindex="0"
-            (drop)="onDrop($event)"
+            role="button"
+            (click)="fileInput.click()"
+            (keydown.enter)="fileInput.click()"
+            (keydown.space)="fileInput.click(); $event.preventDefault()"
+            (dragenter)="onDragOver($event)"
             (dragover)="onDragOver($event)"
+            (drop)="onDrop($event)"
           >
             <div class="ta-drop__icon">
               <svg width="28" height="28"><use href="#i-upload"/></svg>
             </div>
             <div class="ta-drop__primary" [innerHTML]="'tezaur.add.drop_primary' | t"></div>
             <div class="ta-drop__sub" [innerHTML]="'tezaur.add.drop_sub' | t"></div>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              multiple
-              style="display:none"
-              (change)="onFileSelected($event)"
-              #fileInput
-            />
-          </label>
+          </div>
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            style="display:none"
+            (change)="onFileSelected($event)"
+            #fileInput
+          />
 
           <div class="ta-imgs">
             @for (img of images(); track img.sourceId; let idx = $index) {

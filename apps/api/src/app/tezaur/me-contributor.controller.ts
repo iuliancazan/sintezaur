@@ -50,6 +50,17 @@ export class MeContributorController {
     return this.tezaur.meListMyDrafts(user.sub);
   }
 
+  /**
+   * Brand auto-suggest for the contributor editor. Same shape as the
+   * public `/tezaur/meta/brands` endpoint but also includes the calling
+   * user's own pending/rejected/submitted drafts — so a brand they just
+   * created shows up immediately instead of waiting for moderator approval.
+   */
+  @Get('meta/brands')
+  listMyBrands(@CurrentUser() user: AuthenticatedUser) {
+    return this.tezaur.listBrandsForUser(user.sub);
+  }
+
   @Post('gear')
   createDraft(
     @CurrentUser() user: AuthenticatedUser,

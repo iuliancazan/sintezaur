@@ -21,6 +21,7 @@ import { TezaurModule } from './tezaur/tezaur.module';
 import { AdminClosureModule } from './admin-closure/admin-closure.module';
 import { AdminStorageModule } from './admin-storage/admin-storage.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
+import { AppConfigModule } from './app-config/app-config.module';
 import { FeedbackModule } from './feedback/feedback.module';
 import { GdprModule } from './gdpr/gdpr.module';
 import { LegalModule } from './legal/legal.module';
@@ -66,6 +67,7 @@ import { StorageModule } from './storage/storage.module';
     AdminClosureModule,
     AdminStorageModule,
     AdminUsersModule,
+    AppConfigModule,
     LegalModule,
     SearchModule,
     SeoModule,

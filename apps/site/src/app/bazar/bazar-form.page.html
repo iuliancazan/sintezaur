@@ -229,22 +229,29 @@
         </header>
         <div class="ta-sec__body">
 
-          <label class="ta-drop"
-            (drop)="onPhotoDrop($event)"
-            (dragover)="onPhotoDragOver($event)">
+          <div class="ta-drop"
+            tabindex="0"
+            role="button"
+            (click)="dropInput.click()"
+            (keydown.enter)="dropInput.click()"
+            (keydown.space)="dropInput.click(); $event.preventDefault()"
+            (dragenter)="onPhotoDragOver($event)"
+            (dragover)="onPhotoDragOver($event)"
+            (drop)="onPhotoDrop($event)">
             <div class="ta-drop__icon">
               <svg width="28" height="28"><use href="#i-upload"/></svg>
             </div>
             <div class="ta-drop__primary" [innerHTML]="'bazar.form.dropzone_primary' | t"></div>
             <div class="ta-drop__sub" [innerHTML]="'bazar.form.dropzone_sub' | t"></div>
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              multiple
-              style="display:none"
-              (change)="onPhotoSelected($any($event.target))"
-            />
-          </label>
+          </div>
+          <input
+            #dropInput
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            multiple
+            style="display:none"
+            (change)="onPhotoSelected($any($event.target))"
+          />
 
           @if (photoTiles().length || uploadingImages() > 0) {
             <div class="ta-imgs">

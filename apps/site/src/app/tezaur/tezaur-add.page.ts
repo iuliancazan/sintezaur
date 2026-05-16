@@ -506,7 +506,7 @@ export class TezaurAddPage {
   private async bootstrap(): Promise<void> {
     try {
       const [brands, families] = await Promise.all([
-        this.tezaur.listBrandSuggestions().catch(() => []),
+        this.tezaur.listMyBrandSuggestions().catch(() => []),
         this.tezaur.listFamilySuggestions().catch(() => []),
       ]);
       this.brandSuggestions.set(brands);

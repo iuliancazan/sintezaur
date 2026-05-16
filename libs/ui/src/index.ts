@@ -14,6 +14,9 @@ export {
 } from './lib/theme/theme.service';
 export { SintezaurPreset } from './lib/theme/primeng-preset';
 
+// App config (runtime — image base URL)
+export { AppConfigService } from './lib/app-config/app-config.service';
+
 // Icons
 export {
   SINTEZAUR_ICON_NAMES,

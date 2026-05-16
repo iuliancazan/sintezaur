@@ -25,7 +25,7 @@ import {
   userGearStatuses,
 } from '@sintezaur/db';
 import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
-import { and, asc, desc, eq, ilike, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm';
 import type { Request } from 'express';
 import { AuditLogService } from '../common/audit-log.service';
 import { StorageService, type ProcessedUpload } from '../common/storage.service';
@@ -1457,6 +1457,31 @@ export class TezaurService {
       })
       .from(gear)
       .where(and(eq(gear.published, true), isNull(gear.deletedAt)))
+      .groupBy(gear.brand)
+      .orderBy(desc(sql`count(*)`), asc(gear.brand))
+      .limit(200);
+  }
+
+  /**
+   * Brand list for the authenticated contributor — published brands plus
+   * the user's own non-published drafts/submissions. Stops "I just added
+   * a Korg draft, why isn't Korg in the autocomplete?".
+   */
+  async listBrandsForUser(
+    userId: string,
+  ): Promise<{ name: string; count: number }[]> {
+    return this.db
+      .select({
+        name: gear.brand,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(gear)
+      .where(
+        and(
+          isNull(gear.deletedAt),
+          or(eq(gear.published, true), eq(gear.createdBy, userId)),
+        ),
+      )
       .groupBy(gear.brand)
       .orderBy(desc(sql`count(*)`), asc(gear.brand))
       .limit(200);
