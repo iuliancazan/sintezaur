@@ -19,6 +19,7 @@ import { SzAvatarComponent, SzBadgeComponent, SzButtonComponent, SzIconComponent
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
+import { LocaleService } from '../i18n/locale.service';
 import { SeoService } from '../seo/seo.service';
 import { clampDescription, stripHtml, uploadUrl } from '../seo/seo.utils';
 import { TPipe } from '../i18n/t.pipe';
@@ -164,7 +165,7 @@ interface ReviewsResponse {
             }
 
             <div class="td-info__ctas">
-              <button sz-button variant="primary">
+              <button sz-button variant="primary" (click)="quickListOnBazar(d.gear.id)">
                 {{ 'tezaur.detail.ctas.sell' | t }}
               </button>
               @if (d.links.length) {
@@ -642,6 +643,7 @@ interface ReviewsResponse {
 })
 export class TezaurDetailPage {
   readonly i18n = inject(I18nService);
+  readonly locale = inject(LocaleService);
   readonly auth = inject(AuthService);
   readonly tezaur = inject(TezaurService);
   private readonly route = inject(ActivatedRoute);
@@ -886,6 +888,18 @@ export class TezaurDetailPage {
     } finally {
       this.reviewSubmitting.set(false);
     }
+  }
+
+  /**
+   * Quick-list this gear on Bazar (spec §6.2 / §8.2). Navigates to the
+   * new-listing form with `?gear=<id>` so the form can preselect the
+   * Tezaur reference. The form falls back to a blank dropdown if the
+   * id isn't recognised — degrades gracefully.
+   */
+  quickListOnBazar(gearId: string): void {
+    void this.router.navigateByUrl(
+      this.locale.localizeUrl(`/bazar/nou?gear=${encodeURIComponent(gearId)}`),
+    );
   }
 
   async onCollectionChange(status: UserGearStatusFlagLiteral | ''): Promise<void> {

@@ -449,7 +449,23 @@
       "show_count": "Showing {{shown}} of {{total}}"
     },
     "add_button": "Add to Tezaur",
-    "add_button_aria": "Add a new gear entry to Tezaur"
+    "add_button_aria": "Add a new gear entry to Tezaur",
+    "detail": {
+      "back_to_list": "Back to Catalog",
+      "breadcrumb_root": "Catalog",
+      "tabs": {
+        "detalii": "Details",
+        "specs": "Specs",
+        "pret": "Price",
+        "recenzii": "Reviews",
+        "listari": "Listings",
+        "forum": "Forum"
+      },
+      "ctas": {
+        "sell": "Sell on Bazar",
+        "buy_from": "Buy from…"
+      }
+    }
   },
   "bazar": {
     "page_eyebrow": "Bazar · Music marketplace",

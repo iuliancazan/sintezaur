@@ -174,11 +174,11 @@
       "back_to_list": "Înapoi la Tezaur",
       "breadcrumb_root": "Tezaur",
       "tabs": {
-        "details": "Detalii",
+        "detalii": "Detalii",
         "specs": "Specs",
-        "price": "Preț",
-        "reviews": "Recenzii",
-        "listings": "Listări",
+        "pret": "Preț",
+        "recenzii": "Recenzii",
+        "listari": "Listări",
         "forum": "Forum"
       },
       "stats": {
