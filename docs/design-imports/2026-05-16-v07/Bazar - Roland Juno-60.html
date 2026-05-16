@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roland Juno-60 · 4 200 RON — Bazar — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="05 Bazar — detail (Juno-60)">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M2 7h12v9H2zM14 11h4l3 3v2h-7z"/><circle cx="6" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+      <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8 11l8-4M8 13l8 4"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link is-active" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <button class="icon-btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg></button>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- BREADCRUMB -->
+    <nav class="td-crumb" aria-label="Breadcrumb">
+      <a href="Bazar.html" style="display:inline-flex; align-items:center; gap:6px">
+        <svg width="14" height="14"><use href="#i-back"/></svg>
+        Înapoi la Bazar
+      </a>
+      <span class="sep">·</span>
+      <a href="Bazar.html">Bazar</a>
+      <span class="sep">/</span>
+      <a href="#">Sintetizator</a>
+      <span class="sep">/</span>
+      <a href="#">Roland</a>
+      <span class="sep">/</span>
+      <span class="cur">Juno-60 · București</span>
+    </nav>
+
+    <!-- HERO -->
+    <section class="bd-hero crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+
+      <div class="bd-gallery">
+        <div class="bd-gallery__main">
+          <span class="bd-gallery__chip">Foarte bun</span>
+          <div class="gear-fill" data-gear="juno-60">
+            <img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="Roland Juno-60" onerror="this.remove()" />
+          </div>
+          <div class="bd-gallery__counter">01 / 08</div>
+          <div class="bd-gallery__nav">
+            <button aria-label="Anterior" data-prev>‹</button>
+            <button aria-label="Următorul" data-next>›</button>
+          </div>
+        </div>
+        <div class="bd-gallery__thumbs">
+          <div class="bd-thumb is-active"><div class="gear-fill" data-gear="juno-60"><img class="gear-fill__photo" src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="" onerror="this.remove()" /></div></div>
+          <div class="bd-thumb"><div class="gear-fill" data-gear="juno-60"></div></div>
+          <div class="bd-thumb"><div class="gear-fill" data-gear="juno-60"></div></div>
+          <div class="bd-thumb"><div class="gear-fill" data-gear="juno-60"></div></div>
+          <div class="bd-thumb"><div class="gear-fill" data-gear="juno-60"></div></div>
+        </div>
+      </div>
+
+      <div class="bd-info">
+        <div class="bd-info__topline">
+          <span class="bd-info__brand">Roland · vinde</span>
+          <span class="bd-info__status">Listing activ</span>
+        </div>
+        <h1 class="bd-info__title">Juno-60</h1>
+        <p class="bd-info__sub">Polifonic analog 6 voci, anul 1982 — service complet în martie 2026, slidere noi.</p>
+
+        <div class="bd-info__price-row">
+          <div class="bd-info__price">4 200<small>RON · ≈ 845 €</small></div>
+          <div class="bd-info__price-side">
+            <span class="bd-info__price-old">4 500 RON</span>
+            <span class="bd-info__price-delta">300 RON · acum 3 zile</span>
+          </div>
+        </div>
+
+        <div class="bd-info__chips">
+          <span class="bd-info__chip">
+            <svg><use href="#i-pin"/></svg>
+            București · Sector 3
+          </span>
+          <span class="bd-info__chip">
+            <svg><use href="#i-truck"/></svg>
+            Ridicare & livrare
+          </span>
+          <span class="bd-info__chip is-accent">Negociabil ↕</span>
+        </div>
+
+        <div class="bd-info__deal">
+          <div class="bd-info__deal-cell">
+            <span class="k">// Tranzacție</span>
+            <span class="v">Vând · sau schimb</span>
+          </div>
+          <div class="bd-info__deal-cell">
+            <span class="k">// Plata</span>
+            <span class="v">Cash / OP / Revolut</span>
+          </div>
+        </div>
+
+        <div class="bd-info__ctas">
+          <button class="bd-info__cta bd-info__cta--primary">Trimite mesaj</button>
+          <button class="bd-info__cta bd-info__cta--ghost">Fă o ofertă →</button>
+          <button class="bd-info__cta bd-info__cta--icon" data-save aria-label="Salvează">
+            <svg><use href="#i-heart"/></svg>
+          </button>
+        </div>
+
+        <div class="bd-info__posted">
+          <span><span class="accent">Postat</span> · acum 6 zile · 09.05.2026</span>
+          <span>
+            <svg width="11" height="11" style="display:inline-block;vertical-align:-1px;margin-right:4px"><use href="#i-eye"/></svg>
+            342 vizualizări
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MAIN: description + sidebar -->
+    <div class="bd-main">
+
+      <div>
+        <!-- DESCRIERE -->
+        <section class="bd-desc">
+          <h2>Despre exemplarul ăsta</h2>
+          <p>
+            Juno-60 din 1982, serial number RV81xx — am cumpărat-o în 2019 de la un studio din Cluj
+            și a stat la mine ca instrument principal pentru pads și basuri timp de 7 ani. Acum trec
+            la un Prophet-6 desktop și mă doare să o las să plece, dar nu mai are sens să țin două
+            polifonice pe un singur birou.
+          </p>
+          <p>
+            <strong>Service complet făcut în martie 2026</strong> la atelierul lui Bogdan Mihai
+            (București) — capac deschis, condensatori re-makați, slidere și butoane înlocuite cu set
+            nou Mouser, calibrat la voci. Am chitanță și foaie de service cu fotografii. Costul a
+            fost 1 200 RON și se simte — acordajul e perfect, fără drift, fără pârâit pe slidere.
+          </p>
+          <p>
+            Vine cu <strong>adaptor Tubbutec MIDI-to-DCB</strong> instalat intern (mod reversibil,
+            cu switch pe spate — poți reveni la DCB original în 5 minute). Acum primește MIDI direct,
+            inclusiv velocity și aftertouch routate pe filter cutoff. Mod-ul l-am făcut tot la Bogdan,
+            tot acum în martie.
+          </p>
+
+          <h3>Stare cosmetică</h3>
+          <p>
+            8.5 / 10. Are două zgârieturi mici pe capacul de sus (vizibile în pozele 4 și 5) și
+            wood-side-urile sunt originale, cu patina normală de 44 de ani. Clapele sunt toate
+            răspunsabile, niciuna nu zgârie. Display-ul de patch e clar, fără pixeli morți.
+          </p>
+
+          <h3>Ce e inclus</h3>
+        </section>
+
+        <section class="bd-included">
+          <h3>Conținut pachet</h3>
+          <div class="bd-included__grid">
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">Cablu alimentare</span>
+              <span class="note">Original Roland, EU plug</span>
+            </div>
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">Manual original</span>
+              <span class="note">EN, 24 pagini, mic uzat</span>
+            </div>
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">Foaie service 2026</span>
+              <span class="note">+ chitanță atelier</span>
+            </div>
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">MIDI-to-DCB intern</span>
+              <span class="note">Tubbutec, instalat</span>
+            </div>
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">Hardcase (Decksaver)</span>
+              <span class="note">Capac dust, ca nou</span>
+            </div>
+            <div class="bd-included__cell is-missing">
+              <span class="ico">○</span>
+              <span class="lbl">Cutie originală</span>
+              <span class="note">Lipsește — nu o am</span>
+            </div>
+            <div class="bd-included__cell is-missing">
+              <span class="ico">○</span>
+              <span class="lbl">Pedală sustain</span>
+              <span class="note">Nu inclusă</span>
+            </div>
+            <div class="bd-included__cell">
+              <span class="ico">✓</span>
+              <span class="lbl">56 patches programate</span>
+              <span class="note">Lista la cerere</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- MINI SPECS -->
+        <section class="bd-mini-specs">
+          <header class="bd-mini-specs__head">
+            <h3>Specificații pe scurt</h3>
+            <a class="block__cta" href="Tezaur - Roland Juno-60.html">Pagina Tezaur completă</a>
+          </header>
+          <div class="bd-mini-specs__body">
+            <div class="bd-mini-specs__row"><span class="k">An lansare</span><span class="v">1982</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Polifonie</span><span class="v">6 voci</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Oscilatori / voce</span><span class="v">1 DCO + sub</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Filtru</span><span class="v">LP 4-pol + HP</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Patch memory</span><span class="v">56 patches</span></div>
+            <div class="bd-mini-specs__row"><span class="k">MIDI (acest exemplar)</span><span class="v">Da — Tubbutec mod</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Greutate</span><span class="v">12 kg</span></div>
+            <div class="bd-mini-specs__row"><span class="k">Tensiune</span><span class="v">230V · funcționează</span></div>
+          </div>
+        </section>
+
+        <!-- SIMILAR LISTINGS -->
+        <section class="bd-similar">
+          <header class="bd-similar__head">
+            <h3>Alte Juno-60<span style="color:var(--accent)">.</span></h3>
+            <span class="sub">3 listinguri active · sortate după preț</span>
+          </header>
+          <div class="bz-grid" id="similar-grid"></div>
+        </section>
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="bd-sidebar">
+
+        <section class="bd-sidebar__block">
+          <header class="bd-sidebar__head">Vânzător</header>
+          <div class="bd-seller">
+            <div class="bd-seller__row">
+              <div class="bd-seller__avatar">AB</div>
+              <div>
+                <div class="bd-seller__name">Andrei Buzea</div>
+                <div class="bd-seller__handle">@andrei.b · membru din 2021</div>
+              </div>
+            </div>
+
+            <div class="bd-seller__stats">
+              <div class="bd-seller__stat">
+                <span class="v accent">4.9</span>
+                <span class="k">★ rating</span>
+              </div>
+              <div class="bd-seller__stat">
+                <span class="v">23</span>
+                <span class="k">Vânzări</span>
+              </div>
+              <div class="bd-seller__stat">
+                <span class="v">2-3h</span>
+                <span class="k">Răspuns</span>
+              </div>
+            </div>
+
+            <div class="bd-seller__rows">
+              <div>· <span class="accent">Verificat</span> · număr telefon validat</div>
+              <div>· <span class="accent">ID confirmat</span> · cont activ de 4 ani</div>
+              <div>· Apare pe forum: 218 postări, 14 threaduri pornite</div>
+              <div>· 23 tranzacții, 0 dispute, 22/23 review-uri 5★</div>
+            </div>
+
+            <div class="bd-seller__btns">
+              <a href="#">Vezi profil</a>
+              <a href="#">Toate listingurile (4)</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="bd-sidebar__block">
+          <header class="bd-sidebar__head">Cumpără în siguranță</header>
+          <div class="bd-safety">
+            <div class="bd-safety__item">
+              <span class="ico">1</span>
+              <span class="txt"><strong>Cere fotografii suplimentare</strong> sau un video scurt cu instrumentul funcționând înainte de plată.</span>
+            </div>
+            <div class="bd-safety__item">
+              <span class="ico">2</span>
+              <span class="txt"><strong>Vezi la vânzător</strong> dacă e în același oraș. Sintezaur nu mediază tranzacții.</span>
+            </div>
+            <div class="bd-safety__item">
+              <span class="ico">3</span>
+              <span class="txt"><strong>Plătește prin OP sau Revolut</strong>, nu prin transfer rapid Western Union sau MoneyGram.</span>
+            </div>
+            <div class="bd-safety__item">
+              <span class="ico">4</span>
+              <span class="txt"><strong>Verifică seria</strong> pe roland-archive.com și pe lista anuală de unități furate.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="bd-sidebar__block">
+          <header class="bd-sidebar__head">Alte anunțuri @andrei.b</header>
+          <div class="bd-other-list">
+            <a href="#">
+              <div class="mini"><div class="gear-fill" data-gear="model-d"></div></div>
+              <div class="mid">
+                <div class="ttl">Behringer Model D</div>
+                <div class="meta">Foarte bun · București</div>
+              </div>
+              <div class="pr">1 450 RON</div>
+            </a>
+            <a href="#">
+              <div class="mini"><div class="gear-fill" data-gear="volca-fm"></div></div>
+              <div class="mid">
+                <div class="ttl">Korg Volca FM Mk1</div>
+                <div class="meta">Ca nou · București</div>
+              </div>
+              <div class="pr">620 RON</div>
+            </a>
+            <a href="#">
+              <div class="mini"><div class="gear-fill" data-gear="0-coast"></div></div>
+              <div class="mid">
+                <div class="ttl">Make Noise 0-Coast</div>
+                <div class="meta">Bun · București</div>
+              </div>
+              <div class="pr">2 050 RON</div>
+            </a>
+          </div>
+          <a class="bd-report" href="#">Raportează listingul</a>
+        </section>
+
+      </aside>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidențialitate</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // Save toggle
+    const save = document.querySelector('[data-save]');
+    if (save) save.addEventListener('click', () => save.classList.toggle('is-on'));
+
+    // Similar listings (other Juno-60 ads)
+    const SIMILAR = [
+      { brand: "Roland", model: "Juno-60", key: "juno-60", price: "3 800", cur: "RON", cond: "Foarte bun", chip: "very_good", loc: "Cluj-Napoca", sellerInit: "PR", rating: "5.0", count: "21 vânzări", photo: "https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" },
+      { brand: "Roland", model: "Juno-60 + Decksaver", key: "juno-60", price: "4 600", cur: "RON", cond: "Ca nou", chip: "nou", loc: "Brașov", sellerInit: "IC", rating: "4.8", count: "9 vânzări" },
+      { brand: "Roland", model: "Juno-60 (pentru piese)", key: "juno-60", price: "1 800", cur: "RON", cond: "Pentru piese", chip: "very_good", loc: "Iași", sellerInit: "MM", rating: "4.6", count: "9 vânzări" }
+    ];
+    function listingMedia(l) {
+      const img = l.photo ? `<img class="gear-fill__photo" src="${l.photo}" alt="" onerror="this.remove()" />` : '';
+      return `<div class="gear-fill" data-gear="${l.key}">${img}</div>`;
+    }
+    document.getElementById('similar-grid').innerHTML = SIMILAR.map(l => `
+      <a class="listing" href="Bazar - Roland Juno-60.html" style="text-decoration:none; color:inherit;">
+        <div class="listing__media">
+          ${listingMedia(l)}
+          <span class="listing__chip" data-cond="${l.chip}">${l.cond}</span>
+          <button class="listing__heart" aria-label="Salvează"><svg><use href="#i-heart"/></svg></button>
+        </div>
+        <div class="listing__body">
+          <div class="listing__brand">// ${l.brand}</div>
+          <div class="listing__title">${l.model}</div>
+          <div class="listing__row">
+            <div class="listing__price">${l.price}<small>${l.cur}</small></div>
+            <div class="listing__loc">
+              <svg width="11" height="11"><use href="#i-pin"/></svg>
+              ${l.loc}
+            </div>
+          </div>
+          <div class="listing__seller">
+            <span class="avatar" style="width:22px;height:22px;font-size:10px">${l.sellerInit}</span>
+            <span><span class="star">★</span> ${l.rating}</span>
+            <span style="opacity:.5">·</span>
+            <span>${l.count}</span>
+          </div>
+        </div>
+      </a>
+    `).join('');
+
+    // Inject gear SVGs
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // Listing heart toggles
+    document.querySelectorAll('.listing__heart').forEach(b =>
+      b.addEventListener('click', e => { e.preventDefault(); b.classList.toggle('is-on'); })
+    );
+
+    // Gallery thumb switch + arrow cycle
+    let gIdx = 0;
+    const thumbs = document.querySelectorAll('.bd-thumb');
+    const counter = document.querySelector('.bd-gallery__counter');
+    function setG(i) {
+      gIdx = (i + thumbs.length) % thumbs.length;
+      thumbs.forEach((t, k) => t.classList.toggle('is-active', k === gIdx));
+      counter.textContent = String(gIdx + 1).padStart(2, '0') + ' / 08';
+    }
+    thumbs.forEach((t, i) => t.addEventListener('click', () => setG(i)));
+    document.querySelector('[data-prev]').addEventListener('click', () => setG(gIdx - 1));
+    document.querySelector('[data-next]').addEventListener('click', () => setG(gIdx + 1));
+  </script>
+</body>
+</html>

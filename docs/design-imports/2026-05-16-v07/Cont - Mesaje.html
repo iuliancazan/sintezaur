@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur — Home</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+  /* ============================================================
+     LOGGED-IN — topbar, avatar, dropdown, drawer, modal
+     ============================================================ */
+
+  /* --- icon badge (notif/mesaje count) --- */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute;
+    top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+
+  /* --- avatar (with deterministic hue + initials fallback) --- */
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    border-radius: 999px;
+    /* color set inline via JS */
+  }
+
+  /* --- avatar trigger button --- */
+  .avatar-menu { position: relative; }
+  .avatar-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 6px 2px 2px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+
+  .avatar-icon { padding: 0 !important; border-color: transparent !important; }
+  .avatar-icon:hover { border-color: var(--line) !important; }
+
+  /* --- dropdown panel --- */
+  .avatar-drop {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0, 0, 0, 0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60;
+    padding: 6px;
+    transform-origin: top right;
+    animation: avatar-drop-in 0.16s ease;
+  }
+  @keyframes avatar-drop-in {
+    from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  [data-theme="light"] .avatar-drop {
+    box-shadow: 0 18px 48px -12px rgba(60, 50, 20, 0.18);
+  }
+
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px;
+    margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name {
+    font-weight: 600; font-size: 14px; color: var(--fg);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .avatar-drop__handle {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted); margin-top: 3px;
+  }
+
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 13px;
+    color: var(--fg);
+    text-align: left;
+    border-radius: 2px;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__item.is-danger:hover svg { color: oklch(0.82 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger { color: oklch(0.45 0.18 28); }
+  [data-theme="light"] .avatar-drop__item.is-danger:hover { background: oklch(0.94 0.06 28); color: oklch(0.38 0.20 28); }
+
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 6px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    color: var(--fg-muted);
+    border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* --- mobile vs desktop visibility --- */
+  .tools__mobile { display: none !important; }
+  @media (max-width: 860px) {
+    .tools__desktop { display: none !important; }
+    .tools__mobile  { display: inline-flex !important; }
+  }
+  @media (max-width: 640px) {
+    /* original styles.css hides .nav on small; that's fine */
+    /* keep our 4 mobile icons visible — override the .btn-login hide which doesn't apply here */
+  }
+
+  /* --- mobile drawer --- */
+  .scrim {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(360px, 92vw);
+    height: 100dvh;
+    background: var(--bg);
+    border-left: 1px solid var(--line);
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.24s ease;
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+  }
+  .drawer.is-open { transform: translateX(0); }
+
+  .drawer__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .drawer__user { display: flex; align-items: center; gap: 12px; }
+  .drawer__name { font-weight: 600; font-size: 14px; }
+  .drawer__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+
+  .drawer__sec {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer__sec-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-subtle);
+    padding: 8px 8px 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .drawer__item {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%;
+    padding: 11px 8px;
+    font-size: 14px;
+    color: var(--fg);
+    text-align: left;
+    background: transparent; border: 0;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .drawer__item:hover { background: var(--bg-elev); }
+  .drawer__item svg { width: 18px; height: 18px; color: var(--fg-muted); flex-shrink: 0; }
+  .drawer__item .drawer__badge {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px;
+    background: var(--accent); color: var(--accent-fg);
+    border-radius: 999px;
+  }
+  .drawer__item.is-active { color: var(--accent); }
+  .drawer__item.is-danger { color: oklch(0.72 0.16 28); }
+  [data-theme="light"] .drawer__item.is-danger { color: oklch(0.45 0.18 28); }
+
+  /* --- modal --- */
+  .modal-back {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+    z-index: 110;
+    display: grid; place-items: center;
+    padding: 24px;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s ease;
+  }
+  .modal-back.is-open { opacity: 1; pointer-events: auto; }
+  .modal {
+    width: min(520px, 100%);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6);
+    transform: scale(0.96) translateY(8px);
+    transition: transform 0.18s ease;
+  }
+  .modal-back.is-open .modal { transform: scale(1) translateY(0); }
+  .modal__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal__head h3 { margin: 0; font-family: var(--font-display); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; }
+  .modal__body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .modal__foot {
+    display: flex; justify-content: flex-end; gap: 10px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .form-row { display: flex; flex-direction: column; gap: 6px; }
+  .form-row > span {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .form-row input,
+  .form-row select,
+  .form-row textarea {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    padding: 10px 12px;
+    font-size: 14px;
+    border-radius: 2px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .form-row textarea { min-height: 110px; }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+
+  /* --- bottom CTA actions list --- */
+  .cta-strip__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cta-strip__a .btn-ghost { padding: 10px 16px; font-size: 13px; }
+
+  /* --- close hidden attribute when JS toggles open --- */
+  [hidden] { display: none !important; }
+
+  /* ============================================================
+     MESAJE — split-pane inbox
+     ============================================================ */
+  .page-head { padding: 56px 0 28px; }
+  .page-head .block__sub { display: block; font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px; }
+  .page-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 7vw, 88px); line-height: 0.92; letter-spacing: 0.01em; margin: 0 0 12px; text-transform: uppercase; }
+  .page-title .dot { color: var(--accent); }
+  .page-lede { margin: 0; max-width: 60ch; font-size: 17px; color: var(--fg-muted); }
+
+  /* color tokens per source */
+  :root, [data-theme="dark"] {
+    --src-bazar: var(--accent);
+    --src-bazar-fg: var(--accent-fg);
+    --src-bazar-tint: oklch(0.32 0.08 80 / 0.25);
+    --src-forum: oklch(0.72 0.11 235);
+    --src-forum-fg: oklch(0.12 0.04 235);
+    --src-forum-tint: oklch(0.42 0.10 235 / 0.18);
+  }
+  [data-theme="light"] {
+    --src-bazar: #b8861a;
+    --src-bazar-fg: #fff;
+    --src-bazar-tint: rgba(184, 134, 26, 0.10);
+    --src-forum: #2f6db5;
+    --src-forum-fg: #fff;
+    --src-forum-tint: rgba(47, 109, 181, 0.10);
+  }
+
+  /* Filter chips above inbox */
+  .inbox-filters {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .chip-filter {
+    padding: 6px 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip-filter:hover { border-color: var(--fg-muted); color: var(--fg); }
+  .chip-filter.is-active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .chip-filter .dot-source { width: 6px; height: 6px; border-radius: 50%; }
+  .chip-filter .dot-source.is-bazar { background: var(--src-bazar); }
+  .chip-filter .dot-source.is-forum { background: var(--src-forum); }
+  .inbox-filters .spacer { flex: 1; }
+  .inbox-filters .search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    border-radius: 2px;
+    min-width: 240px;
+  }
+  .inbox-filters .search-wrap svg { width: 14px; height: 14px; color: var(--fg-muted); }
+  .inbox-filters .search-wrap input {
+    border: 0; background: transparent;
+    font-size: 13px; flex: 1; outline: none;
+    color: var(--fg);
+  }
+
+  /* The inbox split layout */
+  .inbox {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 0;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    min-height: 620px;
+    margin-bottom: 56px;
+  }
+
+  /* Conversation list (left) */
+  .conv-list {
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    max-height: 760px;
+  }
+  .conv {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    padding: 14px 16px 14px 14px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+    text-align: left;
+    background: transparent;
+    border-left: 4px solid transparent;
+    width: 100%;
+    border-top: 0;
+    border-right: 0;
+    transition: background 0.12s ease;
+    position: relative;
+  }
+  .conv.is-bazar { border-left-color: var(--src-bazar); }
+  .conv.is-forum { border-left-color: var(--src-forum); }
+  .conv:hover { background: var(--bg-elev); }
+  .conv.is-active { background: var(--bg-elev); }
+  .conv.is-unread .conv__name { color: var(--fg); font-weight: 600; }
+  .conv.is-unread .conv__preview { color: var(--fg); }
+
+  .conv__avatar { position: relative; }
+
+  .conv__body { min-width: 0; }
+  .conv__row1 {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+    margin-bottom: 6px;
+  }
+  .conv__name {
+    font-size: 14px; color: var(--fg-muted); font-weight: 500;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .conv__time { font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle); flex-shrink: 0; }
+
+  /* Big, obvious source chip */
+  .conv__source {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px 4px 8px;
+    margin-bottom: 6px;
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .conv__source svg { width: 12px; height: 12px; flex-shrink: 0; }
+  .conv__source.is-bazar { background: var(--src-bazar); color: var(--src-bazar-fg); }
+  .conv__source.is-forum { background: var(--src-forum); color: var(--src-forum-fg); }
+  .conv__source-listing {
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    opacity: 0.88;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    border-left: 1px solid currentColor;
+    padding-left: 8px; margin-left: 2px;
+  }
+  .conv__preview {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .conv__unread {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  /* Active conversation pane (right) */
+  .conv-pane { display: flex; flex-direction: column; min-width: 0; }
+  .pane-empty {
+    flex: 1;
+    display: grid; place-items: center;
+    padding: 40px;
+    color: var(--fg-muted);
+    text-align: center;
+  }
+  .pane-empty__icon { width: 56px; height: 56px; color: var(--fg-subtle); margin-bottom: 16px; }
+  .pane-head {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .pane-head__source {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .pane-head__source.is-bazar { background: var(--src-bazar); color: var(--src-bazar-fg); }
+  .pane-head__source.is-forum { background: var(--src-forum); color: var(--src-forum-fg); }
+  .pane-head__info { flex: 1; min-width: 0; }
+  .pane-head__title {
+    font-weight: 600; font-size: 15px; color: var(--fg);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    margin-bottom: 2px;
+  }
+  .pane-head__sub { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+  .pane-head__sub a { color: inherit; border-bottom: 1px solid var(--line); }
+  .pane-head__sub a:hover { color: var(--fg); }
+  .pane-head__user { display: flex; align-items: center; gap: 10px; }
+  .pane-head__user-name { font-size: 13px; color: var(--fg); }
+
+  /* Bazar context strip */
+  .pane-context {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+    background: var(--src-bazar-tint);
+  }
+  .pane-context.is-forum { background: var(--src-forum-tint); }
+  .pane-context__photo {
+    width: 56px; height: 56px;
+    background: var(--bg-card);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    flex-shrink: 0;
+    display: grid; place-items: center;
+  }
+  .pane-context__photo img { width: 100%; height: 100%; object-fit: cover; }
+  .pane-context__body { flex: 1; min-width: 0; }
+  .pane-context__label { font-family: var(--font-mono); font-size: 10px; color: var(--fg-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+  .pane-context__title { font-weight: 600; font-size: 15px; color: var(--fg); margin: 4px 0 2px; }
+  .pane-context__meta { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); }
+  .pane-context__cta {
+    padding: 8px 14px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .pane-context__cta:hover { border-color: var(--fg-muted); }
+
+  /* Messages list */
+  .msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+    background: var(--bg-card);
+  }
+  .msgs__day {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-subtle);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin: 8px 0;
+    position: relative;
+  }
+  .msgs__day::before, .msgs__day::after {
+    content: "";
+    position: absolute;
+    top: 50%; width: 30%;
+    height: 1px;
+    background: var(--line);
+  }
+  .msgs__day::before { left: 0; }
+  .msgs__day::after { right: 0; }
+
+  .msg {
+    display: flex; gap: 10px;
+    max-width: 78%;
+  }
+  .msg__bubble {
+    padding: 10px 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    font-size: 14px;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .msg__time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--fg-subtle);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+  .msg.is-mine {
+    margin-left: auto;
+    flex-direction: row-reverse;
+  }
+  .msg.is-mine .msg__bubble {
+    background: var(--accent);
+    color: var(--accent-fg);
+    border-color: var(--accent);
+    border-radius: 4px;
+    border-top-right-radius: 0;
+  }
+  .msg.is-mine .msg__time { text-align: right; }
+
+  /* Composer */
+  .composer {
+    border-top: 1px solid var(--line);
+    padding: 14px 16px;
+    display: flex; gap: 10px;
+    align-items: flex-end;
+    background: var(--bg-elev);
+  }
+  .composer textarea {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    padding: 10px 14px;
+    border-radius: 2px;
+    font-family: inherit; font-size: 14px;
+    resize: none;
+    min-height: 44px;
+    max-height: 200px;
+    outline: none;
+  }
+  .composer textarea:focus { border-color: var(--accent); }
+  .composer__send {
+    padding: 11px 22px;
+    background: var(--accent);
+    color: var(--accent-fg);
+    font-family: var(--font-mono);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 0; border-radius: 2px;
+    cursor: pointer;
+  }
+  .composer__send:hover { filter: brightness(1.08); }
+
+  /* Future-note callout */
+  .future-note {
+    margin-top: 14px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px dashed var(--line);
+    font-size: 13px;
+    color: var(--fg-muted);
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .future-note b { color: var(--fg); font-weight: 600; }
+  .future-note__tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--fg);
+    color: var(--bg);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 900px) {
+    .inbox { grid-template-columns: 1fr; min-height: 0; }
+    .conv-list { border-right: 0; border-bottom: 1px solid var(--line); max-height: 380px; }
+    .conv-pane.is-empty-mobile { display: none; }
+  }
+  </style>
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+</head>
+<body data-screen-label="Cont · Mesaje">
+
+  <!-- ============================================================
+       SVG sprite — icons
+       ============================================================ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="8"/><path d="M12 4v16"/><path d="M12 12a8 8 0 0 0 0-8" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round">
+        <path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/>
+      </symbol>
+      <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 22s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+        <path d="M5 5l14 14M19 5L5 19"/>
+      </symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="3" y="5" width="18" height="14"/><path d="M3.5 6l8.5 7 8.5-7"/>
+      </symbol>
+      <symbol id="i-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 7h16M4 12h16M4 17h16"/>
+      </symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 9l6 6 6-6"/>
+      </symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.5a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.5a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/>
+      </symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/>
+      </symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/>
+      </symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/>
+      </symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="/">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+
+        <button class="icon-btn has-badge" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></button>
+
+        <a class="icon-btn tools__desktop" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+
+        <a class="icon-btn has-badge tools__desktop" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+
+        <button class="icon-btn tools__desktop" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <div class="avatar-menu tools__desktop" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item" href="#" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem" data-feedback-open>
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+
+            <div class="avatar-drop__sep"></div>
+
+            <a class="avatar-drop__item is-admin" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+
+            <div class="avatar-drop__sep"></div>
+
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+
+        <!-- mobile-only: avatar mic + burger -->
+        <button class="icon-btn avatar-icon tools__mobile" aria-label="Cont" data-burger>
+          <span class="avatar avatar--sm" data-uid="u_8472" data-initials="TI">TI</span>
+        </button>
+        <button class="icon-btn tools__mobile" aria-label="Meniu" data-burger>
+          <svg><use href="#i-burger"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- SVG sprites used here -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.5 12.5L12 21l-9-9V3h9z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></symbol>
+        <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-12 7l-5 1 1.5-4A8 8 0 1 1 21 12z"/></symbol>
+      </defs>
+    </svg>
+
+    <!-- PAGE HEAD -->
+    <header class="page-head" data-reveal>
+      <span class="block__sub">// Cont</span>
+      <h1 class="page-title">Mesaje<span class="dot">.</span></h1>
+      <p class="page-lede">Inbox unificat — conversațiile din Bazar și de pe Forum stau alături, distinse vizual după sursă. Răspunzi direct, contextul anunțului sau al threadului rămâne mereu vizibil sus.</p>
+    </header>
+
+    <!-- Filters -->
+    <div class="inbox-filters">
+      <button class="chip-filter is-active" type="button" data-filter="all">Toate <span style="opacity:.6">12</span></button>
+      <button class="chip-filter" type="button" data-filter="bazar"><span class="dot-source is-bazar"></span> Bazar <span style="opacity:.6">7</span></button>
+      <button class="chip-filter" type="button" data-filter="forum"><span class="dot-source is-forum"></span> Forum <span style="opacity:.6">5</span></button>
+      <button class="chip-filter" type="button" data-filter="unread">Necitite <span style="opacity:.6">2</span></button>
+      <div class="spacer"></div>
+      <div class="search-wrap">
+        <svg><use href="#i-search"/></svg>
+        <input type="text" placeholder="Caută în conversații…" />
+      </div>
+    </div>
+
+    <!-- INBOX SPLIT -->
+    <div class="inbox" data-inbox>
+      <!-- Conversation list -->
+      <div class="conv-list" id="conv-list"></div>
+      <!-- Active conversation -->
+      <div class="conv-pane" id="conv-pane"></div>
+    </div>
+
+    <!-- Future development note (from spec) -->
+    <div class="future-note">
+      <span class="future-note__tag">Spec</span>
+      <div>
+        <b>Inbox unificat Bazar + Forum</b> — implementat ca o singură listă cu distincție vizuală pe sursă (badge pe avatar + culoare diferită pe context chip). Filtrele de sus permit izolarea pe sursă când e nevoie. Notat în <code style="font-family:var(--font-mono); color:var(--fg)">docs/spec/spec.md</code>.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       MOBILE DRAWER + SCRIM
+       ============================================================ -->
+  <div class="scrim" data-scrim hidden></div>
+  <aside class="drawer" data-drawer aria-label="Meniu cont" hidden>
+    <header class="drawer__head">
+      <div class="drawer__user">
+        <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+        <div>
+          <div class="drawer__name">Tudor Ionescu</div>
+          <div class="drawer__handle">@tudor.i</div>
+        </div>
+      </div>
+      <button class="icon-btn" data-drawer-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+    </header>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Navigare</span>
+      <a class="drawer__item" href="Home.html">Acasă</a>
+      <a class="drawer__item" href="Tezaur.html">Tezaur</a>
+      <a class="drawer__item" href="Bazar.html">Bazar</a>
+      <a class="drawer__item" href="Revista.html">Revistă</a>
+      <a class="drawer__item" href="Forum.html">Forum</a>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Activitate</span>
+      <a class="drawer__item" href="Cont - Favorite.html">
+        <svg><use href="#i-heart"/></svg> Favorite
+      </a>
+      <a class="drawer__item is-active" href="Cont - Mesaje.html">
+        <svg><use href="#i-mail"/></svg> Mesaje
+        <span class="drawer__badge">2</span>
+      </a>
+      <button class="drawer__item" type="button" data-theme-toggle>
+        <svg class="icon-sun"><use href="#i-sun"/></svg>
+        <svg class="icon-moon"><use href="#i-moon"/></svg>
+        Schimbă tema
+      </button>
+    </div>
+
+    <div class="drawer__sec">
+      <span class="drawer__sec-label">// Cont</span>
+      <a class="drawer__item" href="Cont - Setari.html"><svg><use href="#i-cog"/></svg> Setări</a>
+      <a class="drawer__item" href="#"><svg><use href="#i-megaphone"/></svg> Anunțurile mele</a>
+      <button class="drawer__item" type="button" data-feedback-open>
+        <svg><use href="#i-doc"/></svg> Trimite feedback
+      </button>
+      <a class="drawer__item" href="Admin - Dashboard.html">
+        <svg><use href="#i-shield"/></svg> Dashboard
+        <span class="drawer__badge" style="background:var(--accent);color:var(--accent-fg)">admin</span>
+      </a>
+    </div>
+
+    <div class="drawer__sec" style="border-bottom:0">
+      <button class="drawer__item is-danger" type="button">
+        <svg><use href="#i-logout"/></svg> Ieși din cont
+      </button>
+    </div>
+  </aside>
+
+  <!-- ============================================================
+       FEEDBACK MODAL
+       ============================================================ -->
+  <div class="modal-back" data-modal hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="fb-title">
+      <header class="modal__head">
+        <h3 id="fb-title">Trimite feedback</h3>
+        <button class="icon-btn" data-modal-close aria-label="Închide"><svg><use href="#i-x"/></svg></button>
+      </header>
+      <div class="modal__body">
+        <label class="form-row">
+          <span>// Categorie</span>
+          <select>
+            <option>Sugestie de feature</option>
+            <option>Bug / eroare</option>
+            <option>Conținut / raport</option>
+            <option>Altele</option>
+          </select>
+        </label>
+        <label class="form-row">
+          <span>// Mesaj</span>
+          <textarea rows="6" placeholder="Spune-ne ce am putea face mai bine. Cu cât mai specific, cu atât mai bine."></textarea>
+        </label>
+        <p style="margin:0; font-size:12px; color:var(--fg-muted)">
+          Trimitem mesajul cu user_id-ul tău (<code style="font-family:var(--font-mono); color:var(--fg)">u_8472</code>) atașat — răspundem pe email în 1-2 zile lucrătoare.
+        </p>
+      </div>
+      <footer class="modal__foot">
+        <button class="btn-ghost" type="button" data-modal-close>Anulează</button>
+        <button class="btn-login" type="button">Trimite →</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="/">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română. Sinteză + tezaur.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="/despre">Despre</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/termeni">Termeni</a></li>
+            <li><a href="/confidentialitate">Confidențialitate</a></li>
+            <li><a href="/rss">RSS</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       Data + behaviors
+       ============================================================ -->
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+
+      function apply(mode) {
+        root.setAttribute('data-theme', mode);
+      }
+      const saved = localStorage.getItem(KEY) || 'dark';
+      apply(saved);
+
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+          const next = cur === 'dark' ? 'light' : 'dark';
+          localStorage.setItem(KEY, next);
+          apply(next);
+        });
+      });
+    })();
+
+    // ---------- AVATAR COLORING (deterministic hue from user_id) ----------
+    function hashHue(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
+      return h % 360;
+    }
+    function applyAvatarColor(el) {
+      const uid = el.dataset.uid || 'anon';
+      const hue = hashHue(uid);
+      // mid-saturation, mid-lightness so it works across themes
+      const bg = `oklch(0.58 0.14 ${hue})`;
+      // pick white or black for contrast — oklch lightness 0.58 → white text reads well across hues
+      const fg = 'oklch(0.98 0 0)';
+      el.style.background = bg;
+      el.style.color = fg;
+      el.style.display = 'inline-flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      // initials
+      const init = el.dataset.initials || el.textContent.trim().slice(0, 2).toUpperCase();
+      el.textContent = init;
+    }
+    document.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+
+    // ---------- AVATAR DROPDOWN ----------
+    (function avatarMenu() {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      function open() {
+        drop.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+      }
+      function close() {
+        drop.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+      }
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        drop.hidden ? open() : close();
+      });
+      document.addEventListener('click', e => {
+        if (!menu.contains(e.target)) close();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') close();
+      });
+    })();
+
+    // ---------- MOBILE DRAWER ----------
+    (function drawer() {
+      const drawer = document.querySelector('[data-drawer]');
+      const scrim = document.querySelector('[data-scrim]');
+      if (!drawer || !scrim) return;
+      function open() {
+        drawer.hidden = false;
+        scrim.hidden = false;
+        // force a frame so transition triggers
+        requestAnimationFrame(() => {
+          drawer.classList.add('is-open');
+          scrim.classList.add('is-open');
+        });
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        drawer.classList.remove('is-open');
+        scrim.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 240);
+      }
+      document.querySelectorAll('[data-burger]').forEach(b => b.addEventListener('click', open));
+      document.querySelectorAll('[data-drawer-close]').forEach(b => b.addEventListener('click', close));
+      scrim.addEventListener('click', close);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    })();
+
+    // ---------- FEEDBACK MODAL ----------
+    (function feedback() {
+      const modal = document.querySelector('[data-modal]');
+      if (!modal) return;
+      function open() {
+        modal.hidden = false;
+        requestAnimationFrame(() => modal.classList.add('is-open'));
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+        setTimeout(() => { modal.hidden = true; }, 200);
+      }
+      document.querySelectorAll('[data-feedback-open]').forEach(b => b.addEventListener('click', e => {
+        e.preventDefault();
+        // close drawer & avatar drop if open
+        document.querySelector('[data-drawer]')?.classList.remove('is-open');
+        document.querySelector('[data-scrim]')?.classList.remove('is-open');
+        const drop = document.querySelector('.avatar-drop');
+        if (drop) drop.hidden = true;
+        open();
+      }));
+      document.querySelectorAll('[data-modal-close]').forEach(b => b.addEventListener('click', close));
+      modal.addEventListener('click', e => { if (e.target === modal) close(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modal.hidden) close(); });
+    })();
+
+    // Fill any [data-gear] container with its SVG illustration
+    function fillGears(scope) {
+      (scope || document).querySelectorAll('[data-gear]').forEach(el => {
+        if (el.dataset.gearFilled) return;
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+          el.dataset.gearFilled = '1';
+        }
+      });
+    }
+    fillGears();
+
+    // ---------- INBOX DATA ----------
+    const CONVS = [
+      {
+        id: 'c1', source: 'bazar', unread: true,
+        otherName: 'Andrei Bălan', otherHandle: '@andrei.b', otherUid: 'u_andrei', otherInit: 'AB',
+        time: 'acum 8 min', timeFull: 'azi 14:32',
+        contextLabel: 'Juno-60 · 4.200 RON',
+        listing: { brand: 'Roland', model: 'Juno-60', price: '4 200 RON', cond: 'Foarte bun · service done', loc: 'București', photo: 'https://www.rolandcloud.com/getmedia/99d1b61e-eb64-444e-95dd-491a6e5efcaa/JUNO-60-HK-1-LFT-smaller.png', href: 'Bazar - Roland Juno-60.html' },
+        preview: 'Salut! E încă disponibil? Văd că ai zis că ai făcut service în 2024 — ai factura?',
+        messages: [
+          { day: '12 mai · luni' },
+          { from: 'them', text: 'Salut! Am văzut că ai pus Juno-60. E încă disponibil?', time: '12 mai · 10:14' },
+          { from: 'me', text: 'Salut Andrei. Da, e disponibil. L-am scos pe Sintezaur acum 3 zile.', time: '12 mai · 11:02' },
+          { from: 'them', text: 'Super. Voiam să întreb — ai zis în anunț că ai făcut service în 2024. La cine? Și mai ai factura?', time: '12 mai · 11:08' },
+          { from: 'me', text: 'La Studio Vintage Repair de pe Verona. Da, am factura — îți trimit poză cu ea când treci.', time: '12 mai · 11:10' },
+          { day: '13 mai · azi' },
+          { from: 'them', text: 'Perfect. Aș vrea să vin să-l văd. Ai timp săptămâna asta?', time: 'azi 14:32' }
+        ]
+      },
+      {
+        id: 'c2', source: 'forum', unread: true,
+        otherName: 'Vlad Petre', otherHandle: '@vladpetre', otherUid: 'u_vlad', otherInit: 'VP',
+        time: 'acum 1 oră',
+        contextLabel: 'Forum · TR-808 cu inel 2SC828',
+        thread: { cat: 'Tezaur · Întrebări', title: 'TR-808 cu inel de transistor 2SC828 — chiar contează „grade"-ul de fanout pentru kick?', href: 'Forum - Thread TR-808 v2.html' },
+        preview: 'Bună întrebarea ta de la mesaj — am editat răspunsul pe thread și ți-am @-mention la final.',
+        messages: [
+          { day: 'azi' },
+          { from: 'them', text: 'Salut. Am văzut comentariul tău pe threadul cu 808 — voiam să întreb în privat: ai măsurat tu drift-ul de kick între unitățile cu 2SC828 grade B vs C?', time: 'azi 11:45' },
+          { from: 'me', text: 'Da, am două unități acasă. Diferența e ~2 dB pe atac, dar saturația e clar diferită la C — un pic mai aspră.', time: 'azi 12:10' },
+          { from: 'them', text: 'Mă gândeam eu. Pot să te citez pe thread sau preferi să rămână conversația privată?', time: 'azi 12:48' },
+          { from: 'me', text: 'Citează liniștit, dar pune și mențiunea că e empirism cu N=2 :)', time: 'azi 13:05' },
+          { from: 'them', text: 'Bună întrebarea ta de la mesaj — am editat răspunsul pe thread și ți-am @-mention la final.', time: 'acum 1 oră' }
+        ]
+      },
+      {
+        id: 'c3', source: 'bazar', unread: false,
+        otherName: 'Maria R.', otherHandle: '@mariarr', otherUid: 'u_maria', otherInit: 'MR',
+        time: 'acum 3 ore',
+        contextLabel: 'Minilogue XD · 2.850 RON',
+        listing: { brand: 'Korg', model: 'Minilogue XD', price: '2 850 RON', cond: 'Ca nou', loc: 'Cluj-Napoca' },
+        preview: 'Ok mulțumesc pentru răbdare! Mâine pe la 19 sun să confirm cu cei de la curier.',
+        messages: [
+          { day: '11 mai' },
+          { from: 'me', text: 'Bună Maria. Mulțumesc pentru transfer. Confirm primirea, sunt 2.850 RON.', time: '11 mai · 14:20' },
+          { from: 'them', text: 'Mulțumesc! Cum facem cu curierul? Am tras spre Fan Courier sau preferi Sameday?', time: '11 mai · 14:25' },
+          { day: 'azi' },
+          { from: 'me', text: 'Fan e ok. Ai un orar mai relaxat pentru ridicare?', time: 'azi 09:14' },
+          { from: 'them', text: 'Pot mâine după 18. E ok și pentru tine?', time: 'azi 09:30' },
+          { from: 'me', text: 'Perfect, mâine după 18 e bine. Îți trimit AWB-ul după ce-l generez.', time: 'azi 10:02' },
+          { from: 'them', text: 'Ok mulțumesc pentru răbdare! Mâine pe la 19 sun să confirm cu cei de la curier.', time: 'acum 3 ore' }
+        ]
+      },
+      {
+        id: 'c4', source: 'forum', unread: false,
+        otherName: 'Ana M.', otherHandle: '@anaaaaa', otherUid: 'u_ana', otherInit: 'AN',
+        time: 'ieri',
+        contextLabel: 'Forum · Primul rack 84HP',
+        thread: { cat: 'Modular', title: 'Primul rack 84HP — ce module sunt obligatorii și ce e marketing?', href: '#' },
+        preview: 'Mersi mult! Văd că ai și un Maths de 2nd gen — poți face o poză cu rack-ul tău când ai timp?',
+        messages: [
+          { day: 'ieri' },
+          { from: 'them', text: 'Salut! Văd că ai postat o configurație 84HP foarte sensibilă pe thread. Pot să te întreb câteva chestii?', time: 'ieri 16:30' },
+          { from: 'me', text: 'Sigur, dă-i drumul.', time: 'ieri 16:42' },
+          { from: 'them', text: 'Mersi mult! Văd că ai și un Maths de 2nd gen — poți face o poză cu rack-ul tău când ai timp?', time: 'ieri 17:01' }
+        ]
+      },
+      {
+        id: 'c5', source: 'bazar', unread: false,
+        otherName: 'Dan A.', otherHandle: '@dan.a', otherUid: 'u_dan', otherInit: 'DA',
+        time: 'acum 2 zile',
+        contextLabel: 'Subsequent 37 · 5.990 RON',
+        listing: { brand: 'Moog', model: 'Subsequent 37', price: '5 990 RON', cond: 'Bun', loc: 'Timișoara' },
+        preview: 'Pot să las 5.500 RON dar ridici personal din Timișoara. Vinerea sunt acasă toată ziua.',
+        messages: [
+          { day: 'acum 2 zile' },
+          { from: 'me', text: 'Salut, l-ai vinde la 5.500 RON?', time: '11 mai · 09:00' },
+          { from: 'them', text: 'Pot să las 5.500 RON dar ridici personal din Timișoara. Vinerea sunt acasă toată ziua.', time: '11 mai · 09:45' }
+        ]
+      },
+      {
+        id: 'c6', source: 'forum', unread: false,
+        otherName: 'Mihaela M.', otherHandle: '@mihaela_m', otherUid: 'u_mihaela', otherInit: 'MM',
+        time: 'acum 3 zile',
+        contextLabel: 'Forum · Preamp lo-fi sub 2k',
+        thread: { cat: 'Producție', title: 'Cel mai bun preamp pentru vocale lo-fi sub 2000 RON — recomandări reale', href: '#' },
+        preview: 'Am încercat și Warm Audio WA73 — interesant dar mai aspru decât speram. Tu cu ce te-ai oprit?',
+        messages: [
+          { day: 'acum 3 zile' },
+          { from: 'them', text: 'Am încercat și Warm Audio WA73 — interesant dar mai aspru decât speram. Tu cu ce te-ai oprit?', time: '10 mai · 22:18' }
+        ]
+      },
+      {
+        id: 'c7', source: 'bazar', unread: false,
+        otherName: 'Vlad P.', otherHandle: '@vladpetre', otherUid: 'u_vlad', otherInit: 'VP',
+        time: 'acum 5 zile',
+        contextLabel: 'Schimb · Juno-60 + diferență',
+        listing: { brand: 'Schimb propus', model: 'Juno-60 → Prophet-6', price: '+/- 2.500 RON', cond: 'Schimb cu diferență', loc: 'București' },
+        preview: 'Salut, am văzut că ai Juno-60. Eu am un Prophet-6 desktop. Te-ar interesa schimb cu diferență?',
+        messages: [
+          { day: 'acum 5 zile' },
+          { from: 'them', text: 'Salut, am văzut că ai Juno-60. Eu am un Prophet-6 desktop. Te-ar interesa schimb cu diferență?', time: '08 mai · 11:12' }
+        ]
+      }
+    ];
+
+    // ---------- RENDER LIST ----------
+    function sourceChip(c) {
+      if (c.source === 'bazar') {
+        return `
+          <span class="conv__source is-bazar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.5 12.5L12 21l-9-9V3h9z"/><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor"/></svg>
+            Bazar
+            <span class="conv__source-listing">${c.listing.brand} ${c.listing.model}</span>
+          </span>`;
+      }
+      return `
+        <span class="conv__source is-forum">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a8 8 0 0 1-12 7l-5 1 1.5-4A8 8 0 1 1 21 12z"/></svg>
+          Mesaj privat
+        </span>`;
+    }
+
+    function renderList(filter) {
+      const list = document.getElementById('conv-list');
+      const shown = CONVS.filter(c => {
+        if (filter === 'all') return true;
+        if (filter === 'unread') return c.unread;
+        return c.source === filter;
+      });
+      list.innerHTML = shown.map(c => `
+        <button class="conv is-${c.source} ${c.unread ? 'is-unread' : ''}" data-conv-id="${c.id}" type="button">
+          <span class="conv__avatar">
+            <span class="avatar avatar--md" data-uid="${c.otherUid}" data-initials="${c.otherInit}">${c.otherInit}</span>
+          </span>
+          <span class="conv__body">
+            ${sourceChip(c)}
+            <span class="conv__row1">
+              <span class="conv__name">${c.otherName}</span>
+              <span class="conv__time">${c.time}</span>
+            </span>
+            <span class="conv__preview">${c.preview}</span>
+          </span>
+          ${c.unread ? '<span class="conv__unread"></span>' : '<span></span>'}
+        </button>
+      `).join('');
+      list.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+    }
+
+    // ---------- RENDER PANE ----------
+    function renderPane(id) {
+      const c = CONVS.find(x => x.id === id);
+      const pane = document.getElementById('conv-pane');
+      if (!c) {
+        pane.innerHTML = `
+          <div class="pane-empty">
+            <div>
+              <svg class="pane-empty__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12a8 8 0 0 1-12 7l-5 1 1.5-4A8 8 0 1 1 21 12z"/></svg>
+              <p>Selectează o conversație din stânga.</p>
+            </div>
+          </div>`;
+        return;
+      }
+      const ctx = c.source === 'bazar'
+        ? `
+          <div class="pane-context">
+            <div class="pane-context__photo">
+              ${c.listing.photo ? `<img src="${c.listing.photo}" alt="" onerror="this.remove()"/>` : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-tag"/></svg>'}
+            </div>
+            <div class="pane-context__body">
+              <div class="pane-context__label">// Bazar · ${c.listing.brand}</div>
+              <div class="pane-context__title">${c.listing.model}</div>
+              <div class="pane-context__meta">${c.listing.price} <span style="opacity:.4; margin: 0 6px">·</span> ${c.listing.cond} <span style="opacity:.4; margin: 0 6px">·</span> ${c.listing.loc}</div>
+            </div>
+            <a class="pane-context__cta" href="${c.listing.href || '#'}">Vezi anunțul →</a>
+          </div>`
+        : '';
+
+      const msgsHtml = c.messages.map(m => {
+        if (m.day) return `<div class="msgs__day">${m.day}</div>`;
+        if (m.from === 'me') return `
+          <div class="msg is-mine">
+            <div>
+              <div class="msg__bubble">${m.text}</div>
+              <div class="msg__time">${m.time}</div>
+            </div>
+          </div>`;
+        return `
+          <div class="msg">
+            <span class="avatar avatar--sm" data-uid="${c.otherUid}" data-initials="${c.otherInit}" style="align-self:flex-end; margin-bottom:18px">${c.otherInit}</span>
+            <div>
+              <div class="msg__bubble">${m.text}</div>
+              <div class="msg__time">${m.time}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      pane.innerHTML = `
+        <header class="pane-head">
+          <span class="pane-head__source is-${c.source}">${c.source === 'bazar' ? 'Bazar' : 'Mesaj privat'}</span>
+          <span class="avatar avatar--md" data-uid="${c.otherUid}" data-initials="${c.otherInit}">${c.otherInit}</span>
+          <div class="pane-head__info">
+            <div class="pane-head__title">${c.otherName}</div>
+            <div class="pane-head__sub">${c.otherHandle}</div>
+          </div>
+        </header>
+        ${ctx}
+        <div class="msgs">${msgsHtml}</div>
+        <form class="composer" onsubmit="event.preventDefault()">
+          <textarea placeholder="Scrie un mesaj…"></textarea>
+          <button class="composer__send" type="submit">Trimite</button>
+        </form>`;
+
+      pane.querySelectorAll('.avatar[data-uid]').forEach(applyAvatarColor);
+      const msgs = pane.querySelector('.msgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+      // mark active in list
+      document.querySelectorAll('.conv').forEach(c => c.classList.remove('is-active'));
+      const active = document.querySelector(`[data-conv-id="${id}"]`);
+      if (active) active.classList.add('is-active');
+    }
+
+    // ---------- WIRE ----------
+    let currentFilter = 'all';
+    renderList(currentFilter);
+    renderPane('c1');
+
+    document.getElementById('conv-list').addEventListener('click', e => {
+      const conv = e.target.closest('.conv');
+      if (!conv) return;
+      renderPane(conv.dataset.convId);
+    });
+
+    document.querySelectorAll('[data-filter]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('is-active', b === btn));
+        currentFilter = btn.dataset.filter;
+        renderList(currentFilter);
+      });
+    });
+  </script>
+
+</body>
+</html>

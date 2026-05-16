@@ -1,0 +1,706 @@
+<div class="shell">
+  <!-- BREADCRUMB -->
+  <nav class="td-crumb" aria-label="Breadcrumb">
+    <a routerLink="/bazar" style="display:inline-flex; align-items:center; gap:6px">
+      <svg width="14" height="14"><use href="#i-back"/></svg>
+      {{ 'bazar.form.back' | t }}
+    </a>
+    <span class="sep">·</span>
+    <a routerLink="/bazar">{{ 'bazar.form.crumb_root' | t }}</a>
+    <span class="sep">/</span>
+    <span class="cur">{{ 'bazar.form.crumb_current' | t }}</span>
+  </nav>
+
+  <!-- HEADER -->
+  <section class="ta-header crosses" aria-labelledby="bza-title">
+    <span class="crosses-tl"></span><span class="crosses-tr"></span>
+    <div>
+      <p class="ta-header__sub">{{ 'bazar.form.header_eyebrow' | t }}</p>
+      <h1 class="ta-header__title" id="bza-title">
+        {{ 'bazar.form.header_title_line1' | t }}<br />
+        {{ 'bazar.form.header_title_line2' | t }}<span class="dot">.</span>
+      </h1>
+    </div>
+    <div>
+      <p class="ta-header__lede" [innerHTML]="'bazar.form.header_lede' | t"></p>
+      <div class="ta-header__steps">
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[0].done && checklist()[1].done"
+          [class.is-current]="!(checklist()[0].done && checklist()[1].done)"
+        >
+          <span class="ta-step__num"><b>01</b>
+            @if (checklist()[0].done && checklist()[1].done) {<span class="tick">✓</span>}
+            {{ 'bazar.form.step_status.identification' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'bazar.form.steps.identification' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[2].done && checklist()[4].done"
+          [class.is-current]="checklist()[0].done && (!checklist()[2].done || !checklist()[4].done)"
+          [class.is-todo]="!checklist()[0].done"
+        >
+          <span class="ta-step__num"><b>02</b>
+            @if (checklist()[2].done && checklist()[4].done) {<span class="tick">✓</span>}
+            {{ 'bazar.form.step_status.media' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'bazar.form.steps.media' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="checklist()[5].done && checklist()[7].done"
+          [class.is-current]="checklist()[2].done && (!checklist()[5].done || !checklist()[7].done)"
+          [class.is-todo]="!checklist()[2].done"
+        >
+          <span class="ta-step__num"><b>03</b>
+            {{ 'bazar.form.step_status.price' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'bazar.form.steps.price' | t }}</span>
+        </div>
+        <div
+          class="ta-step"
+          [class.is-done]="listingStatus() === 'active'"
+          [class.is-current]="canPublish() && listingStatus() === 'draft'"
+          [class.is-todo]="!canPublish() && listingStatus() === 'draft'"
+        >
+          <span class="ta-step__num"><b>04</b>
+            {{ 'bazar.form.step_status.publish' | t }}
+          </span>
+          <span class="ta-step__label">{{ 'bazar.form.steps.publish' | t }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  @if (listingStatus() === 'active') {
+    <div class="form-success" style="margin-bottom:24px">
+      <strong>{{ 'bazar.form.published_head' | t }}.</strong>
+      {{ 'bazar.form.published_body' | t }}
+    </div>
+  }
+
+  <!-- MAIN -->
+  <div class="ta-main" [class.form-disabled]="isLocked()">
+    <!-- ===================== LEFT: form ===================== -->
+    <form [formGroup]="form" (ngSubmit)="$event.preventDefault()" (click)="closeAllMenus()">
+
+      <!-- ---------- CE VINZI (identificare + titlu + descriere) ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_identify_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_identify_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint" [innerHTML]="'bazar.form.sec_identify_hint' | t"></div>
+        </header>
+        <div class="ta-sec__body">
+
+          <!-- Linked Tezaur entry (pre-filled state) -->
+          @if (selectedGear(); as g) {
+            <div class="bz-add-link">
+              <div class="bz-add-link__thumb"></div>
+              <div class="bz-add-link__txt">
+                <span class="bz-add-link__k">{{ 'bazar.form.linked_label' | t }}</span>
+                <span class="bz-add-link__v">
+                  <a [routerLink]="['/tezaur', g.slug]">{{ g.brand }} · {{ g.model }}</a>
+                </span>
+              </div>
+              <button
+                type="button"
+                class="bz-add-link__cta"
+                (click)="clearGear()"
+              >
+                {{ 'bazar.form.linked_change' | t }}
+              </button>
+            </div>
+          }
+
+          @if (!selectedGear()) {
+            <p class="bz-note" [innerHTML]="'bazar.form.tezaur_search_hint' | t"></p>
+
+            <div class="ta-grid">
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">
+                  {{ 'bazar.form.tezaur_lookup_label' | t }}
+                </label>
+                <div class="ta-select ta-select--combo"
+                  [class.is-open]="gearMenuOpen()"
+                  (click)="$event.stopPropagation()">
+                  <div class="ta-select__btn">
+                    <input
+                      type="text"
+                      class="ta-select__search"
+                      [placeholder]="'bazar.form.tezaur_lookup_placeholder' | t"
+                      [value]="gearSearchText"
+                      (input)="onGearSearchInput($any($event.target).value)"
+                      (focus)="gearMenuOpen.set(true)"
+                    />
+                    <span class="ta-select__caret-wrap" (click)="gearMenuOpen.set(!gearMenuOpen())">
+                      <svg class="ta-select__caret" viewBox="0 0 24 24"><use href="#i-caret-down"/></svg>
+                    </span>
+                  </div>
+                  <div class="ta-select__menu" role="listbox">
+                    @if (gearHits().length === 0 && gearSearchText) {
+                      <div class="ta-select__empty">
+                        {{ 'bazar.form.tezaur_no_results' | t }}
+                      </div>
+                    }
+                    @for (hit of gearHits(); track hit.id) {
+                      <div class="ta-select__opt" (click)="selectGear(hit)">
+                        {{ hit.brand }} {{ hit.model }}
+                        <span class="ta-select__opt-meta">{{ hit.category }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-rawmake">
+                  {{ 'bazar.form.raw_make_label' | t }}
+                </label>
+                <input id="f-rawmake" type="text" formControlName="rawMake" maxlength="80" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-rawmodel">
+                  {{ 'bazar.form.raw_model_label' | t }}
+                </label>
+                <input id="f-rawmodel" type="text" formControlName="rawModel" maxlength="120" />
+              </div>
+              <div class="ta-field">
+                <label class="ta-field__label" for="f-rawyear">
+                  {{ 'bazar.form.raw_year_label' | t }}
+                </label>
+                <input id="f-rawyear" type="number" formControlName="rawYear" min="1900" max="2100" />
+              </div>
+            </div>
+          }
+
+          <div class="ta-grid" style="margin-top:18px">
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-title">
+                {{ 'bazar.form.title_label' | t }}
+                <span class="req">*</span>
+                <span class="hint">{{ 'bazar.form.title_hint' | t }}</span>
+              </label>
+              <input id="f-title" type="text" formControlName="title" maxlength="140" />
+            </div>
+
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-tagline">
+                {{ 'bazar.form.tagline_label' | t }}
+                <span class="hint">{{ 'bazar.form.tagline_hint' | t }}</span>
+              </label>
+              <input id="f-tagline" type="text" formControlName="tagline" maxlength="200" />
+            </div>
+
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-desc">
+                {{ 'bazar.form.description_label' | t }}
+                <span class="req">*</span>
+                <span class="hint">{{ 'bazar.form.description_hint' | t }}</span>
+              </label>
+              <textarea
+                id="f-desc"
+                formControlName="descriptionText"
+                rows="10"
+                maxlength="8000"
+                [placeholder]="'bazar.form.description_placeholder' | t"
+              ></textarea>
+              <div class="ta-field__counter">
+                <b>{{ descriptionLength() }}</b> / 8 000 caractere
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- IMAGINI ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_photos_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_photos_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">
+            <b>{{ photoTiles().length }} / 12</b> {{ 'bazar.form.sec_photos_hint_tail' | t }}
+          </div>
+        </header>
+        <div class="ta-sec__body">
+
+          <label class="ta-drop"
+            (drop)="onPhotoDrop($event)"
+            (dragover)="onPhotoDragOver($event)">
+            <div class="ta-drop__icon">
+              <svg width="28" height="28"><use href="#i-upload"/></svg>
+            </div>
+            <div class="ta-drop__primary" [innerHTML]="'bazar.form.dropzone_primary' | t"></div>
+            <div class="ta-drop__sub" [innerHTML]="'bazar.form.dropzone_sub' | t"></div>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              style="display:none"
+              (change)="onPhotoSelected($any($event.target))"
+            />
+          </label>
+
+          @if (photoTiles().length || uploadingImages() > 0) {
+            <div class="ta-imgs">
+              @for (tile of photoTiles(); track tile.sourceId; let i = $index) {
+                <div class="ta-img"
+                  draggable="true"
+                  (dragstart)="onImgDragStart($event, i)"
+                  (dragend)="onImgDragEnd($event)"
+                  (dragover)="onImgDragOver($event, i)"
+                  (drop)="onImgDrop($event, i)">
+                  <img class="ta-img__photo" [src]="bazar.imageUrl(tile.thumbPath)" alt="" />
+                  <span class="ta-img__num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+                  @if (i === 0) {
+                    <span class="ta-img__cover">{{ 'bazar.form.photo_cover' | t }}</span>
+                  }
+                  <span class="ta-img__handle">
+                    <svg width="11" height="11"><use href="#i-drag"/></svg> drag
+                  </span>
+                  <button
+                    type="button"
+                    class="ta-img__del"
+                    [attr.aria-label]="'bazar.form.photo_remove' | t"
+                    (click)="deletePhoto(tile.sourceId)"
+                  >
+                    <svg><use href="#i-x"/></svg>
+                  </button>
+                </div>
+              }
+              @for (_ of [].constructor(uploadingImages()); track $index) {
+                <div class="ta-img"><span class="img-tile-empty">…</span></div>
+              }
+              @if (photoTiles().length + uploadingImages() < 12) {
+                <label class="ta-img ta-img--add">
+                  +
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    multiple
+                    style="display:none"
+                    (change)="onPhotoSelected($any($event.target))"
+                  />
+                </label>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ---------- CONDITIE ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_condition_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_condition_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">{{ 'bazar.form.sec_condition_hint' | t }}</div>
+        </header>
+        <div class="ta-sec__body">
+
+          <p class="ta-sub-h" style="margin-top:0">
+            {{ 'bazar.form.condition_general_label' | t }}
+          </p>
+          <div class="bz-cond" role="radiogroup" [attr.aria-label]="'bazar.form.condition_general_label' | t">
+            @for (opt of conditionOptions; track opt.value) {
+              <input
+                type="radio"
+                [id]="'c-' + opt.value"
+                name="condition"
+                [value]="opt.value"
+                [checked]="form.controls['condition'].value === opt.value"
+                (change)="selectCondition(opt.value)"
+              />
+              <label [for]="'c-' + opt.value">
+                <span class="num">{{ opt.num }}</span>
+                <span class="ttl">{{ opt.ttl }}</span>
+                <span class="sub">{{ opt.sub }}</span>
+              </label>
+            }
+          </div>
+
+          <p class="ta-sub-h" style="margin-top:24px">
+            {{ 'bazar.form.defects_label' | t }}
+            <span style="text-transform:none; letter-spacing:0; font-family:var(--font-ui); font-size:11px; color:var(--fg-subtle); margin-left:8px;">
+              {{ 'bazar.form.defects_hint' | t }}
+            </span>
+          </p>
+          <div class="ta-field">
+            <textarea
+              formControlName="defects"
+              rows="3"
+              maxlength="2000"
+              style="min-height:80px"
+              [placeholder]="'bazar.form.defects_placeholder' | t"
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- PRET & TRANZACTIE ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_price_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_price_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint">{{ 'bazar.form.sec_price_hint' | t }}</div>
+        </header>
+        <div class="ta-sec__body">
+
+          <p class="ta-sub-h" style="margin-top:0">{{ 'bazar.form.price_label' | t }}</p>
+          <div class="bz-price">
+            <input id="f-price" type="number" formControlName="price" min="0" step="50" />
+            <div
+              class="bz-price__cur"
+              (click)="form.controls['currency'].setValue(form.controls['currency'].value === 'ron' ? 'eur' : 'ron')"
+              role="button"
+              tabindex="0"
+            >
+              <span>
+                <b>{{ previewCurrency() }}</b>
+                · {{ form.controls['currency'].value === 'ron' ? 'LEI' : 'EURO' }}
+              </span>
+            </div>
+            @if (priceConversion()) {
+              <div class="bz-price__conv">≈ <b>{{ priceConversion() }}</b> · curs 4.97</div>
+            }
+          </div>
+
+          <div class="ta-grid ta-grid--3" style="margin-top:18px">
+            <div class="ta-field">
+              <label class="ta-field__label">{{ 'bazar.form.negotiable_label' | t }}</label>
+              <label class="ta-toggle" style="margin-top:4px">
+                <input type="checkbox" formControlName="acceptsOffers" />
+                <span class="ta-toggle__sw"></span>
+                <span>{{ 'bazar.form.negotiable_value' | t }}</span>
+              </label>
+            </div>
+          </div>
+
+          <p class="ta-sub-h" style="margin-top:24px">{{ 'bazar.form.kind_label' | t }}</p>
+          <div class="bz-deal" role="radiogroup" [attr.aria-label]="'bazar.form.kind_label' | t">
+            @for (opt of kindOptions; track opt.value) {
+              <input
+                type="radio"
+                [id]="'d-' + opt.value"
+                name="kind"
+                [value]="opt.value"
+                [checked]="form.controls['kind'].value === opt.value"
+                (change)="selectKind(opt.value)"
+              />
+              <label [for]="'d-' + opt.value">
+                <span class="ic">{{ opt.ic }}</span>
+                <span class="ttl">{{ opt.ttl }}</span>
+                <span class="sub" [innerHTML]="opt.sub.replace('\n', '<br/>')"></span>
+              </label>
+            }
+          </div>
+
+          @if (form.controls['kind'].value !== 'sell') {
+            <div style="margin-top:18px">
+              <div class="ta-field ta-field--full">
+                <label class="ta-field__label">
+                  {{ 'bazar.form.looking_for_label' | t }}
+                  <span class="req">*</span>
+                  <span class="hint">{{ 'bazar.form.looking_for_hint' | t }}</span>
+                </label>
+                <textarea
+                  formControlName="lookingFor"
+                  rows="3"
+                  maxlength="500"
+                  [placeholder]="'bazar.form.looking_for_placeholder' | t"
+                ></textarea>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ---------- LIVRARE & LOCATIE ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_delivery_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_delivery_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint" [innerHTML]="'bazar.form.sec_delivery_hint' | t"></div>
+        </header>
+        <div class="ta-sec__body">
+
+          <div class="bz-deliv" role="radiogroup" [attr.aria-label]="'bazar.form.sec_delivery_h' | t">
+            @for (opt of deliveryOptions; track opt.value) {
+              <input
+                type="radio"
+                [id]="'dl-' + opt.value"
+                name="delivery"
+                [value]="opt.value"
+                [checked]="form.controls['delivery'].value === opt.value"
+                (change)="selectDelivery(opt.value)"
+              />
+              <label [for]="'dl-' + opt.value">
+                <span class="ttl">{{ opt.ttl }}</span>
+                <span class="sub">{{ opt.sub }}</span>
+              </label>
+            }
+          </div>
+
+          <p class="ta-sub-h">{{ 'bazar.form.location_section_label' | t }}</p>
+          <div class="ta-grid ta-grid--3" style="margin-bottom:18px">
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-location">
+                {{ 'bazar.form.location_label' | t }}
+                <span class="req">*</span>
+              </label>
+              <input
+                id="f-location"
+                type="text"
+                formControlName="location"
+                maxlength="80"
+                [placeholder]="'bazar.form.location_placeholder' | t"
+              />
+            </div>
+          </div>
+
+          @if (form.controls['delivery'].value !== 'pickup_only') {
+            <p class="ta-sub-h">{{ 'bazar.form.shipping_label' | t }}</p>
+            <div class="ta-grid ta-grid--3">
+              <div class="ta-field">
+                <label class="ta-field__label">{{ 'bazar.form.shipping_cost_label' | t }}</label>
+                <div class="ta-field__input-row">
+                  <input type="number" formControlName="shippingCost" min="0" step="1" />
+                  <span class="unit">RON</span>
+                </div>
+              </div>
+            </div>
+            <p class="ta-sub-h" style="margin-top:18px">{{ 'bazar.form.carriers_label' | t }}</p>
+            <div class="bz-payment">
+              @for (c of carrierOptions; track c.value) {
+                <input
+                  type="checkbox"
+                  [id]="'ship-' + c.value"
+                  [checked]="isCarrierChecked(c.value)"
+                  (change)="toggleCarrier(c.value, $any($event.target).checked)"
+                />
+                <label [for]="'ship-' + c.value">{{ c.label }}</label>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ---------- CONTACT ---------- -->
+      <section class="ta-sec">
+        <header class="ta-sec__head">
+          <div>
+            <span class="ta-sec__kicker">{{ 'bazar.form.sec_contact_kicker' | t }}</span>
+            <h2>{{ 'bazar.form.sec_contact_h' | t }}</h2>
+          </div>
+          <div class="ta-sec__hint" [innerHTML]="'bazar.form.sec_contact_hint' | t"></div>
+        </header>
+        <div class="ta-sec__body">
+          <div class="ta-grid ta-grid--3">
+            <div class="ta-field ta-field--full">
+              <label class="ta-field__label" for="f-phone">
+                {{ 'bazar.form.contact_phone_label' | t }}
+                <span class="hint">{{ 'bazar.form.contact_phone_hint' | t }}</span>
+              </label>
+              <input
+                id="f-phone"
+                type="tel"
+                formControlName="contactPhone"
+                maxlength="40"
+                [placeholder]="'bazar.form.contact_phone_placeholder' | t"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <!-- ===================== RIGHT: sticky sidebar ===================== -->
+    <aside class="ta-side">
+      <!-- LIVE PREVIEW -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'bazar.form.preview_head' | t }}
+          <span style="margin-left:auto; color:var(--fg-subtle); font-size:9px;">live</span>
+        </header>
+        <div class="ta-side__body">
+          <div class="bz-prev-card listing">
+            <div class="listing__media">
+              @if (previewPhoto(); as p) {
+                <img [src]="p" alt="" />
+              } @else {
+                <span style="font-family:var(--font-mono); font-size:10px; color:var(--fg-subtle); letter-spacing:0.08em;">
+                  {{ 'bazar.form.preview_no_photo' | t }}
+                </span>
+              }
+              <span class="listing__chip">{{ previewConditionLabel() }}</span>
+            </div>
+            <div class="listing__body">
+              <div class="listing__brand">// {{ previewBrand() }}</div>
+              <div class="listing__title">{{ previewModel() }}</div>
+              @if (previewTagline()) {
+                <div class="listing__tagline">{{ previewTagline() }}</div>
+              }
+              <div class="listing__row">
+                <div class="listing__price">
+                  {{ previewPrice() }}<small>{{ previewCurrency() }}</small>
+                </div>
+                <div class="listing__loc">
+                  <svg width="11" height="11"><use href="#i-pin"/></svg>
+                  {{ previewLocation() }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPLETION -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">
+          {{ 'bazar.form.completion_head' | t }}
+          <span class="ta-status save-status"
+            [class.save-status--saving]="saveStatus() === 'saving'"
+            [class.save-status--saved]="saveStatus() === 'saved'"
+            [class.save-status--error]="saveStatus() === 'error'">
+            <span class="save-status__dot ta-status__dot"></span>
+            {{ ('bazar.form.save_status.' + saveStatus()) | t }}
+          </span>
+        </header>
+        <div class="ta-side__body">
+          <div class="ta-meter" [style.--p]="progressPercent() + '%'">
+            <div class="ta-meter__top">
+              <span>{{ 'bazar.form.progress_label' | t }}</span>
+              <span><b>{{ progressPercent() }}</b>%</span>
+            </div>
+            <div class="ta-meter__bar"></div>
+          </div>
+
+          <div class="ta-checklist">
+            @for (item of checklist(); track item.key) {
+              <div class="ta-checklist__item" [class.is-done]="item.done">
+                <span class="mark">{{ item.done ? '✓' : '·' }}</span>
+                <span>{{ item.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- CTAs -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">{{ 'bazar.form.actions_head' | t }}</header>
+        <div class="ta-side__body">
+          <div class="ta-cta-row">
+            <button
+              class="ta-cta ta-cta--primary"
+              type="button"
+              [disabled]="submitting() || !canPublish()"
+              (click)="publish()"
+            >
+              {{ (submitting() ? 'bazar.form.publishing' : 'bazar.form.publish_cta') | t }}
+            </button>
+            <button
+              class="ta-cta ta-cta--ghost"
+              type="button"
+              (click)="saveDraftNow()"
+            >
+              {{ 'bazar.form.save_draft_cta' | t }}
+            </button>
+            @if (listingSlug()) {
+              <button
+                class="ta-cta ta-cta--ghost"
+                type="button"
+                (click)="previewAsVisitor()"
+              >
+                {{ 'bazar.form.preview_cta' | t }}
+              </button>
+            }
+            <button
+              class="ta-cta ta-cta--danger-text"
+              type="button"
+              (click)="discardDraft()"
+            >
+              {{ 'bazar.form.discard_cta' | t }}
+            </button>
+          </div>
+          @if (submitError()) {
+            <div class="submit-error">
+              {{ submitError() }}
+              @if (submitMissing().length) {
+                <ul style="margin: 6px 0 0; padding-left: 18px;">
+                  @for (m of submitMissing(); track m) {
+                    <li>{{ ('bazar.form.missing.' + m) | t }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+          <p style="font-family:var(--font-mono); font-size:10px; letter-spacing:0.06em; color:var(--fg-subtle); margin:8px 0 0; line-height:1.55;">
+            {{ 'bazar.form.publish_note' | t }}
+          </p>
+        </div>
+      </section>
+
+      <!-- SAFETY / TRUST -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">{{ 'bazar.form.trust_head' | t }}</header>
+        <div class="ta-side__body">
+          <div class="bz-trust">
+            <div class="bz-trust__row">
+              <span class="ic">1</span>
+              <span [innerHTML]="'bazar.form.trust_1' | t"></span>
+            </div>
+            <div class="bz-trust__row">
+              <span class="ic">2</span>
+              <span [innerHTML]="'bazar.form.trust_2' | t"></span>
+            </div>
+            <div class="bz-trust__row">
+              <span class="ic">3</span>
+              <span [innerHTML]="'bazar.form.trust_3' | t"></span>
+            </div>
+            <hr />
+            <div class="bz-trust__row">
+              <span class="ic">✦</span>
+              <span [innerHTML]="'bazar.form.trust_ttl' | t"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TIPS -->
+      <section class="ta-side__block">
+        <header class="ta-side__head">{{ 'bazar.form.tips_head' | t }}</header>
+        <div class="ta-side__body">
+          <div class="ta-tips">
+            <div class="ta-tips__item">
+              <span class="n">01</span>
+              <span [innerHTML]="'bazar.form.tip_1' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">02</span>
+              <span [innerHTML]="'bazar.form.tip_2' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">03</span>
+              <span [innerHTML]="'bazar.form.tip_3' | t"></span>
+            </div>
+            <div class="ta-tips__item">
+              <span class="n">04</span>
+              <span [innerHTML]="'bazar.form.tip_4' | t"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>

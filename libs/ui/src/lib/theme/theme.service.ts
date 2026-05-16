@@ -37,11 +37,9 @@ export class ThemeService {
   setMode(next: ThemeMode): void {
     this._mode.set(next);
     try {
-      if (next === 'auto') {
-        localStorage.removeItem(STORAGE_KEY);
-      } else {
-        localStorage.setItem(STORAGE_KEY, next);
-      }
+      // Persist every choice (including `auto`) so an explicit pick
+      // sticks even after we changed the default for new visitors.
+      localStorage.setItem(STORAGE_KEY, next);
     } catch {
       // localStorage unavailable (private mode / SSR) — keep the in-memory choice
     }
@@ -57,11 +55,14 @@ export class ThemeService {
   private readInitialMode(): ThemeMode {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw === 'dark' || raw === 'light') return raw;
+      if (raw === 'dark' || raw === 'light' || raw === 'auto') return raw;
     } catch {
       // ignore
     }
-    return 'auto';
+    // Brand default: site loads in light mode for users who never picked
+    // a theme. Users who explicitly choose `auto`/`dark`/`light` get their
+    // saved preference back via the branch above.
+    return 'light';
   }
 
   private detectSystemDark(): boolean {

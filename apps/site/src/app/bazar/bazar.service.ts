@@ -70,25 +70,35 @@ export interface RecentlySoldResponse {
 }
 
 export interface ListingPayload {
-  gearId?: string;
-  rawMake?: string;
-  rawModel?: string;
-  rawYear?: number;
+  gearId?: string | null;
+  rawMake?: string | null;
+  rawModel?: string | null;
+  rawYear?: number | null;
   title: string;
+  tagline?: string | null;
   description: Record<string, unknown>;
   descriptionHtml?: string;
   price: number;
   currency: DisplayCurrencyLiteral;
   condition: ListingConditionLiteral;
-  conditionNote?: string;
+  conditionNote?: string | null;
+  defects?: string | null;
   kind: ListingKindLiteral;
-  lookingFor?: string;
+  lookingFor?: string | null;
   delivery: ListingDeliveryLiteral;
-  shippingCost?: number;
+  shippingCost?: number | null;
   shippingCarriers?: string[];
   acceptsOffers: boolean;
   location: string;
-  contactPhone?: string;
+  contactPhone?: string | null;
+}
+
+export interface DraftSeedPayload {
+  gearId?: string;
+  rawMake?: string;
+  rawModel?: string;
+  rawYear?: number;
+  title?: string;
 }
 
 export interface InboxThread {
@@ -245,12 +255,14 @@ export interface BazarListingDetail {
     rawModel: string | null;
     rawYear: number | null;
     title: string;
+    tagline: string | null;
     description: Record<string, unknown>;
     descriptionHtml: string;
     price: string;
     currency: DisplayCurrencyLiteral;
     condition: ListingConditionLiteral;
     conditionNote: string | null;
+    defects: string | null;
     kind: ListingKindLiteral;
     lookingFor: string | null;
     delivery: ListingDeliveryLiteral;
@@ -358,6 +370,40 @@ export class BazarService {
       this.http.post<{ id: string; slug: string }>(
         `${this.base}/me/bazar/listings`,
         payload,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /** V07 sell flow: spin up an empty draft so auto-save has somewhere to write. */
+  createDraft(
+    seed: DraftSeedPayload = {},
+  ): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/me/bazar/listings/draft`,
+        seed,
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /** Flip a draft into status='active'. Throws 409 with `missing[]` if incomplete. */
+  publishDraft(listingId: string): Promise<{ id: string; slug: string }> {
+    return firstValueFrom(
+      this.http.post<{ id: string; slug: string }>(
+        `${this.base}/me/bazar/listings/${listingId}/publish`,
+        {},
+        { withCredentials: true },
+      ),
+    );
+  }
+
+  /** Owner-only fetch by id. Returns drafts too. */
+  findOwn(listingId: string): Promise<BazarListingDetail> {
+    return firstValueFrom(
+      this.http.get<BazarListingDetail>(
+        `${this.base}/me/bazar/listings/${listingId}`,
         { withCredentials: true },
       ),
     );
