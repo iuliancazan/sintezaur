@@ -145,6 +145,22 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
       :host .gear-fill__photo--contain {
         object-fit: contain;
         background: transparent;
+        /* Soft-fade the photo's edges into the blurred backdrop so the
+           contain letterbox / pillarbox doesn't show a hard cut.
+           Two linear-gradient masks (vertical + horizontal) composited
+           with intersect give a rounded-rectangle visible area that
+           feathers in both directions — works for landscape, portrait
+           and square sources without picking an orientation up-front.
+           Tune the feather depth via the % stops (8% subtle, 12%
+           dramatic). */
+        -webkit-mask-image:
+          linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%),
+          linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+        -webkit-mask-composite: source-in;
+        mask-image:
+          linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%),
+          linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+        mask-composite: intersect;
       }
 
       /* Hero rotator (prev / counter / next) — align to the bottom-right
