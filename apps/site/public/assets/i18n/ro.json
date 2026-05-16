@@ -407,7 +407,15 @@
         "mod_approved": "Draft aprobat și publicat.",
         "mod_rejected": "Cerere de modificări trimisă către contribuitor.",
         "relation_not_found_title": "Piesa nu există în Tezaur",
-        "relation_not_found_body": "Nu am găsit {{brand}} {{model}}. Verifică ortografia sau lasă relația pentru curator."
+        "relation_not_found_body": "Nu am găsit {{brand}} {{model}}. Verifică ortografia sau lasă relația pentru curator.",
+        "too_many_images": "Maxim 12 imagini per piesă. Șterge una înainte să adaugi alta.",
+        "draft_create_failed": "Nu am putut crea draftul pentru încărcare. Încearcă din nou.",
+        "upload_failed_file": "Upload eșuat pentru {{name}}.",
+        "upload_failed_hint": "Verifică formatul (PNG/JPG/WEBP) și mărimea (max 8 MB).",
+        "upload_failed": "Upload eșuat",
+        "uploading": "se încarcă…",
+        "queued": "în coadă",
+        "dismiss_aria": "Înlătură imaginea eșuată"
       },
       "mod": {
         "banner_head": "Vezi acest draft ca moderator.",

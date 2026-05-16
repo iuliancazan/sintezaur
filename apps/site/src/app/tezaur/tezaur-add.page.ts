@@ -223,6 +223,13 @@ interface LinkRow {
   url: string;
 }
 
+interface PendingUpload {
+  tempId: string;
+  name: string;
+  status: 'queued' | 'uploading' | 'error';
+  errorMessage?: string;
+}
+
 @Component({
   selector: 'app-tezaur-add-page',
   standalone: true,
@@ -415,6 +422,11 @@ export class TezaurAddPage {
   readonly loading = signal(true);
   readonly submitting = signal(false);
   readonly uploadingImages = signal(0);
+  /** Optimistic upload tiles shown immediately so the user knows the
+   *  drop registered, even before the first POST returns. */
+  readonly pendingUploads = signal<PendingUpload[]>([]);
+  /** True while a file is being dragged over the drop zone. */
+  readonly dropHover = signal(false);
 
   /* ---------- cropper modal ---------- */
   readonly cropperOpen = signal(false);
@@ -843,6 +855,7 @@ export class TezaurAddPage {
 
   async onDrop(event: DragEvent): Promise<void> {
     event.preventDefault();
+    this.dropHover.set(false);
     if (!event.dataTransfer) return;
     const files = Array.from(event.dataTransfer.files).filter((f) =>
       f.type.startsWith('image/'),
@@ -853,41 +866,96 @@ export class TezaurAddPage {
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
+    if (!this.dropHover()) this.dropHover.set(true);
+  }
+
+  onDragLeave(event: DragEvent): void {
+    // Only flip off if we left the dropzone itself, not a child element.
+    const related = event.relatedTarget as Node | null;
+    const currentEl = event.currentTarget as Node | null;
+    if (currentEl && related && currentEl.contains(related)) return;
+    this.dropHover.set(false);
+  }
+
+  dismissPendingUpload(tempId: string): void {
+    this.pendingUploads.update((p) => p.filter((x) => x.tempId !== tempId));
   }
 
   /**
-   * Upload one or more files. If we don't have a draft id yet, force
-   * a save first so the gear row exists. Upload sequentially to keep
-   * positions stable and surface errors per-file cleanly.
+   * Upload one or more files. Each file gets an optimistic placeholder
+   * tile (spinner) immediately so the user knows the drop / select
+   * registered. Tiles upgrade to uploading → success (removed when the
+   * real image lands) or error (sticks with a dismiss button + toast).
    */
   private async uploadFiles(files: File[]): Promise<void> {
     if (this.isLocked()) return;
-    if (this.images().length + files.length > 12) {
-      this.submitError.set('Maxim 12 imagini per piesă.');
+    const used = this.images().length + this.pendingUploads().length;
+    if (used + files.length > 12) {
+      this.toast.warn(this.i18n.t('tezaur.add.toast.too_many_images'));
       return;
     }
+
+    // Step 1: optimistic placeholders so the user sees the drop took effect.
+    const pending: PendingUpload[] = files.map((f) => ({
+      tempId: this.makeTempId(),
+      name: f.name,
+      status: 'queued',
+    }));
+    this.pendingUploads.update((p) => [...p, ...pending]);
+
+    // Step 2: ensure we have a draft id before posting any image.
     if (!this.draftId()) {
       await this.saveDraftNow({ silent: true });
     }
     const id = this.draftId();
     if (!id) {
-      this.submitError.set('Nu am putut crea draftul — încearcă din nou.');
+      this.pendingUploads.update((p) =>
+        p.filter((x) => !pending.some((y) => y.tempId === x.tempId)),
+      );
+      this.toast.error(this.i18n.t('tezaur.add.toast.draft_create_failed'));
       return;
     }
-    for (const file of files) {
+
+    // Step 3: sequential upload, updating each placeholder as it progresses.
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const tempId = pending[i].tempId;
+      this.pendingUploads.update((p) =>
+        p.map((x) => (x.tempId === tempId ? { ...x, status: 'uploading' } : x)),
+      );
       this.uploadingImages.update((n) => n + 1);
       try {
         await this.tezaur.uploadDraftImage(id, file);
+        this.pendingUploads.update((p) =>
+          p.filter((x) => x.tempId !== tempId),
+        );
+        await this.refreshImages();
       } catch (err) {
         console.error('[tezaur-add] upload failed', err);
-        this.submitError.set(
-          `Upload eșuat pentru „${file.name}" (max 8 MB, PNG/JPG/WEBP).`,
+        const msg = this.i18n.t('tezaur.add.toast.upload_failed_file', {
+          name: file.name,
+        });
+        this.pendingUploads.update((p) =>
+          p.map((x) =>
+            x.tempId === tempId
+              ? { ...x, status: 'error', errorMessage: msg }
+              : x,
+          ),
         );
+        this.toast.error(msg, {
+          detail: this.i18n.t('tezaur.add.toast.upload_failed_hint'),
+        });
       } finally {
         this.uploadingImages.update((n) => n - 1);
       }
     }
-    await this.refreshImages();
+  }
+
+  private makeTempId(): string {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+    return 'tmp_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
   }
 
   async deleteImage(sourceId: string): Promise<void> {

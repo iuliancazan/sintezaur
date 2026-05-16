@@ -369,11 +369,13 @@
             class="ta-drop"
             tabindex="0"
             role="button"
+            [class.is-hover]="dropHover()"
             (click)="fileInput.click()"
             (keydown.enter)="fileInput.click()"
             (keydown.space)="fileInput.click(); $event.preventDefault()"
             (dragenter)="onDragOver($event)"
             (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
             (drop)="onDrop($event)"
           >
             <div class="ta-drop__icon">
@@ -434,6 +436,39 @@
                 >
                   <svg><use href="#i-x"/></svg>
                 </button>
+              </div>
+            }
+            @for (p of pendingUploads(); track p.tempId) {
+              <div
+                class="ta-img ta-img--pending"
+                [class.is-uploading]="p.status === 'uploading'"
+                [class.is-queued]="p.status === 'queued'"
+                [class.is-error]="p.status === 'error'"
+                [title]="p.name"
+              >
+                @if (p.status === 'error') {
+                  <div class="ta-img__pending-icon">!</div>
+                  <span class="ta-img__pending-label">
+                    {{ p.errorMessage || ('tezaur.add.toast.upload_failed' | t) }}
+                  </span>
+                  <button
+                    class="ta-img__pending-dismiss"
+                    type="button"
+                    (click)="dismissPendingUpload(p.tempId)"
+                    [attr.aria-label]="'tezaur.add.toast.dismiss_aria' | t"
+                  >
+                    <svg><use href="#i-x"/></svg>
+                  </button>
+                } @else {
+                  <span class="ta-img__spinner" aria-hidden="true"></span>
+                  <span class="ta-img__pending-label">
+                    @if (p.status === 'uploading') {
+                      {{ 'tezaur.add.toast.uploading' | t }}
+                    } @else {
+                      {{ 'tezaur.add.toast.queued' | t }}
+                    }
+                  </span>
+                }
               </div>
             }
             <button
