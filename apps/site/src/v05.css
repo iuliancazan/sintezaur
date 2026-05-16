@@ -2814,6 +2814,7 @@ body {
 .tez-card:hover .tez-card__model { color: var(--accent); }
 .tez-card__media {
   aspect-ratio: 1;
+  width: 100%;
   background: var(--bg-card-2);
   position: relative;
   overflow: hidden;
