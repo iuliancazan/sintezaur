@@ -105,24 +105,6 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
          the label readable instead of collapsing the tile. */
       .gear-fill__photo:not([src]) { display: none; }
 
-      /* Aspect-ratio inside a flex column (.listing / .gear / .article)
-         needs an explicit cross-axis size AND no shrinking, otherwise
-         Chromium computes the height as 0 — the absolutely-positioned
-         .gear-fill__label then escapes the collapsed tile and floats
-         into the surrounding section header. Pinning width:100% +
-         flex-shrink:0 with the aspect-ratio restated wins consistently
-         across Chrome / Firefox / Safari. */
-      :host .listing__media,
-      :host .article__media,
-      :host .gear__media {
-        width: 100%;
-        flex-shrink: 0;
-        align-self: stretch;
-      }
-      :host .listing__media { aspect-ratio: 4 / 3; }
-      :host .article__media { aspect-ratio: 16 / 9; }
-      :host .article.is-small .article__media { aspect-ratio: 16 / 10; }
-      :host .gear__media { aspect-ratio: 1 / 1; }
     `,
   ],
   template: `
