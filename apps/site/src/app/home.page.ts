@@ -129,6 +129,7 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
            drop saturation/brightness so the foreground stays the focus. */
         transform: scale(1.15);
         filter: blur(28px) saturate(1.15) brightness(0.75);
+        opacity: 0.1;
         z-index: 0;
         pointer-events: none;
         user-select: none;
