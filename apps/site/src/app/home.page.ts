@@ -862,7 +862,7 @@ export class HomePage implements OnInit {
     if (!box || !box.clientWidth || !box.clientHeight) return;
     const imgRatio = img.naturalWidth / img.naturalHeight;
     const boxRatio = box.clientWidth / box.clientHeight;
-    const FEATHER = 4; // % of container, soft transition into the blur
+    const FEATHER = 1.5; // % of container, soft transition into the blur
     if (Math.abs(imgRatio - boxRatio) < 0.01) {
       // Photo fills the box exactly — no bands, no mask needed.
       img.style.maskImage = '';
