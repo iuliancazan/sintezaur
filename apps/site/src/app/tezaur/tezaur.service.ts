@@ -70,7 +70,9 @@ export interface TezaurDraftPayload {
   yearDiscontinued?: number | null;
   msrpAtLaunchEur?: number | null;
   tagline?: string;
+  taglineEn?: string;
   descriptionText?: string;
+  descriptionTextEn?: string;
   specs?: Record<string, unknown>;
 }
 
@@ -128,6 +130,8 @@ export interface TezaurDraftDetail {
     yearDiscontinued: number | null;
     msrpAtLaunchEur: string | null;
     specs: Record<string, unknown>;
+    taglineRo: string | null;
+    taglineEn: string | null;
     submittedAt: string | null;
     updatedAt: string;
     createdBy: string | null;
@@ -137,6 +141,7 @@ export interface TezaurDraftDetail {
   links: TezaurDraftLink[];
   relationships: { parent: TezaurDraftRelationship[] };
   description: { body: unknown; bodyHtml: string } | null;
+  descriptionEn: { body: unknown; bodyHtml: string } | null;
 }
 
 export interface TezaurListItem {

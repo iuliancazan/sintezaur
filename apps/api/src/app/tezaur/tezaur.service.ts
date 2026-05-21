@@ -1353,6 +1353,7 @@ export class TezaurService {
 
     const { body, bodyHtml } = this.descriptionFromText(dto.descriptionText);
     const specs = this.mergeTaglineIntoSpecs(dto.specs, dto.tagline);
+    const taglineEn = dto.taglineEn?.trim() || null;
 
     const [row] = await this.db
       .insert(gear)
@@ -1367,6 +1368,7 @@ export class TezaurService {
         yearDiscontinued: dto.yearDiscontinued,
         msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString(),
         specs,
+        taglineEn,
         published: false,
         state: 'draft',
         createdBy: userId,
@@ -1380,6 +1382,18 @@ export class TezaurService {
         { lang: 'ro', body, bodyHtml },
         userId,
       );
+    }
+
+    if (dto.descriptionTextEn !== undefined) {
+      const trimmed = dto.descriptionTextEn.trim();
+      if (trimmed) {
+        const en = this.descriptionFromText(dto.descriptionTextEn);
+        await this.upsertDescription(
+          row.id,
+          { lang: 'en', body: en.body, bodyHtml: en.bodyHtml },
+          userId,
+        );
+      }
     }
 
     return row;
@@ -1410,6 +1424,7 @@ export class TezaurService {
       }[];
     };
     description: { body: unknown; bodyHtml: string } | null;
+    descriptionEn: { body: unknown; bodyHtml: string } | null;
   }> {
     const [gearRow] = await this.db
       .select()
@@ -1470,6 +1485,17 @@ export class TezaurService {
       )
       .limit(1);
 
+    const [descEn_] = await this.db
+      .select({
+        body: gearDescriptions.body,
+        bodyHtml: gearDescriptions.bodyHtml,
+      })
+      .from(gearDescriptions)
+      .where(
+        and(eq(gearDescriptions.gearId, gearRow.id), eq(gearDescriptions.lang, 'en')),
+      )
+      .limit(1);
+
     return {
       gear: gearRow,
       family: familyRow ?? null,
@@ -1477,6 +1503,7 @@ export class TezaurService {
       links,
       relationships: { parent: parentRels },
       description: desc_ ?? null,
+      descriptionEn: descEn_ ?? null,
     };
   }
 
@@ -1538,6 +1565,9 @@ export class TezaurService {
         ...(dto.msrpAtLaunchEur !== undefined && {
           msrpAtLaunchEur: dto.msrpAtLaunchEur?.toString() ?? null,
         }),
+        ...(dto.taglineEn !== undefined && {
+          taglineEn: dto.taglineEn?.trim() || null,
+        }),
         specs: nextSpecs,
         updatedAt: new Date(),
         updatedBy: userId,
@@ -1547,6 +1577,27 @@ export class TezaurService {
     if (dto.descriptionText !== undefined) {
       const { body, bodyHtml } = this.descriptionFromText(dto.descriptionText);
       await this.upsertDescription(gearId, { lang: 'ro', body, bodyHtml }, userId);
+    }
+
+    if (dto.descriptionTextEn !== undefined) {
+      const trimmed = dto.descriptionTextEn.trim();
+      if (trimmed) {
+        const en = this.descriptionFromText(dto.descriptionTextEn);
+        await this.upsertDescription(
+          gearId,
+          { lang: 'en', body: en.body, bodyHtml: en.bodyHtml },
+          userId,
+        );
+      } else {
+        await this.db
+          .delete(gearDescriptions)
+          .where(
+            and(
+              eq(gearDescriptions.gearId, gearId),
+              eq(gearDescriptions.lang, 'en'),
+            ),
+          );
+      }
     }
 
     if (asModerator) {

@@ -453,6 +453,16 @@
         "sound": "<strong>Descrie cum sună.</strong> Mai mult decât specs — la ce gen merge, care era contextul cultural când a apărut, cu ce se compară.",
         "sources": "<strong>Citează surse.</strong> Producător, Wikipedia, manualul oficial. Fără surse, intră la coadă mai lentă de moderare.",
         "partial": "<strong>Lasă gol ce nu știi.</strong> Comunitatea completează. E ok să ai un draft parțial — alții îl extind."
+      },
+      "en": {
+        "summary": "Traducere în engleză (opțional)",
+        "note": "Dacă lași gol, paginile /en/tezaur afișează versiunea RO și o marchează ca „translation pending\". Poți completa parțial — doar tagline sau doar descrierea.",
+        "tagline_label": "Tagline (EN)",
+        "tagline_hint": "o linie · traducere a tagline-ului RO",
+        "tagline_placeholder": "Flagship · poly · analog · what every visitor should know",
+        "description_label": "Descriere lungă (EN)",
+        "description_hint": "2–6 paragrafe · 200–8000 caractere",
+        "description_placeholder": "Translate the Romanian description here. Blank lines = new paragraphs."
       }
     },
     "add_button": "Adaugă în Tezaur",

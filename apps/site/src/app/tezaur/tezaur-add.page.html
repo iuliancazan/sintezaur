@@ -522,6 +522,34 @@
                 <b>{{ descriptionLength() }}</b> / 8000 {{ 'tezaur.add.fields.chars' | t }}
               </div>
             </div>
+            <div class="ta-field ta-field--full">
+              <details class="ta-en">
+                <summary>{{ 'tezaur.add.en.summary' | t }}</summary>
+                <p class="ta-en__note">{{ 'tezaur.add.en.note' | t }}</p>
+                <label class="ta-field__label" for="f-tag-en">
+                  {{ 'tezaur.add.en.tagline_label' | t }}
+                  <span class="hint">{{ 'tezaur.add.en.tagline_hint' | t }}</span>
+                </label>
+                <input
+                  id="f-tag-en"
+                  name="taglineEn"
+                  type="text"
+                  formControlName="taglineEn"
+                  [placeholder]="i18n.t('tezaur.add.en.tagline_placeholder')"
+                />
+                <label class="ta-field__label" for="f-desc-en">
+                  {{ 'tezaur.add.en.description_label' | t }}
+                  <span class="hint">{{ 'tezaur.add.en.description_hint' | t }}</span>
+                </label>
+                <textarea
+                  id="f-desc-en"
+                  name="descriptionTextEn"
+                  rows="10"
+                  formControlName="descriptionTextEn"
+                  [placeholder]="i18n.t('tezaur.add.en.description_placeholder')"
+                ></textarea>
+              </details>
+            </div>
           </div>
         </div>
       </section>

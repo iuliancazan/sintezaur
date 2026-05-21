@@ -6,7 +6,20 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M16** ✅ (partial — A/B/C/D/E/H/I/J + testing doc;
+**Last shipped:** **M17-A** — Tezaur contributor add bilingv (close
+M16-F). Form `/tezaur/adauga` capătă bloc `<details>` „Traducere în
+engleză (opțional)" sub Descriere cu 2 inputs (`taglineEn` text 200 +
+`descriptionTextEn` textarea 8000). Backend: `MeCreateGearDto` extins cu
+`taglineEn`/`descriptionTextEn`; `meCreateDraft` și `meUpdateDraft`
+mapează `taglineEn` la `gear.tagline_en` (empty→NULL) și
+`descriptionTextEn` la `gear_descriptions{lang:'en'}` via
+`upsertDescription` existent. Clearance EN textarea (string gol pe
+update) DELETE rândul EN. `meGetDraft` returnează acum și
+`descriptionEn` ca să se hidrateze înapoi textarea EN. Pattern preluat
+1:1 din M16-H legal admin. Niciun build warning nou (bundle initial
+warning de 23kB e pre-existent).
+
+**Last shipped (previous):** **M16** ✅ (partial — A/B/C/D/E/H/I/J + testing doc;
 F/G deferred) — bilingual platform foundation RO/EN. Tot site-ul
 serveste acum sub două URL-uri (`/...` RO default + `/en/...` mirror)
 cu un selector RO/EN în topbar care setează cookie `sz_locale` și
@@ -347,7 +360,15 @@ cu coadă moderare pentru status `pending_review`. Cod existent
 pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
 relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** none — M13 closed, M11 (Tezaur contributor) next.
+**Active milestone:** **M17** — close-out funcțional (bilingv close
+M16-F/G + rewrite scoped markup forum/revista/tezaur/cont + pagini noi
+v08). Plan complet în `~/.claude/plans/resilient-foraging-wave.md`.
+**NU** include pixel-perfect alignment 1:1 cu design files — acel
+workstream e rezervat post-M17 ca pas separat pagină cu pagină.
+
+**Next up:** **M17-B** — Revista editor bilingv (close M16-G):
+`<details>` cu `titleEn`/`excerptEn`/`bodyEn` pe `/revista/nou` +
+`/revista/:slug/editare`.
 
 ## Milestones
 
@@ -461,6 +482,28 @@ relaxat la `contributor` cu guard own-only pe update / delete.
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M17 — Close-out funcțional (bilingv + rewrite scoped + pagini noi v08)
+
+Plan complet în `~/.claude/plans/resilient-foraging-wave.md`. **NU**
+include pixel-perfect alignment 1:1 cu design files — acel workstream
+e rezervat post-M17 ca pas separat pagină cu pagină.
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A   | _TBD_  | done | Tezaur add bilingv (close M16-F). `MeCreateGearDto` extins cu `taglineEn`/`descriptionTextEn` (max 200/8000); `meCreateDraft` și `meUpdateDraft` mapează `taglineEn` la `gear.tagline_en` cu normalizare empty→NULL și `descriptionTextEn` la `gear_descriptions{lang:'en'}` via `upsertDescription` existent (DELETE EN row pe clearance). `meGetDraft` returnează acum și `descriptionEn` ca să hidrateze înapoi textarea. Form `/tezaur/adauga` capătă `<details class="ta-en">` „Traducere în engleză (opțional)" sub Descriere cu inputs taglineEn + descriptionTextEn. CSS scoped 30-linii pentru `.ta-en`. 8 chei i18n noi sub `tezaur.add.en.*`. Pattern preluat 1:1 din M16-H legal admin. |
+| B   | _TBD_  | pending | Revista editor bilingv (close M16-G). |
+| C   | _TBD_  | pending | Forum thread rewrite (.ft-* scoped → globale V05). |
+| D   | _TBD_  | pending | Forum category rewrite. |
+| E   | _TBD_  | pending | Forum search rewrite. |
+| F   | _TBD_  | pending | Forum new (form) rewrite. |
+| G   | _TBD_  | pending | Revista detail rewrite (.rd-* → .ad-*). |
+| H   | _TBD_  | pending | Tezaur detail Sz→sprite swap. |
+| I   | _TBD_  | pending | Cont 3 shells rename .settings/.favorites/.messages → .acc-*. |
+| J   | _TBD_  | pending | My-listings rebrand .ml-* → .am-*. |
+| K   | _TBD_  | pending | Avatar dropdown + drawer „Articolele mele" link. |
+| L   | _TBD_  | pending | Verificare Contribuții-tezaur vs V08. |
+| M   | _TBD_  | pending | Close + `docs/testing/m17-testing.md` + STATUS update. |
 
 ### M16 — Bilingual platform RO/EN (foundation)
 

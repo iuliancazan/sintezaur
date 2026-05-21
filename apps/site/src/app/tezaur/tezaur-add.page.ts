@@ -328,6 +328,46 @@ interface PendingUpload {
         opacity: 0.55;
         pointer-events: none;
       }
+      .ta-en {
+        border: 1px dashed var(--line);
+        padding: 14px 16px;
+        background: var(--bg-elev);
+      }
+      .ta-en > summary {
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fg-muted);
+        list-style: none;
+      }
+      .ta-en > summary::-webkit-details-marker {
+        display: none;
+      }
+      .ta-en > summary::before {
+        content: '+';
+        display: inline-block;
+        width: 14px;
+        margin-right: 8px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .ta-en[open] > summary::before {
+        content: '–';
+      }
+      .ta-en[open] {
+        background: var(--bg);
+      }
+      .ta-en__note {
+        margin: 10px 0 14px;
+        font-size: 12px;
+        color: var(--fg-subtle);
+        line-height: 1.55;
+      }
+      .ta-en .ta-field__label {
+        margin-top: 12px;
+      }
     `,
   ],
 })
@@ -361,7 +401,9 @@ export class TezaurAddPage {
     yearDiscontinued: this.fb.control<number | null>(null),
     msrpAtLaunchEur: this.fb.control<number | null>(null),
     tagline: ['', [Validators.maxLength(200)]],
+    taglineEn: ['', [Validators.maxLength(200)]],
     descriptionText: ['', [Validators.maxLength(8000)]],
+    descriptionTextEn: ['', [Validators.maxLength(8000)]],
 
     // Specs (flat keys → mapped into `specs` JSONB on save)
     synth_type: [''],
@@ -641,15 +683,18 @@ export class TezaurAddPage {
     );
 
     // Recover plain-text description from bodyHtml (rough — strip <p>).
-    const descText = detail.description
-      ? detail.description.bodyHtml
-          .replace(/<\/p><p>/g, '\n\n')
-          .replace(/<\/?p>/g, '')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'")
+    const recoverPlain = (html: string): string =>
+      html
+        .replace(/<\/p><p>/g, '\n\n')
+        .replace(/<\/?p>/g, '')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    const descText = detail.description ? recoverPlain(detail.description.bodyHtml) : '';
+    const descTextEn = detail.descriptionEn
+      ? recoverPlain(detail.descriptionEn.bodyHtml)
       : '';
 
     this.form.patchValue(
@@ -663,7 +708,9 @@ export class TezaurAddPage {
         yearDiscontinued: g.yearDiscontinued,
         msrpAtLaunchEur: g.msrpAtLaunchEur ? Number(g.msrpAtLaunchEur) : null,
         tagline: specs.tagline ?? '',
+        taglineEn: g.taglineEn ?? '',
         descriptionText: descText,
+        descriptionTextEn: descTextEn,
         synth_type: specs.synth_type ?? '',
         polyphony: specs.polyphony ?? null,
         osc_per_voice: specs.osc_per_voice ?? null,
@@ -787,7 +834,9 @@ export class TezaurAddPage {
       yearDiscontinued: v.yearDiscontinued ?? null,
       msrpAtLaunchEur: v.msrpAtLaunchEur ?? null,
       tagline: (v.tagline as string)?.trim() || undefined,
+      taglineEn: (v.taglineEn as string)?.trim() || '',
       descriptionText: (v.descriptionText as string) ?? '',
+      descriptionTextEn: (v.descriptionTextEn as string) ?? '',
       specs: specs as Record<string, unknown>,
     };
   }

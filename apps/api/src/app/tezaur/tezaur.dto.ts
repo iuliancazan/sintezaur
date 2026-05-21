@@ -408,6 +408,12 @@ export class MeCreateGearDto {
   @MaxLength(200)
   tagline?: string;
 
+  /** English tagline mirror. Empty/whitespace normalised to NULL on save. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  taglineEn?: string;
+
   /**
    * Long-form description as plain text. The service splits on blank
    * lines into Tiptap paragraph nodes and stores both `body` (JSON)
@@ -417,6 +423,12 @@ export class MeCreateGearDto {
   @IsString()
   @MaxLength(8000)
   descriptionText?: string;
+
+  /** English description mirror. Stored on `gear_descriptions.lang='en'`. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(8000)
+  descriptionTextEn?: string;
 }
 
 export class MeUpdateGearDto extends PartialType(MeCreateGearDto) {}
