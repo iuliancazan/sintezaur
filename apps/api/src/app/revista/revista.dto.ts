@@ -79,6 +79,31 @@ export class CreateArticleDto {
   @IsOptional()
   @IsBoolean()
   isPremium?: boolean;
+
+  /* ---------- English mirror (bilingual, optional) ---------- */
+
+  /** English title. Empty/whitespace normalised to NULL on save. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  titleEn?: string;
+
+  /** English excerpt. Empty/whitespace normalised to NULL on save. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(280)
+  excerptEn?: string;
+
+  /** English body — Tiptap JSON. Empty/null body removes the EN row. */
+  @IsOptional()
+  @IsObject()
+  bodyEn?: Record<string, unknown>;
+
+  /** English pre-rendered HTML. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(200_000)
+  bodyHtmlEn?: string;
 }
 
 export class UpdateArticleDto extends PartialType(CreateArticleDto) {}

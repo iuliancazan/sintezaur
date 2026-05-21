@@ -189,6 +189,51 @@ interface GearSearchHit {
           </p>
         </section>
 
+        <!-- ===== English mirror (optional) ===== -->
+        <section class="rf-sec">
+          <details class="rf-en">
+            <summary>{{ 'revista.form.en.summary' | t }}</summary>
+            <p class="rf-en__note">{{ 'revista.form.en.note' | t }}</p>
+            <label class="rf-input">
+              <span>{{ 'revista.form.en.title_label' | t }}</span>
+              <input
+                type="text"
+                [(ngModel)]="form.titleEn"
+                name="titleEn"
+                maxlength="200"
+                [placeholder]="i18n.t('revista.form.en.title_placeholder')"
+              />
+            </label>
+            <label class="rf-input">
+              <span>{{ 'revista.form.en.excerpt_label' | t }}</span>
+              <textarea
+                [(ngModel)]="form.excerptEn"
+                name="excerptEn"
+                maxlength="280"
+                rows="2"
+                [placeholder]="i18n.t('revista.form.en.excerpt_placeholder')"
+              ></textarea>
+              <span class="rf-input__hint">
+                {{ 'revista.form.en.excerpt_hint' | t }}
+              </span>
+            </label>
+            <label class="rf-input">
+              <span>{{ 'revista.form.en.body_label' | t }}</span>
+              <sz-editor
+                [value]="form.bodyEn"
+                [richMode]="true"
+                [imageUploader]="imageUploader"
+                [placeholder]="i18n.t('revista.form.en.body_placeholder')"
+                [maxLength]="200000"
+                (valueChange)="onBodyEnChange($event)"
+              />
+              <span class="rf-input__hint">
+                {{ 'revista.form.en.body_hint' | t }}
+              </span>
+            </label>
+          </details>
+        </section>
+
         <!-- ===== Gear sidebar links ===== -->
         <section class="rf-sec">
           <h2 class="rf-sec__title">// {{ 'revista.form.gear_section' | t }}</h2>
@@ -534,6 +579,41 @@ interface GearSearchHit {
         font-family: var(--font-mono);
         font-size: 12px;
       }
+
+      .rf-en {
+        border: 1px dashed var(--line);
+        padding: 16px 18px;
+        background: var(--bg-elev);
+      }
+      .rf-en > summary {
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--fg-muted);
+        list-style: none;
+      }
+      .rf-en > summary::-webkit-details-marker { display: none; }
+      .rf-en > summary::before {
+        content: '+';
+        display: inline-block;
+        width: 14px;
+        margin-right: 8px;
+        font-weight: 700;
+        color: var(--accent);
+      }
+      .rf-en[open] > summary::before { content: '–'; }
+      .rf-en[open] { background: var(--bg); }
+      .rf-en__note {
+        margin: 12px 0 18px;
+        font-size: 12px;
+        color: var(--fg-subtle);
+        line-height: 1.55;
+      }
+      .rf-en .rf-input {
+        margin-top: 14px;
+      }
     `,
   ],
 })
@@ -562,6 +642,10 @@ export class RevistaFormPage {
     bodyHtml: string;
     tags: string[];
     heroSourceId: string | null;
+    titleEn: string;
+    excerptEn: string;
+    bodyEn: Record<string, unknown>;
+    bodyHtmlEn: string;
   } = freshForm();
 
   readonly tagsInput = signal('');
@@ -642,6 +726,10 @@ export class RevistaFormPage {
       bodyHtml: d.article.bodyHtml,
       tags: d.article.tags,
       heroSourceId: d.article.heroSourceId,
+      titleEn: d.article.titleEn ?? '',
+      excerptEn: d.article.excerptEn ?? '',
+      bodyEn: d.article.bodyEn ?? {},
+      bodyHtmlEn: d.article.bodyHtmlEn ?? '',
     };
     this.tagsInput.set(d.article.tags.join(', '));
     this.linkedGear.set(
@@ -661,6 +749,11 @@ export class RevistaFormPage {
   onBodyChange(change: SzEditorChange): void {
     this.form.body = change.json as Record<string, unknown>;
     this.form.bodyHtml = change.html;
+  }
+
+  onBodyEnChange(change: SzEditorChange): void {
+    this.form.bodyEn = change.json as Record<string, unknown>;
+    this.form.bodyHtmlEn = change.html;
   }
 
   onGearSearch(): void {
@@ -737,6 +830,9 @@ export class RevistaFormPage {
   }
 
   private buildPayload(): CreateArticlePayload {
+    // EN mirror: send the trimmed string (empty string → backend null).
+    // bodyEn/bodyHtmlEn travel together — service decides based on
+    // bodyHtmlEn whether to persist or null both columns.
     return {
       title: this.form.title.trim(),
       excerpt: this.form.excerpt.trim() || undefined,
@@ -746,6 +842,10 @@ export class RevistaFormPage {
       tags: this.form.tags,
       gearIds: this.linkedGear().map((g) => g.id),
       heroSourceId: this.form.heroSourceId ?? undefined,
+      titleEn: this.form.titleEn.trim(),
+      excerptEn: this.form.excerptEn.trim(),
+      bodyEn: this.form.bodyEn,
+      bodyHtmlEn: this.form.bodyHtmlEn,
     };
   }
 
@@ -845,5 +945,9 @@ function freshForm(): RevistaFormPage['form'] {
     bodyHtml: '',
     tags: [],
     heroSourceId: null,
+    titleEn: '',
+    excerptEn: '',
+    bodyEn: {},
+    bodyHtmlEn: '',
   };
 }

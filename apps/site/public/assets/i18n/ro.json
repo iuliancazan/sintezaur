@@ -1175,7 +1175,19 @@
       "archive_error": "Arhivarea a eșuat.",
       "save_error": "Salvarea a eșuat. Verifică datele și reîncearcă.",
       "publish_error": "Publicarea a eșuat.",
-      "load_error": "Articolul nu a putut fi încărcat."
+      "load_error": "Articolul nu a putut fi încărcat.",
+      "en": {
+        "summary": "Traducere în engleză (opțional)",
+        "note": "Dacă lași gol, pagina /en/revista a articolului afișează versiunea RO și marchează „translation pending\". Poți completa parțial — doar titlul, doar excerptul sau toate trei.",
+        "title_label": "Titlu (EN)",
+        "title_placeholder": "Article title in English",
+        "excerpt_label": "Excerpt (EN)",
+        "excerpt_placeholder": "1–2 sentences shown on listing cards and social previews.",
+        "excerpt_hint": "Max 280 caractere · folosit la SEO meta description.",
+        "body_label": "Corp articol (EN)",
+        "body_placeholder": "Translate the article body here.",
+        "body_hint": "Rich-text + imagini + embed-uri YouTube. Lăsat gol = /en folosește RO body."
+      }
     }
   },
   "forum": {

@@ -95,6 +95,9 @@ export class ArticlesService {
     const slug = await uniqueSlug(slugFromParts(dto.title), (s) =>
       this.slugTaken(s),
     );
+    const titleEn = dto.titleEn?.trim() || null;
+    const excerptEn = dto.excerptEn?.trim() || null;
+    const bodyEnHasContent = !!dto.bodyHtmlEn?.trim();
     const [row] = await this.db
       .insert(articles)
       .values({
@@ -109,6 +112,10 @@ export class ArticlesService {
         heroSourceId: dto.heroSourceId ?? null,
         isPremium: dto.isPremium ?? false,
         status: 'draft',
+        titleEn,
+        excerptEn,
+        bodyEn: bodyEnHasContent ? (dto.bodyEn ?? null) : null,
+        bodyHtmlEn: bodyEnHasContent ? (dto.bodyHtmlEn ?? null) : null,
       })
       .returning({ id: articles.id, slug: articles.slug });
 
@@ -139,6 +146,14 @@ export class ArticlesService {
       );
     }
 
+    // EN mirror normalisation: empty/whitespace strings collapse to NULL
+    // so the /en read path falls back to RO + flags "translation pending".
+    // For bodyEn, the source of truth is the HTML — when it's empty we
+    // null out both JSON and HTML even if the editor accidentally sent
+    // a stray empty doc node.
+    const bodyEnDefined = dto.bodyEn !== undefined || dto.bodyHtmlEn !== undefined;
+    const bodyEnHasContent = !!dto.bodyHtmlEn?.trim();
+
     await this.db
       .update(articles)
       .set({
@@ -155,6 +170,16 @@ export class ArticlesService {
         }),
         ...(dto.isPremium !== undefined && {
           isPremium: dto.isPremium,
+        }),
+        ...(dto.titleEn !== undefined && {
+          titleEn: dto.titleEn?.trim() || null,
+        }),
+        ...(dto.excerptEn !== undefined && {
+          excerptEn: dto.excerptEn?.trim() || null,
+        }),
+        ...(bodyEnDefined && {
+          bodyEn: bodyEnHasContent ? (dto.bodyEn ?? null) : null,
+          bodyHtmlEn: bodyEnHasContent ? (dto.bodyHtmlEn ?? null) : null,
         }),
         updatedAt: new Date(),
       })

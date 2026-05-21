@@ -74,6 +74,10 @@ export interface ArticleDetail {
     viewCount: number;
     createdAt: string;
     updatedAt: string;
+    titleEn: string | null;
+    excerptEn: string | null;
+    bodyEn: Record<string, unknown> | null;
+    bodyHtmlEn: string | null;
   };
   heroImage: { sourceId: string; path: string } | null;
   inlineImages: { sourceId: string; path: string; caption: string | null }[];
@@ -285,4 +289,8 @@ export interface CreateArticlePayload {
   gearIds?: string[];
   heroSourceId?: string;
   isPremium?: boolean;
+  titleEn?: string;
+  excerptEn?: string;
+  bodyEn?: Record<string, unknown>;
+  bodyHtmlEn?: string;
 }

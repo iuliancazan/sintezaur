@@ -6,7 +6,18 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M17-A** — Tezaur contributor add bilingv (close
+**Last shipped:** **M17-B** — Revista editor bilingv (close M16-G).
+Form `/revista/nou` și `/revista/:slug/editare` capătă o nouă secțiune
+`<details>` „Traducere în engleză (opțional)" cu 3 câmpuri (titleEn 200,
+excerptEn 280, bodyEn Tiptap rich cu același upload pipeline ca RO).
+Backend: `CreateArticleDto` extins cu 4 câmpuri optional; `create` și
+`update` mapează direct la coloanele `title_en`/`excerpt_en`/`body_en`/
+`body_html_en` cu normalizare empty→NULL (txt) și body source-of-truth
+pe `bodyHtmlEn` (gol → NULL ambele coloane). `ArticleDetail` frontend
+extins ca să hidrateze formă. 11 chei i18n noi sub `revista.form.en.*`.
+Schema deja existentă (migration 0017).
+
+**Last shipped (previous):** **M17-A** — Tezaur contributor add bilingv (close
 M16-F). Form `/tezaur/adauga` capătă bloc `<details>` „Traducere în
 engleză (opțional)" sub Descriere cu 2 inputs (`taglineEn` text 200 +
 `descriptionTextEn` textarea 8000). Backend: `MeCreateGearDto` extins cu
@@ -492,7 +503,7 @@ e rezervat post-M17 ca pas separat pagină cu pagină.
 | Sub | Commit | Status | Notes |
 |-----|--------|--------|-------|
 | A   | _TBD_  | done | Tezaur add bilingv (close M16-F). `MeCreateGearDto` extins cu `taglineEn`/`descriptionTextEn` (max 200/8000); `meCreateDraft` și `meUpdateDraft` mapează `taglineEn` la `gear.tagline_en` cu normalizare empty→NULL și `descriptionTextEn` la `gear_descriptions{lang:'en'}` via `upsertDescription` existent (DELETE EN row pe clearance). `meGetDraft` returnează acum și `descriptionEn` ca să hidrateze înapoi textarea. Form `/tezaur/adauga` capătă `<details class="ta-en">` „Traducere în engleză (opțional)" sub Descriere cu inputs taglineEn + descriptionTextEn. CSS scoped 30-linii pentru `.ta-en`. 8 chei i18n noi sub `tezaur.add.en.*`. Pattern preluat 1:1 din M16-H legal admin. |
-| B   | _TBD_  | pending | Revista editor bilingv (close M16-G). |
+| B   | _TBD_  | done | Revista editor bilingv (close M16-G). `CreateArticleDto` extins cu `titleEn` (200) / `excerptEn` (280) / `bodyEn` (jsonb) / `bodyHtmlEn` (200_000), toate optional. `articles.service.create` și `update` mapează la coloanele bilingual existente cu normalizare empty→NULL (text) și body source-of-truth pe `bodyHtmlEn` (gol → ambele jsonb+html NULL). Frontend: `RevistaFormPage.form` extins cu 4 câmpuri EN, `freshForm`/`fillFromDetail`/`buildPayload` aliniate, secțiune nouă `<details class="rf-en">` „Traducere în engleză (opțional)" sub Body section cu input title EN + textarea excerpt EN + SzEditor secundar pentru body EN (același uploader image ca RO). 11 chei i18n noi sub `revista.form.en.*`. Schema deja existentă (migration 0017). Read-side resolution EN/RO pe public `findBySlug` rămâne pentru M17-G (rewrite revista detail). |
 | C   | _TBD_  | pending | Forum thread rewrite (.ft-* scoped → globale V05). |
 | D   | _TBD_  | pending | Forum category rewrite. |
 | E   | _TBD_  | pending | Forum search rewrite. |
