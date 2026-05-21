@@ -15,7 +15,7 @@ import {
 } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { USER_GEAR_STATUS_FLAGS, type UserGearStatusFlagLiteral } from '@sintezaur/shared';
-import { SzAvatarComponent, SzBadgeComponent, SzButtonComponent, SzIconComponent } from '@sintezaur/ui';
+import { SzAvatarComponent, SzBadgeComponent, SzButtonComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
@@ -59,7 +59,6 @@ interface ReviewsResponse {
     FormsModule,
     RouterLink,
     TPipe,
-    SzIconComponent,
     SzBadgeComponent,
     SzAvatarComponent,
     SzButtonComponent,
@@ -71,7 +70,7 @@ interface ReviewsResponse {
         <!-- BREADCRUMB -->
         <nav class="td-crumb" aria-label="Breadcrumb">
           <a routerLink="/tezaur" class="td-crumb__back">
-            <sz-icon name="back" [size]="14" />
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-back"/></svg>
             {{ 'tezaur.detail.back_to_list' | t }}
           </a>
           <span class="sep">·</span>

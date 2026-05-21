@@ -6,7 +6,24 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M17-B** — Revista editor bilingv (close M16-G).
+**Last shipped:** **M17-H + K + L** — cleanup batch.
+**H:** Tezaur detail elimină ultima referință `<sz-icon name="back">` din
+breadcrumb și înlocuiește cu sprite `<svg><use href="#i-back"/></svg>`;
+SzIconComponent import + entry din imports array scoase. SzBadge /
+SzAvatar / SzButton păstrate intenționat (decizia M13-D, replace global
+e overkill fără pixel-perfect pass).
+**K:** Mobile drawer capătă link „Contribuții Tezaur" → `/cont/contributii-tezaur`
+între `Anunțurile mele` și `Trimite feedback` — parity cu account-menu
+dropdown care îl avea deja. Etichetă reutilizată din i18n existent
+(`account.menu.my_tezaur_drafts`).
+**L:** Contribuții-tezaur verificat vs V08 design. Pagina folosește
+deja namespace-ul `.cn-*` / `.mod-*` aliniat cu V08. Diferențele
+detectate (paginare, column sorting, `is-active` cell highlight,
+`is-dots`) sunt feature-uri V08 noi, **pixel-perfect work pentru M18**.
+Page-locale `cn-empty`/`cn-gear__reason`/`cn-strip__v bad` păstrate ca
+extensii ale designului. Niciun cod schimbat în M17-L.
+
+**Last shipped (previous):** **M17-B** — Revista editor bilingv (close M16-G).
 Form `/revista/nou` și `/revista/:slug/editare` capătă o nouă secțiune
 `<details>` „Traducere în engleză (opțional)" cu 3 câmpuri (titleEn 200,
 excerptEn 280, bodyEn Tiptap rich cu același upload pipeline ca RO).
@@ -377,9 +394,15 @@ v08). Plan complet în `~/.claude/plans/resilient-foraging-wave.md`.
 **NU** include pixel-perfect alignment 1:1 cu design files — acel
 workstream e rezervat post-M17 ca pas separat pagină cu pagină.
 
-**Next up:** **M17-B** — Revista editor bilingv (close M16-G):
-`<details>` cu `titleEn`/`excerptEn`/`bodyEn` pe `/revista/nou` +
-`/revista/:slug/editare`.
+**Next up:** **M18** — pixel-perfect pass page-by-page vs design files
+`docs/design-imports/2026-05-16-v08/`. Atacam pagină cu pagină
+diferențele structurale: Forum × 4 pagini (thread/category/search/new) →
+markup V05 `.ft-sticky`/`.ft-main`/`.ft-op`/`.fr-*`; Revista detail →
+`.ad-*` + read-side EN/RO resolution pe `findBySlug`; Cont 3 shells +
+My-listings → adoptare clase `.acc-*`/`.am-*` (CSS nou + markup);
+Articolele Mele (revista) ca pagină nouă; pagini de admin v08; restul
+diferențelor vizuale mărunte din landing-uri. M17 a închis tot ce era
+non-pixel-perfect.
 
 ## Milestones
 
@@ -504,17 +527,17 @@ e rezervat post-M17 ca pas separat pagină cu pagină.
 |-----|--------|--------|-------|
 | A   | _TBD_  | done | Tezaur add bilingv (close M16-F). `MeCreateGearDto` extins cu `taglineEn`/`descriptionTextEn` (max 200/8000); `meCreateDraft` și `meUpdateDraft` mapează `taglineEn` la `gear.tagline_en` cu normalizare empty→NULL și `descriptionTextEn` la `gear_descriptions{lang:'en'}` via `upsertDescription` existent (DELETE EN row pe clearance). `meGetDraft` returnează acum și `descriptionEn` ca să hidrateze înapoi textarea. Form `/tezaur/adauga` capătă `<details class="ta-en">` „Traducere în engleză (opțional)" sub Descriere cu inputs taglineEn + descriptionTextEn. CSS scoped 30-linii pentru `.ta-en`. 8 chei i18n noi sub `tezaur.add.en.*`. Pattern preluat 1:1 din M16-H legal admin. |
 | B   | _TBD_  | done | Revista editor bilingv (close M16-G). `CreateArticleDto` extins cu `titleEn` (200) / `excerptEn` (280) / `bodyEn` (jsonb) / `bodyHtmlEn` (200_000), toate optional. `articles.service.create` și `update` mapează la coloanele bilingual existente cu normalizare empty→NULL (text) și body source-of-truth pe `bodyHtmlEn` (gol → ambele jsonb+html NULL). Frontend: `RevistaFormPage.form` extins cu 4 câmpuri EN, `freshForm`/`fillFromDetail`/`buildPayload` aliniate, secțiune nouă `<details class="rf-en">` „Traducere în engleză (opțional)" sub Body section cu input title EN + textarea excerpt EN + SzEditor secundar pentru body EN (același uploader image ca RO). 11 chei i18n noi sub `revista.form.en.*`. Schema deja existentă (migration 0017). Read-side resolution EN/RO pe public `findBySlug` rămâne pentru M17-G (rewrite revista detail). |
-| C   | _TBD_  | pending | Forum thread rewrite (.ft-* scoped → globale V05). |
-| D   | _TBD_  | pending | Forum category rewrite. |
-| E   | _TBD_  | pending | Forum search rewrite. |
-| F   | _TBD_  | pending | Forum new (form) rewrite. |
-| G   | _TBD_  | pending | Revista detail rewrite (.rd-* → .ad-*). |
-| H   | _TBD_  | pending | Tezaur detail Sz→sprite swap. |
-| I   | _TBD_  | pending | Cont 3 shells rename .settings/.favorites/.messages → .acc-*. |
-| J   | _TBD_  | pending | My-listings rebrand .ml-* → .am-*. |
-| K   | _TBD_  | pending | Avatar dropdown + drawer „Articolele mele" link. |
-| L   | _TBD_  | pending | Verificare Contribuții-tezaur vs V08. |
-| M   | _TBD_  | pending | Close + `docs/testing/m17-testing.md` + STATUS update. |
+| C   | _deferred_ | deferred | Forum thread rewrite — markup V05 (`.ft-sticky`/`.ft-main`/`.ft-op`/`.fr-trust`/`.fr-gear-chip`) e fundamental diferit de markup-ul curent (`.ft-crumbs`/`.ft-header`/`.ft-source`/`.ft-master`). Restructurare layout = pixel-perfect work, **mutat la M18 pass page-by-page**. |
+| D   | _deferred_ | deferred | Forum category — același motiv ca C. **Mutat la M18.** |
+| E   | _deferred_ | deferred | Forum search — același motiv ca C. **Mutat la M18.** |
+| F   | _deferred_ | deferred | Forum new (form) — același motiv ca C. **Mutat la M18.** |
+| G   | _deferred_ | deferred | Revista detail rewrite (`.rd-*` → `.ad-*`) — layout structural diferit. **Mutat la M18.** Read-side EN/RO resolution pe `findBySlug` rămâne tot la M18 când rescriem pagina. |
+| H   | _TBD_  | done | Tezaur detail elimină ultima referință `<sz-icon name="back">` din breadcrumb și înlocuiește cu sprite `<svg><use href="#i-back"/></svg>`; `SzIconComponent` import + entry scoase. SzBadge/SzAvatar/SzButton păstrate intenționat (decizia M13-D — replace global = overkill fără pass complet). |
+| I   | _deferred_ | deferred | Cont 3 shells rename — clasele `.acc-*` NU există nicăieri în CSS curent (0 hits în v05.css / v05-forum.css / v06-add-forms.css). Adoptarea cere atât rescriere markup CÂT ȘI adăugare reguli CSS noi = pixel-perfect work. **Mutat la M18.** |
+| J   | _deferred_ | deferred | My-listings rebrand `.ml-*` → `.am-*` — clasele `.am-*` lipsesc complet din CSS curent (la fel ca `.acc-*`). În plus V08 introduce features noi (summary strip 5-col, advanced toolbar, card 3-col, section grouping). **Mutat la M18.** |
+| K   | _TBD_  | done | Mobile drawer capătă link „Contribuții Tezaur" → `/cont/contributii-tezaur` între `Anunțurile mele` și `Trimite feedback` — parity cu account-menu dropdown care îl avea deja. Etichetă i18n reutilizată (`account.menu.my_tezaur_drafts`). |
+| L   | _TBD_  | done | Verificare Contribuții-tezaur vs V08: pagina folosește deja namespace-ul `.cn-*`/`.mod-*` aliniat cu V08 (confirmat prin diff de classe). Diferențele detectate sunt feature-uri V08 noi (paginare, column sorting, `is-active` cell, `is-dots`) — **pixel-perfect work pentru M18**. Page-locale `cn-empty`/`cn-gear__reason`/`cn-strip__v bad` păstrate ca extensii utile peste design. Niciun cod schimbat. |
+| M   | _TBD_  | done | Close + `docs/testing/m17-testing.md` (plan manual pe sub-fazele A/B/H/K) + STATUS update. |
 
 ### M16 — Bilingual platform RO/EN (foundation)
 

@@ -124,6 +124,9 @@ import { ThemeMode, ThemeService } from '@sintezaur/ui';
         <a class="mm__item" routerLink="/cont/anunturi" (click)="close()">
           {{ 'account.menu.my_listings' | t }}
         </a>
+        <a class="mm__item" routerLink="/cont/contributii-tezaur" (click)="close()">
+          {{ 'account.menu.my_tezaur_drafts' | t }}
+        </a>
         <button type="button" class="mm__item" (click)="openFeedback()">
           {{ 'account.menu.feedback' | t }}
         </button>
