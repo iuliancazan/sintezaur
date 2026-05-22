@@ -118,21 +118,33 @@ import {
 
           <div class="bd-info">
             <div class="bd-info__topline">
-              @if (d.gear) {
-                <a class="bd-info__brand" [routerLink]="['/tezaur', d.gear.slug]">
-                  {{ d.gear.brand }} · {{ 'bazar.kind.' + d.listing.kind | t }}
-                </a>
-              } @else {
-                <span class="bd-info__brand">
-                  {{ d.listing.rawMake || '—' }} · {{ 'bazar.kind.' + d.listing.kind | t }}
-                </span>
-              }
+              <span class="bd-info__brand">
+                @if (d.gear) {
+                  <a [routerLink]="['/tezaur']" [queryParams]="{ brand: d.gear.brand }">
+                    {{ d.gear.brand }}
+                  </a>
+                  <span class="sep">·</span>
+                  <a [routerLink]="['/tezaur', d.gear.slug]">
+                    {{ d.gear.model }}
+                  </a>
+                  <span class="sep">·</span>
+                } @else if (d.listing.rawMake || d.listing.rawModel) {
+                  @if (d.listing.rawMake) {
+                    <span>{{ d.listing.rawMake }}</span>
+                    <span class="sep">·</span>
+                  }
+                  @if (d.listing.rawModel) {
+                    <span>{{ d.listing.rawModel }}</span>
+                    <span class="sep">·</span>
+                  }
+                }
+                <span>{{ 'bazar.kind.' + d.listing.kind | t }}</span>
+              </span>
               <span class="bd-info__status">
                 {{ 'bazar.detail.status_' + d.listing.status | t }}
               </span>
             </div>
-            <h1 class="bd-info__title">{{ d.gear?.model ?? d.listing.rawModel ?? d.listing.title }}</h1>
-            <p class="bd-info__sub">{{ d.listing.title }}</p>
+            <h1 class="bd-info__title">{{ d.listing.title }}</h1>
 
             <div class="bd-info__price-row">
               <div class="bd-info__price">

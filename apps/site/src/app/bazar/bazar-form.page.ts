@@ -202,7 +202,6 @@ export class BazarFormPage {
     rawModel: ['', [Validators.maxLength(120)]],
     rawYear: this.fb.control<number | null>(null),
     title: ['', [Validators.maxLength(140)]],
-    tagline: ['', [Validators.maxLength(200)]],
     descriptionText: ['', [Validators.maxLength(8000)]],
     defects: ['', [Validators.maxLength(2000)]],
     condition: ['very_good', [Validators.required]],
@@ -273,10 +272,6 @@ export class BazarFormPage {
     this.formTick();
     const c = this.form.controls['condition'].value as string;
     return CONDITION_OPTIONS.find((o) => o.value === c)?.ttl ?? '—';
-  });
-  readonly previewTagline = computed(() => {
-    this.formTick();
-    return (this.form.controls['tagline'].value as string) || '';
   });
   readonly previewPhoto = computed(() => {
     const first = this.photoTiles()[0];
@@ -452,7 +447,6 @@ export class BazarFormPage {
         rawModel: d.listing.rawModel ?? '',
         rawYear: d.listing.rawYear,
         title: d.listing.title === 'Draft anunț' ? '' : d.listing.title,
-        tagline: d.listing.tagline ?? '',
         descriptionText: descText,
         defects: d.listing.defects ?? '',
         condition: d.listing.condition,
@@ -557,7 +551,7 @@ export class BazarFormPage {
       rawModel: g ? null : ((v.rawModel as string)?.trim() || null),
       rawYear: v.rawYear ?? null,
       title,
-      tagline: (v.tagline as string)?.trim() || null,
+      tagline: null,
       description: descriptionToTiptap(descriptionText),
       descriptionHtml: plainTextToHtml(descriptionText),
       defects: (v.defects as string)?.trim() || null,

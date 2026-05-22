@@ -188,14 +188,6 @@
             </div>
 
             <div class="ta-field ta-field--full">
-              <label class="ta-field__label" for="f-tagline">
-                {{ 'bazar.form.tagline_label' | t }}
-                <span class="hint">{{ 'bazar.form.tagline_hint' | t }}</span>
-              </label>
-              <input id="f-tagline" type="text" formControlName="tagline" maxlength="200" />
-            </div>
-
-            <div class="ta-field ta-field--full">
               <label class="ta-field__label" for="f-desc">
                 {{ 'bazar.form.description_label' | t }}
                 <span class="req">*</span>
@@ -554,9 +546,6 @@
             <div class="listing__body">
               <div class="listing__brand">// {{ previewBrand() }}</div>
               <div class="listing__title">{{ previewModel() }}</div>
-              @if (previewTagline()) {
-                <div class="listing__tagline">{{ previewTagline() }}</div>
-              }
               <div class="listing__row">
                 <div class="listing__price">
                   {{ previewPrice() }}<small>{{ previewCurrency() }}</small>

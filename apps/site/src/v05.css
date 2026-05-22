@@ -3091,6 +3091,9 @@ body {
   color: var(--fg-muted);
 }
 .bd-info__brand::before { content: "// "; color: var(--accent); }
+.bd-info__brand a { color: inherit; transition: color 0.12s ease; }
+.bd-info__brand a:hover { color: var(--accent); }
+.bd-info__brand .sep { color: var(--fg-subtle); margin: 0 2px; }
 .bd-info__status {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -3291,9 +3294,9 @@ body {
 }
 .bd-desc h2 {
   font-family: var(--font-headline);
-  font-size: clamp(26px, 2.8vw, 38px);
+  font-size: clamp(20px, 2vw, 28px);
   font-weight: 600;
-  line-height: 0.95;
+  line-height: 1.1;
   text-transform: none;
   margin: 0 0 16px;
   padding-top: 0.18em;
