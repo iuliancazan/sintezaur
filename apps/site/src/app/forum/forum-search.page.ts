@@ -33,331 +33,337 @@ type Sort = (typeof SORT_OPTIONS)[number];
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
-      <header class="fs-head crosses">
-        <span class="crosses-tl"></span><span class="crosses-tr"></span>
-        <h1>{{ 'forum.search.title' | t }}</h1>
-      </header>
+      <!-- BREADCRUMB -->
+      <nav class="td-crumb" aria-label="Breadcrumb">
+        <a routerLink="/forum" class="td-crumb__back">
+          <svg width="14" height="14" aria-hidden="true"><use href="#i-back"/></svg>
+          {{ 'forum.crumb_root' | t }}
+        </a>
+        <span class="sep">/</span>
+        <span class="cur">{{ 'forum.search.title' | t }}</span>
+      </nav>
 
+      <!-- STICKY SEARCH BAR -->
       <form
-        class="fs-form"
+        class="fs-bar"
         (submit)="$event.preventDefault(); submit()"
       >
-        <label class="fs-field fs-field--q">
-          <span>{{ 'forum.search.query_label' | t }}</span>
-          <input
-            type="search"
-            [ngModel]="q()"
-            (ngModelChange)="q.set($event)"
-            name="q"
-            [placeholder]="i18n.t('forum.search.query_placeholder')"
-            (keydown.enter)="$event.preventDefault(); submit()"
-          />
-        </label>
-        <label class="fs-field">
-          <span>{{ 'forum.search.author_label' | t }}</span>
-          <input
-            type="text"
-            [ngModel]="author()"
-            (ngModelChange)="author.set($event)"
-            name="author"
-            placeholder="username"
-          />
-        </label>
-        <label class="fs-field">
-          <span>{{ 'forum.search.from_label' | t }}</span>
-          <input
-            type="date"
-            [ngModel]="from()"
-            (ngModelChange)="from.set($event)"
-            name="from"
-          />
-        </label>
-        <label class="fs-field">
-          <span>{{ 'forum.search.to_label' | t }}</span>
-          <input
-            type="date"
-            [ngModel]="to()"
-            (ngModelChange)="to.set($event)"
-            name="to"
-          />
-        </label>
-        <label class="fs-field">
-          <span>{{ 'forum.search.sort_label' | t }}</span>
-          <select [ngModel]="sort()" (ngModelChange)="sort.set($event)" name="sort">
-            @for (s of sortOptions; track s) {
-              <option [value]="s">{{ 'forum.search.sort_' + s | t }}</option>
-            }
-          </select>
-        </label>
-        <button type="submit" class="fs-btn fs-btn--primary" [disabled]="loading()">
-          {{ loading() ? ('app.loading' | t) : ('forum.search.go' | t) }}
-        </button>
-      </form>
-
-      <div class="fs-cats">
-        <span class="fs-cats__label">{{ 'forum.search.categories_label' | t }}:</span>
-        @for (c of allCategories(); track c.id) {
+        <div class="fs-bar__ico">
+          <svg aria-hidden="true"><use href="#i-search"/></svg>
+        </div>
+        <input
+          class="fs-bar__input"
+          type="search"
+          [ngModel]="q()"
+          (ngModelChange)="q.set($event)"
+          name="q"
+          [placeholder]="i18n.t('forum.search.query_placeholder')"
+          (keydown.enter)="$event.preventDefault(); submit()"
+        />
+        @if (q()) {
           <button
             type="button"
-            class="fs-chip"
-            [class.is-active]="selectedCats().has(c.slug)"
-            (click)="toggleCat(c.slug)"
-          >{{ c.name }}</button>
+            class="fs-bar__clear"
+            (click)="q.set(''); submit()"
+          >
+            {{ 'forum.search.clear' | t }}
+          </button>
         }
-        @if (selectedCats().size > 0) {
-          <button type="button" class="fs-chip fs-chip--clear" (click)="clearCats()">✕ {{ 'forum.search.clear' | t }}</button>
-        }
-      </div>
+      </form>
 
+      <!-- SUMMARY + SORT -->
       @if (response(); as r) {
-        <div class="fs-meta">
-          <span>{{ 'forum.search.results' | t: { total: r.totalCount } }}</span>
-          @if (r.totalPages > 1) {
-            <span>{{ 'forum.pagination.page_of' | t: { page: r.page, total: r.totalPages } }}</span>
+        <div class="fs-summary">
+          <span>
+            <span class="num"><span class="acc">{{ r.totalCount }}</span></span>
+            {{ 'forum.search.results_for' | t: { q: (q() || '—') } }}
+          </span>
+          <div class="sort">
+            <a
+              [class.is-active]="sort() === 'relevance'"
+              (click)="setSort('relevance'); $event.preventDefault()"
+              href="#"
+            >{{ 'forum.search.sort_relevance' | t }}</a>
+            <a
+              [class.is-active]="sort() === 'newest'"
+              (click)="setSort('newest'); $event.preventDefault()"
+              href="#"
+            >{{ 'forum.search.sort_newest' | t }}</a>
+            <a
+              [class.is-active]="sort() === 'most_replies'"
+              (click)="setSort('most_replies'); $event.preventDefault()"
+              href="#"
+            >{{ 'forum.search.sort_most_replies' | t }}</a>
+          </div>
+        </div>
+      }
+
+      <!-- ACTIVE FILTER CHIPS -->
+      @if (hasActiveFilters()) {
+        <div class="fs-filters">
+          <span class="lbl">{{ 'forum.search.active_filters' | t }}</span>
+
+          @for (slug of selectedCats(); track slug) {
+            <button
+              type="button"
+              class="fs-chip is-on"
+              (click)="toggleCat(slug)"
+            >
+              {{ categoryName(slug) }}
+              <span class="x">×</span>
+            </button>
+          }
+
+          @if (author()) {
+            <button
+              type="button"
+              class="fs-chip is-on"
+              (click)="clearAuthor()"
+            >
+              &#64;{{ author() }}
+              <span class="x">×</span>
+            </button>
+          }
+
+          @if (from() || to()) {
+            <button
+              type="button"
+              class="fs-chip is-on"
+              (click)="clearDates()"
+            >
+              {{ dateRangeLabel() }}
+              <span class="x">×</span>
+            </button>
+          }
+
+          <button
+            type="button"
+            class="fs-chip-clear"
+            (click)="clearAll()"
+          >
+            {{ 'forum.search.clear_all' | t }}
+          </button>
+        </div>
+      }
+
+      <div class="fs-main">
+
+        <!-- RESULTS -->
+        <div class="fs-results">
+          @if (response(); as r) {
+            @if (r.items.length === 0) {
+              <app-empty-state
+                icon="🔍"
+                [title]="i18n.t('forum.search.no_results_title')"
+                [lede]="i18n.t('forum.search.no_results_lede')"
+                [ctaLabel]="i18n.t('forum.search.reset')"
+                ctaRouterLink="/forum/cautare"
+              />
+            } @else {
+              @for (hit of r.items; track hit.threadId; let i = $index) {
+                <a
+                  class="fs-result"
+                  [routerLink]="['/forum', hit.categorySlug, hit.threadSlug]"
+                >
+                  <span class="fs-result__cat-num">{{ formatIndex(i, r.page, r.pageSize) }}</span>
+                  <div class="fs-result__body">
+                    <div class="fs-result__crumb">
+                      <span class="cat">{{ hit.categoryName }}</span>
+                      @for (tag of hit.tags.slice(0, 2); track tag) {
+                        <span class="sep">/</span>
+                        <span>{{ tag }}</span>
+                      }
+                    </div>
+                    <h3 class="fs-result__title" [innerHTML]="hit.threadTitle"></h3>
+                    @if (hit.snippet) {
+                      <p
+                        class="fs-result__snippet"
+                        [innerHTML]="hit.snippet"
+                      ></p>
+                    }
+                    <div class="fs-result__foot">
+                      <span
+                        class="avatar"
+                        [style.background]="avatarBg(hit.authorUsername)"
+                      >{{ initialsFor(hit.authorUsername) }}</span>
+                      <span>
+                        &#64;{{ hit.authorUsername ?? ('forum.deleted_user' | t) }}
+                      </span>
+                      <span>·</span>
+                      <span>{{ relativeTime(hit.lastPostAt ?? hit.createdAt) }}</span>
+                      <span>·</span>
+                      <span class="replies">
+                        {{ hit.postCount }} {{ 'forum.search.replies_short' | t }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="fs-result__stats">
+                    <span class="rep">
+                      {{ hit.postCount }}<small>{{ 'forum.replies_label' | t }}</small>
+                    </span>
+                  </div>
+                </a>
+              }
+            }
+          } @else if (loading()) {
+            <p class="fs-empty">{{ 'app.loading' | t }}</p>
+          } @else if (error()) {
+            <p class="fs-empty">{{ 'forum.load_error' | t }}</p>
           }
         </div>
 
-        @if (r.items.length === 0) {
-          <app-empty-state
-            icon="🔍"
-            [title]="'Nicio postare nu se potrivește'"
-            [lede]="'Încearcă alți termeni de căutare sau elimină filtrele de categorie / autor.'"
-            ctaLabel="Resetează căutarea"
-            ctaRouterLink="/forum/cautare"
-          />
-        } @else {
-          <ul class="fs-list">
-            @for (hit of r.items; track hit.threadId) {
-              <li>
-                <a class="fs-hit" [routerLink]="['/forum', hit.categorySlug, hit.threadSlug]">
-                  <div class="fs-hit__meta">
-                    <span class="fs-hit__cat">{{ hit.categoryName }}</span>
-                    @if (hit.authorUsername) {
-                      <span class="sep">·</span>
-                      <span class="fs-hit__author">&#64;{{ hit.authorUsername }}</span>
-                    }
-                    <span class="sep">·</span>
-                    <time>{{ formatDate(hit.lastPostAt ?? hit.createdAt) }}</time>
-                    <span class="sep">·</span>
-                    <span>{{ hit.postCount }} {{ 'forum.search.replies_short' | t }}</span>
-                  </div>
-                  <h2 class="fs-hit__title">{{ hit.threadTitle }}</h2>
-                  @if (hit.snippet) {
-                    <p class="fs-hit__snippet" [innerHTML]="hit.snippet"></p>
-                  }
-                  @if (hit.tags.length > 0) {
-                    <div class="fs-hit__tags">
-                      @for (t of hit.tags; track t) {
-                        <span class="fs-tag">#{{ t }}</span>
-                      }
-                    </div>
-                  }
-                </a>
-              </li>
-            }
-          </ul>
+        <!-- FACETS SIDEBAR -->
+        <aside class="fs-facets">
 
-          @if (r.totalPages > 1) {
-            <nav class="fs-pag">
-              <button type="button" [disabled]="r.page === 1" (click)="goToPage(r.page - 1)">‹</button>
+          <div class="fs-facets__block">
+            <header class="fs-facets__head">
+              {{ 'forum.search.facet_category' | t }}
+            </header>
+            <div class="fs-facets__body">
+              @for (c of allCategories(); track c.id) {
+                <a
+                  class="fs-facets__row"
+                  [class.is-on]="selectedCats().has(c.slug)"
+                  (click)="toggleCat(c.slug); $event.preventDefault()"
+                  href="#"
+                >
+                  {{ c.name }}
+                </a>
+              }
+            </div>
+          </div>
+
+          <div class="fs-facets__block">
+            <header class="fs-facets__head">
+              {{ 'forum.search.facet_author' | t }}
+            </header>
+            <div class="fs-facets__body">
+              <input
+                class="fs-facets__author-input"
+                type="text"
+                [ngModel]="author()"
+                (ngModelChange)="author.set($event)"
+                [placeholder]="i18n.t('forum.search.facet_author_placeholder')"
+                (keydown.enter)="$event.preventDefault(); submit()"
+              />
+            </div>
+          </div>
+
+          <div class="fs-facets__block">
+            <header class="fs-facets__head">
+              {{ 'forum.search.facet_date' | t }}
+            </header>
+            <div class="fs-facets__date">
+              <input
+                type="date"
+                [ngModel]="from()"
+                (ngModelChange)="from.set($event); submit()"
+                [attr.aria-label]="'forum.search.from_label' | t"
+              />
+              <input
+                type="date"
+                [ngModel]="to()"
+                (ngModelChange)="to.set($event); submit()"
+                [attr.aria-label]="'forum.search.to_label' | t"
+              />
+            </div>
+          </div>
+
+        </aside>
+      </div>
+
+      <!-- PAGINATION -->
+      @if (response(); as r) {
+        @if (r.totalPages > 1) {
+          <nav class="fr-pag" aria-label="Pagini">
+            <span>
+              {{
+                'forum.search.pagination_summary' | t: {
+                  page: r.page,
+                  total: r.totalPages,
+                  count: r.totalCount
+                }
+              }}
+            </span>
+            <div class="fr-pag__nums">
+              <button
+                type="button"
+                class="fr-pag__num"
+                [class.is-disabled]="r.page === 1"
+                [disabled]="r.page === 1"
+                (click)="goToPage(r.page - 1)"
+              >‹</button>
               @for (p of paginationPages(); track p) {
                 @if (p === '…') {
-                  <span>…</span>
+                  <span class="fr-pag__num is-ellipsis">…</span>
                 } @else {
-                  <button type="button" [class.is-active]="p === r.page" (click)="goToPage($any(p))">{{ p }}</button>
+                  <button
+                    type="button"
+                    class="fr-pag__num"
+                    [class.is-active]="p === r.page"
+                    (click)="goToPage($any(p))"
+                  >{{ p }}</button>
                 }
               }
-              <button type="button" [disabled]="r.page === r.totalPages" (click)="goToPage(r.page + 1)">›</button>
-            </nav>
-          }
+              <button
+                type="button"
+                class="fr-pag__num"
+                [class.is-disabled]="r.page === r.totalPages"
+                [disabled]="r.page === r.totalPages"
+                (click)="goToPage(r.page + 1)"
+              >›</button>
+            </div>
+          </nav>
         }
-      } @else if (loading()) {
-        <p class="fs-empty">{{ 'app.loading' | t }}</p>
-      } @else if (error()) {
-        <p class="fs-empty">{{ 'forum.load_error' | t }}</p>
       }
     </div>
   `,
   styles: [
     `
       :host { display: block; }
-      .fs-head {
-        position: relative;
-        padding: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 32px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: var(--gutter-y) 0 20px;
-      }
-      .fs-head h1 {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(32px, 4vw, 48px);
-        line-height: 1;
-        margin: 0;
-        text-transform: uppercase;
-      }
-      .fs-form {
-        display: grid;
-        grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto;
-        gap: 10px;
-        align-items: end;
-        margin-bottom: 16px;
-      }
-      .fs-field { display: flex; flex-direction: column; gap: 4px; }
-      .fs-field span {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
+
+      /* Layout from global v05-forum.css (.fs-bar / .fs-summary /
+         .fs-filters / .fs-main / .fs-results / .fs-facets / .fs-result /
+         .fs-chip / .fr-pag). Page-local rules below cover empty/error
+         states, the author facet input, and small tweaks. */
+
+      .fs-empty {
+        padding: 40px 0;
+        text-align: center;
         color: var(--fg-muted);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
       }
-      .fs-field input,
-      .fs-field select {
+
+      .fs-facets__author-input {
+        width: 100%;
+        font-family: inherit;
+        font-size: 13px;
         padding: 8px 10px;
         background: var(--bg);
         border: 1px solid var(--line-strong);
         color: var(--fg);
-        font-family: inherit;
       }
-      .fs-field input:focus,
-      .fs-field select:focus { outline: none; border-color: var(--accent); }
-      .fs-btn {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        padding: 10px 18px;
-        border: 1px solid var(--accent);
-        background: var(--accent);
-        color: var(--accent-fg);
-        cursor: pointer;
-      }
-      .fs-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-      .fs-btn:hover:not(:disabled) { filter: brightness(1.1); }
-      .fs-cats {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 16px;
-      }
-      .fs-cats__label {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-      }
-      .fs-chip {
-        padding: 6px 12px;
-        border: 1px solid var(--line-strong);
-        background: transparent;
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 11px;
-        cursor: pointer;
-      }
-      .fs-chip:hover { border-color: var(--accent); color: var(--accent); }
-      .fs-chip.is-active {
-        background: var(--accent);
-        color: var(--accent-fg);
+      .fs-facets__author-input:focus {
+        outline: none;
         border-color: var(--accent);
       }
-      .fs-chip--clear { border-style: dashed; }
-      .fs-meta {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        margin-bottom: 12px;
-      }
-      .fs-list { list-style: none; margin: 0 0 24px; padding: 0; border: var(--grid-line) solid var(--line); }
-      .fs-list li + li { border-top: var(--grid-line) solid var(--line); }
-      .fs-hit {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding: 14px 18px;
-        background: var(--bg-elev);
-        color: var(--fg);
-        text-decoration: none;
-      }
-      .fs-hit:hover { background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%); }
-      .fs-hit__meta {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--fg-muted);
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .fs-hit__cat { color: var(--accent); }
-      .fs-hit__author { color: var(--accent); }
-      .fs-hit__meta .sep { color: var(--fg-subtle); }
-      .fs-hit__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: 18px;
-        margin: 0;
-      }
-      .fs-hit__snippet {
-        margin: 0;
-        color: var(--fg-muted);
-        font-size: 13px;
-        line-height: 1.5;
-      }
-      .fs-hit__snippet mark {
-        background: color-mix(in oklab, var(--accent) 28%, transparent);
-        color: var(--fg);
-        padding: 0 2px;
-      }
-      .fs-hit__tags {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-top: 4px;
-      }
-      .fs-tag {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        color: var(--fg-muted);
-        background: var(--bg);
-        padding: 2px 6px;
-        border: 1px solid var(--line);
-      }
-      .fs-pag {
-        display: inline-flex;
-        gap: 4px;
-        margin: 20px auto 60px;
-        justify-content: center;
-        width: 100%;
-      }
-      .fs-pag button,
-      .fs-pag span {
-        min-width: 32px;
-        min-height: 32px;
-        padding: 0 8px;
-        display: inline-grid;
-        place-items: center;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 12px;
+
+      .fs-summary .sort a {
         cursor: pointer;
       }
-      .fs-pag button.is-active { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-      .fs-pag button:disabled { opacity: 0.5; cursor: not-allowed; }
-      .fs-empty { padding: 30px; text-align: center; color: var(--fg-muted); font-family: var(--font-mono); font-size: 13px; }
+      .fs-summary .sort a.is-active {
+        color: var(--accent);
+      }
 
-      @media (max-width: 900px) {
-        .fs-form { grid-template-columns: 1fr 1fr; }
-        .fs-form .fs-field--q { grid-column: 1 / -1; }
+      /* Highlight tsquery <mark> from ts_headline */
+      :host ::ng-deep .fs-result__snippet mark,
+      :host ::ng-deep .fs-result__title mark {
+        background: color-mix(in oklab, var(--accent) 30%, transparent);
+        color: inherit;
+        padding: 0 2px;
       }
     `,
   ],
@@ -382,6 +388,106 @@ export class ForumSearchPage {
   readonly response = signal<ForumSearchResponse | null>(null);
   readonly loading = signal(false);
   readonly error = signal(false);
+
+  readonly hasActiveFilters = computed(() =>
+    this.selectedCats().size > 0 || !!this.author() || !!this.from() || !!this.to(),
+  );
+
+  setSort(s: Sort): void {
+    this.sort.set(s);
+    this.page.set(1);
+    void this.syncUrl();
+  }
+
+  clearAuthor(): void {
+    this.author.set('');
+    this.page.set(1);
+    void this.syncUrl();
+  }
+
+  clearDates(): void {
+    this.from.set('');
+    this.to.set('');
+    this.page.set(1);
+    void this.syncUrl();
+  }
+
+  clearAll(): void {
+    this.selectedCats.set(new Set());
+    this.author.set('');
+    this.from.set('');
+    this.to.set('');
+    this.page.set(1);
+    void this.syncUrl();
+  }
+
+  categoryName(slug: string): string {
+    return this.allCategories().find((c) => c.slug === slug)?.name ?? slug;
+  }
+
+  dateRangeLabel(): string {
+    const f = this.from();
+    const t = this.to();
+    if (f && t) return `${this.formatDateShort(f)} – ${this.formatDateShort(t)}`;
+    if (f) return `${this.i18n.t('forum.search.from_label')} ${this.formatDateShort(f)}`;
+    if (t) return `${this.i18n.t('forum.search.to_label')} ${this.formatDateShort(t)}`;
+    return '';
+  }
+
+  private formatDateShort(iso: string): string {
+    return new Date(iso).toLocaleDateString(this.i18n.locale(), {
+      day: 'numeric',
+      month: 'short',
+    });
+  }
+
+  /** Returns the 2-digit row number for `.fs-result__cat-num` (01, 02, …)
+   *  taking pagination into account so page 2's first result is "26"
+   *  (assuming page size 25). */
+  formatIndex(i: number, page: number, pageSize: number): string {
+    const n = (page - 1) * pageSize + i + 1;
+    return String(n).padStart(2, '0');
+  }
+
+  /** Hash username → hue for the avatar tint. Same routine as
+   *  `forum-thread.page.ts` and `forum-category.page.ts`. */
+  private hashHue(input: string | null | undefined): number {
+    if (!input) return 0;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return Math.abs(h) % 360;
+  }
+
+  avatarBg(username: string | null | undefined): string | null {
+    if (!username) return null;
+    return `oklch(0.55 0.12 ${this.hashHue(username)})`;
+  }
+
+  initialsFor(username: string | null): string {
+    if (!username) return '··';
+    return username.slice(0, 2).toUpperCase();
+  }
+
+  relativeTime(iso: string): string {
+    const date = new Date(iso);
+    const diff = Date.now() - date.getTime();
+    const sec = Math.round(diff / 1000);
+    const min = Math.round(sec / 60);
+    const hr = Math.round(min / 60);
+    const day = Math.round(hr / 24);
+    if (sec < 60) return this.i18n.t('forum.time.now');
+    if (min < 60) return this.i18n.t('forum.time.minutes', { n: min });
+    if (hr < 24) return this.i18n.t('forum.time.hours', { n: hr });
+    if (day < 30) return this.i18n.t('forum.time.days', { n: day });
+    return date.toLocaleDateString(this.i18n.locale(), {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  }
 
   readonly paginationPages = computed<(number | '…')[]>(() => {
     const total = this.response()?.totalPages ?? 1;
