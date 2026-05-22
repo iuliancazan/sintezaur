@@ -1233,13 +1233,45 @@
     "show_n_replies": "Afișează cele {{n}} răspunsuri",
     "hide_replies": "Ascunde răspunsurile",
     "in_reply_to": "în răspuns la @{{username}} — Postare #{{numbering}}",
+    "in_reply_to_short": "În răspuns la",
+    "see_preview": "Vezi preview",
+    "hide_preview": "Ascunde preview",
+    "wrote_in": "a scris în",
+    "post_number_label": "Postare",
+    "replies_label": "Răspunsuri",
+    "replies_sub": "Cronologic · flat · fără nesting",
+    "nested_replies": "răspunsuri imbricate",
+    "and_n_others": "și {{n}} alții",
+    "back_to_category": "Înapoi la categorie",
+    "jump_to_newest": "Sari la cel mai nou · #{{n}}",
     "coming_soon": "Disponibil curând",
     "action": {
       "reply": "Răspunde",
       "like": "Util",
+      "quote": "Cită",
+      "share": "Distribuie",
       "edit": "Editează",
       "delete": "Șterge",
       "report": "Raportează"
+    },
+    "engage": {
+      "useful": "Util",
+      "replies": "Răspunsuri",
+      "share": "Distribuie"
+    },
+    "trust": {
+      "veteran": "Veteran",
+      "regular": "Activ"
+    },
+    "side": {
+      "gear": "Gear discutat",
+      "people": "Cei mai activi"
+    },
+    "share": {
+      "copied": "Link copiat în clipboard."
+    },
+    "quote": {
+      "wrote": "a scris:"
     },
     "actions_menu": "Mai multe acțiuni",
     "mod": {
@@ -1283,6 +1315,7 @@
       "body_placeholder": "Scrie aici. Folosește @ pentru a menționa pe cineva.",
       "body_hint": "Marcaje rich-text + imagini + YouTube prin butoanele din toolbar. Max 3 embed-uri.",
       "reply_placeholder": "Răspunsul tău. Folosește @ pentru mențiuni.",
+      "replybox_placeholder": "Scrie un răspuns la thread… (Ctrl+Enter publică, Esc anulează)",
       "general_reply_cta": "Adaugă un răspuns la thread",
       "general_reply_title": "Răspuns nou",
       "reply_to": "Răspunzi la @{{username}}",

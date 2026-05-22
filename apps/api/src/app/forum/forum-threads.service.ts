@@ -286,12 +286,29 @@ export class ForumThreadsService {
       name: string;
       kind: 'user' | 'system';
     };
-    author: { id: string; username: string; fullName: string } | null;
+    author: {
+      id: string;
+      username: string;
+      fullName: string;
+      avatarUrl: string | null;
+      createdAt: Date;
+      approvedPostCount: number;
+    } | null;
     sourceLink: {
       type: 'article' | 'gear';
       slug: string;
       title: string;
     } | null;
+    /** Hydrated gear references from `thread.gear_tag` (uuid[]) — used by
+     *  the thread sidebar's "Gear discutat" block. Empty when the thread
+     *  has no gear chips. */
+    gearTagged: Array<{
+      id: string;
+      slug: string;
+      brand: string;
+      model: string;
+      yearReleased: number | null;
+    }>;
   }> {
     const [row] = await this.db
       .select({
@@ -306,6 +323,9 @@ export class ForumThreadsService {
         authorId: users.id,
         authorUsername: users.username,
         authorFullName: users.fullName,
+        authorAvatarUrl: users.avatarUrl,
+        authorCreatedAt: users.createdAt,
+        authorApprovedPostCount: users.approvedPostCount,
       })
       .from(forumThreads)
       .innerJoin(
@@ -348,6 +368,33 @@ export class ForumThreadsService {
       }
     }
 
+    // Hydrate gear-tag uuids into mini cards for the sidebar. Skip the
+    // query when the array is empty so we don't pay for the round-trip.
+    let gearTagged: Array<{
+      id: string;
+      slug: string;
+      brand: string;
+      model: string;
+      yearReleased: number | null;
+    }> = [];
+    if (row.thread.gearTag && row.thread.gearTag.length > 0) {
+      gearTagged = await this.db
+        .select({
+          id: gear.id,
+          slug: gear.slug,
+          brand: gear.brand,
+          model: gear.model,
+          yearReleased: gear.yearReleased,
+        })
+        .from(gear)
+        .where(
+          and(
+            inArray(gear.id, row.thread.gearTag),
+            isNull(gear.deletedAt),
+          ),
+        );
+    }
+
     return {
       thread: row.thread,
       category: row.category,
@@ -356,9 +403,13 @@ export class ForumThreadsService {
             id: row.authorId,
             username: row.authorUsername as string,
             fullName: row.authorFullName as string,
+            avatarUrl: row.authorAvatarUrl ?? null,
+            createdAt: row.authorCreatedAt as Date,
+            approvedPostCount: row.authorApprovedPostCount as number,
           }
         : null,
       sourceLink,
+      gearTagged,
     };
   }
 

@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  HostListener,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { ToastService } from '../ui/toast.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   SzEditorChange,
@@ -89,13 +91,38 @@ const EMPTY_COMPOSER: ComposerState = {
   template: `
     @if (thread(); as t) {
       <div class="shell">
-        <nav class="ft-crumbs">
+        <!-- BREADCRUMB -->
+        <nav class="td-crumb" aria-label="Breadcrumb">
+          <a [routerLink]="['/forum', t.category.slug]" class="td-crumb__back">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-back"/></svg>
+            {{ t.category.name }}
+          </a>
+          <span class="sep">/</span>
           <a routerLink="/forum">{{ 'forum.crumb_root' | t }}</a>
           <span class="sep">/</span>
-          <a [routerLink]="['/forum', t.category.slug]">{{ t.category.name }}</a>
-          <span class="sep">/</span>
-          <span>{{ t.thread.title }}</span>
+          <span class="cur">{{ t.thread.title }}</span>
         </nav>
+
+        <!-- STICKY THREAD BAR -->
+        <div class="ft-sticky">
+          <a
+            class="ft-sticky__back"
+            [routerLink]="['/forum', t.category.slug]"
+            [attr.aria-label]="'forum.back_to_category' | t"
+          >
+            <svg aria-hidden="true"><use href="#i-back"/></svg>
+          </a>
+          <div class="ft-sticky__title">
+            {{ t.thread.title }}
+            @if (t.thread.lockedAt) {
+              <span class="ft-lock" [title]="'forum.locked' | t">🔒</span>
+            }
+          </div>
+          <span class="ft-sticky__cat">{{ t.category.name }}</span>
+          <span class="ft-sticky__progress">
+            {{ visiblePostIndex() }} / {{ totalPostsCount() }}
+          </span>
+        </div>
 
         @if (t.sourceLink; as src) {
           <div class="ft-source">
@@ -105,8 +132,7 @@ const EMPTY_COMPOSER: ComposerState = {
                   ? 'forum.source.article'
                   : 'forum.source.gear'
                 ) | t
-              }}
-              :
+              }}:
             </span>
             <a
               class="ft-source__link"
@@ -121,165 +147,344 @@ const EMPTY_COMPOSER: ComposerState = {
           </div>
         }
 
-        <header class="ft-header crosses">
-          <span class="crosses-tl"></span><span class="crosses-tr"></span>
-          <h1 class="ft-header__title">
-            {{ t.thread.title }}
-            @if (t.thread.lockedAt) {
-              <span class="ft-lock" [title]="'forum.locked' | t">🔒</span>
-            }
-          </h1>
-          <div class="ft-header__meta">
-            @if (t.author) {
-              <span class="ft-header__author">&#64;{{ t.author.username }}</span>
-            } @else {
-              <span>{{ 'forum.deleted_user' | t }}</span>
-            }
-            <span class="sep">·</span>
-            <time>{{ formatDate(t.thread.createdAt) }}</time>
-            <span class="sep">·</span>
-            <span>{{ t.thread.postCount }} {{ 'forum.posts_count' | t }}</span>
-          </div>
+        <div class="ft-main">
 
-          @if (t.thread.tags && t.thread.tags.length > 0) {
-            <div class="ft-header__tags">
-              @for (tag of t.thread.tags; track tag) {
-                <a
-                  class="ft-tag"
-                  [routerLink]="['/forum/cautare']"
-                  [queryParams]="{ tag: tag }"
-                >#{{ tag }}</a>
-              }
-            </div>
-          }
+          <!-- LEFT: posts column -->
+          <div>
 
-          <div class="ft-header__actions">
-            @if (auth.currentUser()) {
-              <app-forum-subscribe-bell
-                [level]="subLevel()"
-                [busy]="subBusy()"
-                (levelChange)="onSubChange($event)"
-              />
-              <app-post-actions-menu
-                kind="thread"
-                [canReport]="true"
-                [isMod]="isMod()"
-                [isOwn]="isOwnThread(t)"
-                [threadIsLocked]="!!t.thread.lockedAt"
-                [threadIsPinned]="t.thread.pinPosition !== null"
-                (action)="onThreadAction($any($event), t)"
-              />
-            }
-            @if (groups().length > 0) {
-              <div class="ft-master">
-                <button type="button" (click)="setAllExpanded(true)">
-                  {{ 'forum.expand_all' | t }}
-                </button>
-                <button type="button" (click)="setAllExpanded(false)">
-                  {{ 'forum.collapse_all' | t }}
-                </button>
-              </div>
-            }
-          </div>
-        </header>
+            <!-- OP POST -->
+            @if (op(); as p) {
+              <article class="ft-op crosses" [id]="'post-' + (p.topLevelSeq || 1)">
+                <span class="crosses-tl"></span><span class="crosses-tr"></span>
 
-        <!-- OP -->
-        @if (op(); as p) {
-          <ng-container
-            *ngTemplateOutlet="postTpl; context: { $implicit: p, numbering: 'OP', isOp: true }"
-          />
-        }
-
-        <!-- REPLIES -->
-        @if (groups().length === 0 && !loading()) {
-          <p class="ft-empty">{{ 'forum.no_replies' | t }}</p>
-        }
-
-        <ol class="ft-replies">
-          @for (g of groups(); track g.post.id) {
-            <li>
-              <ng-container
-                *ngTemplateOutlet="postTpl; context: { $implicit: g.post, numbering: g.numbering, isPending: g.isPending }"
-              />
-
-              @if (g.children.length > 0) {
-                @if (!g.expanded) {
-                  <button type="button" class="ft-strip" (click)="toggleGroup(g.post.id)">
-                    ↓ {{ 'forum.show_n_replies' | t: { n: g.children.length } }}
-                  </button>
-                } @else {
-                  @if (g.children.length > COLLAPSE_THRESHOLD) {
-                    <button type="button" class="ft-strip" (click)="toggleGroup(g.post.id)">
-                      ↑ {{ 'forum.hide_replies' | t }}
-                    </button>
+                <header class="ft-op__head">
+                  <div class="ft-op__avatar" [style.background]="avatarBg(p.authorUsername)">
+                    {{ initialsFor(p.authorFullName, p.authorUsername) }}
+                  </div>
+                  <div class="ft-op__author">
+                    <div class="nm">
+                      {{ p.authorFullName ?? p.authorUsername ?? ('forum.deleted_user' | t) }}
+                      @if (p.authorUsername) {
+                        <span class="at">&#64;{{ p.authorUsername }}</span>
+                      }
+                      @if (trustTier(p.authorCreatedAt, p.authorApprovedPostCount); as tier) {
+                        <span class="fr-trust is-{{ tier.kind }}">{{ tier.label }}</span>
+                      }
+                    </div>
+                    <div class="meta">
+                      {{ 'forum.post_number_label' | t }}
+                      <span class="acc">#1</span>
+                      <span class="sep">·</span>
+                      <time>{{ formatDate(p.createdAt) }}</time>
+                      @if (p.editedAt) {
+                        <span class="sep">·</span>
+                        <span class="edited">{{ 'forum.edited' | t }}</span>
+                      }
+                    </div>
+                  </div>
+                  @if (auth.currentUser()) {
+                    <app-forum-subscribe-bell
+                      [level]="subLevel()"
+                      [busy]="subBusy()"
+                      (levelChange)="onSubChange($event)"
+                    />
                   }
-                  <ol class="ft-subreplies">
-                    @for (s of g.children; track s.id) {
-                      <li>
-                        <ng-container
-                          *ngTemplateOutlet="postTpl; context: { $implicit: s, numbering: s.numbering, parentRef: s.parentRef }"
-                        />
-                      </li>
-                    }
-                  </ol>
-                }
-              }
-            </li>
-          }
-        </ol>
-
-        <!-- GENERAL REPLY (thread-wide) -->
-        @if (canPostInThread()) {
-          <section class="ft-general">
-            @if (!generalOpen()) {
-              <button type="button" class="ft-general__cta" (click)="openGeneral()">
-                + {{ 'forum.compose.general_reply_cta' | t }}
-              </button>
-            } @else {
-              <div class="ft-composer">
-                <header class="ft-composer__head">
-                  <span>{{ 'forum.compose.general_reply_title' | t }}</span>
-                  <button type="button" (click)="cancelGeneral()">✕</button>
                 </header>
-                <sz-editor
-                  [richMode]="true"
-                  [maxLength]="4000"
-                  [mentionSuggest]="mentionSuggest"
-                  [placeholder]="i18n.t('forum.compose.reply_placeholder')"
-                  (valueChange)="onGeneralChange($event)"
-                />
-                @if (generalError()) {
-                  <p class="ft-composer__error">{{ generalError() }}</p>
-                }
-                <div class="ft-composer__actions">
-                  <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelGeneral()">
-                    {{ 'forum.compose.cancel' | t }}
-                  </button>
+
+                <div class="ft-op__body">
+                  <h1 class="ft-op__title">{{ t.thread.title }}</h1>
+
+                  @if ((t.gearTagged && t.gearTagged.length > 0) || (t.thread.tags && t.thread.tags.length > 0)) {
+                    <div class="ft-op__tags">
+                      @for (g of t.gearTagged; track g.id) {
+                        <a class="fr-gear-chip" [routerLink]="['/tezaur', g.slug]">
+                          <span class="fr-gear-chip__photo"></span>
+                          {{ g.brand }} {{ g.model }}
+                        </a>
+                      }
+                      @for (tag of t.thread.tags; track tag) {
+                        <a
+                          class="fr-tag"
+                          [routerLink]="['/forum/cautare']"
+                          [queryParams]="{ tag: tag }"
+                        >{{ tag }}</a>
+                      }
+                    </div>
+                  }
+
+                  @if (editingPost() === p.id) {
+                    <div class="ft-composer ft-composer--inline">
+                      <sz-editor
+                        [value]="editInitialHtml()"
+                        [richMode]="true"
+                        [maxLength]="4000"
+                        [mentionSuggest]="mentionSuggest"
+                        [placeholder]="i18n.t('forum.compose.reply_placeholder')"
+                        (valueChange)="onEditChange($event)"
+                      />
+                      @if (editError()) {
+                        <p class="ft-composer__error">{{ editError() }}</p>
+                      }
+                      <div class="ft-composer__actions">
+                        <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelEdit()">
+                          {{ 'forum.compose.cancel' | t }}
+                        </button>
+                        <button
+                          type="button"
+                          class="ft-btn ft-btn--primary"
+                          [disabled]="!canSubmit(edit()) || submitting()"
+                          (click)="submitEdit(p)"
+                        >
+                          @if (submitting()) {
+                            {{ 'forum.compose.submitting' | t }}
+                          } @else {
+                            {{ 'forum.compose.save_edit' | t }}
+                          }
+                        </button>
+                      </div>
+                    </div>
+                  } @else if (p.hiddenAt) {
+                    <div class="ft-hidden">
+                      <span>{{ 'forum.hidden_post' | t }}</span>
+                    </div>
+                  } @else {
+                    <div class="ft-prose" [innerHTML]="p.bodyHtml"></div>
+                    @if (attachmentsByPost().get(p.id); as atts) {
+                      @if (atts.length > 0) {
+                        <app-attachment-list [items]="atts" />
+                      }
+                    }
+                    @if (isOwnPost(p) && editingPost() !== p.id) {
+                      <app-attachment-box
+                        [target]="{ kind: 'forum-post', postId: p.id }"
+                        [initial]="attachmentsByPost().get(p.id) ?? []"
+                        (changed)="onAttachmentsChanged(p.id, $event)"
+                      />
+                    }
+                  }
+                </div>
+
+                <div class="ft-engage">
                   <button
                     type="button"
-                    class="ft-btn ft-btn--primary"
-                    [disabled]="!canSubmit(general()) || submitting()"
-                    (click)="submitGeneral()"
+                    class="ft-engage__btn"
+                    [class.is-on]="likedByMe().has(p.id)"
+                    (click)="onLike(p)"
                   >
-                    @if (submitting()) {
-                      {{ 'forum.compose.submitting' | t }}
-                    } @else {
-                      {{ 'forum.compose.send' | t }}
-                    }
+                    <svg aria-hidden="true"><use href="#i-heart"/></svg>
+                    <span class="num">{{ p.likeCount }}</span>
+                    <span>{{ 'forum.engage.useful' | t }}</span>
                   </button>
+                  <button type="button" class="ft-engage__btn" (click)="scrollToReplies()">
+                    <svg aria-hidden="true"><use href="#i-reply"/></svg>
+                    <span class="num">{{ totalRepliesCount() }}</span>
+                    <span>{{ 'forum.engage.replies' | t }}</span>
+                  </button>
+                  <button type="button" class="ft-engage__btn" (click)="sharePost(p, true)">
+                    <svg aria-hidden="true"><use href="#i-share"/></svg>
+                    <span>{{ 'forum.engage.share' | t }}</span>
+                  </button>
+                  @if (canEditPost(p)) {
+                    <button type="button" class="ft-engage__btn" (click)="startEdit(p)">
+                      <svg aria-hidden="true"><use href="#i-quote"/></svg>
+                      <span>{{ 'forum.action.edit' | t }}</span>
+                    </button>
+                  }
+                  <div class="ft-engage__spacer"></div>
+                  @if (auth.currentUser()) {
+                    <app-post-actions-menu
+                      kind="thread"
+                      [canReport]="true"
+                      [isMod]="isMod()"
+                      [isOwn]="isOwnThread(t)"
+                      [threadIsLocked]="!!t.thread.lockedAt"
+                      [threadIsPinned]="t.thread.pinPosition !== null"
+                      (action)="onThreadAction($any($event), t)"
+                    />
+                  }
+                </div>
+              </article>
+            }
+
+            <!-- REPLIES HEADER -->
+            <header class="ft-replies-head" id="ft-replies-anchor">
+              <h2>
+                {{ 'forum.replies_label' | t }}
+                <span class="num">/ {{ totalRepliesCount() }}</span>
+              </h2>
+              <span class="sub">{{ 'forum.replies_sub' | t }}</span>
+              @if (groups().length > 0) {
+                <div class="ft-master">
+                  <button type="button" (click)="setAllExpanded(true)">
+                    {{ 'forum.expand_all' | t }}
+                  </button>
+                  <button type="button" (click)="setAllExpanded(false)">
+                    {{ 'forum.collapse_all' | t }}
+                  </button>
+                </div>
+              }
+            </header>
+
+            @if (groups().length === 0 && !loading()) {
+              <p class="ft-empty">{{ 'forum.no_replies' | t }}</p>
+            }
+
+            <div class="ft-replies">
+              @for (g of groups(); track g.post.id) {
+                <ng-container
+                  *ngTemplateOutlet="postTpl; context: { $implicit: g.post, numbering: g.numbering, isPending: g.isPending }"
+                />
+
+                @if (g.children.length > 0) {
+                  @if (!g.expanded) {
+                    <button
+                      type="button"
+                      class="ft-children-toggle"
+                      (click)="toggleGroup(g.post.id)"
+                    >
+                      <span class="arrow">▸</span>
+                      <span><b>{{ g.children.length }}</b> {{ 'forum.nested_replies' | t }}</span>
+                      <span class="ft-children-toggle__preview">
+                        {{ childrenPreview(g.children) }}
+                      </span>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="ft-children-toggle is-open"
+                      (click)="toggleGroup(g.post.id)"
+                    >
+                      <span class="arrow">▾</span>
+                      <span>{{ 'forum.hide_replies' | t }}</span>
+                    </button>
+                    <div class="ft-children is-open">
+                      <div class="ft-children__inner">
+                        @for (s of g.children; track s.id) {
+                          <ng-container
+                            *ngTemplateOutlet="postTpl; context: { $implicit: s, numbering: s.numbering, parentRef: s.parentRef }"
+                          />
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              }
+            </div>
+
+            <!-- STICKY REPLY BOX -->
+            @if (canPostInThread()) {
+              @if (!generalOpen()) {
+                <div class="ft-replybox">
+                  <div
+                    class="ft-replybox__avatar"
+                    [style.background]="avatarBg(currentUserName())"
+                  >
+                    {{ currentUserInitials() }}
+                  </div>
+                  <input
+                    class="ft-replybox__input"
+                    type="text"
+                    [placeholder]="i18n.t('forum.compose.replybox_placeholder')"
+                    (focus)="openGeneral()"
+                    readonly
+                  />
+                  <button type="button" class="ft-replybox__cta" (click)="openGeneral()">
+                    {{ 'forum.compose.send' | t }}
+                  </button>
+                </div>
+              } @else {
+                <div class="ft-composer">
+                  <header class="ft-composer__head">
+                    <span>{{ 'forum.compose.general_reply_title' | t }}</span>
+                    <button type="button" (click)="cancelGeneral()">✕</button>
+                  </header>
+                  <sz-editor
+                    [value]="general().bodyHtml"
+                    [richMode]="true"
+                    [maxLength]="4000"
+                    [mentionSuggest]="mentionSuggest"
+                    [placeholder]="i18n.t('forum.compose.reply_placeholder')"
+                    (valueChange)="onGeneralChange($event)"
+                  />
+                  @if (generalError()) {
+                    <p class="ft-composer__error">{{ generalError() }}</p>
+                  }
+                  <div class="ft-composer__actions">
+                    <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelGeneral()">
+                      {{ 'forum.compose.cancel' | t }}
+                    </button>
+                    <button
+                      type="button"
+                      class="ft-btn ft-btn--primary"
+                      [disabled]="!canSubmit(general()) || submitting()"
+                      (click)="submitGeneral()"
+                    >
+                      @if (submitting()) {
+                        {{ 'forum.compose.submitting' | t }}
+                      } @else {
+                        {{ 'forum.compose.send' | t }}
+                      }
+                    </button>
+                  </div>
+                </div>
+              }
+            } @else if (t.thread.lockedAt) {
+              <p class="ft-empty">{{ 'forum.locked_notice' | t }}</p>
+            } @else if (!auth.currentUser()) {
+              <p class="ft-empty">
+                <a routerLink="/login" [queryParams]="{ returnUrl: currentUrl }">
+                  {{ 'forum.login_to_reply' | t }}
+                </a>
+              </p>
+            }
+
+          </div>
+
+          <!-- RIGHT: sidebar -->
+          <aside class="ft-side">
+            @if (t.gearTagged && t.gearTagged.length > 0) {
+              <div class="ft-side__block">
+                <header class="ft-side__head">{{ 'forum.side.gear' | t }}</header>
+                @for (g of t.gearTagged; track g.id) {
+                  <a class="ft-side-gear" [routerLink]="['/tezaur', g.slug]">
+                    <div class="ft-side-gear__media"></div>
+                    <div>
+                      <div class="ft-side-gear__brand">
+                        {{ g.brand }}@if (g.yearReleased) { · {{ g.yearReleased }} }
+                      </div>
+                      <div class="ft-side-gear__model">{{ g.model }}</div>
+                    </div>
+                  </a>
+                }
+              </div>
+            }
+
+            @if (peopleActive().length > 0) {
+              <div class="ft-side__block">
+                <header class="ft-side__head">{{ 'forum.side.people' | t }}</header>
+                <div class="ft-side__body">
+                  <div class="ft-people">
+                    @for (per of peopleActive(); track per.username) {
+                      <div class="ft-people__row">
+                        <span
+                          class="avatar"
+                          [style.background]="avatarBg(per.username)"
+                        >{{ per.initials }}</span>
+                        <div>
+                          <div class="nm">{{ per.username }}</div>
+                          <div class="at">
+                            @if (per.isOp) { OP · }&#64;{{ per.username }}
+                          </div>
+                        </div>
+                        <span class="ct">{{ per.postCount }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             }
-          </section>
-        } @else if (t.thread.lockedAt) {
-          <p class="ft-empty">{{ 'forum.locked_notice' | t }}</p>
-        } @else if (!auth.currentUser()) {
-          <p class="ft-empty">
-            <a routerLink="/login" [queryParams]="{ returnUrl: currentUrl }">
-              {{ 'forum.login_to_reply' | t }}
-            </a>
-          </p>
-        }
+          </aside>
+        </div>
 
         @if (toast()) {
           <div class="ft-toast">{{ toast() }}</div>
@@ -295,182 +500,239 @@ const EMPTY_COMPOSER: ComposerState = {
         />
       </div>
 
-      <!-- POST TEMPLATE -->
+      <!-- floating jump-to-newest -->
+      @if (showJump()) {
+        <button class="ft-jump is-visible" type="button" (click)="scrollToBottom()">
+          <svg width="12" height="12" aria-hidden="true"><use href="#i-arrow-down"/></svg>
+          {{ 'forum.jump_to_newest' | t: { n: totalPostsCount() } }}
+        </button>
+      }
+
+      <!-- POST TEMPLATE (V08 .ft-post with rail + main) -->
       <ng-template
         #postTpl
         let-p
         let-numbering="numbering"
-        let-isOp="isOp"
         let-isPending="isPending"
         let-parentRef="parentRef"
       >
         <article
           class="ft-post"
-          [class.ft-op]="isOp"
-          [class.ft-sub]="!isOp && parentRef !== undefined && !numbering.startsWith('OP') && numbering.includes('.')"
           [class.is-hidden]="!!p.hiddenAt"
           [class.is-pending]="isPending"
+          [id]="'post-' + numbering"
         >
-          <div class="ft-post__head">
-            @if (!isOp) {
-              <span class="ft-num">#{{ numbering }}</span>
-            }
-            <div class="ft-post__meta">
-              @if (p.authorUsername) {
-                <span class="ft-post__author">&#64;{{ p.authorUsername }}</span>
-              } @else {
-                <span>{{ 'forum.deleted_user' | t }}</span>
-              }
-              <span class="sep">·</span>
-              <time>{{ formatDate(p.createdAt) }}</time>
-              @if (p.editedAt) {
-                <span class="sep">·</span>
-                <span class="ft-edited">{{ 'forum.edited' | t }}</span>
-              }
-              @if (isPending) {
-                <span class="ft-pending-badge">
-                  {{ 'forum.pending_badge' | t }}
-                </span>
-              }
-            </div>
+          <div class="ft-post__rail">
+            <div
+              class="ft-post__avatar"
+              [style.background]="avatarBg(p.authorUsername)"
+            >{{ initialsFor(p.authorFullName, p.authorUsername) }}</div>
+            <span class="ft-post__num">#{{ numbering }}</span>
           </div>
 
-          @if (parentRef) {
-            <div class="ft-parent-ref">
-              {{
-                'forum.in_reply_to' | t: {
-                  username: parentRef.username ?? '?',
-                  numbering: parentRef.numbering
-                }
-              }}
-            </div>
-          }
+          <div class="ft-post__main">
 
-          @if (editingPost() === p.id) {
-            <div class="ft-composer ft-composer--inline">
-              <sz-editor
-                [value]="editInitialHtml()"
-                [richMode]="true"
-                [maxLength]="4000"
-                [mentionSuggest]="mentionSuggest"
-                [placeholder]="i18n.t('forum.compose.reply_placeholder')"
-                (valueChange)="onEditChange($event)"
-              />
-              @if (editError()) {
-                <p class="ft-composer__error">{{ editError() }}</p>
-              }
-              <div class="ft-composer__actions">
-                <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelEdit()">
-                  {{ 'forum.compose.cancel' | t }}
-                </button>
-                <button
-                  type="button"
-                  class="ft-btn ft-btn--primary"
-                  [disabled]="!canSubmit(edit()) || submitting()"
-                  (click)="submitEdit(p)"
-                >
-                  @if (submitting()) {
-                    {{ 'forum.compose.submitting' | t }}
+            @if (parentRef) {
+              <a
+                class="ft-quote-ref"
+                (click)="toggleParentPreview(p.id); $event.preventDefault()"
+                href="#"
+              >
+                <span>
+                  {{ 'forum.in_reply_to_short' | t }}
+                  <span class="at">&#64;{{ parentRef.username ?? '?' }}</span>
+                  — {{ 'forum.post_number_label' | t }}
+                  <span class="pn">#{{ parentRef.numbering }}</span>
+                </span>
+                <span class="pv">
+                  @if (parentPreviewOpen().has(p.id)) {
+                    {{ 'forum.hide_preview' | t }}
                   } @else {
-                    {{ 'forum.compose.save_edit' | t }}
+                    {{ 'forum.see_preview' | t }}
                   }
-                </button>
-              </div>
-            </div>
-          } @else if (p.hiddenAt) {
-            <p class="ft-hidden">{{ 'forum.hidden_post' | t }}</p>
-          } @else {
-            <div class="ft-post__body" [innerHTML]="p.bodyHtml"></div>
-            @if (attachmentsByPost().get(p.id); as atts) {
-              @if (atts.length > 0) {
-                <app-attachment-list [items]="atts" />
+                </span>
+              </a>
+              @if (parentPreviewOpen().has(p.id)) {
+                <div class="ft-quote-preview is-open">
+                  <div class="ft-quote-preview__inner">
+                    <span class="by">
+                      &#64;{{ parentRef.username ?? '?' }}
+                      {{ 'forum.wrote_in' | t }}
+                      #{{ parentRef.numbering }}:
+                    </span>
+                    <span>{{ parentPreviewText(p.parentPostId) }}</span>
+                  </div>
+                </div>
               }
             }
-            @if (isOwnPost(p) && editingPost() !== p.id) {
+
+            <header class="ft-post__head">
+              @if (p.authorUsername) {
+                <span class="nm">
+                  {{ p.authorFullName ?? p.authorUsername }}
+                </span>
+                <span class="at">&#64;{{ p.authorUsername }}</span>
+              } @else {
+                <span class="nm">{{ 'forum.deleted_user' | t }}</span>
+              }
+              @if (trustTier(p.authorCreatedAt, p.authorApprovedPostCount); as tier) {
+                <span class="fr-trust is-{{ tier.kind }}">{{ tier.label }}</span>
+              }
+              <span class="time">
+                {{ formatDate(p.createdAt) }}
+                @if (p.editedAt) {
+                  <span class="edited">{{ 'forum.edited' | t }}</span>
+                }
+                @if (isPending) {
+                  <span class="ft-pending-badge">
+                    {{ 'forum.pending_badge' | t }}
+                  </span>
+                }
+              </span>
+            </header>
+
+            @if (editingPost() === p.id) {
+              <div class="ft-composer ft-composer--inline">
+                <sz-editor
+                  [value]="editInitialHtml()"
+                  [richMode]="true"
+                  [maxLength]="4000"
+                  [mentionSuggest]="mentionSuggest"
+                  [placeholder]="i18n.t('forum.compose.reply_placeholder')"
+                  (valueChange)="onEditChange($event)"
+                />
+                @if (editError()) {
+                  <p class="ft-composer__error">{{ editError() }}</p>
+                }
+                <div class="ft-composer__actions">
+                  <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelEdit()">
+                    {{ 'forum.compose.cancel' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ft-btn ft-btn--primary"
+                    [disabled]="!canSubmit(edit()) || submitting()"
+                    (click)="submitEdit(p)"
+                  >
+                    @if (submitting()) {
+                      {{ 'forum.compose.submitting' | t }}
+                    } @else {
+                      {{ 'forum.compose.save_edit' | t }}
+                    }
+                  </button>
+                </div>
+              </div>
+            } @else if (p.hiddenAt) {
+              <div class="ft-hidden">
+                <span>{{ 'forum.hidden_post' | t }}</span>
+              </div>
+            } @else {
+              <div class="ft-prose" [innerHTML]="p.bodyHtml"></div>
+              @if (attachmentsByPost().get(p.id); as atts) {
+                @if (atts.length > 0) {
+                  <app-attachment-list [items]="atts" />
+                }
+              }
+            }
+
+            @if (!p.hiddenAt && editingPost() !== p.id && !isPending) {
+              <div class="ft-actions">
+                <button
+                  type="button"
+                  class="ft-actions__btn"
+                  [class.is-on]="likedByMe().has(p.id)"
+                  (click)="onLike(p)"
+                >
+                  <svg aria-hidden="true"><use href="#i-heart"/></svg>
+                  <span class="ft-actions__count">{{ p.likeCount }}</span>
+                  <span>{{ 'forum.action.like' | t }}</span>
+                </button>
+                @if (canPostInThread()) {
+                  <button type="button" class="ft-actions__btn" (click)="startReply(p)">
+                    <svg aria-hidden="true"><use href="#i-reply"/></svg>
+                    <span>{{ 'forum.action.reply' | t }}</span>
+                  </button>
+                  <button type="button" class="ft-actions__btn" (click)="quotePost(p)">
+                    <svg aria-hidden="true"><use href="#i-quote"/></svg>
+                    <span>{{ 'forum.action.quote' | t }}</span>
+                  </button>
+                }
+                <button type="button" class="ft-actions__btn" (click)="sharePost(p)">
+                  <svg aria-hidden="true"><use href="#i-share"/></svg>
+                  <span>{{ 'forum.action.share' | t }}</span>
+                </button>
+                @if (canEditPost(p)) {
+                  <button type="button" class="ft-actions__btn" (click)="startEdit(p)">
+                    <span>{{ 'forum.action.edit' | t }}</span>
+                  </button>
+                }
+                @if (canDeletePost(p)) {
+                  <button type="button" class="ft-actions__btn ft-actions__btn--danger" (click)="deletePost(p)">
+                    <span>{{ 'forum.action.delete' | t }}</span>
+                  </button>
+                }
+                @if (auth.currentUser()) {
+                  <app-post-actions-menu
+                    style="margin-left:auto"
+                    kind="post"
+                    [canReport]="true"
+                    [isMod]="isMod()"
+                    [isOwn]="isOwnPost(p)"
+                    [postIsHidden]="!!p.hiddenAt"
+                    [postIsPending]="p.status === 'pending'"
+                    (action)="onPostAction($any($event), p)"
+                  />
+                }
+              </div>
+            }
+
+            @if (replyingTo() === p.id) {
+              <div class="ft-composer ft-composer--inline">
+                <header class="ft-composer__head">
+                  <span>
+                    {{ 'forum.compose.reply_to' | t: { username: p.authorUsername ?? '?' } }}
+                  </span>
+                  <button type="button" (click)="cancelReply()">✕</button>
+                </header>
+                <sz-editor
+                  [value]="reply().bodyHtml"
+                  [richMode]="true"
+                  [maxLength]="4000"
+                  [mentionSuggest]="mentionSuggest"
+                  [placeholder]="i18n.t('forum.compose.reply_placeholder')"
+                  (valueChange)="onReplyChange($event)"
+                />
+                @if (replyError()) {
+                  <p class="ft-composer__error">{{ replyError() }}</p>
+                }
+                <div class="ft-composer__actions">
+                  <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelReply()">
+                    {{ 'forum.compose.cancel' | t }}
+                  </button>
+                  <button
+                    type="button"
+                    class="ft-btn ft-btn--primary"
+                    [disabled]="!canSubmit(reply()) || submitting()"
+                    (click)="submitReply(p)"
+                  >
+                    @if (submitting()) {
+                      {{ 'forum.compose.submitting' | t }}
+                    } @else {
+                      {{ 'forum.compose.send' | t }}
+                    }
+                  </button>
+                </div>
+              </div>
+            }
+
+            @if (isOwnPost(p) && editingPost() !== p.id && !p.hiddenAt) {
               <app-attachment-box
                 [target]="{ kind: 'forum-post', postId: p.id }"
                 [initial]="attachmentsByPost().get(p.id) ?? []"
                 (changed)="onAttachmentsChanged(p.id, $event)"
               />
             }
-          }
-
-          @if (!p.hiddenAt && editingPost() !== p.id && !isPending) {
-            <div class="ft-actions">
-              @if (canPostInThread()) {
-                <button type="button" class="ft-action" (click)="startReply(p)">
-                  ↩ {{ 'forum.action.reply' | t }}
-                </button>
-              }
-              <button
-                type="button"
-                class="ft-action ft-action--like"
-                [class.is-liked]="likedByMe().has(p.id)"
-                (click)="onLike(p)"
-              >
-                👍 {{ 'forum.action.like' | t }} · {{ p.likeCount }}
-              </button>
-              @if (canEditPost(p)) {
-                <button type="button" class="ft-action" (click)="startEdit(p)">
-                  ✎ {{ 'forum.action.edit' | t }}
-                </button>
-              }
-              @if (canDeletePost(p)) {
-                <button type="button" class="ft-action ft-action--danger" (click)="deletePost(p)">
-                  🗑 {{ 'forum.action.delete' | t }}
-                </button>
-              }
-              @if (auth.currentUser()) {
-                <app-post-actions-menu
-                  kind="post"
-                  [canReport]="true"
-                  [isMod]="isMod()"
-                  [isOwn]="isOwnPost(p)"
-                  [postIsHidden]="!!p.hiddenAt"
-                  [postIsPending]="p.status === 'pending'"
-                  (action)="onPostAction($any($event), p)"
-                />
-              }
-            </div>
-          }
-
-          @if (replyingTo() === p.id) {
-            <div class="ft-composer ft-composer--inline">
-              <header class="ft-composer__head">
-                <span>
-                  {{ 'forum.compose.reply_to' | t: { username: p.authorUsername ?? '?' } }}
-                </span>
-                <button type="button" (click)="cancelReply()">✕</button>
-              </header>
-              <sz-editor
-                [richMode]="true"
-                [maxLength]="4000"
-                [mentionSuggest]="mentionSuggest"
-                [placeholder]="i18n.t('forum.compose.reply_placeholder')"
-                (valueChange)="onReplyChange($event)"
-              />
-              @if (replyError()) {
-                <p class="ft-composer__error">{{ replyError() }}</p>
-              }
-              <div class="ft-composer__actions">
-                <button type="button" class="ft-btn ft-btn--ghost" (click)="cancelReply()">
-                  {{ 'forum.compose.cancel' | t }}
-                </button>
-                <button
-                  type="button"
-                  class="ft-btn ft-btn--primary"
-                  [disabled]="!canSubmit(reply()) || submitting()"
-                  (click)="submitReply(p)"
-                >
-                  @if (submitting()) {
-                    {{ 'forum.compose.submitting' | t }}
-                  } @else {
-                    {{ 'forum.compose.send' | t }}
-                  }
-                </button>
-              </div>
-            </div>
-          }
+          </div>
         </article>
       </ng-template>
     } @else if (loading()) {
@@ -483,17 +745,21 @@ const EMPTY_COMPOSER: ComposerState = {
     `
       :host { display: block; }
 
-      .ft-crumbs {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
+      /* Most layout + chrome lives in the global v05-forum.css (.ft-*,
+         .fr-*) and v05.css (.td-crumb). This block only holds page-local
+         rules: states (pending / hidden), the inline composer that isn't
+         in the V08 design, the toast, and a few mobile tweaks. */
+
+      .ft-empty {
+        padding: 40px 0;
+        text-align: center;
         color: var(--fg-muted);
-        padding: 16px 0 8px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
       }
-      .ft-crumbs a { color: var(--fg-muted); text-decoration: none; }
-      .ft-crumbs a:hover { color: var(--accent); }
-      .ft-crumbs .sep { margin: 0 8px; color: var(--fg-subtle); }
+      .ft-empty a { color: var(--accent); text-decoration: none; }
 
       .ft-source {
         padding: 12px 16px;
@@ -517,246 +783,75 @@ const EMPTY_COMPOSER: ComposerState = {
       }
       .ft-source__link:hover { text-decoration: underline; }
 
-      .ft-header {
-        position: relative;
-        padding: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 32px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: 8px 0 20px;
+      .ft-lock {
+        font-size: 0.7em;
+        margin-left: 6px;
       }
-      .ft-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(28px, 4vw, 44px);
-        line-height: 1.05;
-        margin: 0 0 12px;
-        letter-spacing: 0.005em;
-      }
-      .ft-lock { font-size: 0.7em; margin-left: 8px; }
-      .ft-header__meta {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        display: flex;
+
+      .ft-replies-head .ft-master {
+        display: inline-flex;
         gap: 6px;
-        flex-wrap: wrap;
+        margin-left: auto;
       }
-      .ft-header__author { color: var(--accent); }
-      .ft-header__meta .sep { color: var(--fg-subtle); }
-      .ft-header__tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 10px;
-      }
-      .ft-tag {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        padding: 3px 8px;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        color: var(--fg-muted);
-        text-decoration: none;
-      }
-      .ft-tag:hover { color: var(--accent); border-color: var(--accent); }
-      .ft-master {
-        display: flex;
-        gap: 8px;
-        margin-top: 14px;
-      }
-      .ft-master button {
+      .ft-replies-head .ft-master button {
         font-family: var(--font-mono);
         font-size: 10px;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        padding: 6px 10px;
+        padding: 5px 10px;
         background: transparent;
         border: 1px solid var(--line-strong);
         color: var(--fg-muted);
         cursor: pointer;
       }
-      .ft-master button:hover { color: var(--accent); border-color: var(--accent); }
-      .ft-header__actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 14px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .ft-post {
-        background: var(--bg-elev);
-        border: var(--grid-line) solid var(--line);
-        padding: 20px;
-        margin: 0 0 14px;
-      }
-      .ft-op { border-left-width: 3px; border-left-color: var(--accent); }
-      .ft-post.is-hidden { opacity: 0.55; }
-      .ft-post.is-pending {
-        border-color: #d4a017;
-        background: color-mix(in oklab, #d4a017 8%, var(--bg-elev));
-      }
-      .ft-pending-badge {
-        font-family: var(--font-mono);
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        padding: 2px 6px;
-        margin-left: 8px;
-        background: #d4a017;
-        color: var(--bg);
-        border-radius: 2px;
-      }
-
-      .ft-post__head {
-        display: flex;
-        align-items: baseline;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-      .ft-num {
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--accent);
-        letter-spacing: 0.06em;
-      }
-      .ft-post__meta {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--fg-muted);
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        align-items: baseline;
-      }
-      .ft-post__author { color: var(--accent); }
-      .ft-post__meta .sep { color: var(--fg-subtle); }
-      .ft-edited { font-style: italic; }
-
-      .ft-parent-ref {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        color: var(--fg-muted);
-        padding: 6px 10px;
-        margin: 0 0 10px;
-        border-left: 2px solid var(--line-strong);
-        background: color-mix(in oklab, var(--bg-elev) 80%, var(--bg) 20%);
-      }
-
-      .ft-post__body {
-        font-size: 15px;
-        line-height: 1.6;
-        color: var(--fg);
-      }
-      .ft-post__body :first-child { margin-top: 0; }
-      .ft-post__body :last-child { margin-bottom: 0; }
-      .ft-post__body p { margin: 0 0 12px; }
-      .ft-post__body a { color: var(--accent); }
-      .ft-post__body img { max-width: 100%; height: auto; }
-      .ft-post__body code {
-        font-family: var(--font-mono);
-        font-size: 0.9em;
-        background: var(--bg);
-        padding: 2px 5px;
-        border: 1px solid var(--line);
-      }
-      .ft-post__body blockquote {
-        border-left: 3px solid var(--line-strong);
-        padding-left: 14px;
-        color: var(--fg-muted);
-        margin: 0 0 12px;
-      }
-      .ft-post__body .sz-mention {
-        color: var(--accent);
-        background: color-mix(in oklab, var(--accent) 14%, transparent);
-        padding: 1px 4px;
-        border-radius: 2px;
-        font-weight: 500;
-      }
-
-      .ft-hidden {
-        font-family: var(--font-mono);
-        font-size: 12px;
-        color: var(--fg-muted);
-        font-style: italic;
-        margin: 0;
-      }
-
-      .ft-actions {
-        margin-top: 14px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      .ft-action {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        padding: 6px 10px;
-        background: transparent;
-        border: 1px solid var(--line);
-        color: var(--fg-muted);
-        cursor: pointer;
-      }
-      .ft-action:hover { color: var(--accent); border-color: var(--accent); }
-      .ft-action--danger:hover { color: #e8665b; border-color: #e8665b; }
-      .ft-action--like.is-liked {
-        background: color-mix(in oklab, var(--accent) 18%, transparent);
+      .ft-replies-head .ft-master button:hover {
         color: var(--accent);
         border-color: var(--accent);
       }
 
-      .ft-strip {
-        display: block;
-        width: 100%;
-        margin: 4px 0 14px 32px;
-        padding: 8px 14px;
-        background: transparent;
-        border: 1px dashed var(--line-strong);
-        color: var(--accent);
+      /* States the global stylesheet doesn't ship */
+      .ft-post.is-pending,
+      .ft-op.is-pending {
+        opacity: 0.7;
+        border-style: dashed;
+      }
+      .ft-post.is-hidden {
+        opacity: 0.5;
+      }
+      .ft-pending-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 6px;
+        margin-left: 8px;
+        background: color-mix(in oklab, oklch(0.7 0.16 75) 12%, var(--bg));
+        border: 1px solid oklch(0.7 0.16 75);
+        color: oklch(0.7 0.16 75);
         font-family: var(--font-mono);
-        font-size: 11px;
+        font-size: 9px;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
-        text-align: left;
-        cursor: pointer;
+        letter-spacing: 0.08em;
       }
-      .ft-strip:hover { background: var(--bg-elev); }
-
-      .ft-replies,
-      .ft-subreplies {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-      .ft-subreplies {
-        margin-left: 32px;
-        border-left: 1px solid var(--line-strong);
-        padding-left: 16px;
-      }
-      .ft-sub { border-left-width: 2px; border-left-color: var(--line-strong); }
-
-      .ft-empty {
-        color: var(--fg-muted);
+      .ft-post__head .time .edited,
+      .ft-op__head .meta .edited {
+        margin-left: 6px;
         font-family: var(--font-mono);
-        font-size: 13px;
-        padding: 30px 20px;
-        text-align: center;
+        font-size: 10px;
+        color: var(--fg-subtle);
+        text-transform: lowercase;
       }
-      .ft-empty a { color: var(--accent); }
 
+      /* Inline composer (reply + edit inside .ft-post / .ft-op) — not in
+         the V08 static design (it shows a sticky bottom box only). */
       .ft-composer {
-        margin-top: 14px;
+        margin: 14px 0;
+        padding: 14px;
         background: var(--bg);
-        border: 1px solid var(--line-strong);
-        padding: 12px;
+        border: 1px solid var(--line);
       }
-      .ft-composer--inline { margin-top: 14px; }
+      .ft-composer--inline {
+        margin: 12px 0 4px;
+      }
       .ft-composer__head {
         display: flex;
         justify-content: space-between;
@@ -764,31 +859,32 @@ const EMPTY_COMPOSER: ComposerState = {
         font-family: var(--font-mono);
         font-size: 11px;
         text-transform: uppercase;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.08em;
         color: var(--fg-muted);
-        padding: 4px 6px 10px;
+        margin-bottom: 10px;
       }
       .ft-composer__head button {
         background: transparent;
-        border: 0;
+        border: none;
         color: var(--fg-muted);
         font-size: 14px;
         cursor: pointer;
+        padding: 2px 6px;
       }
       .ft-composer__head button:hover { color: var(--accent); }
       .ft-composer__error {
+        margin: 8px 0 0;
+        padding: 8px 12px;
+        background: color-mix(in oklab, #c0392b 12%, var(--bg));
+        border: 1px solid #c0392b;
+        color: #c0392b;
         font-family: var(--font-mono);
-        font-size: 11px;
-        color: #e8665b;
-        padding: 8px 10px;
-        background: color-mix(in oklab, #e8665b 12%, var(--bg));
-        border-left: 3px solid #e8665b;
-        margin: 10px 0 0;
+        font-size: 12px;
       }
       .ft-composer__actions {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
+        gap: 8px;
         margin-top: 10px;
       }
       .ft-btn {
@@ -797,35 +893,30 @@ const EMPTY_COMPOSER: ComposerState = {
         text-transform: uppercase;
         letter-spacing: 0.12em;
         padding: 8px 14px;
+        cursor: pointer;
         border: 1px solid var(--line-strong);
         background: transparent;
-        color: var(--fg-muted);
-        cursor: pointer;
+        color: var(--fg);
       }
-      .ft-btn:hover { color: var(--fg); border-color: var(--accent); }
+      .ft-btn:hover:not(:disabled) {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .ft-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
       .ft-btn--primary {
         background: var(--accent);
         color: var(--accent-fg);
         border-color: var(--accent);
       }
-      .ft-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
-      .ft-btn--primary:hover:not(:disabled) { filter: brightness(1.1); }
-
-      .ft-general { margin-top: 24px; }
-      .ft-general__cta {
-        width: 100%;
-        padding: 14px;
-        background: var(--bg-elev);
-        border: 1px dashed var(--line-strong);
-        color: var(--accent);
-        font-family: var(--font-mono);
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        cursor: pointer;
+      .ft-btn--primary:hover:not(:disabled) {
+        filter: brightness(1.08);
+        color: var(--accent-fg);
       }
-      .ft-general__cta:hover {
-        background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%);
+      .ft-btn--ghost {
+        background: transparent;
       }
 
       .ft-toast {
@@ -833,27 +924,50 @@ const EMPTY_COMPOSER: ComposerState = {
         bottom: 24px;
         left: 50%;
         transform: translateX(-50%);
-        background: var(--bg-elev);
-        border: 1px solid var(--accent);
+        padding: 10px 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--line-strong);
         color: var(--fg);
-        padding: 10px 18px;
         font-family: var(--font-mono);
         font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        z-index: 100;
-        animation: ft-toast-in 0.2s ease-out;
+        z-index: 1000;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
       }
-      @keyframes ft-toast-in {
-        from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-        to { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+      /* Danger variant for delete actions — global v05-forum styles
+         the base .ft-actions__btn; we layer the destructive tone. */
+      .ft-actions__btn--danger:hover {
+        color: oklch(0.7 0.16 28);
+        border-color: oklch(0.7 0.16 28);
+      }
+
+      /* The sub-pill is the V08 subscribe widget; we still use the
+         existing SubscribeBellComponent (its own template + popover).
+         Squash it into the OP head row so it sits where .fr-sub-pill
+         would sit in the static design. */
+      .ft-op__head app-forum-subscribe-bell {
+        align-self: flex-start;
+        margin-left: auto;
+      }
+
+      /* Children-toggle hint text (preview of nested replies). */
+      .ft-children-toggle__preview {
+        margin-left: auto;
+        color: var(--fg-subtle);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        text-transform: none;
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       @media (max-width: 720px) {
-        .ft-subreplies { margin-left: 16px; padding-left: 10px; }
-        .ft-strip { margin-left: 16px; }
-        .ft-post { padding: 14px; }
-        .ft-post__body { font-size: 14px; }
+        .ft-main { grid-template-columns: 1fr; }
+        .ft-side { display: none; }
+        .ft-composer { padding: 10px; }
       }
     `,
   ],
@@ -870,8 +984,17 @@ export class ForumThreadPage {
   /** Attachments indexed by `postId` for O(1) lookups in the post template. */
   readonly attachmentsByPost = signal<Map<string, AttachmentItem[]>>(new Map());
 
+  /** Set of post IDs whose parent-quote preview is currently expanded. */
+  readonly parentPreviewOpen = signal<Set<string>>(new Set());
+
+  /** Tracks the vertical scroll position (updated by `@HostListener`). Drives
+   *  the sticky bar progress counter and the floating jump-to-newest button. */
+  readonly scrollY = signal(0);
+
   readonly COLLAPSE_THRESHOLD = COLLAPSE_THRESHOLD;
   readonly currentUrl = this.router.url;
+
+  private readonly toastSvc = inject(ToastService);
 
   readonly thread = signal<ThreadDetail | null>(null);
   readonly posts = signal<PostsResponse | null>(null);
@@ -1656,5 +1779,272 @@ export class ForumThreadPage {
     } catch (err) {
       console.warn('[forum] load user annotations failed', err);
     }
+  }
+
+  /* ============ V08 visual helpers ============
+   * Methods/computeds below feed the V08 layout (`.ft-sticky` progress
+   * counter, trust badges on `.fr-trust`, avatar tints on `.ft-op__avatar`
+   * and `.ft-post__avatar`, the "Cei mai activi" sidebar, share/quote/jump
+   * engagement controls). They derive from existing data — no extra
+   * backend round-trips. */
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    this.scrollY.set(window.scrollY || 0);
+  }
+
+  /** Total posts in the thread (OP + paginated replies — pending ones
+   *  excluded from the visible total because they aren't rendered yet). */
+  readonly totalPostsCount = computed(() => {
+    const p = this.posts();
+    if (!p) return 0;
+    return (p.op ? 1 : 0) + p.replies.length;
+  });
+
+  readonly totalRepliesCount = computed(() => {
+    const p = this.posts();
+    if (!p) return 0;
+    // Prefer the server-side total (covers paginated branches not on
+    // this page). Falls back to the local replies array when missing.
+    return Math.max(p.replies.length, p.totalReplies ?? 0);
+  });
+
+  /**
+   * The post-number currently anchored near the top of the viewport.
+   * Mirrors the V08 sticky-bar progress display ("18 / 143"). On SSR
+   * (no window) we report `1` so the markup is stable.
+   */
+  readonly visiblePostIndex = computed(() => {
+    // Reactive on scrollY — the value itself isn't used directly, just
+    // forces recompute on every scroll tick.
+    void this.scrollY();
+    if (typeof window === 'undefined') return 1;
+    const nodes = document.querySelectorAll<HTMLElement>('.ft-op, .ft-post');
+    let topMost = 1;
+    let idx = 1;
+    for (const node of Array.from(nodes)) {
+      const rect = node.getBoundingClientRect();
+      if (rect.top < 200) topMost = idx;
+      idx += 1;
+    }
+    return topMost;
+  });
+
+  /** Show the floating jump-to-newest button after the user scrolls past
+   *  the OP (~600px is the heuristic from the V08 reference). */
+  readonly showJump = computed(() => this.scrollY() > 600);
+
+  /** Top-5 most-active users in the current thread (sorted by post count).
+   *  Derived purely from the loaded posts; no extra fetch. */
+  readonly peopleActive = computed(() => {
+    const p = this.posts();
+    if (!p) return [];
+    const opId = p.op?.authorId ?? null;
+    type Tally = {
+      authorId: string;
+      username: string;
+      fullName: string | null;
+      postCount: number;
+    };
+    const byAuthor = new Map<string, Tally>();
+    const all: PostListItem[] = [];
+    if (p.op) all.push(p.op);
+    all.push(...p.replies);
+    for (const post of all) {
+      if (!post.authorId || !post.authorUsername || post.hiddenAt) continue;
+      const cur = byAuthor.get(post.authorId);
+      if (cur) {
+        cur.postCount += 1;
+      } else {
+        byAuthor.set(post.authorId, {
+          authorId: post.authorId,
+          username: post.authorUsername,
+          fullName: post.authorFullName,
+          postCount: 1,
+        });
+      }
+    }
+    return Array.from(byAuthor.values())
+      .sort((a, b) => b.postCount - a.postCount)
+      .slice(0, 5)
+      .map((t) => ({
+        username: t.username,
+        initials: this.initialsFor(t.fullName, t.username),
+        postCount: t.postCount,
+        isOp: t.authorId === opId,
+      }));
+  });
+
+  /* ---------- avatar paint ---------- */
+
+  /** Deterministic 0–359 hue from a string (FNV-1a-ish 32-bit). Keeps the
+   *  same user always painted with the same tint without an extra fetch. */
+  private hashHue(input: string | null | undefined): number {
+    if (!input) return 0;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return Math.abs(h) % 360;
+  }
+
+  avatarBg(seed: string | null | undefined): string | null {
+    if (!seed) return null;
+    return `oklch(0.55 0.12 ${this.hashHue(seed)})`;
+  }
+
+  initialsFor(fullName: string | null, username: string | null): string {
+    const source = (fullName ?? username ?? '').trim();
+    if (!source) return '··';
+    const parts = source.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  /* ---------- trust badge ---------- */
+
+  /**
+   * Resolve the {kind, label} for the per-post trust pill. Tiers thresholds
+   * are matched to the V08 reference (Veteran for the long-time members,
+   * Activ for the regulars, default = no badge so newbie rows stay clean).
+   * Moderators get a separate "Mod" pill courtesy of the `.is-mod` class.
+   */
+  trustTier(
+    createdAtIso: string | null,
+    approvedPostCount: number | null,
+  ): { kind: 'veteran' | 'regular' | 'mod'; label: string } | null {
+    if (!createdAtIso) return null;
+    const ageMs = Date.now() - new Date(createdAtIso).getTime();
+    const ageDays = ageMs / (1000 * 60 * 60 * 24);
+    const postCount = approvedPostCount ?? 0;
+
+    if (ageDays >= 730 || postCount >= 100) {
+      return {
+        kind: 'veteran',
+        label: this.i18n.t('forum.trust.veteran'),
+      };
+    }
+    if (ageDays >= 180 || postCount >= 30) {
+      return {
+        kind: 'regular',
+        label: this.i18n.t('forum.trust.regular'),
+      };
+    }
+    return null;
+  }
+
+  /* ---------- current user (for sticky reply box) ---------- */
+
+  currentUserName(): string | null {
+    return this.auth.currentUser()?.username ?? null;
+  }
+
+  currentUserInitials(): string {
+    const u = this.auth.currentUser();
+    if (!u) return 'EU';
+    return this.initialsFor(u.fullName ?? null, u.username);
+  }
+
+  /* ---------- engagement actions ---------- */
+
+  /** Copy the post deep-link (`…#post-<id>`) to the clipboard. With
+   *  `asThread=true` we copy the canonical thread URL instead (used by
+   *  the OP "Distribuie" button which shares the whole thread). */
+  async sharePost(p: PostListItem, asThread = false): Promise<void> {
+    const t = this.thread();
+    if (!t) return;
+    const base = `${window.location.origin}/forum/${t.category.slug}/${t.thread.slug}`;
+    const numbering = this.numberingForPost(p);
+    const url = asThread ? base : `${base}#post-${numbering}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.toastSvc.success(this.i18n.t('forum.share.copied'));
+    } catch {
+      // Fallback when clipboard is unavailable (e.g. http context) —
+      // show the URL so the user can copy it manually.
+      this.flashToast(url);
+    }
+  }
+
+  /** Opens the inline reply composer with the parent body pre-quoted as
+   *  a blockquote. The composer is the same one used by `startReply` so
+   *  no extra wiring is needed — we just patch the editor seed. */
+  quotePost(p: PostListItem): void {
+    if (!this.auth.currentUser()) {
+      void this.router.navigate(['/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+    const quotedHtml = `<blockquote><p>@${p.authorUsername ?? '?'} ${this.i18n.t('forum.quote.wrote')}</p>${p.bodyHtml ?? ''}</blockquote><p></p>`;
+    this.editingPost.set(null);
+    this.replyingTo.set(p.id);
+    this.reply.set({
+      bodyJson: {},
+      bodyHtml: quotedHtml,
+      bodyText: this.stripHtml(quotedHtml),
+    });
+    this.replyError.set(null);
+    this.replyStartedAt = Date.now();
+  }
+
+  scrollToReplies(): void {
+    if (typeof document === 'undefined') return;
+    const anchor = document.getElementById('ft-replies-anchor');
+    if (anchor) anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  scrollToBottom(): void {
+    if (typeof window === 'undefined') return;
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
+  /* ---------- parent quote preview (toggle inline) ---------- */
+
+  toggleParentPreview(postId: string): void {
+    const next = new Set(this.parentPreviewOpen());
+    if (next.has(postId)) next.delete(postId);
+    else next.add(postId);
+    this.parentPreviewOpen.set(next);
+  }
+
+  /** Returns the plain-text version of a parent post body, capped at 240
+   *  characters so the preview stays compact. */
+  parentPreviewText(parentPostId: string | null): string {
+    if (!parentPostId) return '';
+    const p = this.posts();
+    if (!p) return '';
+    const all: PostListItem[] = [];
+    if (p.op) all.push(p.op);
+    all.push(...p.replies);
+    const parent = all.find((x) => x.id === parentPostId);
+    if (!parent) return '';
+    const text = this.stripHtml(parent.bodyHtml ?? '');
+    return text.length > 240 ? text.slice(0, 240).trimEnd() + '…' : text;
+  }
+
+  /** Comma-separated preview of usernames in the nested-replies toggle
+   *  ("vlad.b, rares.s și 3 alții"). Mirrors the V08 toggle hint. */
+  childrenPreview(children: SubReplyVM[]): string {
+    if (children.length === 0) return '';
+    const names = Array.from(
+      new Set(
+        children
+          .map((c) => c.authorUsername)
+          .filter((n): n is string => !!n),
+      ),
+    );
+    if (names.length === 0) return '';
+    if (names.length <= 3) return names.join(', ');
+    return `${names.slice(0, 2).join(', ')} ${this.i18n.t('forum.and_n_others', { n: names.length - 2 })}`;
+  }
+
+  /** Picks the right numbering string for a post — OP gets "1", top-level
+   *  replies get their topLevelSeq, sub-replies use "{top}.{sub}". */
+  private numberingForPost(p: PostListItem): string {
+    if (p.topLevelSeq === 0) return '1';
+    if (p.subSeq !== null) return `${p.topLevelSeq}.${p.subSeq}`;
+    return `${p.topLevelSeq}`;
   }
 }

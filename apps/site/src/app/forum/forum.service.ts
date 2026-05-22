@@ -72,10 +72,25 @@ export interface ThreadDetail {
     name: string;
     kind: ForumCategoryKind;
   };
-  author: { id: string; username: string; fullName: string } | null;
+  author: {
+    id: string;
+    username: string;
+    fullName: string;
+    avatarUrl: string | null;
+    createdAt: string;
+    approvedPostCount: number;
+  } | null;
   sourceLink:
     | { type: 'article' | 'gear'; slug: string; title: string }
     | null;
+  /** Hydrated gear references from `thread.gearTag` (used by the sidebar). */
+  gearTagged: Array<{
+    id: string;
+    slug: string;
+    brand: string;
+    model: string;
+    yearReleased: number | null;
+  }>;
 }
 
 export type PostStatus = 'pending' | 'approved' | 'rejected';
@@ -87,6 +102,9 @@ export interface PostListItem {
   authorId: string | null;
   authorUsername: string | null;
   authorFullName: string | null;
+  authorAvatarUrl: string | null;
+  authorCreatedAt: string | null;
+  authorApprovedPostCount: number | null;
   body: Record<string, unknown> | null;
   bodyHtml: string | null;
   topLevelSeq: number;

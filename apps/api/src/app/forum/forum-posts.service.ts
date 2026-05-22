@@ -58,6 +58,11 @@ export interface PostListItem {
   authorId: string | null;
   authorUsername: string | null;
   authorFullName: string | null;
+  authorAvatarUrl: string | null;
+  /** Used by the trust-tier badge (account age tier on the post header). */
+  authorCreatedAt: Date | null;
+  /** Used by the trust-tier badge (Veteran threshold = ≥100 approved posts). */
+  authorApprovedPostCount: number | null;
   body: Record<string, unknown> | null;
   bodyHtml: string | null;
   topLevelSeq: number;
@@ -519,6 +524,9 @@ export class ForumPostsService {
         authorId: forumPosts.authorId,
         authorUsername: users.username,
         authorFullName: users.fullName,
+        authorAvatarUrl: users.avatarUrl,
+        authorCreatedAt: users.createdAt,
+        authorApprovedPostCount: users.approvedPostCount,
         body: forumPosts.body,
         bodyHtml: forumPosts.bodyHtml,
         topLevelSeq: forumPosts.topLevelSeq,
