@@ -207,6 +207,8 @@ export interface SzTopbarUser {
             >
               <sz-avatar
                 size="sm"
+                shape="circle"
+                [seed]="user.id ?? user.username ?? user.email"
                 [photo]="user.photo"
                 [name]="user.displayName ?? user.username ?? user.email"
               />

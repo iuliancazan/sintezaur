@@ -84,7 +84,7 @@ import { V05SpriteComponent } from './ui/v05-sprite.component';
       [themeAutoLabel]="themeAutoLabel()"
       [themeLightLabel]="themeLightLabel()"
       [themeDarkLabel]="themeDarkLabel()"
-      [showLocaleSwitch]="true"
+      [showLocaleSwitch]="false"
       [currentLocale]="locale.locale()"
       [localeAriaLabel]="localeAriaLabel()"
       (localeClick)="toggleLocale()"

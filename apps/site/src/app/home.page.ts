@@ -54,14 +54,6 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
          the label readable instead of collapsing the tile. */
       .gear-fill__photo:not([src]) { display: none; }
 
-      /* Long hero titles overflow the column at the default clamp
-         (max 88px). When the title exceeds ~30 chars we switch to a
-         tighter scale so the lede + footer stay visible above the fold. */
-      :host .hero__title--compact {
-        font-size: clamp(28px, 3vw, 44px);
-        line-height: 1.05;
-      }
-
       /* Hero photo: stop cropping. Show the whole image with
          object-fit:contain, and fill the surrounding letterbox with a
          heavily-blurred copy of the same photo so we keep a fixed-size
@@ -102,35 +94,16 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
            Inline style on the <img> wins over this rule. */
       }
 
-      /* Hero rotator (prev / counter / next) — align to the bottom-right
-         corner mirroring the ELEKTRON label pill at bottom-left. All
-         three controls share the label's height so the cluster reads as
-         a row of equal-height pills. */
-      :host .hero__media .hero__rotator {
-        bottom: 10px;
-        right: 10px;
-        gap: 6px;
-      }
+      /* Rotator chips are decorative siblings of the counter pill, not
+         standalone tap targets — override the global 44×44 WCAG floor
+         so they match the 30px baseline shared with the label + counter
+         (see .hero .gear-fill__label / .hero .hero__counter in v05.css). */
       :host .hero__media .hero__rotator button {
-        width: 24px;
-        height: 24px;
-        /* Override the global 44px accessibility minimums in
-           styles.scss — these rotator chips are decorative siblings of
-           the counter pill, not standalone tap targets, so they need to
-           match the pill height instead of the WCAG 44x44 floor. */
         min-width: 0;
         min-height: 0;
         padding: 0;
         line-height: 1;
       }
-      :host .hero__media .hero__counter {
-        padding: 4px 8px;
-        font-size: 10px;
-        line-height: 1.3;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-      }
-
     `,
   ],
   template: `
@@ -191,7 +164,11 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
                 <span>{{ formatShortDate(heroPublishedAt()) }}</span>
               </div>
               @if (heroArticle(); as a) {
-                <h1 [class]="heroTitleClass()" id="hero-title">{{ a.title }}</h1>
+                <h1
+                  class="hero__title"
+                  id="hero-title"
+                  [style.--title-len]="a.title.length"
+                >{{ a.title }}</h1>
                 <p class="hero__lede">{{ a.excerpt || ('home.featured_no_excerpt' | t) }}</p>
               } @else {
                 <h1 class="hero__title" id="hero-title">{{ 'home.hero_title_fallback' | t }}</h1>
@@ -635,18 +612,6 @@ export class HomePage implements OnInit {
     const current = total > 0 ? this.heroIndex() + 1 : 0;
     return `${String(current).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
   });
-
-  /**
-   * Long titles overflow the hero column when rendered at the default
-   * display-font clamp (max 88px). Drop to roughly half the size when
-   * the title is over 30 chars so it still fits next to the photo
-   * without pushing the lede off-screen.
-   */
-  readonly heroTitleClass = computed(() =>
-    (this.heroArticle()?.title.length ?? 0) > 30
-      ? 'hero__title hero__title--compact'
-      : 'hero__title',
-  );
 
   heroPrev(): void {
     const total = this.heroPool().length;

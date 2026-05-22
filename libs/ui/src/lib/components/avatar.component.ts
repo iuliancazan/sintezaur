@@ -8,11 +8,17 @@ import {
 } from '@angular/core';
 
 export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
+export type SzAvatarShape = 'square' | 'circle';
 
 /**
- * Editorial-style square avatar with initials fallback. Used in topbar,
- * bylines, threads, listings sellers, etc. Optional photo; if missing or
- * fails to load, falls back to up to 2 initials derived from `name`.
+ * Editorial avatar with initials fallback. Used in topbar, bylines,
+ * threads, listings sellers, etc. Optional photo; if missing or fails
+ * to load, falls back to up to 2 initials derived from `name`.
+ *
+ * Defaults to square (the editorial byline look). Set `shape="circle"`
+ * for user-identity avatars (account trigger, account menu head) — per
+ * V09 design, identity avatars are round + colored, byline avatars are
+ * square + neutral.
  *
  * When `seed` is provided (e.g. user id), the initials fallback paints
  * a deterministic hue background so each user gets a stable visual
@@ -39,6 +45,7 @@ export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
   `,
   host: {
     '[attr.data-size]': 'size',
+    '[attr.data-shape]': 'shape',
     class: 'sz-avatar',
   },
   styles: [
@@ -54,6 +61,10 @@ export type SzAvatarSize = 'xs' | 'sm' | 'md' | 'lg';
         text-transform: uppercase;
         overflow: hidden;
         flex-shrink: 0;
+      }
+      .sz-avatar[data-shape='circle'] {
+        border-radius: 999px;
+        border: 0;
       }
       .sz-avatar img {
         width: 100%;
@@ -95,6 +106,7 @@ export class SzAvatarComponent {
   @Input() name?: string;
   @Input() photo?: string;
   @Input() size: SzAvatarSize = 'sm';
+  @Input() shape: SzAvatarShape = 'square';
   @Input() fallback?: string;
   /**
    * Optional deterministic seed (e.g. user id) used to compute the

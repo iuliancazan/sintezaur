@@ -544,11 +544,11 @@
   padding: 22px clamp(20px, 3vw, 32px) 18px;
 }
 .ft-op__title {
-  font-family: var(--font-display);
+  font-family: var(--font-headline);
   font-size: clamp(36px, 4.6vw, 64px);
   font-weight: 600;
   line-height: 0.9;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.005em;
   padding-top: 0.18em;
   margin: 0 0 16px;
@@ -1160,7 +1160,7 @@
 .ft-people__row .nm { color: var(--fg); font-weight: 600; font-family: var(--font-ui); font-size: 13px; }
 .ft-people__row .at { color: var(--fg-muted); font-size: 10px; }
 .ft-people__row .ct {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 18px;
   font-weight: 600;
   color: var(--accent);
@@ -1219,12 +1219,12 @@
   color: var(--fg-muted);
 }
 .ft-side-gear__model {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 22px;
   font-weight: 600;
   line-height: 1;
   padding-top: 0.16em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .ft-side-gear__link {
   padding: 10px 16px;
@@ -1302,7 +1302,7 @@
   padding: 14px 16px;
   background: var(--bg);
   border: 1px solid var(--line-strong);
-  font-family: var(--font-display);
+  font-family: var(--font-headline);
   font-weight: 600;
   font-size: 24px;
   letter-spacing: 0.005em;
@@ -1311,7 +1311,7 @@
   outline: 0;
   text-transform: none;
 }
-.fn-input-title::placeholder { color: var(--fg-subtle); font-family: var(--font-display); }
+.fn-input-title::placeholder { color: var(--fg-subtle); font-family: var(--font-headline); }
 .fn-input-title:focus { border-color: var(--accent); }
 .fn-input-title-meta {
   display: flex;
@@ -1667,7 +1667,7 @@
   color: var(--fg-muted);
 }
 .fs-summary .num {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 24px;
   font-weight: 600;
   color: var(--fg);
@@ -1774,7 +1774,7 @@
 }
 .fs-result:hover { background: var(--bg-card); }
 .fs-result__cat-num {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 28px;
   font-weight: 600;
   color: var(--fg-subtle);
@@ -1846,7 +1846,7 @@
 }
 .fs-result__stats .util,
 .fs-result__stats .rep {
-  font-family: var(--font-display);
+  font-family: var(--font-mono);
   font-size: 24px;
   font-weight: 600;
   line-height: 1;

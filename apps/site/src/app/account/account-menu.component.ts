@@ -10,6 +10,7 @@ import {
   inject,
 } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { SzAvatarComponent } from '@sintezaur/ui';
 import { environment } from '../../environments/environment';
 import { AuthService } from '../auth/auth.service';
 import { hasAnyRole } from '../auth/auth.types';
@@ -27,7 +28,7 @@ import { TPipe } from '../i18n/t.pipe';
 @Component({
   selector: 'app-account-menu',
   standalone: true,
-  imports: [CommonModule, RouterLink, TPipe],
+  imports: [CommonModule, RouterLink, TPipe, SzAvatarComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div
@@ -37,8 +38,16 @@ import { TPipe } from '../i18n/t.pipe';
     >
       @if (auth.currentUser(); as user) {
         <div class="am__head">
-          <p class="am__name">{{ displayName() }}</p>
-          <p class="am__email">{{ user.email }}</p>
+          <sz-avatar
+            size="md"
+            shape="circle"
+            [seed]="user.id"
+            [name]="displayName()"
+          />
+          <div class="am__id">
+            <p class="am__name">{{ displayName() }}</p>
+            <p class="am__email">{{ user.email }}</p>
+          </div>
         </div>
       }
 
@@ -168,12 +177,19 @@ import { TPipe } from '../i18n/t.pipe';
       }
       .am__head {
         display: flex;
-        flex-direction: column;
-        gap: 3px;
+        align-items: center;
+        gap: 12px;
         padding: 12px 12px 14px;
         margin: -6px -6px 6px;
         border-bottom: 1px solid var(--line);
         background: var(--bg-elev);
+      }
+      .am__id {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        line-height: 1.2;
+        min-width: 0;
       }
       .am__name {
         margin: 0;
@@ -181,7 +197,9 @@ import { TPipe } from '../i18n/t.pipe';
         font-size: 14px;
         color: var(--fg);
         line-height: 1.2;
-        word-break: break-word;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .am__email {
         margin: 0;
