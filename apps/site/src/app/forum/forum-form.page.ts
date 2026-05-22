@@ -43,142 +43,247 @@ const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
-      <nav class="ff-crumbs">
-        <a routerLink="/forum">{{ 'forum.crumb_root' | t }}</a>
+      <nav class="td-crumb" aria-label="Breadcrumb">
+        <a routerLink="/forum" class="td-crumb__back">
+          <svg width="14" height="14" aria-hidden="true"><use href="#i-back"/></svg>
+          {{ 'forum.crumb_root' | t }}
+        </a>
         <span class="sep">/</span>
         <a [routerLink]="['/forum', categorySlug()]">
           {{ category()?.name ?? '...' }}
         </a>
         <span class="sep">/</span>
-        <span>{{ 'forum.compose.new_thread' | t }}</span>
+        <span class="cur">{{ 'forum.compose.new_thread' | t }}</span>
       </nav>
 
       @if (loadError()) {
-        <p class="ff-empty">{{ 'forum.load_error' | t }}</p>
+        <p class="fn-empty">{{ 'forum.load_error' | t }}</p>
       } @else if (category(); as c) {
-        <header class="ff-header crosses">
-          <span class="crosses-tl"></span><span class="crosses-tr"></span>
-          <p class="ff-header__sub">{{ c.name }}</p>
-          <h1 class="ff-header__title">{{ 'forum.compose.new_thread' | t }}</h1>
-          <p class="ff-header__lede">{{ 'forum.compose.new_thread_lede' | t }}</p>
-        </header>
+        <div class="fn-shell">
 
-        <form class="ff-form" (submit)="$event.preventDefault(); submit()">
-          <label class="ff-field">
-            <span class="ff-label">{{ 'forum.compose.title_label' | t }}</span>
-            <input
-              type="text"
-              [(ngModel)]="state.title"
-              name="title"
-              [maxlength]="MAX_TITLE"
-              [placeholder]="i18n.t('forum.compose.title_placeholder')"
-              required
-            />
-            <span class="ff-hint">
-              {{ state.title.length }} / {{ MAX_TITLE }}
-              · {{ 'forum.compose.title_hint' | t }}
-            </span>
-          </label>
+          <!-- LEFT: form -->
+          <form class="fn-form crosses" (submit)="$event.preventDefault(); submit()">
+            <span class="crosses-tl"></span><span class="crosses-tr"></span>
 
-          <div class="ff-field">
-            <span class="ff-label">{{ 'forum.compose.body_label' | t }}</span>
-            <sz-editor
-              [value]="initialBody"
-              [richMode]="true"
-              [maxLength]="4000"
-              [mentionSuggest]="mentionSuggest"
-              [placeholder]="i18n.t('forum.compose.body_placeholder')"
-              (valueChange)="onBodyChange($event)"
-            />
-            <span class="ff-hint">{{ 'forum.compose.body_hint' | t }}</span>
-          </div>
+            <header class="fn-form__head">
+              <p class="fn-form__kicker">
+                {{ 'forum.compose.kicker_in' | t }}
+                <span class="acc">{{ c.name }}</span>
+              </p>
+              <h1 class="fn-form__title">{{ 'forum.compose.new_thread' | t }}</h1>
+            </header>
 
-          <label class="ff-field">
-            <span class="ff-label">{{ 'forum.compose.tags_label' | t }}</span>
-            <input
-              type="text"
-              [ngModel]="state.tagsInput"
-              (ngModelChange)="onTagsInput($event)"
-              name="tags"
-              [placeholder]="i18n.t('forum.compose.tags_placeholder')"
-            />
-            <span class="ff-hint">{{ 'forum.compose.tags_hint' | t: { max: MAX_TAGS } }}</span>
-            @if (parsedTags().length > 0) {
-              <div class="ff-chips">
-                @for (t of parsedTags(); track t) {
-                  <span class="ff-chip">#{{ t }}</span>
-                }
+            <div class="fn-form__body">
+
+              <!-- TITLE -->
+              <div class="fn-field">
+                <label class="fn-field__label" for="ft-title">
+                  {{ 'forum.compose.title_label' | t }}
+                  <span class="req">*</span>
+                  — {{ 'forum.compose.title_hint_short' | t }}
+                </label>
+                <input
+                  id="ft-title"
+                  class="fn-input-title"
+                  type="text"
+                  [(ngModel)]="state.title"
+                  name="title"
+                  [maxlength]="MAX_TITLE"
+                  [placeholder]="i18n.t('forum.compose.title_placeholder')"
+                  required
+                />
+                <div class="fn-input-title-meta">
+                  <span>{{ 'forum.compose.title_hint' | t }}</span>
+                  <span>
+                    <b>{{ state.title.length }}</b>
+                    / {{ MAX_TITLE }} {{ 'forum.compose.chars' | t }}
+                  </span>
+                </div>
               </div>
-            }
-          </label>
 
-          <div class="ff-field">
-            <span class="ff-label">{{ 'forum.compose.gear_label' | t }}</span>
-            <input
-              type="search"
-              [ngModel]="gearQuery()"
-              (ngModelChange)="onGearQuery($event)"
-              [placeholder]="i18n.t('forum.compose.gear_placeholder')"
-              [disabled]="state.gearTags.length >= MAX_GEAR_TAGS"
-            />
-            @if (gearResults().length > 0) {
-              <ul class="ff-gear-pick">
-                @for (g of gearResults(); track g.id) {
-                  <li>
-                    <button type="button" (click)="addGearTag(g)">
-                      <strong>{{ g.brand }} {{ g.model }}</strong>
-                      <span>{{ g.category }}</span>
-                    </button>
-                  </li>
-                }
-              </ul>
-            }
-            @if (state.gearTags.length > 0) {
-              <div class="ff-chips">
-                @for (g of state.gearTags; track g.id) {
-                  <button
-                    type="button"
-                    class="ff-chip ff-chip--gear"
-                    (click)="removeGearTag(g.id)"
-                  >
-                    {{ g.brand }} {{ g.model }} ✕
-                  </button>
-                }
+              <!-- BODY EDITOR -->
+              <div class="fn-field">
+                <label class="fn-field__label">
+                  {{ 'forum.compose.body_label' | t }}
+                  <span class="req">*</span>
+                  — {{ 'forum.compose.body_hint_short' | t }}
+                </label>
+                <sz-editor
+                  [value]="initialBody"
+                  [richMode]="true"
+                  [maxLength]="4000"
+                  [mentionSuggest]="mentionSuggest"
+                  [placeholder]="i18n.t('forum.compose.body_placeholder')"
+                  (valueChange)="onBodyChange($event)"
+                />
+                <p class="fn-field__hint">{{ 'forum.compose.body_hint' | t }}</p>
               </div>
-            }
-            <span class="ff-hint">
-              {{ state.gearTags.length }} / {{ MAX_GEAR_TAGS }} · {{ 'forum.compose.gear_hint' | t }}
-            </span>
-          </div>
 
-          <!-- honeypot -->
-          <div class="ff-honeypot" aria-hidden="true">
-            <label>Nu completa acest câmp <input type="text" name="hp" [(ngModel)]="state.hp" tabindex="-1" autocomplete="off" /></label>
-          </div>
+              <!-- GEAR TAG PICKER -->
+              <div class="fn-field">
+                <label class="fn-field__label">
+                  {{ 'forum.compose.gear_label' | t }}
+                </label>
+                <p class="fn-field__hint">{{ 'forum.compose.gear_hint' | t }}</p>
 
-          @if (error()) {
-            <p class="ff-error">{{ error() }}</p>
-          }
+                <div class="fn-tag-input">
+                  @for (g of state.gearTags; track g.id) {
+                    <span class="fr-gear-chip">
+                      <span class="fr-gear-chip__photo"></span>
+                      {{ g.brand }} {{ g.model }}
+                      <button
+                        type="button"
+                        class="fn-tag-input__rm"
+                        (click)="removeGearTag(g.id)"
+                        aria-label="Elimină"
+                      >✕</button>
+                    </span>
+                  }
+                  <input
+                    type="search"
+                    [ngModel]="gearQuery()"
+                    (ngModelChange)="onGearQuery($event)"
+                    [placeholder]="i18n.t('forum.compose.gear_placeholder')"
+                    [disabled]="state.gearTags.length >= MAX_GEAR_TAGS"
+                    name="gearSearch"
+                  />
+                </div>
 
-          <div class="ff-actions">
-            <a class="ff-btn ff-btn--ghost" [routerLink]="['/forum', c.slug]">
-              {{ 'forum.compose.cancel' | t }}
-            </a>
-            <button
-              type="submit"
-              class="ff-btn ff-btn--primary"
-              [disabled]="!canSubmit() || submitting()"
-            >
-              @if (submitting()) {
-                {{ 'forum.compose.submitting' | t }}
-              } @else {
-                {{ 'forum.compose.publish' | t }}
+                @if (gearResults().length > 0) {
+                  <div class="fn-autocomp">
+                    <div class="fn-autocomp__hd">
+                      {{ 'forum.compose.gear_results' | t: { n: gearResults().length, q: gearQuery() } }}
+                    </div>
+                    @for (g of gearResults(); track g.id; let i = $index) {
+                      <button
+                        type="button"
+                        class="fn-autocomp__item"
+                        [class.is-hl]="i === 0"
+                        (click)="addGearTag(g)"
+                      >
+                        <span class="mini"></span>
+                        <span class="nm">
+                          <span class="b">{{ g.brand }} {{ g.model }}</span>
+                          <span class="m">{{ g.category }}</span>
+                        </span>
+                        <span class="key">+</span>
+                      </button>
+                    }
+                  </div>
+                }
+                <span class="fn-field__hint">
+                  {{ state.gearTags.length }} / {{ MAX_GEAR_TAGS }}
+                </span>
+              </div>
+
+              <!-- FREE TAGS -->
+              <div class="fn-field">
+                <label class="fn-field__label">
+                  {{ 'forum.compose.tags_label_v08' | t }}
+                </label>
+                <div class="fn-tag-input">
+                  @for (t of parsedTags(); track t) {
+                    <span class="fr-tag">{{ t }}</span>
+                  }
+                  <input
+                    type="text"
+                    [ngModel]="state.tagsInput"
+                    (ngModelChange)="onTagsInput($event)"
+                    name="tags"
+                    [placeholder]="i18n.t('forum.compose.tags_placeholder')"
+                  />
+                </div>
+                <span class="fn-field__hint">
+                  {{ 'forum.compose.tags_hint' | t: { max: MAX_TAGS } }}
+                </span>
+              </div>
+
+              <!-- honeypot -->
+              <div class="fn-honeypot" aria-hidden="true">
+                <label>
+                  Nu completa
+                  <input
+                    type="text"
+                    name="hp"
+                    [(ngModel)]="state.hp"
+                    tabindex="-1"
+                    autocomplete="off"
+                  />
+                </label>
+              </div>
+
+              @if (error()) {
+                <p class="fn-error">{{ error() }}</p>
               }
-            </button>
-          </div>
-        </form>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="fn-actions">
+              <a class="ghost" [routerLink]="['/forum', c.slug]">
+                {{ 'forum.compose.cancel' | t }}
+              </a>
+              <button
+                type="submit"
+                class="pri"
+                [disabled]="!canSubmit() || submitting()"
+              >
+                @if (submitting()) {
+                  {{ 'forum.compose.submitting' | t }}
+                } @else {
+                  {{ 'forum.compose.publish' | t }}
+                }
+              </button>
+            </div>
+          </form>
+
+          <!-- RIGHT: sidebar -->
+          <aside class="fn-side">
+
+            <div class="fn-side__block">
+              <header class="fn-side__head">
+                {{ 'forum.compose.tips_title' | t }}
+              </header>
+              <div class="fn-side__body">
+                <ul class="fn-side__list">
+                  <li>
+                    <span class="n">01</span>
+                    <span [innerHTML]="i18n.t('forum.compose.tip_1')"></span>
+                  </li>
+                  <li>
+                    <span class="n">02</span>
+                    <span [innerHTML]="i18n.t('forum.compose.tip_2')"></span>
+                  </li>
+                  <li>
+                    <span class="n">03</span>
+                    <span [innerHTML]="i18n.t('forum.compose.tip_3')"></span>
+                  </li>
+                  <li>
+                    <span class="n">04</span>
+                    <span [innerHTML]="i18n.t('forum.compose.tip_4')"></span>
+                  </li>
+                  <li>
+                    <span class="n">05</span>
+                    <span [innerHTML]="i18n.t('forum.compose.tip_5')"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="fn-side__block">
+              <header class="fn-side__head">
+                {{ 'forum.compose.rules_title' | t }}
+              </header>
+              <div class="fn-side__body fn-rules">
+                <p>· {{ 'forum.compose.rule_1' | t }}</p>
+                <p>· {{ 'forum.compose.rule_2' | t }}</p>
+                <p>· {{ 'forum.compose.rule_3' | t }}</p>
+                <p>· {{ 'forum.compose.rule_4' | t }}</p>
+              </div>
+            </div>
+          </aside>
+        </div>
       } @else {
-        <p class="ff-empty">{{ 'app.loading' | t }}</p>
+        <p class="fn-empty">{{ 'app.loading' | t }}</p>
       }
     </div>
   `,
@@ -186,124 +291,19 @@ const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
     `
       :host { display: block; }
 
-      .ff-crumbs {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        padding: 16px 0 8px;
-      }
-      .ff-crumbs a { color: var(--fg-muted); text-decoration: none; }
-      .ff-crumbs a:hover { color: var(--accent); }
-      .ff-crumbs .sep { margin: 0 8px; color: var(--fg-subtle); }
+      /* Most layout is global (v05-forum.css .fn-shell / .fn-form /
+         .fn-field / .fn-input-title / .fn-tag-input / .fn-autocomp /
+         .fn-actions / .fn-side). Page-local rules below cover the
+         honeypot, error box, and a couple of tweaks not in V08. */
 
-      .ff-header {
-        position: relative;
-        padding: clamp(24px, 4vw, 40px) clamp(20px, 3vw, 32px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: 8px 0 20px;
-      }
-      .ff-header__sub {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.16em;
-        color: var(--accent);
-        margin: 0 0 10px;
-      }
-      .ff-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(32px, 4vw, 44px);
-        line-height: 1;
-        margin: 0 0 10px;
-        letter-spacing: 0.005em;
-      }
-      .ff-header__lede {
+      .fn-empty {
         color: var(--fg-muted);
-        font-size: 14px;
-        max-width: 60ch;
-        margin: 0;
-      }
-
-      .ff-form { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
-      .ff-field { display: flex; flex-direction: column; gap: 8px; }
-      .ff-label {
         font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
+        font-size: 13px;
+        padding: 40px 20px;
+        text-align: center;
       }
-      .ff-field input[type='text'] {
-        font-family: var(--font-display);
-        font-size: 20px;
-        padding: 12px 14px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        color: var(--fg);
-      }
-      .ff-field input[type='text']:focus,
-      .ff-field input[type='search']:focus { outline: none; border-color: var(--accent); }
-      .ff-field input[type='search'] {
-        font-family: inherit;
-        font-size: 14px;
-        padding: 10px 12px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        color: var(--fg);
-      }
-      .ff-chips {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 8px;
-      }
-      .ff-chip {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        padding: 4px 10px;
-        background: var(--bg);
-        border: 1px solid var(--line-strong);
-        color: var(--fg-muted);
-      }
-      .ff-chip--gear {
-        cursor: pointer;
-        color: var(--accent);
-      }
-      .ff-chip--gear:hover { border-color: #e8665b; color: #e8665b; }
-      .ff-gear-pick {
-        list-style: none;
-        margin: 4px 0 0;
-        padding: 4px;
-        background: var(--bg-elev);
-        border: 1px solid var(--line-strong);
-        max-height: 220px;
-        overflow-y: auto;
-      }
-      .ff-gear-pick li button {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        width: 100%;
-        text-align: left;
-        background: transparent;
-        border: 0;
-        padding: 8px 12px;
-        cursor: pointer;
-        color: var(--fg);
-      }
-      .ff-gear-pick li button:hover { background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%); }
-      .ff-gear-pick li button span {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--fg-muted);
-      }
-      .ff-honeypot {
+      .fn-honeypot {
         position: absolute;
         left: -9999px;
         width: 1px;
@@ -311,14 +311,7 @@ const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
         opacity: 0;
         pointer-events: none;
       }
-      .ff-hint {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--fg-subtle);
-      }
-      .ff-error {
+      .fn-error {
         font-family: var(--font-mono);
         font-size: 12px;
         color: #e8665b;
@@ -327,41 +320,28 @@ const TAG_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
         border-left: 3px solid #e8665b;
         margin: 0;
       }
-
-      .ff-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        margin-top: 8px;
-      }
-      .ff-btn {
+      .fn-rules p {
         font-family: var(--font-mono);
         font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        padding: 10px 18px;
-        border: 1px solid var(--line-strong);
+        line-height: 1.7;
+        letter-spacing: 0.04em;
+        color: var(--fg-muted);
+        margin: 0 0 8px;
+      }
+      .fn-rules p:last-child { margin: 0; }
+      .fn-tag-input__rm {
+        background: none;
+        border: none;
+        color: inherit;
+        margin-left: 6px;
         cursor: pointer;
-        text-decoration: none;
-        background: transparent;
-        color: var(--fg-muted);
+        padding: 0;
+        font-size: 12px;
+        opacity: 0.6;
       }
-      .ff-btn:hover { color: var(--fg); border-color: var(--accent); }
-      .ff-btn--primary {
-        background: var(--accent);
-        color: var(--accent-fg);
-        border-color: var(--accent);
-      }
-      .ff-btn--primary:disabled { opacity: 0.5; cursor: not-allowed; }
-      .ff-btn--primary:hover:not(:disabled) { filter: brightness(1.1); }
+      .fn-tag-input__rm:hover { opacity: 1; }
 
-      .ff-empty {
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 13px;
-        padding: 40px 20px;
-        text-align: center;
-      }
+      .req { color: #e8665b; }
     `,
   ],
 })
