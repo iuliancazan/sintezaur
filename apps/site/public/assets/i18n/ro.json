@@ -166,6 +166,7 @@
       "year_desc": "An lansare ↓"
     },
     "view": {
+      "label": "Vizualizare",
       "grid": "Grid",
       "list": "Listă"
     },
@@ -176,6 +177,8 @@
       "type": "Tip",
       "brand": "Brand",
       "year_released": "An lansare",
+      "year_min_aria": "An lansare — minim",
+      "year_max_aria": "An lansare — maxim",
       "status": "Status",
       "in_production": "În producție",
       "discontinued": "Discontinuat",
@@ -193,6 +196,8 @@
     "detail": {
       "back_to_list": "Înapoi la Tezaur",
       "breadcrumb_root": "Tezaur",
+      "flag_classic": "Holy grail",
+      "flag_vintage": "Vintage",
       "tabs": {
         "detalii": "Detalii",
         "specs": "Specs",

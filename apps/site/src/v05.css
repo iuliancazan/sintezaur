@@ -4,9 +4,10 @@
 
 :root {
   /* Type */
-  --font-display: "Big Shoulders Stencil Display", "Big Shoulders Display", "Impact", system-ui, sans-serif;
-  --font-ui: "Space Grotesk", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-display:  "Big Shoulders Stencil Display", "Big Shoulders Display", "Impact", system-ui, sans-serif;
+  --font-headline: "IBM Plex Serif", Georgia, serif;
+  --font-ui:       "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono:     "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Sizing */
   --container: 1440px;

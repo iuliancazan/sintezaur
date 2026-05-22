@@ -15,7 +15,7 @@ import {
 } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { USER_GEAR_STATUS_FLAGS, type UserGearStatusFlagLiteral } from '@sintezaur/shared';
-import { SzAvatarComponent, SzBadgeComponent, SzButtonComponent } from '@sintezaur/ui';
+import { SzAvatarComponent, SzButtonComponent } from '@sintezaur/ui';
 import { AuthService } from '../auth/auth.service';
 import { environment } from '../../environments/environment';
 import { I18nService } from '../i18n/i18n.service';
@@ -59,7 +59,6 @@ interface ReviewsResponse {
     FormsModule,
     RouterLink,
     TPipe,
-    SzBadgeComponent,
     SzAvatarComponent,
     SzButtonComponent,
   ],
@@ -125,12 +124,17 @@ interface ReviewsResponse {
             <span class="td-info__brand">{{ d.gear.brand }}</span>
             <h1 class="td-info__model">{{ d.gear.model }}</h1>
             <div class="td-info__tags">
-              @if (d.gear.specs['type']; as t) {
-                <sz-badge variant="pill">{{ $any(t) }}</sz-badge>
+              @if (d.gear.ownersPublicCount >= 30) {
+                <span class="td-info__tag is-accent">
+                  {{ 'tezaur.detail.flag_classic' | t }}
+                </span>
               }
-              <sz-badge variant="pill">{{ humanizeCategory(d.gear.category) }}</sz-badge>
+              <span class="td-info__tag">{{ humanizeCategory(d.gear.category) }}</span>
+              @if (d.gear.specs['type']; as t) {
+                <span class="td-info__tag">{{ $any(t) }}</span>
+              }
               @if (d.gear.yearDiscontinued) {
-                <sz-badge variant="pill">Vintage</sz-badge>
+                <span class="td-info__tag">{{ 'tezaur.detail.flag_vintage' | t }}</span>
               }
             </div>
 
