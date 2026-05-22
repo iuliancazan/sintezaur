@@ -71,6 +71,7 @@ export interface ThreadListItem {
   pinnedAt: Date | null;
   pinPosition: number | null;
   lockedAt: Date | null;
+  tags: string[];
 }
 
 @Injectable()
@@ -194,6 +195,7 @@ export class ForumThreadsService {
         pinnedAt: forumThreads.pinnedAt,
         pinPosition: forumThreads.pinPosition,
         lockedAt: forumThreads.lockedAt,
+        tags: forumThreads.tags,
       })
       .from(forumThreads)
       .leftJoin(users, eq(users.id, forumThreads.authorId))
@@ -252,6 +254,7 @@ export class ForumThreadsService {
         pinnedAt: forumThreads.pinnedAt,
         pinPosition: forumThreads.pinPosition,
         lockedAt: forumThreads.lockedAt,
+        tags: forumThreads.tags,
       })
       .from(forumThreads)
       .innerJoin(

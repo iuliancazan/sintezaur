@@ -34,122 +34,239 @@ const PAGE_SIZE = 25;
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell">
-      <nav class="fc-crumbs">
-        <a routerLink="/forum">{{ 'forum.crumb_root' | t }}</a>
-        <span class="sep">/</span>
-        <span>{{ response()?.category?.name ?? '' }}</span>
-      </nav>
-
       @if (response(); as r) {
-        <section class="fc-header crosses">
+        <!-- BREADCRUMB -->
+        <nav class="td-crumb" aria-label="Breadcrumb">
+          <a routerLink="/forum" class="td-crumb__back">
+            <svg width="14" height="14" aria-hidden="true"><use href="#i-back"/></svg>
+            {{ 'forum.back_to_root' | t }}
+          </a>
+          <span class="sep">·</span>
+          <a routerLink="/forum">{{ 'forum.crumb_root' | t }}</a>
+          <span class="sep">/</span>
+          <span class="cur">{{ r.category.name }}</span>
+        </nav>
+
+        <!-- CATEGORY STRIP -->
+        <section class="fl-cat-strip crosses">
           <span class="crosses-tl"></span><span class="crosses-tr"></span>
-          <div class="fc-header__row">
-            <div>
-              <h1 class="fc-header__title">{{ r.category.name }}</h1>
-              @if (r.category.description) {
-                <p class="fc-header__desc">{{ r.category.description }}</p>
-              }
+          <div class="fl-cat-strip__body">
+            <p class="fl-cat-strip__kicker">
+              {{
+                'forum.cat_kicker' | t: {
+                  kind: (r.category.kind === 'system'
+                    ? ('forum.kind_system' | t)
+                    : ('forum.kind_user' | t))
+                }
+              }}
+            </p>
+            <h1 class="fl-cat-strip__title">{{ r.category.name }}</h1>
+            @if (r.category.description) {
+              <p class="fl-cat-strip__desc">{{ r.category.description }}</p>
+            }
+          </div>
+          <div class="fl-cat-strip__meta">
+            <div class="fl-cat-stat">
+              <span class="v">{{ r.totalCount }}</span>
+              <span class="k">{{ 'forum.threads_count' | t }}</span>
             </div>
-            <div class="fc-header__actions">
-              @if (auth.currentUser()) {
-                <app-forum-subscribe-bell
-                  [level]="subLevel()"
-                  [busy]="subBusy()"
-                  (levelChange)="onSubChange($event, r)"
-                />
-              }
-              @if (canCompose(r)) {
-                <a
-                  class="fc-header__cta"
-                  [routerLink]="['/forum', r.category.slug, 'nou']"
-                >
-                  + {{ 'forum.compose.new_thread' | t }}
-                </a>
-              }
-            </div>
+            @if (auth.currentUser()) {
+              <app-forum-subscribe-bell
+                [level]="subLevel()"
+                [busy]="subBusy()"
+                (levelChange)="onSubChange($event, r)"
+              />
+            }
           </div>
         </section>
 
-        <div class="fc-results">
-          <span>
-            <span class="accent">// </span>
-            {{
-              'forum.results_count' | t: { shown: r.items.length, total: r.totalCount }
-            }}
-          </span>
-          @if (r.totalPages > 1) {
-            <span>
-              {{
-                'forum.pagination.page_of' | t: { page: r.page, total: r.totalPages }
-              }}
-            </span>
+        <!-- ACTION ROW -->
+        <div class="fl-actions">
+          @if (canCompose(r)) {
+            <a
+              class="fl-actions__primary"
+              [routerLink]="['/forum', r.category.slug, 'nou']"
+            >
+              {{ 'forum.compose.new_thread_short' | t }}
+            </a>
           }
+          <div class="fl-sort-tabs">
+            <a class="is-active">{{ 'forum.sort.recent_activity' | t }}</a>
+            <a class="is-disabled" title="Disponibil curând">
+              {{ 'forum.sort.newest' | t }}
+            </a>
+            <a class="is-disabled" title="Disponibil curând">
+              {{ 'forum.sort.most_replies' | t }}
+            </a>
+          </div>
         </div>
 
-        @if (r.items.length === 0) {
-          <app-empty-state
-            icon="💬"
-            [title]="'Nu există încă discuții în această categorie'"
-            [lede]="'Fii primul care deschide un subiect. O discuție bună începe cu o întrebare clară.'"
-            ctaLabel="Deschide thread nou"
-            [ctaRouterLink]="['/forum', categorySlug(), 'nou']"
-          />
-        } @else {
-          <ul class="fc-list">
-            @for (t of r.items; track t.id) {
-              <li>
-                <a class="fc-thread" [routerLink]="['/forum', r.category.slug, t.slug]">
-                  <span class="fc-thread__bullet">
-                    @if (t.pinPosition !== null) {
-                      <span class="fc-pin" [title]="'forum.pinned' | t">📌</span>
-                    } @else {
-                      ▌
-                    }
-                  </span>
-                  <span class="fc-thread__body">
-                    <span class="fc-thread__title">
+        @if (pinnedItems().length > 0) {
+          <!-- PINNED -->
+          <section class="fl-pinned">
+            <header class="fl-pinned__head">
+              <svg aria-hidden="true"><use href="#i-pin"/></svg>
+              {{ 'forum.pinned_label' | t: { n: pinnedItems().length } }}
+            </header>
+            @for (t of pinnedItems(); track t.id) {
+              <a
+                class="fl-row"
+                [routerLink]="['/forum', r.category.slug, t.slug]"
+              >
+                <div class="fl-row__pin">
+                  <svg aria-hidden="true"><use href="#i-pin"/></svg>
+                </div>
+                <div class="fl-row__body">
+                  <div class="fl-row__title-line">
+                    <h3 class="fl-row__title">
                       {{ t.title }}
                       @if (t.lockedAt) {
-                        <span class="fc-lock">🔒</span>
+                        <span class="ft-lock">🔒</span>
                       }
+                    </h3>
+                    <span class="fl-row__badge">
+                      {{ 'forum.pinned' | t }}
                     </span>
-                    <span class="fc-thread__meta">
-                      @if (t.authorUsername) {
-                        <span class="fc-thread__author">&#64;{{ t.authorUsername }}</span>
-                      } @else {
-                        <span>{{ 'forum.deleted_user' | t }}</span>
+                  </div>
+                  @if (t.tags && t.tags.length > 0) {
+                    <div class="fl-row__tags">
+                      @for (tag of t.tags.slice(0, 4); track tag) {
+                        <span class="fr-tag">{{ tag }}</span>
                       }
-                      <span class="sep">·</span>
-                      <span>{{ relativeTime(t.lastPostAt ?? t.createdAt) }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="fl-row__activity">
+                  <div class="by-row">
+                    <span
+                      class="avatar"
+                      [style.background]="avatarBg(t.authorUsername)"
+                    >{{ initialsFor(t.authorUsername) }}</span>
+                    <span>
+                      <strong>{{ t.authorUsername ?? ('forum.deleted_user' | t) }}</strong>
                     </span>
+                  </div>
+                  <span class="last">
+                    {{ relativeTime(t.lastPostAt ?? t.createdAt) }}
                   </span>
-                  <span class="fc-thread__count">
-                    <span class="num">{{ t.postCount }}</span>
-                    <span class="lbl">{{ 'forum.replies_short' | t }}</span>
-                  </span>
-                </a>
-              </li>
+                </div>
+                <div class="fl-row__replies">
+                  <span class="v">{{ t.postCount - 1 }}</span>
+                  <span class="k">{{ 'forum.replies_short' | t }}</span>
+                </div>
+              </a>
             }
-          </ul>
+          </section>
+        }
+
+        @if (regularItems().length === 0 && pinnedItems().length === 0) {
+          <app-empty-state
+            icon="💬"
+            [title]="i18n.t('forum.empty_category_title')"
+            [lede]="i18n.t('forum.empty_category_lede')"
+            [ctaLabel]="canCompose(r) ? i18n.t('forum.compose.new_thread') : ''"
+            [ctaRouterLink]="canCompose(r) ? ['/forum', categorySlug(), 'nou'] : null"
+          />
+        } @else {
+          <!-- REGULAR THREAD LIST -->
+          <div class="fl-list">
+            @for (t of regularItems(); track t.id) {
+              <a
+                class="fl-row"
+                [routerLink]="['/forum', r.category.slug, t.slug]"
+              >
+                <div class="fl-row__pin"></div>
+                <div class="fl-row__body">
+                  <div class="fl-row__title-line">
+                    <h3 class="fl-row__title">
+                      {{ t.title }}
+                      @if (t.lockedAt) {
+                        <span class="ft-lock">🔒</span>
+                      }
+                    </h3>
+                  </div>
+                  @if (t.tags && t.tags.length > 0) {
+                    <div class="fl-row__tags">
+                      @for (tag of t.tags.slice(0, 4); track tag) {
+                        <span class="fr-tag">{{ tag }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="fl-row__activity">
+                  <div class="by-row">
+                    <span
+                      class="avatar"
+                      [style.background]="avatarBg(t.authorUsername)"
+                    >{{ initialsFor(t.authorUsername) }}</span>
+                    <span>
+                      <strong>{{ t.authorUsername ?? ('forum.deleted_user' | t) }}</strong>
+                    </span>
+                  </div>
+                  <span class="last">
+                    {{ relativeTime(t.lastPostAt ?? t.createdAt) }}
+                  </span>
+                </div>
+                <div class="fl-row__replies">
+                  <span class="v">{{ t.postCount - 1 }}</span>
+                  <span class="k">{{ 'forum.replies_short' | t }}</span>
+                </div>
+              </a>
+            }
+          </div>
 
           @if (r.totalPages > 1) {
-            <nav class="fc-pag">
-              <button type="button" [disabled]="r.page === 1" (click)="goToPage(r.page - 1)">‹</button>
-              @for (p of paginationPages(); track p) {
-                @if (p === '…') {
-                  <span class="is-ellipsis">…</span>
-                } @else {
-                  <button type="button" [class.is-active]="p === r.page" (click)="goToPage($any(p))">{{ p }}</button>
+            <nav class="fr-pag" aria-label="Pagini">
+              <span>
+                {{
+                  'forum.pagination.page_of' | t: {
+                    page: r.page,
+                    total: r.totalPages
+                  }
+                }}
+                ·
+                {{
+                  'forum.pagination.total_threads' | t: {
+                    total: r.totalCount,
+                    name: r.category.name
+                  }
+                }}
+              </span>
+              <div class="fr-pag__nums">
+                <button
+                  class="fr-pag__num"
+                  type="button"
+                  [class.is-disabled]="r.page === 1"
+                  [disabled]="r.page === 1"
+                  (click)="goToPage(r.page - 1)"
+                >‹</button>
+                @for (p of paginationPages(); track p) {
+                  @if (p === '…') {
+                    <span class="fr-pag__num is-ellipsis">…</span>
+                  } @else {
+                    <button
+                      type="button"
+                      class="fr-pag__num"
+                      [class.is-active]="p === r.page"
+                      (click)="goToPage($any(p))"
+                    >{{ p }}</button>
+                  }
                 }
-              }
-              <button type="button" [disabled]="r.page === r.totalPages" (click)="goToPage(r.page + 1)">›</button>
+                <button
+                  class="fr-pag__num"
+                  type="button"
+                  [class.is-disabled]="r.page === r.totalPages"
+                  [disabled]="r.page === r.totalPages"
+                  (click)="goToPage(r.page + 1)"
+                >›</button>
+              </div>
             </nav>
           }
         }
       } @else if (loading()) {
-        <p class="fc-empty">{{ 'app.loading' | t }}</p>
+        <p class="fl-empty">{{ 'app.loading' | t }}</p>
       } @else if (error()) {
-        <p class="fc-empty">{{ 'forum.load_error' | t }}</p>
+        <p class="fl-empty">{{ 'forum.load_error' | t }}</p>
       }
     </div>
   `,
@@ -157,182 +274,28 @@ const PAGE_SIZE = 25;
     `
       :host { display: block; }
 
-      .fc-crumbs {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        padding: 16px 0 8px;
-      }
-      .fc-crumbs a { color: var(--fg-muted); text-decoration: none; }
-      .fc-crumbs a:hover { color: var(--accent); }
-      .fc-crumbs .sep { margin: 0 8px; color: var(--fg-subtle); }
+      /* Most layout is global in v05-forum.css (.fl-cat-strip, .fl-row,
+         .fl-actions, .fl-pinned, .fr-pag). Only page-local rules below. */
 
-      .fc-header {
-        position: relative;
-        padding: clamp(28px, 4vw, 48px) clamp(20px, 3vw, 32px);
-        border: var(--grid-line) solid var(--line);
-        background: var(--bg-elev);
-        margin: 8px 0 20px;
-      }
-      .fc-header__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: clamp(36px, 5vw, 56px);
-        line-height: 1;
-        text-transform: uppercase;
-        margin: 0 0 10px;
-        letter-spacing: 0.005em;
-      }
-      .fc-header__desc {
-        color: var(--fg-muted);
-        font-size: 14px;
-        max-width: 60ch;
-        margin: 0;
-      }
-      .fc-header__row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
-      .fc-header__cta {
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        padding: 10px 16px;
-        background: var(--accent);
-        color: var(--accent-fg);
-        border: 1px solid var(--accent);
-        text-decoration: none;
-        white-space: nowrap;
-      }
-      .fc-header__cta:hover { filter: brightness(1.1); }
-      .fc-header__actions {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .fc-results {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--fg-muted);
-        padding: 8px 0 12px;
-      }
-      .fc-results .accent { color: var(--accent); }
-
-      .fc-list {
-        list-style: none;
-        margin: 0 0 24px;
-        padding: 0;
-        border: var(--grid-line) solid var(--line);
-      }
-      .fc-list li + li { border-top: var(--grid-line) solid var(--line); }
-
-      .fc-thread {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        gap: 14px;
-        align-items: center;
-        padding: 14px 18px;
-        background: var(--bg-elev);
-        color: var(--fg);
-        text-decoration: none;
-        transition: background 0.15s ease;
-      }
-      .fc-thread:hover {
-        background: color-mix(in oklab, var(--bg-elev) 80%, var(--accent) 20%);
-      }
-      .fc-thread__bullet { color: var(--accent); font-size: 18px; line-height: 1; }
-      .fc-pin { font-size: 14px; }
-      .fc-thread__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-      .fc-thread__title {
-        font-family: var(--font-display);
-        font-weight: 600;
-        font-size: 16px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .fc-lock { font-size: 12px; }
-      .fc-thread__meta {
-        font-family: var(--font-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--fg-muted);
-        display: inline-flex;
-        gap: 6px;
-        flex-wrap: wrap;
-      }
-      .fc-thread__author { color: var(--accent); }
-      .fc-thread__meta .sep { color: var(--fg-subtle); }
-
-      .fc-thread__count {
-        display: flex;
-        flex-direction: column;
-        align-items: end;
-        font-family: var(--font-mono);
-        color: var(--fg-muted);
-      }
-      .fc-thread__count .num {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--fg);
-      }
-      .fc-thread__count .lbl {
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-      }
-
-      .fc-pag {
-        display: inline-flex;
-        gap: 4px;
-        margin: 20px auto 60px;
-        justify-content: center;
-        width: 100%;
-      }
-      .fc-pag button,
-      .fc-pag .is-ellipsis {
-        min-width: 32px;
-        min-height: 32px;
-        padding: 0 8px;
-        display: inline-grid;
-        place-items: center;
-        background: var(--bg-elev);
-        border: 1px solid var(--line);
+      .fl-empty {
+        padding: 40px 0;
+        text-align: center;
         color: var(--fg-muted);
         font-family: var(--font-mono);
         font-size: 12px;
-        cursor: pointer;
-      }
-      .fc-pag button:hover:not(:disabled) { color: var(--fg); border-color: var(--line-strong); }
-      .fc-pag button.is-active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-      .fc-pag button:disabled { opacity: 0.5; cursor: not-allowed; }
-      .fc-pag .is-ellipsis { border: 0; background: transparent; cursor: default; }
-
-      .fc-empty {
-        color: var(--fg-muted);
-        font-family: var(--font-mono);
-        font-size: 13px;
-        padding: 40px 20px;
-        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
       }
 
-      @media (max-width: 720px) {
-        .fc-thread { grid-template-columns: auto 1fr; padding: 12px 14px; }
-        .fc-thread__count { grid-column: 2; flex-direction: row; gap: 6px; align-items: baseline; }
-        .fc-thread__count .num { font-size: 14px; }
+      .fl-sort-tabs a.is-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .fl-row .ft-lock {
+        font-size: 0.7em;
+        margin-left: 6px;
       }
     `,
   ],
@@ -357,6 +320,38 @@ export class ForumCategoryPage {
 
   readonly subLevel = signal<SubscriptionLevel | null>(null);
   readonly subBusy = signal(false);
+
+  /** Pinned threads come first in the V08 layout (`.fl-pinned` section).
+   *  Backend already sorts pinned-first so we just partition the list. */
+  readonly pinnedItems = computed(() =>
+    (this.response()?.items ?? []).filter((t) => t.pinPosition !== null),
+  );
+
+  readonly regularItems = computed(() =>
+    (this.response()?.items ?? []).filter((t) => t.pinPosition === null),
+  );
+
+  /** Hash username → hue for the avatar tint (matches the same routine
+   *  used by `forum-thread.page.ts`). */
+  private hashHue(input: string | null | undefined): number {
+    if (!input) return 0;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return Math.abs(h) % 360;
+  }
+
+  avatarBg(username: string | null | undefined): string | null {
+    if (!username) return null;
+    return `oklch(0.55 0.12 ${this.hashHue(username)})`;
+  }
+
+  initialsFor(username: string | null): string {
+    if (!username) return '··';
+    return username.slice(0, 2).toUpperCase();
+  }
 
   readonly paginationPages = computed<(number | '…')[]>(() => {
     const total = this.response()?.totalPages ?? 1;

@@ -30,6 +30,7 @@ export interface ThreadListItem {
   pinnedAt: string | null;
   pinPosition: number | null;
   lockedAt: string | null;
+  tags: string[];
 }
 
 export interface ThreadListResponse {

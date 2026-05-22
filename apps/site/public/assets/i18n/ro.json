@@ -1219,7 +1219,8 @@
     "crumb_root": "Forum",
     "results_count": "{{shown}} thread-uri din {{total}}",
     "pagination": {
-      "page_of": "Pagina {{page}} / {{total}}"
+      "page_of": "Pagina {{page}} / {{total}}",
+      "total_threads": "{{total}} threaduri în {{name}}"
     },
     "replies_short": "răsp.",
     "posts_count": "postări",
@@ -1243,6 +1244,17 @@
     "nested_replies": "răspunsuri imbricate",
     "and_n_others": "și {{n}} alții",
     "back_to_category": "Înapoi la categorie",
+    "back_to_root": "Înapoi la Forum",
+    "cat_kicker": "Categorie · {{kind}}",
+    "pinned_label": "Anunț · pinned de moderatori ({{n}})",
+    "threads_count": "threaduri",
+    "empty_category_title": "Nu există încă discuții în această categorie",
+    "empty_category_lede": "Fii primul care deschide un subiect. O discuție bună începe cu o întrebare clară.",
+    "sort": {
+      "recent_activity": "Activitate recentă",
+      "newest": "Cele mai noi",
+      "most_replies": "Cele mai răspunse"
+    },
     "jump_to_newest": "Sari la cel mai nou · #{{n}}",
     "coming_soon": "Disponibil curând",
     "action": {
@@ -1307,6 +1319,7 @@
     },
     "compose": {
       "new_thread": "Thread nou",
+      "new_thread_short": "Începe un thread nou",
       "new_thread_lede": "Pornește o discuție în această categorie.",
       "title_label": "Titlu",
       "title_placeholder": "Despre ce vrei să discuți?",
