@@ -6,7 +6,26 @@ Niciodată nu poate diverge de git log dacă regula e respectată.
 
 ## Current state
 
-**Last shipped:** **M17-H + K + L** — cleanup batch.
+**Last shipped:** **M18 — Forum pixel-perfect pass complete** (A–E + F testing doc).
+Toate cele 5 pagini Forum aliniate 1:1 cu
+`docs/design-imports/2026-05-16-v08/`. Landing era deja 1:1 (M18-A
+no-op). Thread, Category, New, Search complet rescrise cu markup V08
+`.ft-*` / `.fl-*` / `.fn-*` / `.fs-*` / `.fr-*` + sidebar-uri `.ft-side`
+/ `.fn-side` / `.fs-facets`. CSS scoped trimmed în toate paginile la
+~30–60 linii page-local; restul layout-ului vine din globalul
+`v05-forum.css` (1952 linii deja importate). Feature-uri noi în Thread:
+sticky bar cu progress counter live, engagement row (Util/Reply/Share/
+Quote/More), trust badges per autor (Veteran / Activ / mod), share
+button cu clipboard + toast, quote button cu prefilled blockquote,
+floating jump-to-newest, sidebar Gear discutat + Cei mai activi. Backend
+extins: `PostListItem` + `ThreadDetail.author` capătă `createdAt` +
+`approvedPostCount` pentru trust tier; `findBySlug` returnează acum
+`gearTagged` hidratat din `thread.gearTag` uuid[]; `ThreadListItem.tags`
+selectat în `listByCategorySlug` + `listRecent`. 84+ chei i18n noi sub
+`forum.*` (engage, trust, side, share, quote, tip_1..5, rule_1..4,
+sort.*, facet_*, pagination_summary, etc.).
+
+**Last shipped (previous):** **M17-H + K + L** — cleanup batch.
 **H:** Tezaur detail elimină ultima referință `<sz-icon name="back">` din
 breadcrumb și înlocuiește cu sprite `<svg><use href="#i-back"/></svg>`;
 SzIconComponent import + entry din imports array scoase. SzBadge /
@@ -388,21 +407,18 @@ cu coadă moderare pentru status `pending_review`. Cod existent
 pe API: `@RolesAllowed('curator','admin','superadmin')` — trebuie
 relaxat la `contributor` cu guard own-only pe update / delete.
 
-**Active milestone:** **M17** — close-out funcțional (bilingv close
-M16-F/G + rewrite scoped markup forum/revista/tezaur/cont + pagini noi
-v08). Plan complet în `~/.claude/plans/resilient-foraging-wave.md`.
-**NU** include pixel-perfect alignment 1:1 cu design files — acel
-workstream e rezervat post-M17 ca pas separat pagină cu pagină.
+**Active milestone:** none — M18 (Forum) închis. M19+ atacă restul
+pass-ului pixel-perfect: Revista detail, Cont 3 shells, My-listings,
+Articolele Mele, admin v08, landing diff-uri.
 
-**Next up:** **M18** — pixel-perfect pass page-by-page vs design files
-`docs/design-imports/2026-05-16-v08/`. Atacam pagină cu pagină
-diferențele structurale: Forum × 4 pagini (thread/category/search/new) →
-markup V05 `.ft-sticky`/`.ft-main`/`.ft-op`/`.fr-*`; Revista detail →
-`.ad-*` + read-side EN/RO resolution pe `findBySlug`; Cont 3 shells +
-My-listings → adoptare clase `.acc-*`/`.am-*` (CSS nou + markup);
-Articolele Mele (revista) ca pagină nouă; pagini de admin v08; restul
-diferențelor vizuale mărunte din landing-uri. M17 a închis tot ce era
-non-pixel-perfect.
+**Next up:** **M19** — următoarea pagină în pass-ul pixel-perfect.
+Recomandare ordine: Revista detail (`.rd-*` → `.ad-*` + read-side EN/RO
+resolution pe `findBySlug`); apoi Cont 3 shells (Setari/Favorite/Mesaje
+→ namespace `.acc-*` cu CSS nou); My-listings rebrand la `.am-*` plus
+features V08 noi (summary strip, advanced toolbar, card 3-col, section
+grouping „Necesită răspuns"); pagină nouă Articolele Mele (revista
+author view); admin v08 (Dashboard, Useri, User Edit); apoi diff-uri
+mărunte pe landings.
 
 ## Milestones
 
@@ -516,6 +532,22 @@ non-pixel-perfect.
 | A   | `4e2103c` | done | Forum 410 Gone (§7.13 — `ForumThreadsService.lookupSlugRedirect` + `handleSlugMiss` helper în controller + site honor pe `forum-thread.page`); BreadcrumbList JSON-LD pe 4 detail pages via `SeoService.breadcrumbList()` static helper + array form `setJsonLd([primary, breadcrumb])`; homepage Organization + WebSite SearchAction (sitelinks search box); brand placeholders generate via `tools/scripts/generate-brand-assets.ts` (Sharp) — `og-default.png` 1200×630 + `logo.png` 512×512; warnings cleanup (NG8107/8102 bio.value, 2× NG8113 imports nefolosite, bundle budget 1500kb/2500kb) |
 | B   | `9f0e604` | done | Unified cross-module search `/cautare` (§7.6) — backend `UnifiedSearchService` fan-out paralel cu try/catch per section + public `GET /api/search?q=&limit=` (min 2 chars, max 20/section); site `SearchPage` cu debounce 300ms + URL param sync + 4 grouped sections (top 5 + „Vezi toate" deep-links); app shell topbar search button cablat; homepage SearchAction target swap `/forum/cautare` → `/cautare`; i18n `search.*` block nou; ForumModule.exports extended cu ForumSearchService |
 | C   | `1b5762a` | done | Observability M6 deliverables. **Sentry** `@sentry/nestjs@^10.53.1` + `@sentry/node@^10.53.1` — `instrument.ts` (side-effect init before NestFactory) + `SentryModule.forRoot()` în api + worker AppModule. Worker tagged `service: 'worker'`. 4 env vars opționale (`SENTRY_DSN/ENVIRONMENT/TRACES_SAMPLE_RATE/RELEASE`), no-op pe dev. **Daily pg_dump**: `PgDumpBackupJob` cron `backup:pg-dump` @ 02:30 UTC, `pg_dump --format=custom --compress=9` la `BACKUP_DIR` (default `./storage/backups`) + prune > `BACKUP_RETAIN_DAYS` (default 14). `docs/devops/backups.md` cu 3 layers (local + Hetzner Storage Box rclone + restore drill trimestrial). |
+
+### M18 — Forum pixel-perfect pass (toate cele 5 pagini → v08 1:1)
+
+Prima sub-pass din workstream-ul pixel-perfect post-M17. Atacă pagină
+cu pagină diferențele structurale vs `docs/design-imports/2026-05-16-v08/`.
+Restul site-ului (Revista detail, Cont shells, My-listings, admin
+v08) intră în M19+.
+
+| Sub | Commit | Status | Notes |
+|-----|--------|--------|-------|
+| A | _no-op_ | done | Forum landing era deja 1:1 cu v08 (clasele `.fm-*` din `forum-list.page.ts` matchează v08 fără diferențe — singurele 3 clase utility extra `.fm-empty`/`.fm-online__record`/`.fm-trending__empty` sunt page-locals legitime pentru empty states pe care designul static V08 nu îi expune). |
+| B | `f69519c` | done | Forum thread rewrite la layout V08 (`.ft-sticky` + `.ft-main` + `.ft-op` + `.ft-engage` + `.ft-side`). Backend: `PostListItem` + `ThreadDetail.author` extinși cu `createdAt` + `approvedPostCount` (trust tier); `findBySlug` returnează acum `gearTagged` hidratat (mini-cards din `thread.gearTag` uuid[]). Features noi: sticky bar cu progress counter live (HostListener scroll), engagement row OP (Util/Reply/Share/More) + reply (Util/Reply/Quote/Share), trust badges (`.fr-trust is-veteran/is-regular`), share button cu `navigator.clipboard.writeText` + toast, quote button cu inline blockquote prefilled în composer, floating `.ft-jump` button, sidebar Gear discutat + Cei mai activi (top-5 derived din posts). CSS slim de la 376 la ~225 linii page-local. 41 chei i18n noi sub `forum.*`. |
+| C | `12d4a8b` | done | Forum category rewrite la `.fl-cat-strip` + `.fl-actions` + `.fl-pinned` + `.fl-row` + `.fr-pag`. Backend: `ThreadListItem.tags` adăugat (proiectat din `forumThreads.tags`) pentru chips `.fr-tag` pe row. Partition pinned vs regular threads via 2 computed signals. Sort tabs „Cele mai noi" / „Cele mai răspunse" disabled visual — sort variants nu sunt încă cablate pe backend `listByCategorySlug` (urmează în sub-pass). CSS la ~30 linii. 11 chei i18n noi. |
+| D | `f0c8bb5` | done | Forum new (form) rewrite la `.fn-shell` + `.fn-form.crosses` + `.fn-side`. SzEditor păstrat ca body editor (nu reimplementăm `.fn-editor` toolbar custom V08). Gear picker + autocomplete cu `.fn-tag-input` + `.fn-autocomp`. Sidebar 2 blocks: „Cum scrii thread bun" (5 tips cu `[innerHTML]` pentru `<b>`) + „Reguli pe scurt" (4 monospace bullets). „Threaduri similare" sidebar SKIPPED (would need semantic search endpoint nou). CSS la ~55 linii. 19 chei i18n noi. |
+| E | `bac9843` | done | Forum search rewrite la `.fs-bar` + `.fs-summary` + `.fs-filters` + `.fs-main` (`.fs-results` + `.fs-facets`). Sticky search bar, sort tabs (toate 3 funcționale), active filter chips cu × removers (categorii + autor + date range), facets sidebar 3 blocks (Categorie list cu click-to-toggle, Autor input, Interval date pickers). `.fs-result` cards cu numbered prefix paginated (01/02/...), `<mark>` highlight din ts_headline preserved. Removed: util-count column (would need cross-post likeSum aggregation backend) + „Stare thread" facet (Cu răspunsuri/Hot — features noi). CSS la ~35 linii. 13 chei i18n noi. |
+| F | _TBD_ | done | Close + `docs/testing/m18-testing.md` (plan manual pe sub-fazele A-E: routes, layout, features noi, regression, known limitations) + STATUS update + push batch toate commit-urile pe main într-un singur push. |
 
 ### M17 — Close-out funcțional (bilingv + rewrite scoped + pagini noi v08)
 
