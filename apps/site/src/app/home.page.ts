@@ -47,59 +47,8 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: [
     `
-      /* Forum recent — list view for the home page "Se vorbește" block.
-         Lives in the component (not v05.css) since it's home-specific. */
-      .forum-recent {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        border-top: 1px solid var(--line);
-      }
-      .forum-recent__item {
-        padding: 14px 20px;
-        border-bottom: 1px solid var(--line);
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-      .forum-recent__item:hover { background: var(--bg-card-2); }
-      .forum-recent__title {
-        font-family: var(--font-display);
-        font-size: 18px;
-        color: var(--fg);
-        text-decoration: none;
-        line-height: 1.3;
-      }
-      .forum-recent__title:hover { color: var(--accent); }
-      .forum-recent__meta {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-        font-family: var(--font-mono);
-        font-size: 11px;
-        letter-spacing: 0.04em;
-        color: var(--fg-muted);
-      }
-      .forum-recent__meta .avatar {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg);
-        border: 1px solid var(--line);
-        color: var(--fg);
-        font-family: var(--font-mono);
-        text-transform: uppercase;
-        margin-right: 4px;
-        vertical-align: middle;
-      }
-      .forum-recent__cat {
-        color: var(--accent);
-        text-decoration: none;
-      }
-      .forum-recent__meta .sep { opacity: 0.4; }
+      /* Forum threads + pulse aside live in global v05.css (.thread,
+         .forum-with-pulse, .pulse__cell etc.) — no scoped rules needed. */
 
       /* Pattern-only fallback when the image hides itself (onerror) keeps
          the label readable instead of collapsing the tile. */
@@ -440,56 +389,71 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
         </header>
 
         <div class="block__body">
-          @if (forumThreads().length > 0) {
-            <ul class="forum-recent">
-              @for (t of forumThreads(); track t.id) {
-                <li class="forum-recent__item">
+          <div class="forum-with-pulse">
+            @if (forumThreads().length > 0) {
+              <div class="forum-list">
+                @for (t of forumThreads(); track t.id) {
                   <a
-                    class="forum-recent__title"
+                    class="thread"
                     [routerLink]="['/forum', t.categorySlug, t.slug]"
                   >
-                    {{ t.title }}
-                  </a>
-                  <div class="forum-recent__meta">
-                    <a
-                      class="forum-recent__cat"
-                      [routerLink]="['/forum', t.categorySlug]"
-                    >
-                      // {{ t.categorySlug }}
-                    </a>
-                    <span class="sep">·</span>
-                    <span>
-                      <b>{{ t.postCount }}</b>
-                      {{
-                        t.postCount === 1
-                          ? ('home.forum_post_one' | t)
-                          : ('home.forum_post_many' | t)
-                      }}
-                    </span>
-                    @if (t.lastPostAt || t.createdAt) {
-                      <span class="sep">·</span>
-                      <span>{{ formatShortDate(t.lastPostAt ?? t.createdAt) }}</span>
-                    }
-                    @if (t.authorUsername) {
-                      <span class="sep">·</span>
-                      <span>
-                        <span class="avatar" style="width:18px;height:18px;font-size:9px">{{
-                          initials(t.authorFullName || t.authorUsername)
-                        }}</span>
-                        {{ t.authorFullName || t.authorUsername }}
+                    <span
+                      class="thread__avatar"
+                      [style.background]="avatarBg(t.authorUsername)"
+                    >{{ initials(t.authorFullName || t.authorUsername || '') }}</span>
+                    <div class="thread__body">
+                      <span class="thread__cat">
+                        // {{ categoryNameOf(t) }}
                       </span>
-                    }
-                  </div>
-                </li>
-              }
-            </ul>
-          } @else {
-            <div
-              style="padding:40px 20px;text-align:center;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;"
-            >
-              {{ 'home.forum_empty' | t }}
-            </div>
-          }
+                      <span class="thread__title">{{ t.title }}</span>
+                      <span class="thread__meta">
+                        @if (t.authorUsername) {
+                          &#64;{{ t.authorUsername }}
+                          <span class="sep">·</span>
+                        }
+                        {{ relativeTime(t.lastPostAt ?? t.createdAt) }}
+                      </span>
+                    </div>
+                    <div class="thread__replies">
+                      {{ Math.max(0, t.postCount - 1) }}
+                      <small>{{ 'home.forum_replies' | t }}</small>
+                    </div>
+                  </a>
+                }
+              </div>
+            } @else {
+              <div class="forum-list">
+                <div
+                  style="padding:40px 20px;text-align:center;color:var(--fg-muted);font-family:var(--font-mono);font-size:12px;letter-spacing:0.06em;"
+                >
+                  {{ 'home.forum_empty' | t }}
+                </div>
+              </div>
+            }
+
+            <aside class="pulse pulse--aside" [attr.aria-label]="'home.pulse_aria' | t">
+              <div class="pulse__cell">
+                <span class="pulse__label">// {{ 'home.pulse_listings_label' | t }}</span>
+                <span class="pulse__num">{{ formatCount(pulseListings()) }}</span>
+                <span class="pulse__delta">{{ 'home.pulse_listings_delta' | t }}</span>
+              </div>
+              <div class="pulse__cell">
+                <span class="pulse__label">// {{ 'home.pulse_articles_label' | t }}</span>
+                <span class="pulse__num">{{ formatCount(pulseArticles()) }}</span>
+                <span class="pulse__delta">{{ 'home.pulse_articles_delta' | t }}</span>
+              </div>
+              <div class="pulse__cell">
+                <span class="pulse__label">// {{ 'home.pulse_threads_label' | t }}</span>
+                <span class="pulse__num">{{ formatCount(pulseThreads()) }}</span>
+                <span class="pulse__delta">{{ 'home.pulse_threads_delta' | t }}</span>
+              </div>
+              <div class="pulse__cell">
+                <span class="pulse__label">// {{ 'home.pulse_gear_label' | t }}</span>
+                <span class="pulse__num">{{ formatCount(pulseGear()) }}</span>
+                <span class="pulse__delta is-down">{{ 'home.pulse_gear_delta' | t }}</span>
+              </div>
+            </aside>
+          </div>
         </div>
       </section>
 
@@ -588,12 +552,6 @@ import { TezaurListItem, TezaurService } from './tezaur/tezaur.service';
               </div>
               <div class="gear__brand">// {{ g.brand }}</div>
               <div class="gear__model">{{ g.model }}</div>
-              <div class="gear__tags">
-                <span class="tag">{{ g.category }}</span>
-                @if (g.type) {
-                  <span class="tag">{{ g.type }}</span>
-                }
-              </div>
               <div class="gear__own"><b>{{ g.ownersPublicCount }}</b> {{ 'home.catalog_own' | t }}</div>
             </a>
           }
@@ -722,6 +680,22 @@ export class HomePage implements OnInit {
   readonly spotlight = computed(() => this.tezaurList()[0] ?? null);
   readonly catalog = computed(() => this.tezaurList().slice(1, 7));
 
+  /**
+   * Pulse aside counts (V09 design — `.pulse--aside` next to the forum
+   * thread list). Fed by the same `loadForum()`/`loadBazar()`/etc. calls
+   * that hydrate the rest of the page, plus a dedicated platform-stats
+   * snapshot we fire alongside. Defaults to `null` while loading so the
+   * cells render `—` instead of jumping from 0 to the real number.
+   */
+  readonly pulseListings = signal<number | null>(null);
+  readonly pulseArticles = signal<number | null>(null);
+  readonly pulseThreads = signal<number | null>(null);
+  readonly pulseGear = signal<number | null>(null);
+
+  /** Exposed so the template `{{ Math.max(...) }}` expressions can
+   *  compile cleanly without an extra method per use site. */
+  readonly Math = Math;
+
   constructor() {
     this.seo.set({
       title: 'Sintezaur — gear, bazar, revista, forum',
@@ -768,14 +742,26 @@ export class HomePage implements OnInit {
     } catch {
       this.forumThreads.set([]);
     }
+    // Active-threads tally for the pulse aside. We use the same
+    // recent-list endpoint but at a higher cap (cheap — the index is
+    // covering and the resultset stays under 100 rows). Falls back to
+    // the loaded count when the wider call fails.
+    try {
+      const all = await this.forum.listRecent(100);
+      this.pulseThreads.set(all.length);
+    } catch {
+      this.pulseThreads.set(this.forumThreads().length);
+    }
   }
 
   private async loadRevista(): Promise<void> {
     try {
       const res = await this.revista.list({ sort: 'newest', pageSize: 4 });
       this.revistaArticles.set(res.items);
+      this.pulseArticles.set(res.totalCount);
     } catch {
       this.revistaArticles.set([]);
+      this.pulseArticles.set(0);
     }
   }
 
@@ -784,8 +770,10 @@ export class HomePage implements OnInit {
     try {
       const res = await this.bazar.list({ pageSize: 8 });
       this.bazarListings.set(res.items);
+      this.pulseListings.set(res.totalCount);
     } catch {
       this.bazarListings.set([]);
+      this.pulseListings.set(0);
     } finally {
       this.bazarLoading.set(false);
     }
@@ -795,8 +783,10 @@ export class HomePage implements OnInit {
     try {
       const res = await this.tezaur.list({ sort: 'popular', pageSize: 7 });
       this.tezaurList.set(res.items);
+      this.pulseGear.set(res.totalCount);
     } catch {
       this.tezaurList.set([]);
+      this.pulseGear.set(0);
     }
   }
 
@@ -805,6 +795,60 @@ export class HomePage implements OnInit {
     if (!parts.length) return '—';
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  /** Deterministic 0–359 hue per username, paints `.thread__avatar` so
+   *  the same user always shows up with the same tint (matches the
+   *  forum thread / category / search pages — keeps the V09 visual
+   *  language coherent across the site). */
+  private hashHue(input: string | null | undefined): number {
+    if (!input) return 0;
+    let h = 0x811c9dc5;
+    for (let i = 0; i < input.length; i++) {
+      h ^= input.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return Math.abs(h) % 360;
+  }
+
+  avatarBg(username: string | null | undefined): string | null {
+    if (!username) return null;
+    return `oklch(0.55 0.12 ${this.hashHue(username)})`;
+  }
+
+  /** Short "acum N min/h/zile" for the thread__meta line. Falls back to
+   *  the absolute short date when the value is older than 30 days. */
+  relativeTime(iso: string | null | undefined): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return '—';
+    const diff = Date.now() - d.getTime();
+    const min = Math.round(diff / 60_000);
+    const hr = Math.round(min / 60);
+    const day = Math.round(hr / 24);
+    if (min < 1) return this.i18n.t('home.time.now');
+    if (min < 60) return this.i18n.t('home.time.minutes', { n: min });
+    if (hr < 24) return this.i18n.t('home.time.hours', { n: hr });
+    if (day < 30) return this.i18n.t('home.time.days', { n: day });
+    return this.formatShortDate(iso);
+  }
+
+  /** Picks a human-readable category label from the thread row. The
+   *  recent-list endpoint returns `categorySlug` but not the resolved
+   *  category name, so we title-case the slug as a graceful fallback. */
+  categoryNameOf(t: ThreadListItem): string {
+    if (!t.categorySlug) return '—';
+    return t.categorySlug
+      .split('-')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }
+
+  /** Adds locale-aware thousand separators ("2,418") and returns `—`
+   *  while the count is still null (loading). */
+  formatCount(n: number | null): string {
+    if (n === null) return '—';
+    return n.toLocaleString('ro-RO');
   }
 
   formatShortDate(iso: string | null | undefined): string {

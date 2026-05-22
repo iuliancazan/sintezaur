@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notificări — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+  /* ============================================================
+     NOTIFICATIONS — dropdown panel + dedicated page
+     ============================================================ */
+
+  /* --- shared: pillar tags & type colors ----------------------- */
+  :root {
+    --c-forum:   oklch(0.72 0.10 230);   /* cool steel */
+    --c-bazar:   oklch(0.72 0.12 145);   /* mossy green */
+    --c-revista: oklch(0.78 0.16 80);    /* gold (= accent) */
+    --c-tezaur:  oklch(0.75 0.10 305);   /* lavender */
+    --c-sistem:  oklch(0.72 0.02 85);    /* neutral */
+    --c-danger:  oklch(0.72 0.16 28);    /* red */
+  }
+
+  /* icon-btn badge (matches Home logat) */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute; top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    line-height: 16px; text-align: center; border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .icon-btn.is-open { background: var(--bg-elev); color: var(--accent); }
+
+  /* avatar primitives reused */
+  .avatar.avatar--xs { width: 22px; height: 22px; font-size: 9px; }
+  .avatar.avatar--sm { width: 28px; height: 28px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] {
+    font-family: var(--font-mono); font-weight: 700;
+    letter-spacing: 0.02em; border-radius: 999px;
+    display: inline-grid; place-items: center;
+  }
+
+  /* avatar dropdown (kept for menu parity, but greyed since notif is the focus) */
+  .avatar-menu { position: relative; }
+  .avatar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 999px; }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); }
+
+  /* ============================================================
+     NOTIF DROPDOWN PANEL (anchored to bell)
+     ============================================================ */
+  .nf-anchor { position: relative; }
+
+  .nf-pop {
+    position: absolute;
+    top: calc(100% + 10px); right: -8px;
+    width: 420px; max-width: calc(100vw - 24px);
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    box-shadow:
+      0 24px 64px -16px rgba(0,0,0,0.55),
+      0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 90;
+    transform-origin: top right;
+    animation: nf-pop-in 0.16s ease;
+  }
+  [data-theme="light"] .nf-pop { box-shadow: 0 24px 64px -16px rgba(60,50,20,0.22); }
+  .nf-pop[hidden] { display: none; }
+  @keyframes nf-pop-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.985); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* pointer cross-tab (decorative) */
+  .nf-pop::before {
+    content: "";
+    position: absolute; top: -7px; right: 22px;
+    width: 12px; height: 12px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--line-strong);
+    border-left: 1px solid var(--line-strong);
+    transform: rotate(45deg);
+  }
+
+  .nf-pop__head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--line);
+  }
+  .nf-pop__head .ttl {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg); flex: 1;
+  }
+  .nf-pop__head .ttl::before { content: "// "; color: var(--accent); }
+  .nf-pop__head .ttl b { color: var(--fg); }
+  .nf-pop__head .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 7px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 10px;
+    font-weight: 700; letter-spacing: 0.06em;
+  }
+  .nf-pop__close {
+    width: 24px; height: 24px;
+    display: grid; place-items: center;
+    color: var(--fg-muted); border: 1px solid var(--line);
+    background: var(--bg);
+  }
+  .nf-pop__close:hover { color: var(--fg); border-color: var(--fg-muted); }
+  .nf-pop__close svg { width: 12px; height: 12px; }
+
+  .nf-pop__mark {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 9px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg-muted);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .nf-pop__mark:hover { color: var(--accent); border-color: var(--accent); }
+  .nf-pop__mark svg { color: currentColor; }
+
+  .nf-pop__tabs {
+    display: flex;
+    background: var(--bg-elev);
+    border-bottom: 1px solid var(--line);
+  }
+  .nf-pop__tab {
+    flex: 1; padding: 9px 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted); background: transparent; border: 0;
+    border-right: 1px solid var(--line);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .nf-pop__tab:last-child { border-right: 0; }
+  .nf-pop__tab .c {
+    padding: 1px 6px; font-size: 9px;
+    background: var(--bg-card-2); color: var(--fg-muted);
+    border: 1px solid var(--line);
+  }
+  .nf-pop__tab:hover { color: var(--fg); }
+  .nf-pop__tab.is-active { color: var(--fg); background: var(--bg-card); position: relative; }
+  .nf-pop__tab.is-active::after {
+    content: ""; position: absolute;
+    left: 12px; right: 12px; bottom: -1px; height: 2px;
+    background: var(--accent);
+  }
+  .nf-pop__tab.is-active .c { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+  .nf-pop__actions {
+    display: flex; gap: 14px; align-items: center;
+    padding: 9px 14px;
+    border-bottom: 1px dashed var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+    background: var(--bg-card);
+  }
+  .nf-pop__actions a, .nf-pop__actions button {
+    background: transparent; border: 0; padding: 0;
+    color: var(--fg-muted); cursor: pointer;
+    font-family: inherit; font-size: inherit; letter-spacing: inherit;
+  }
+  .nf-pop__actions a:hover, .nf-pop__actions button:hover { color: var(--accent); }
+  .nf-pop__actions .sep { color: var(--fg-subtle); }
+
+  .nf-pop__list {
+    max-height: 520px; overflow-y: auto;
+    scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent;
+  }
+  .nf-pop__list::-webkit-scrollbar { width: 6px; }
+  .nf-pop__list::-webkit-scrollbar-thumb { background: var(--line-strong); }
+
+  .nf-pop__day {
+    padding: 8px 14px 6px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--fg-subtle);
+    background: var(--bg);
+    border-bottom: 1px dashed var(--line);
+    border-top: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 2;
+  }
+  .nf-pop__day:first-child { border-top: 0; }
+
+  /* ROW — popup version (sparse, single-line) */
+  .nf-row {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    gap: 12px; align-items: center;
+    padding: 14px 16px;
+    position: relative;
+    cursor: pointer;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.12s;
+  }
+  .nf-row:last-child { border-bottom: 0; }
+  .nf-row:hover { background: var(--bg-elev); }
+
+  .nf-row.is-unread { background: color-mix(in oklab, var(--accent) 4%, var(--bg-card)); }
+  .nf-row.is-unread:hover { background: color-mix(in oklab, var(--accent) 7%, var(--bg-card)); }
+  .nf-row.is-unread::before {
+    content: ""; position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px; background: var(--accent);
+  }
+  /* unread dot on the right for an extra at-a-glance cue in the popup */
+  .nf-row.is-unread .nf-row__time::after {
+    content: ""; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    margin-left: 7px; vertical-align: 1px;
+  }
+
+  /* left icon thumb (popup — smaller, less framed) */
+  .nf-row__ic {
+    width: 32px; height: 32px;
+    display: grid; place-items: center;
+    background: transparent;
+    border: 0;
+    position: relative;
+  }
+  .nf-row__ic.is-square {
+    background: var(--bg);
+    border: 1px solid var(--line);
+  }
+  .nf-row__ic.is-avatar { padding: 0; border: 0; background: transparent; }
+  .nf-row__ic svg {
+    width: 16px; height: 16px;
+    color: var(--c-sistem);
+  }
+  .nf-row__ic[data-src="forum"]   svg { color: var(--c-forum); }
+  .nf-row__ic[data-src="bazar"]   svg { color: var(--c-bazar); }
+  .nf-row__ic[data-src="revista"] svg { color: var(--c-revista); }
+  .nf-row__ic[data-src="tezaur"]  svg { color: var(--c-tezaur); }
+  .nf-row__ic[data-src="sistem"]  svg { color: var(--c-sistem); }
+  .nf-row__ic[data-src="alert"]   svg { color: var(--c-danger); }
+
+  /* small overlay badge on avatar for mention/reply etc */
+  .nf-row__ic .dot {
+    position: absolute; right: -4px; bottom: -4px;
+    width: 16px; height: 16px;
+    display: grid; place-items: center;
+    background: var(--bg-card); border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .nf-row__ic .dot svg { width: 9px; height: 9px; }
+  .nf-row__ic .dot[data-src="forum"]   svg { color: var(--c-forum); }
+  .nf-row__ic .dot[data-src="bazar"]   svg { color: var(--c-bazar); }
+  .nf-row__ic .dot[data-src="revista"] svg { color: var(--c-revista); }
+  .nf-row__ic .dot[data-src="tezaur"]  svg { color: var(--c-tezaur); }
+
+  .nf-row__body { min-width: 0; }
+  .nf-row__line1 {
+    font-size: 13px; line-height: 1.45;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+  .nf-row__line1 b { font-weight: 600; color: var(--fg); }
+  .nf-row__line1 .ref { color: var(--accent); border-bottom: 1px dashed var(--accent); }
+  .nf-row__line1 .price-old {
+    color: var(--fg-subtle); text-decoration: line-through;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .nf-row__line1 .price-new {
+    color: oklch(0.82 0.16 145); font-weight: 600;
+    font-family: var(--font-mono); font-size: 12px;
+  }
+
+  /* popup: clamp first line to 2 rows, keep cards short */
+  .nf-pop .nf-row__line1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  /* popup: link refs stay subtle, no dashed underline (too busy) */
+  .nf-pop .nf-row__line1 .ref { color: var(--fg); border-bottom: 0; font-weight: 500; }
+
+  .nf-row__line2 {
+    margin-top: 4px;
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+  }
+  .nf-row__src {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 6px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg-muted);
+    text-transform: uppercase; letter-spacing: 0.10em; font-size: 9px;
+  }
+  .nf-row__src::before {
+    content: ""; width: 6px; height: 6px;
+    background: var(--c-sistem);
+  }
+  .nf-row__src[data-src="forum"]::before   { background: var(--c-forum); }
+  .nf-row__src[data-src="bazar"]::before   { background: var(--c-bazar); }
+  .nf-row__src[data-src="revista"]::before { background: var(--c-revista); }
+  .nf-row__src[data-src="tezaur"]::before  { background: var(--c-tezaur); }
+  .nf-row__src[data-src="sistem"]::before  { background: var(--c-sistem); }
+  .nf-row__src[data-src="alert"]::before   { background: var(--c-danger); }
+
+  /* hover-quick actions (page only) */
+  .nf-row__quick {
+    display: flex; gap: 2px;
+    opacity: 0; transition: opacity 0.12s;
+  }
+  .nf-row:hover .nf-row__quick { opacity: 1; }
+  .nf-row__quick button {
+    width: 22px; height: 22px;
+    display: grid; place-items: center;
+    background: var(--bg-card-2); border: 1px solid var(--line);
+    color: var(--fg-muted); cursor: pointer;
+  }
+  .nf-row__quick button:hover { color: var(--accent); border-color: var(--accent); }
+  .nf-row__quick button svg { width: 11px; height: 11px; }
+
+  /* inline action cluster (page only) */
+  .nf-row__cta {
+    display: flex; gap: 6px; margin-top: 9px; flex-wrap: wrap;
+  }
+  .nf-row__cta button, .nf-row__cta a {
+    padding: 5px 10px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg); cursor: pointer;
+  }
+  .nf-row__cta button:hover, .nf-row__cta a:hover {
+    border-color: var(--accent); color: var(--accent);
+  }
+  .nf-row__cta .pri {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+  }
+  .nf-row__cta .pri:hover { filter: brightness(1.08); color: var(--accent-fg); }
+
+  /* preview snippet (page only) */
+  .nf-row__snippet {
+    margin-top: 7px; padding: 8px 10px;
+    background: var(--bg); border-left: 2px solid var(--line-strong);
+    font-family: var(--font-ui); font-size: 12px;
+    color: var(--fg-muted); line-height: 1.5;
+  }
+  .nf-row__snippet em { color: var(--fg); font-style: normal; }
+
+  /* image-stack preview (page only) */
+  .nf-row__thumbs {
+    margin-top: 9px;
+    display: flex; gap: 6px;
+  }
+  .nf-row__thumbs .t {
+    width: 56px; height: 42px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    background-size: cover; background-position: center;
+    position: relative;
+  }
+  .nf-row__thumbs .t.is-more {
+    display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted);
+  }
+
+  /* right side: just timestamp (no hover actions in popup — they live on the page) */
+  .nf-row__meta {
+    display: flex; flex-direction: column; align-items: flex-end;
+    gap: 0; padding-top: 1px;
+  }
+  .nf-row__time {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .nf-row.is-unread .nf-row__time { color: var(--accent); }
+
+  /* footer */
+  .nf-pop__foot {
+    display: flex; align-items: stretch; gap: 0;
+    background: var(--bg-elev);
+    border-top: 1px solid var(--line);
+  }
+  .nf-pop__foot a.see-all {
+    flex: 1;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px 16px;
+    color: var(--fg);
+    font-family: var(--font-mono); font-size: 11px;
+    font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    border-right: 1px solid var(--line);
+    transition: background 0.12s, color 0.12s;
+  }
+  .nf-pop__foot a.see-all:hover { background: var(--accent); color: var(--accent-fg); }
+  .nf-pop__foot a.see-all svg { transition: transform 0.15s; }
+  .nf-pop__foot a.see-all:hover svg { transform: translateX(3px); }
+  .nf-pop__foot a.settings {
+    width: 52px;
+    display: grid; place-items: center;
+    color: var(--fg-muted);
+  }
+  .nf-pop__foot a.settings:hover { color: var(--accent); background: var(--bg-card); }
+  .nf-pop__foot a.settings svg { width: 14px; height: 14px; }
+
+  /* ============================================================
+     DEDICATED PAGE
+     ============================================================ */
+  .page-head {
+    padding: 56px 0 28px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 0;
+    position: relative;
+  }
+  .page-head .block__sub {
+    display: block;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .page-head .block__sub::before { content: ""; }
+  .page-head .block__sub::after { content: " //"; color: var(--fg-subtle); }
+  .page-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(48px, 7vw, 96px); line-height: 0.92;
+    letter-spacing: 0.01em; margin: 0 0 14px;
+    text-transform: uppercase;
+  }
+  .page-title .dot { color: var(--accent); }
+  .page-title .count {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-left: 16px;
+    vertical-align: middle;
+    font-family: var(--font-mono); font-size: 14px;
+    font-weight: 600; letter-spacing: 0.06em;
+    padding: 6px 12px;
+    background: var(--accent); color: var(--accent-fg);
+    text-transform: uppercase;
+  }
+  .page-lede {
+    margin: 0; max-width: 62ch; font-size: 17px; color: var(--fg-muted);
+    text-wrap: pretty;
+  }
+
+  /* toolbar with filters + bulk actions */
+  .nf-toolbar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 64px; z-index: 30;
+    background: color-mix(in oklab, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    margin-bottom: 28px;
+  }
+  .nf-filters {
+    display: flex; flex-wrap: wrap; gap: 2px;
+    flex: 1;
+  }
+  .nf-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 13px;
+    background: var(--bg-card); border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-muted); cursor: pointer;
+  }
+  .nf-chip::before {
+    content: ""; width: 7px; height: 7px;
+    background: var(--c-sistem);
+  }
+  .nf-chip[data-f="toate"]::before   { display: none; }
+  .nf-chip[data-f="necitite"]::before{ background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  .nf-chip[data-f="mentiuni"]::before{ background: var(--fg); }
+  .nf-chip[data-f="forum"]::before   { background: var(--c-forum); }
+  .nf-chip[data-f="bazar"]::before   { background: var(--c-bazar); }
+  .nf-chip[data-f="revista"]::before { background: var(--c-revista); }
+  .nf-chip[data-f="tezaur"]::before  { background: var(--c-tezaur); }
+  .nf-chip[data-f="sistem"]::before  { background: var(--c-sistem); }
+  .nf-chip .c {
+    padding: 1px 6px;
+    background: var(--bg); color: var(--fg-muted);
+    border: 1px solid var(--line);
+    font-size: 10px; letter-spacing: 0.02em;
+  }
+  .nf-chip:hover { color: var(--fg); border-color: var(--line-strong); }
+  .nf-chip.is-active {
+    background: var(--bg); color: var(--fg);
+    border-color: var(--accent);
+  }
+  .nf-chip.is-active .c { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  .nf-bulk {
+    display: flex; align-items: center; gap: 4px;
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .nf-bulk button, .nf-bulk a {
+    padding: 8px 12px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    color: var(--fg); font-family: inherit; font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .nf-bulk button:hover, .nf-bulk a:hover {
+    border-color: var(--accent); color: var(--accent);
+  }
+  .nf-bulk button svg, .nf-bulk a svg { width: 12px; height: 12px; }
+  .nf-bulk .sep { width: 1px; height: 18px; background: var(--line); margin: 0 6px; }
+
+  /* page grid: list + side */
+  .nf-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 40px;
+    margin-bottom: var(--gutter-y);
+    align-items: flex-start;
+  }
+  .nf-side { position: sticky; top: 152px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* day group block */
+  .nf-day {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+  .nf-day:last-child { border-bottom: 1px solid var(--line); }
+  .nf-day__hd {
+    padding: 24px 16px 24px 0;
+    border-right: 1px dashed var(--line);
+    position: relative;
+  }
+  .nf-day__hd .nm {
+    display: block;
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 28px; line-height: 0.95;
+    letter-spacing: 0.01em; text-transform: uppercase;
+    color: var(--fg);
+  }
+  .nf-day__hd .sub {
+    display: block; margin-top: 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+  .nf-day__hd .sub b { color: var(--accent); font-weight: 600; }
+
+  /* page rows: same nf-row but bigger */
+  .nf-day__body { padding: 0; }
+  .nf-day__body .nf-row {
+    grid-template-columns: 44px 1fr auto;
+    padding: 18px 6px 18px 18px;
+    gap: 14px;
+    background: transparent;
+    border-bottom: 1px dashed var(--line);
+  }
+  .nf-day__body .nf-row:last-child { border-bottom: 0; }
+  .nf-day__body .nf-row:hover { background: var(--bg-elev); }
+  .nf-day__body .nf-row.is-unread { background: color-mix(in oklab, var(--accent) 5%, transparent); }
+  .nf-day__body .nf-row.is-unread:hover { background: color-mix(in oklab, var(--accent) 9%, transparent); }
+  .nf-day__body .nf-row__ic { width: 44px; height: 44px; }
+  .nf-day__body .nf-row__ic svg { width: 20px; height: 20px; }
+  .nf-day__body .nf-row__line1 { font-size: 15px; line-height: 1.5; }
+  .nf-day__body .nf-row__line2 { font-size: 10px; margin-top: 6px; }
+  .nf-day__body .nf-row__quick { opacity: 1; }
+  .nf-day__body .nf-row__quick button { width: 26px; height: 26px; }
+  .nf-day__body .nf-row__quick button svg { width: 12px; height: 12px; }
+
+  /* side panel */
+  .nf-side__block {
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .nf-side__head {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .nf-side__head::before { content: "// "; color: var(--accent); }
+  .nf-side__body { padding: 14px; }
+
+  .nf-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .nf-stats__cell {
+    padding: 12px 12px;
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .nf-stats__cell .k {
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+  .nf-stats__cell .v {
+    font-family: var(--font-display); font-size: 32px; line-height: 1;
+    color: var(--fg); font-weight: 700;
+  }
+  .nf-stats__cell .v .u {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); margin-left: 6px;
+    letter-spacing: 0.06em;
+  }
+  .nf-stats__cell.is-hot .v { color: var(--accent); }
+
+  /* delivery prefs micro-rows */
+  .nf-pref {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line);
+    font-size: 13px;
+  }
+  .nf-pref:last-child { border-bottom: 0; }
+  .nf-pref .lbl { color: var(--fg); }
+  .nf-pref .sub {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+    margin-top: 2px;
+  }
+  .nf-pref-toggle {
+    width: 32px; height: 18px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    position: relative; cursor: pointer; flex-shrink: 0;
+  }
+  .nf-pref-toggle::after {
+    content: ""; position: absolute;
+    left: 2px; top: 1px; width: 12px; height: 12px;
+    background: var(--fg-muted);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .nf-pref-toggle.is-on { background: var(--accent); border-color: var(--accent); }
+  .nf-pref-toggle.is-on::after { transform: translateX(14px); background: var(--accent-fg); }
+
+  /* shortcuts */
+  .nf-keys {
+    display: flex; flex-direction: column; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .nf-keys li {
+    display: grid; grid-template-columns: 1fr auto;
+    gap: 8px; align-items: center;
+    color: var(--fg-muted);
+  }
+  .nf-keys kbd {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg);
+  }
+
+  /* empty state */
+  .nf-empty {
+    padding: 56px 24px; text-align: center;
+    border: 1px dashed var(--line);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 14px,
+        color-mix(in oklab, var(--line) 60%, transparent) 14px 15px);
+    color: var(--fg-muted);
+  }
+  .nf-empty h3 {
+    font-family: var(--font-display); font-size: 36px;
+    margin: 0 0 8px; color: var(--fg);
+    letter-spacing: 0.01em; text-transform: uppercase;
+  }
+  .nf-empty p { margin: 0; font-size: 13px; }
+
+  /* load more */
+  .nf-loadmore {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px;
+    margin: 28px 0 0;
+    padding: 18px;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .nf-loadmore button {
+    padding: 9px 18px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    color: var(--fg);
+    font-family: inherit; font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .nf-loadmore button:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* hint banner explaining the demo */
+  .nf-demo-hint {
+    position: fixed; bottom: 18px; left: 18px; right: 18px;
+    max-width: 580px; margin: 0 auto;
+    padding: 11px 16px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--accent);
+    color: var(--fg);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.04em;
+    z-index: 200;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 18px 48px -12px rgba(0,0,0,0.5);
+  }
+  .nf-demo-hint b { color: var(--accent); }
+  .nf-demo-hint .x {
+    margin-left: auto; cursor: pointer; color: var(--fg-muted);
+    background: none; border: 0; font-size: 16px;
+  }
+  .nf-demo-hint .x:hover { color: var(--accent); }
+  .nf-demo-hint kbd {
+    padding: 2px 7px; background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg); font-size: 10px;
+  }
+
+  /* responsive */
+  @media (max-width: 1080px) {
+    .nf-grid { grid-template-columns: 1fr; }
+    .nf-side { position: static; flex-direction: row; flex-wrap: wrap; }
+    .nf-side__block { flex: 1; min-width: 260px; }
+    .nf-toolbar { top: 56px; }
+  }
+  @media (max-width: 720px) {
+    .nf-day { grid-template-columns: 1fr; }
+    .nf-day__hd { border-right: 0; border-bottom: 1px dashed var(--line); padding: 14px 0; }
+    .nf-day__body .nf-row { padding: 14px 0; grid-template-columns: 36px 1fr auto; }
+    .nf-pop { width: calc(100vw - 24px); right: -8px; }
+    .page-title .count { display: inline-block; margin-left: 0; margin-top: 10px; }
+  }
+  </style>
+</head>
+<body data-screen-label="16 Cont — Notificări">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 6h18v12H3z"/><path d="M3 6l9 7 9-7"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="round"><path d="M5 12l4 4 10-10"/></symbol>
+      <symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/><path d="M3 3l18 18" stroke="currentColor"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M5 7h14M9 7V4h6v3M7 7l1 14h8l1-14"/></symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M16 8v6a3 3 0 0 0 6 0v-2a10 10 0 1 0-4 8"/></symbol>
+      <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M9 8l-5 4 5 4"/><path d="M4 12h11a5 5 0 0 1 5 5v3"/></symbol>
+      <symbol id="i-heart-s" viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 4v14M5 12l7 7 7-7"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="8" cy="8" r="1.5"/></symbol>
+      <symbol id="i-msg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 5h16v11H8l-4 4z"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/></symbol>
+      <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13 7l4 4"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 6h18v4H3z"/><path d="M5 10v10h14V10"/><path d="M10 14h4"/></symbol>
+      <symbol id="i-burger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR ============================================ -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+
+        <!-- BELL — anchors the popover ===================== -->
+        <div class="nf-anchor" id="nf-anchor">
+          <button class="icon-btn has-badge is-open" aria-label="Notificări" data-count="7" id="nf-toggle" aria-expanded="true" aria-haspopup="menu" aria-controls="nf-pop">
+            <svg><use href="#i-bell"/></svg>
+          </button>
+
+          <!-- POPOVER ================================== -->
+          <div class="nf-pop" id="nf-pop" role="menu" aria-label="Notificări recente">
+            <div class="nf-pop__head">
+              <span class="ttl">Notificări</span>
+              <button type="button" class="nf-pop__mark" id="nf-pop-mark" title="Marchează toate ca citite">
+                <svg width="11" height="11"><use href="#i-check"/></svg> Toate citite
+              </button>
+              <button type="button" class="nf-pop__close" id="nf-pop-close" aria-label="Închide">
+                <svg><use href="#i-x"/></svg>
+              </button>
+            </div>
+
+            <div class="nf-pop__tabs" role="tablist">
+              <button type="button" class="nf-pop__tab is-active" role="tab" data-pop-tab="all">Toate</button>
+              <button type="button" class="nf-pop__tab" role="tab" data-pop-tab="unread">Necitite <span class="c">7</span></button>
+              <button type="button" class="nf-pop__tab" role="tab" data-pop-tab="mentions">@ Mențiuni</button>
+            </div>
+
+            <div class="nf-pop__list" id="nf-pop-list">
+              <div class="nf-pop__day">Astăzi</div>
+
+              <a class="nf-row is-unread" href="Forum - Thread TR-808.html" data-pop-row data-types="mention forum">
+                <div class="nf-row__ic is-avatar">
+                  <span class="avatar avatar--sm" data-uid="u_gr" data-initials="GR" style="background:oklch(0.62 0.14 230);color:oklch(0.18 0.05 230)">GR</span>
+                  <span class="dot" data-src="forum"><svg><use href="#i-at"/></svg></span>
+                </div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>George Radu</b> te-a menționat în <span class="ref">TR-808 vs 909</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">12m</span></div>
+              </a>
+
+              <a class="nf-row is-unread" href="Bazar - Roland Juno-60.html" data-pop-row data-types="price bazar">
+                <div class="nf-row__ic" data-src="bazar"><svg><use href="#i-tag"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Preț nou la <span class="ref">Roland Juno-60</span> · <span class="price-new">4 200 RON</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">1h</span></div>
+              </a>
+
+              <a class="nf-row is-unread" href="Forum - Thread TR-808.html" data-pop-row data-types="reply forum">
+                <div class="nf-row__ic is-avatar">
+                  <span class="avatar avatar--sm" data-uid="u_rm" data-initials="RM" style="background:oklch(0.62 0.14 145);color:oklch(0.18 0.05 145)">RM</span>
+                  <span class="dot" data-src="forum"><svg><use href="#i-reply"/></svg></span>
+                </div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>Radu M.</b> a răspuns la <span class="ref">Help: Juno-60 portamento ticks</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">2h</span></div>
+              </a>
+
+              <a class="nf-row is-unread" href="Revista - Cum suna Romania prin Juno-60.html" data-pop-row data-types="revista">
+                <div class="nf-row__ic" data-src="revista"><svg><use href="#i-doc"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Articol nou · <span class="ref">Cum sună România prin Juno-60</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">3h</span></div>
+              </a>
+
+              <a class="nf-row is-unread" href="Cont - Mesaje.html" data-pop-row data-types="bazar msg">
+                <div class="nf-row__ic is-avatar">
+                  <span class="avatar avatar--sm" data-uid="u_da" data-initials="DA" style="background:oklch(0.62 0.14 305);color:oklch(0.18 0.05 305)">DA</span>
+                  <span class="dot" data-src="bazar"><svg><use href="#i-msg"/></svg></span>
+                </div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>Daniel A.</b> a ofertat <span class="price-new">4 100 RON</span> pentru <span class="ref">Korg MS-20</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">5h</span></div>
+              </a>
+
+              <div class="nf-pop__day">Ieri</div>
+
+              <a class="nf-row is-unread" href="Cont - Articolele Mele.html" data-pop-row data-types="revista">
+                <div class="nf-row__ic" data-src="revista"><svg><use href="#i-pen"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Articolul tău <span class="ref">Patchcable rituals</span> a fost trimis la review</div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">18:42</span></div>
+              </a>
+
+              <a class="nf-row is-unread" href="Bazar.html" data-pop-row data-types="bazar">
+                <div class="nf-row__ic" data-src="bazar"><svg><use href="#i-spark"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>2 listinguri noi</b> pentru <span class="ref">Modular Eurorack · ≤ 2 500 RON</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">16:10</span></div>
+              </a>
+
+              <a class="nf-row" href="Tezaur - Roland Juno-60.html" data-pop-row data-types="tezaur">
+                <div class="nf-row__ic" data-src="tezaur"><svg><use href="#i-stack"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Modificarea pe <span class="ref">Roland Jupiter-8</span> a fost acceptată</div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">12:00</span></div>
+              </a>
+
+              <a class="nf-row" href="Forum - Thread TR-808.html" data-pop-row data-types="forum">
+                <div class="nf-row__ic" data-src="forum"><svg><use href="#i-heart-s"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>7 oameni</b> au votat comentariul tău în <span class="ref">TR-808 vs 909</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">09:30</span></div>
+              </a>
+
+              <div class="nf-pop__day">Săptămâna asta</div>
+
+              <a class="nf-row" href="#" data-pop-row data-types="sistem">
+                <div class="nf-row__ic" data-src="sistem"><svg><use href="#i-spark"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Versiune nouă · <span class="ref">v0.7 — editor articol &amp; mențiuni @</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">joi</span></div>
+              </a>
+
+              <a class="nf-row" href="Revista - Cum suna Romania prin Juno-60.html" data-pop-row data-types="revista reply">
+                <div class="nf-row__ic is-avatar">
+                  <span class="avatar avatar--sm" data-uid="u_ml" data-initials="ML" style="background:oklch(0.62 0.14 28);color:oklch(0.18 0.05 28)">ML</span>
+                  <span class="dot" data-src="revista"><svg><use href="#i-reply"/></svg></span>
+                </div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>Maria L.</b> a comentat la <span class="ref">Cum suna Romania prin Juno-60</span></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">mar</span></div>
+              </a>
+
+              <a class="nf-row" href="#" data-pop-row data-types="sistem">
+                <div class="nf-row__ic is-avatar">
+                  <span class="avatar avatar--sm" data-uid="u_ac" data-initials="AC" style="background:oklch(0.62 0.14 80);color:oklch(0.18 0.05 80)">AC</span>
+                </div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1"><b>Andrei C.</b> te urmărește acum</div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">lun</span></div>
+              </a>
+
+              <a class="nf-row" href="Bazar - Roland Juno-60.html" data-pop-row data-types="bazar alert">
+                <div class="nf-row__ic" data-src="alert"><svg><use href="#i-clock"/></svg></div>
+                <div class="nf-row__body">
+                  <div class="nf-row__line1">Anunțul <span class="ref">Behringer Model D</span> expiră în <b>7 zile</b></div>
+                </div>
+                <div class="nf-row__meta"><span class="nf-row__time">lun</span></div>
+              </a>
+            </div>
+
+            <div class="nf-pop__foot">
+              <a class="see-all" href="Cont - Notificări.html">
+                <span>Vezi toate notificările</span>
+                <svg width="13" height="13"><use href="#i-arrow"/></svg>
+              </a>
+              <a class="settings" href="Cont - Setari.html" aria-label="Setări notificări">
+                <svg><use href="#i-cog"/></svg>
+              </a>
+            </div>
+          </div>
+          <!-- /POPOVER -->
+        </div>
+
+        <a class="icon-btn" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+        <a class="icon-btn has-badge" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+
+        <div class="avatar-menu" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI" style="background:oklch(0.62 0.14 80);color:oklch(0.18 0.05 80)">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- PAGE HEAD ====================================== -->
+    <header class="page-head crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <span class="block__sub">Cont</span>
+      <h1 class="page-title">
+        Notificări<span class="dot">.</span>
+        <span class="count">7 noi</span>
+      </h1>
+      <p class="page-lede">
+        Tot ce s-a întâmplat în jurul tău pe Sintezaur — răspunsuri la threadurile tale,
+        listinguri noi pentru căutările salvate, mențiuni, modificări de preț, decizii editoriale.
+        Filtrează după sursă, marchează în bulk, programează liniștea de noapte.
+      </p>
+    </header>
+
+    <!-- TOOLBAR ====================================== -->
+    <div class="nf-toolbar" role="toolbar" aria-label="Filtre notificări">
+      <div class="nf-filters" role="tablist">
+        <button type="button" class="nf-chip is-active" data-f="toate" role="tab" aria-selected="true">Toate <span class="c">132</span></button>
+        <button type="button" class="nf-chip" data-f="necitite" role="tab">Necitite <span class="c">7</span></button>
+        <button type="button" class="nf-chip" data-f="mentiuni" role="tab">@ Mențiuni <span class="c">2</span></button>
+        <button type="button" class="nf-chip" data-f="forum" role="tab">Forum <span class="c">38</span></button>
+        <button type="button" class="nf-chip" data-f="bazar" role="tab">Bazar <span class="c">61</span></button>
+        <button type="button" class="nf-chip" data-f="revista" role="tab">Revistă <span class="c">14</span></button>
+        <button type="button" class="nf-chip" data-f="tezaur" role="tab">Tezaur <span class="c">11</span></button>
+        <button type="button" class="nf-chip" data-f="sistem" role="tab">Sistem <span class="c">8</span></button>
+      </div>
+      <div class="nf-bulk">
+        <button type="button" id="page-mark-all">
+          <svg><use href="#i-check"/></svg> Toate citite
+        </button>
+        <button type="button">
+          <svg><use href="#i-archive"/></svg> Arhivează citite
+        </button>
+        <span class="sep"></span>
+        <a href="Cont - Setari.html">
+          <svg><use href="#i-cog"/></svg> Setări
+        </a>
+      </div>
+    </div>
+
+    <!-- GRID ====================================== -->
+    <div class="nf-grid">
+
+      <main>
+        <!-- ASTĂZI -->
+        <section class="nf-day" data-day="azi">
+          <div class="nf-day__hd">
+            <span class="nm">Astăzi</span>
+            <span class="sub"><b>5 noi</b> · 16 mai</span>
+          </div>
+          <div class="nf-day__body">
+
+            <a class="nf-row is-unread" href="Forum - Thread TR-808.html" data-types="mention forum">
+              <div class="nf-row__ic is-avatar">
+                <span class="avatar avatar--md" data-uid="u_gr" data-initials="GR" style="background:oklch(0.62 0.14 230);color:oklch(0.18 0.05 230)">GR</span>
+                <span class="dot" data-src="forum"><svg><use href="#i-at"/></svg></span>
+              </div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>George Radu</b> te-a menționat în firul <span class="ref">TR-808 vs 909 — care e mai "lemnos"?</span>
+                </div>
+                <div class="nf-row__snippet">
+                  Cred că <em>@tudor.i</em> a făcut un A/B pe asta acum câteva luni — corectează-mă dacă greșesc, dar țin minte că ai concluzionat că 909-ul are mai mult atac mecanic în kick, iar 808 are sustainul ăla lung de toba peruvian-radio…
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="forum">Forum</span>
+                  <span>r/Drum machines · 4 răspunsuri</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">acum 12m</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row is-unread" href="Bazar - Roland Juno-60.html" data-types="price bazar">
+              <div class="nf-row__ic" data-src="bazar"><svg><use href="#i-tag"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Preț în scădere · <span class="ref">Roland Juno-60</span> · <span class="price-old">4 800 RON</span> → <span class="price-new">4 200 RON</span> <b style="color:oklch(0.82 0.16 145); font-family:var(--font-mono); font-size:11px;">−13%</b>
+                </div>
+                <div class="nf-row__thumbs">
+                  <div class="t" style="background-image:linear-gradient(135deg,oklch(0.6 0.10 80),oklch(0.3 0.04 80));"></div>
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="bazar">Bazar</span>
+                  <span>Listing urmărit · București · vândut de @marius.s</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">acum 1h</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row is-unread" href="Forum - Thread TR-808.html" data-types="reply forum">
+              <div class="nf-row__ic is-avatar">
+                <span class="avatar avatar--md" data-uid="u_rm" data-initials="RM" style="background:oklch(0.62 0.14 145);color:oklch(0.18 0.05 145)">RM</span>
+                <span class="dot" data-src="forum"><svg><use href="#i-reply"/></svg></span>
+              </div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>Radu M.</b> a răspuns la firul tău · <span class="ref">Help: Juno-60 portamento ticks</span>
+                </div>
+                <div class="nf-row__snippet">
+                  Sună a CV-leak pe linia de pitch. Verifică tantalul C71 — la mine era deja umflat, l-am înlocuit cu un poly și a dispărut. Dacă vrei, am poză cu placa &amp; schema scanată.
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="forum">Forum</span>
+                  <span>Help &amp; Repair · subscris</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">acum 2h</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row is-unread" href="Revista - Cum suna Romania prin Juno-60.html" data-types="revista">
+              <div class="nf-row__ic" data-src="revista"><svg><use href="#i-doc"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Articol nou în <b>Interviuri</b> · <span class="ref">Cum sună România prin Juno-60</span>
+                </div>
+                <div class="nf-row__snippet">
+                  Trei producători descriu cum un Juno-60 cu service la cheie le-a schimbat scrierea — de la sesiunile de la Buftea până la EP-uri de techno produse în garaje din Cluj. Lectură ~ 14 min.
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="revista">Revistă</span>
+                  <span>de Ioana B. · urmărești pillar-ul "Interviuri"</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">acum 3h</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row is-unread" href="Cont - Mesaje.html" data-types="bazar msg">
+              <div class="nf-row__ic is-avatar">
+                <span class="avatar avatar--md" data-uid="u_da" data-initials="DA" style="background:oklch(0.62 0.14 305);color:oklch(0.18 0.05 305)">DA</span>
+                <span class="dot" data-src="bazar"><svg><use href="#i-msg"/></svg></span>
+              </div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>Daniel A.</b> a făcut ofertă <span class="price-new">4 100 RON</span> pentru anunțul tău <span class="ref">Korg MS-20 (original)</span>
+                </div>
+                <div class="nf-row__snippet">
+                  "Bună! Pot ridica weekendul ăsta din București, cash pe loc. Am mai cumpărat 2x prin Sintezaur, rating 4.9. Mai bag 50 RON dacă ai caseta originală."
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="bazar">Bazar</span>
+                  <span>250 RON sub asking · expiră în 48h</span>
+                </div>
+                <div class="nf-row__cta">
+                  <button type="button" class="pri" onclick="event.preventDefault();event.stopPropagation();">Acceptă</button>
+                  <button type="button" onclick="event.preventDefault();event.stopPropagation();">Contraofertă</button>
+                  <button type="button" onclick="event.preventDefault();event.stopPropagation();">Refuză</button>
+                  <button type="button" onclick="event.preventDefault();event.stopPropagation();">Răspunde în Mesaje →</button>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">acum 5h</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- IERI -->
+        <section class="nf-day" data-day="ieri">
+          <div class="nf-day__hd">
+            <span class="nm">Ieri</span>
+            <span class="sub"><b>2 noi</b> · 15 mai</span>
+          </div>
+          <div class="nf-day__body">
+
+            <a class="nf-row is-unread" href="Cont - Articolele Mele.html" data-types="revista">
+              <div class="nf-row__ic" data-src="revista"><svg><use href="#i-pen"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Editor: articolul tău <span class="ref">Patchcable rituals — 10 reguli neoficiale ale studio-ului mic</span> a fost trimis la review
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="revista">Revistă</span>
+                  <span>est. răspuns 24–48h · review de Ioana B.</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">18:42</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row is-unread" href="Bazar.html" data-types="bazar">
+              <div class="nf-row__ic" data-src="bazar"><svg><use href="#i-spark"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>2 listinguri noi</b> potrivite cu căutarea <span class="ref">Modular Eurorack · utility &amp; seq · ≤ 2 500 RON</span>
+                </div>
+                <div class="nf-row__thumbs">
+                  <div class="t" style="background-image:linear-gradient(135deg,oklch(0.4 0.05 145),oklch(0.25 0.04 230));"></div>
+                  <div class="t" style="background-image:linear-gradient(135deg,oklch(0.35 0.06 80),oklch(0.22 0.03 250));"></div>
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="bazar">Bazar</span>
+                  <span>căutare salvată · 14 listinguri active acum</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">16:10</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="Tezaur - Roland Juno-60.html" data-types="tezaur">
+              <div class="nf-row__ic" data-src="tezaur"><svg><use href="#i-stack"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Modificarea ta pe fișa <span class="ref">Roland Jupiter-8</span> a fost <b style="color:oklch(0.82 0.16 145);">acceptată</b> (+12 reputație)
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="tezaur">Tezaur</span>
+                  <span>review de @cosmin.t (moderator) · 14 fișe contribuite</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">12:00</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="Forum - Thread TR-808.html" data-types="forum">
+              <div class="nf-row__ic" data-src="forum"><svg><use href="#i-heart-s"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>7 oameni</b> au votat pozitiv comentariul tău în <span class="ref">TR-808 vs 909</span>
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="forum">Forum</span>
+                  <span>+7 reputație · 124 total upvotes pe acel thread</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">09:30</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- SĂPTĂMÂNA ASTA -->
+        <section class="nf-day" data-day="saptamana">
+          <div class="nf-day__hd">
+            <span class="nm">Săptămâna asta</span>
+            <span class="sub">11–14 mai · 4 itemi</span>
+          </div>
+          <div class="nf-day__body">
+
+            <a class="nf-row" href="#" data-types="sistem">
+              <div class="nf-row__ic" data-src="sistem"><svg><use href="#i-spark"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>v0.7</b> — editor articol cu citate pull, mențiuni gear cu <code style="font-family:var(--font-mono);background:var(--bg);padding:0 4px;border:1px solid var(--line);color:var(--accent);">@</code>, comparator Bazar
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="sistem">Sistem</span>
+                  <span>changelog · vezi nota</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">joi</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="Revista - Cum suna Romania prin Juno-60.html" data-types="revista reply">
+              <div class="nf-row__ic is-avatar">
+                <span class="avatar avatar--md" data-uid="u_ml" data-initials="ML" style="background:oklch(0.62 0.14 28);color:oklch(0.18 0.05 28)">ML</span>
+                <span class="dot" data-src="revista"><svg><use href="#i-reply"/></svg></span>
+              </div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>Maria L.</b> a răspuns la articolul tău <span class="ref">Cum suna Romania prin Juno-60</span>
+                </div>
+                <div class="nf-row__snippet">
+                  "Am simțit asta când am produs prima oară cu un Juno împrumutat de la Tibi — sunetul lui pare să iarte greșelile de mixaj. Te-ai gândit la o continuare cu Jupiter-uri?"
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="revista">Revistă</span>
+                  <span>1 reply nou + 3 likes</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">mar</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="#" data-types="sistem">
+              <div class="nf-row__ic is-avatar">
+                <span class="avatar avatar--md" data-uid="u_ac" data-initials="AC" style="background:oklch(0.62 0.14 80);color:oklch(0.18 0.05 80)">AC</span>
+                <span class="dot" data-src="sistem"><svg><use href="#i-arrow"/></svg></span>
+              </div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  <b>Andrei C.</b> te urmărește acum
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="sistem">Sistem</span>
+                  <span>84 followers · 12 articole în Revistă</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">lun</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="Bazar - Roland Juno-60.html" data-types="bazar alert">
+              <div class="nf-row__ic" data-src="alert"><svg><use href="#i-clock"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Anunțul tău <span class="ref">Behringer Model D</span> expiră în <b>7 zile</b> · reînnoiește în 1 click
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="bazar">Bazar</span>
+                  <span>activ 53 zile · 184 vizualizări · 12 saves</span>
+                </div>
+                <div class="nf-row__cta">
+                  <button type="button" class="pri" onclick="event.preventDefault();event.stopPropagation();">Reînnoiește +60 zile</button>
+                  <button type="button" onclick="event.preventDefault();event.stopPropagation();">Editează</button>
+                  <button type="button" onclick="event.preventDefault();event.stopPropagation();">Lasă să expire</button>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">lun</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- MAI VECHI -->
+        <section class="nf-day" data-day="vechi">
+          <div class="nf-day__hd">
+            <span class="nm">Mai vechi</span>
+            <span class="sub">săpt. 19 · 2 itemi</span>
+          </div>
+          <div class="nf-day__body">
+
+            <a class="nf-row" href="#" data-types="sistem">
+              <div class="nf-row__ic" data-src="sistem"><svg><use href="#i-megaphone"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Anunț: ne mutăm pe <span class="ref">sintezaur.ro</span> din 1 iunie · vechiul domeniu rămâne redirect 1 an
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="sistem">Sistem</span>
+                  <span>de la echipa Sintezaur</span>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">7 mai</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+
+            <a class="nf-row" href="#" data-types="bazar">
+              <div class="nf-row__ic" data-src="bazar"><svg><use href="#i-check"/></svg></div>
+              <div class="nf-row__body">
+                <div class="nf-row__line1">
+                  Vânzarea ta <span class="ref">Korg Volca FM</span> a fost confirmată de cumpărător · lasă feedback
+                </div>
+                <div class="nf-row__line2">
+                  <span class="nf-row__src" data-src="bazar">Bazar</span>
+                  <span>+1 vânzare reușită · rating curent 4.8</span>
+                </div>
+                <div class="nf-row__cta">
+                  <button type="button" class="pri" onclick="event.preventDefault();event.stopPropagation();">Lasă feedback</button>
+                </div>
+              </div>
+              <div class="nf-row__meta">
+                <span class="nf-row__time">6 mai</span>
+                <span class="nf-row__quick">
+                  <button type="button" title="Marchează citit"><svg><use href="#i-check"/></svg></button>
+                  <button type="button" title="Silențios"><svg><use href="#i-mute"/></svg></button>
+                  <button type="button" title="Șterge"><svg><use href="#i-trash"/></svg></button>
+                </span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <div class="nf-loadmore">
+          <span>119 notificări mai vechi</span>
+          <button type="button"><svg width="11" height="11" style="vertical-align:-2px;margin-right:6px"><use href="#i-down"/></svg> Încarcă încă 30</button>
+        </div>
+
+      </main>
+
+      <!-- SIDE ====================================== -->
+      <aside class="nf-side">
+        <div class="nf-side__block">
+          <div class="nf-side__head">
+            Săptămâna asta
+            <span style="font-family:var(--font-mono);font-size:10px;color:var(--fg-subtle);text-transform:none;letter-spacing:0.04em;">11–17 mai</span>
+          </div>
+          <div class="nf-side__body">
+            <div class="nf-stats">
+              <div class="nf-stats__cell is-hot">
+                <span class="k">Necitite</span>
+                <span class="v">7<span class="u">/ 18</span></span>
+              </div>
+              <div class="nf-stats__cell">
+                <span class="k">Mențiuni</span>
+                <span class="v">2</span>
+              </div>
+              <div class="nf-stats__cell">
+                <span class="k">Forum</span>
+                <span class="v">8</span>
+              </div>
+              <div class="nf-stats__cell">
+                <span class="k">Bazar</span>
+                <span class="v">6</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="nf-side__block">
+          <div class="nf-side__head">Livrare rapidă</div>
+          <div class="nf-side__body">
+            <div class="nf-pref">
+              <div>
+                <div class="lbl">Mențiuni @</div>
+                <div class="sub">Push + email · prioritate înaltă</div>
+              </div>
+              <div class="nf-pref-toggle is-on" data-pref></div>
+            </div>
+            <div class="nf-pref">
+              <div>
+                <div class="lbl">Răspunsuri thread</div>
+                <div class="sub">Doar threadurile la care ești subscris</div>
+              </div>
+              <div class="nf-pref-toggle is-on" data-pref></div>
+            </div>
+            <div class="nf-pref">
+              <div>
+                <div class="lbl">Price drops Bazar</div>
+                <div class="sub">Listinguri urmărite · ≥ 5%</div>
+              </div>
+              <div class="nf-pref-toggle is-on" data-pref></div>
+            </div>
+            <div class="nf-pref">
+              <div>
+                <div class="lbl">Articole noi · pilonii urmăriți</div>
+                <div class="sub">Digest zilnic la 09:00</div>
+              </div>
+              <div class="nf-pref-toggle" data-pref></div>
+            </div>
+            <div class="nf-pref">
+              <div>
+                <div class="lbl">Liniște nocturnă</div>
+                <div class="sub">22:00 → 08:00 · doar mențiuni</div>
+              </div>
+              <div class="nf-pref-toggle is-on" data-pref></div>
+            </div>
+            <a href="Cont - Setari.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-family:var(--font-mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:var(--accent);border-bottom:1px solid var(--accent);padding-bottom:2px;">
+              Toate setările notificărilor →
+            </a>
+          </div>
+        </div>
+
+        <div class="nf-side__block">
+          <div class="nf-side__head">Comenzi rapide</div>
+          <div class="nf-side__body">
+            <ul class="nf-keys">
+              <li>Navighează între itemi <span><kbd>J</kbd> <kbd>K</kbd></span></li>
+              <li>Deschide item curent <span><kbd>Enter</kbd></span></li>
+              <li>Marchează citit <span><kbd>E</kbd></span></li>
+              <li>Toate citite <span><kbd>⇧</kbd> <kbd>E</kbd></span></li>
+              <li>Filtru următor <span><kbd>F</kbd></span></li>
+              <li>Deschide bell-popover <span><kbd>G</kbd> <kbd>N</kbd></span></li>
+            </ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- DEMO HINT ================================================ -->
+  <div class="nf-demo-hint" id="demo-hint">
+    <span><b>Demo:</b> click pe clopoțelul din topbar pentru a (re)deschide panel-ul · butonul „Vezi toate" duce la pagina asta</span>
+    <button type="button" class="x" id="demo-hint-x" aria-label="Închide hint">×</button>
+  </div>
+
+  <script>
+    /* ----------- bell popover toggle ----------- */
+    const bell    = document.getElementById('nf-toggle');
+    const pop     = document.getElementById('nf-pop');
+    const popX    = document.getElementById('nf-pop-close');
+    const anchor  = document.getElementById('nf-anchor');
+
+    function openPop() {
+      pop.hidden = false;
+      bell.classList.add('is-open');
+      bell.setAttribute('aria-expanded', 'true');
+    }
+    function closePop() {
+      pop.hidden = true;
+      bell.classList.remove('is-open');
+      bell.setAttribute('aria-expanded', 'false');
+    }
+    function togglePop() {
+      pop.hidden ? openPop() : closePop();
+    }
+
+    bell.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); togglePop(); });
+    popX.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closePop(); });
+
+    document.addEventListener('click', (e) => {
+      if (!anchor.contains(e.target) && !pop.hidden) closePop();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !pop.hidden) closePop();
+    });
+
+    /* ----------- popover tabs ----------- */
+    document.querySelectorAll('[data-pop-tab]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('[data-pop-tab]').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const f = btn.dataset.popTab;
+        document.querySelectorAll('#nf-pop-list [data-pop-row]').forEach(row => {
+          if (f === 'all') { row.style.display = ''; return; }
+          if (f === 'unread')   { row.style.display = row.classList.contains('is-unread') ? '' : 'none'; return; }
+          if (f === 'mentions') { row.style.display = (row.dataset.types || '').includes('mention') ? '' : 'none'; }
+        });
+        // hide day headers that no longer have visible rows
+        document.querySelectorAll('#nf-pop-list .nf-pop__day').forEach(hd => {
+          let n = hd.nextElementSibling, hasRow = false;
+          while (n && !n.classList.contains('nf-pop__day')) {
+            if (n.style.display !== 'none' && n.dataset.popRow !== undefined) hasRow = true;
+            n = n.nextElementSibling;
+          }
+          hd.style.display = hasRow ? '' : 'none';
+        });
+      });
+    });
+
+    /* ----------- mark-all-read in popover ----------- */
+    document.getElementById('nf-pop-mark').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('#nf-pop-list .nf-row.is-unread').forEach(r => r.classList.remove('is-unread'));
+      const unreadTab = document.querySelector('[data-pop-tab="unread"] .c');
+      if (unreadTab) unreadTab.textContent = '0';
+      bell.removeAttribute('data-count');
+      bell.classList.remove('has-badge');
+    });
+
+    /* ----------- page filter chips ----------- */
+    document.querySelectorAll('.nf-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.nf-chip').forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+        const f = chip.dataset.f;
+        document.querySelectorAll('.nf-day__body .nf-row').forEach(row => {
+          const t = (row.dataset.types || '').split(/\s+/);
+          let show = true;
+          if (f === 'toate') show = true;
+          else if (f === 'necitite') show = row.classList.contains('is-unread');
+          else if (f === 'mentiuni') show = t.includes('mention');
+          else show = t.includes(f);
+          row.style.display = show ? '' : 'none';
+        });
+        // hide empty day blocks
+        document.querySelectorAll('.nf-day').forEach(day => {
+          const anyVisible = [...day.querySelectorAll('.nf-row')].some(r => r.style.display !== 'none');
+          day.style.display = anyVisible ? '' : 'none';
+        });
+      });
+    });
+
+    /* ----------- page mark all ----------- */
+    document.getElementById('page-mark-all').addEventListener('click', () => {
+      document.querySelectorAll('.nf-day__body .nf-row.is-unread').forEach(r => r.classList.remove('is-unread'));
+      document.querySelectorAll('.nf-chip').forEach(c => {
+        if (c.dataset.f === 'necitite') c.querySelector('.c').textContent = '0';
+      });
+    });
+
+    /* ----------- pref toggles ----------- */
+    document.querySelectorAll('[data-pref]').forEach(t => {
+      t.addEventListener('click', () => t.classList.toggle('is-on'));
+    });
+
+    /* ----------- quick row buttons (mark-read on row) ----------- */
+    document.querySelectorAll('.nf-row__quick button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        const row = btn.closest('.nf-row');
+        const title = btn.getAttribute('title') || '';
+        if (title.startsWith('Marchează')) row.classList.remove('is-unread');
+        if (title.startsWith('Șterge'))    row.style.display = 'none';
+        if (title.startsWith('Silențios')) row.style.opacity = '0.55';
+      });
+    });
+
+    /* ----------- demo hint ----------- */
+    document.getElementById('demo-hint-x').addEventListener('click', () => {
+      document.getElementById('demo-hint').style.display = 'none';
+    });
+
+    /* ----------- theme toggle ----------- */
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const saved = localStorage.getItem(KEY) || 'dark';
+      root.setAttribute('data-theme', saved);
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          root.setAttribute('data-theme', next);
+          localStorage.setItem(KEY, next);
+        });
+      });
+    })();
+
+    /* ----------- "Vezi toate" from popover, when already on this page ----------- */
+    document.querySelector('.nf-pop__foot a.see-all')?.addEventListener('click', (e) => {
+      // we're already on Cont - Notificări.html — just close popover + scroll to the list
+      e.preventDefault();
+      closePop();
+      const list = document.querySelector('.nf-day');
+      if (list) {
+        const top = list.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  </script>
+</body>
+</html>

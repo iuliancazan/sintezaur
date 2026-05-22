@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anunțurile mele — Cont — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+
+  <style>
+  /* ============================================================
+     ARTICOLELE MELE — re-uses idioms from Cont - Contribuții
+     ============================================================ */
+
+  /* avatar drop / topbar pieces (copied so this page stands alone) */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute; top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    line-height: 16px; text-align: center; border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.02em; border-radius: 999px; }
+  .avatar-menu { position: relative; }
+  .avatar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 999px; transition: border-color 0.15s ease, background 0.15s ease; }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+  .avatar-drop {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0,0,0,0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60; padding: 6px;
+  }
+  [data-theme="light"] .avatar-drop { box-shadow: 0 18px 48px -12px rgba(60,50,20,0.18); }
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px; margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line); background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name { font-weight: 600; font-size: 14px; color: var(--fg); }
+  .avatar-drop__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); margin-top: 3px; }
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; font-size: 13px; color: var(--fg);
+    text-align: left; border-radius: 2px;
+    background: transparent; border: 0; cursor: pointer;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-active { background: var(--bg-elev); color: var(--fg); }
+  .avatar-drop__item.is-active svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px; background: var(--bg-card-2);
+    border: 1px solid var(--line); color: var(--fg-muted); border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  /* PAGE HEAD */
+  .page-head { padding: 56px 0 28px; border-bottom: 1px solid var(--line); margin-bottom: 28px; }
+  .page-head .block__sub {
+    display: block;
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 12px;
+  }
+  .page-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(48px, 7vw, 88px); line-height: 0.92;
+    letter-spacing: 0.01em; margin: 0 0 12px;
+    text-transform: uppercase;
+  }
+  .page-title .dot { color: var(--accent); }
+  .page-lede { margin: 0; max-width: 64ch; font-size: 17px; color: var(--fg-muted); }
+  .page-head__row { display: flex; align-items: end; gap: 36px; justify-content: space-between; flex-wrap: wrap; }
+  .page-head__cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 18px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid var(--accent);
+    transition: background 0.15s, transform 0.15s;
+  }
+  .page-head__cta:hover { background: var(--accent-2); transform: translateY(-1px); }
+  .page-head__cta .plus { font-size: 16px; line-height: 1; }
+
+  /* summary strip */
+  .am-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    margin-bottom: 22px;
+  }
+  .am-strip__cell {
+    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+    border-right: 1px dashed var(--line);
+    position: relative; cursor: pointer;
+    transition: background 0.12s;
+    text-align: left;
+  }
+  .am-strip__cell:last-child { border-right: 0; }
+  .am-strip__cell:hover { background: var(--bg-elev); }
+  .am-strip__cell.is-active { background: var(--bg-elev); }
+  .am-strip__cell.is-active::before {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+    height: 2px; background: var(--accent);
+  }
+  .am-strip__k {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .am-strip__v {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 30px; line-height: 1; letter-spacing: 0.005em;
+    color: var(--fg);
+  }
+  .am-strip__v.up { color: oklch(0.78 0.16 145); }
+  .am-strip__v.warn { color: var(--accent); }
+  .am-strip__v.bad { color: oklch(0.72 0.18 28); }
+  .am-strip__v.muted { color: var(--fg-muted); }
+  .am-strip__sub { font-family: var(--font-mono); font-size: 10px; color: var(--fg-subtle); letter-spacing: 0.04em; }
+
+  /* toolbar */
+  .am-toolbar {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 8px;
+    margin-bottom: 14px;
+    align-items: stretch;
+  }
+  .am-search {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 14px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    transition: border-color 0.12s;
+  }
+  .am-search:focus-within { border-color: var(--accent); }
+  .am-search svg { width: 14px; height: 14px; color: var(--fg-muted); flex-shrink: 0; }
+  .am-search input {
+    flex: 1; border: 0; background: transparent;
+    padding: 11px 0;
+    font-size: 14px; color: var(--fg);
+    outline: none;
+  }
+  .am-search input::placeholder { color: var(--fg-subtle); }
+  .am-search kbd {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px; color: var(--fg-muted);
+    background: var(--bg-card); border: 1px solid var(--line); border-radius: 2px;
+  }
+  .am-sel {
+    position: relative; display: inline-flex;
+    background: var(--bg); border: 1px solid var(--line-strong);
+  }
+  .am-sel select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0; outline: none;
+    padding: 11px 36px 11px 14px;
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em;
+    color: var(--fg); cursor: pointer; min-width: 140px;
+  }
+  .am-sel::after {
+    content: "▾"; position: absolute; right: 12px;
+    top: 50%; transform: translateY(-50%);
+    color: var(--fg-muted); pointer-events: none; font-size: 10px;
+  }
+  .am-sel__label {
+    align-self: center; padding: 0 0 0 12px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-subtle); border-right: 1px dashed var(--line);
+    padding-right: 10px;
+  }
+
+  .am-h {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    margin: 22px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--line);
+  }
+  .am-h h2 {
+    font-family: var(--font-mono); font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.10em;
+    color: var(--fg); font-weight: 600; margin: 0;
+  }
+  .am-h h2::before { content: "// "; color: var(--accent); }
+  .am-h .meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+  }
+
+  /* status pill */
+  .am-stat {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px 3px 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .am-stat::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--fg-subtle);
+  }
+  .am-stat[data-s="published"] { color: oklch(0.82 0.16 145); border-color: oklch(0.45 0.12 145); }
+  .am-stat[data-s="published"]::before { background: oklch(0.72 0.16 145); }
+  .am-stat[data-s="review"] { color: var(--accent); border-color: oklch(0.55 0.14 80); }
+  .am-stat[data-s="review"]::before { background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  .am-stat[data-s="draft"] { color: var(--fg); border-color: var(--line-strong); }
+  .am-stat[data-s="draft"]::before { background: var(--fg-muted); }
+  .am-stat[data-s="scheduled"] { color: oklch(0.82 0.10 230); border-color: oklch(0.50 0.10 230); }
+  .am-stat[data-s="scheduled"]::before { background: oklch(0.72 0.10 230); }
+  .am-stat[data-s="changes"] { color: oklch(0.82 0.14 60); border-color: oklch(0.50 0.12 60); }
+  .am-stat[data-s="changes"]::before { background: oklch(0.78 0.14 60); }
+  .am-stat[data-s="rejected"] { color: oklch(0.82 0.16 28); border-color: oklch(0.45 0.14 28); }
+  .am-stat[data-s="rejected"]::before { background: oklch(0.72 0.18 28); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* pillar chips */
+  .am-pillar {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    background: transparent; border: 1px solid var(--line-strong);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .am-pillar[data-p="interviu"] { color: oklch(0.78 0.14 200); border-color: oklch(0.46 0.10 200); }
+  .am-pillar[data-p="recenzie"] { color: oklch(0.78 0.14 60); border-color: oklch(0.50 0.12 60); }
+  .am-pillar[data-p="tutorial"] { color: oklch(0.78 0.14 165); border-color: oklch(0.46 0.10 165); }
+  .am-pillar[data-p="stiri"] { color: oklch(0.74 0.10 320); border-color: oklch(0.46 0.10 320); }
+  .am-pillar[data-p="ghid"] { color: oklch(0.78 0.10 30); border-color: oklch(0.48 0.10 30); }
+  .am-pillar[data-p="deepdive"] { color: var(--accent); border-color: oklch(0.55 0.14 80); }
+
+  /* ARTICLE CARDS — list view (rich) */
+  .am-list {
+    display: flex; flex-direction: column;
+    gap: 10px;
+  }
+  .am-card {
+    display: grid;
+    grid-template-columns: 160px 1fr 220px;
+    gap: 0;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    transition: border-color 0.12s, transform 0.12s;
+  }
+  .am-card:hover { border-color: var(--line-strong); }
+  .am-card.is-priority { border-left: 3px solid var(--accent); }
+
+  .am-card__thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--bg-card-2);
+    border-right: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .am-card__thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .am-card__thumb .gear-fill { padding: 10%; }
+  .am-card__thumb-mark {
+    position: absolute; top: 0; left: 0;
+    padding: 4px 8px;
+    font-family: var(--font-mono); font-size: 9px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg);
+    background: var(--bg);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .am-card__thumb-mark.is-featured {
+    background: var(--accent); color: var(--accent-fg);
+    border-color: var(--accent);
+  }
+
+  .am-card__body {
+    padding: 14px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    min-width: 0;
+  }
+  .am-card__head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  }
+  .am-card__title {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 26px; line-height: 0.98;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.005em;
+    color: var(--fg);
+    text-wrap: balance;
+  }
+  .am-card__title a { color: inherit; }
+  .am-card__title a:hover { color: var(--accent); }
+  .am-card__deck {
+    margin: 0;
+    font-size: 13.5px; line-height: 1.5;
+    color: var(--fg-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .am-card__meta {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    letter-spacing: 0.02em;
+  }
+  .am-card__meta .sep { color: var(--fg-subtle); }
+  .am-card__meta b { color: var(--fg); font-weight: 500; }
+
+  /* feedback callout (when changes requested or rejected) */
+  .am-card__feedback {
+    display: grid; grid-template-columns: 18px 1fr;
+    gap: 10px; padding: 9px 12px;
+    background: oklch(0.55 0.14 60 / 0.08);
+    border: 1px solid oklch(0.50 0.10 60);
+    color: var(--fg);
+    font-size: 12px; line-height: 1.45;
+  }
+  .am-card__feedback.is-bad {
+    background: oklch(0.55 0.16 28 / 0.10);
+    border-color: oklch(0.50 0.14 28);
+  }
+  .am-card__feedback .ic {
+    width: 16px; height: 16px; align-self: center;
+    color: oklch(0.78 0.14 60);
+    font-family: var(--font-mono); font-weight: 700; font-size: 12px;
+    line-height: 1.4;
+  }
+  .am-card__feedback.is-bad .ic { color: oklch(0.78 0.16 28); }
+  .am-card__feedback b { color: var(--accent); }
+  .am-card__feedback.is-bad b { color: oklch(0.85 0.16 28); }
+  .am-card__feedback .who {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); display: block; margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+
+  /* right side (stats & actions) */
+  .am-card__side {
+    padding: 14px 16px;
+    border-left: 1px solid var(--line);
+    background: var(--bg);
+    display: flex; flex-direction: column; gap: 12px;
+    justify-content: space-between;
+  }
+  .am-card__stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.06em;
+  }
+  .am-card__stats .cell {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .am-card__stats .cell b {
+    font-family: var(--font-display); font-weight: 600;
+    font-size: 22px; line-height: 1; color: var(--fg);
+    letter-spacing: 0.005em;
+  }
+  .am-card__stats .cell b.muted { color: var(--fg-subtle); }
+  .am-card__stats .cell k {
+    text-transform: uppercase;
+  }
+  .am-card__act {
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  .am-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg-card); color: var(--fg);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+  }
+  .am-btn svg { width: 13px; height: 13px; }
+  .am-btn:hover { border-color: var(--fg-muted); background: var(--bg-elev); }
+  .am-btn.pri {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+  }
+  .am-btn.pri:hover { filter: brightness(1.08); }
+  .am-btn.ghost { background: transparent; border-color: var(--line); color: var(--fg-muted); }
+  .am-btn.ghost:hover { color: var(--fg); }
+  .am-btn .key {
+    margin-left: auto; font-size: 9px;
+    color: var(--fg-subtle); letter-spacing: 0.06em;
+  }
+
+  /* pagination */
+  .am-pager {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 18px;
+    padding: 0 4px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted);
+  }
+  .am-pager__ctrls { display: flex; gap: 4px; }
+  .am-pager__ctrls button, .am-pager__ctrls a {
+    min-width: 30px; padding: 6px 10px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg-muted); cursor: pointer;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .am-pager__ctrls button:hover, .am-pager__ctrls a:hover {
+    color: var(--fg); border-color: var(--fg-muted);
+  }
+  .am-pager__ctrls .is-active {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+  }
+  .am-pager__ctrls .is-dots { border: 0; background: transparent; cursor: default; color: var(--fg-subtle); }
+
+  /* empty */
+  .am-empty {
+    border: 1px dashed var(--line);
+    background: var(--bg-card);
+    padding: 56px 32px;
+    text-align: center;
+    color: var(--fg-muted);
+  }
+  .am-empty h3 {
+    font-family: var(--font-display);
+    font-size: 32px; margin: 0 0 8px;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+  .am-empty p { margin: 0 0 18px; font-size: 14px; }
+
+  /* bazar additions */
+  .am-price {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 28px; line-height: 1; color: var(--fg);
+    letter-spacing: 0.005em; white-space: nowrap;
+    margin-left: auto;
+  }
+  .am-price small {
+    display: inline-block; margin-left: 4px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    color: var(--fg-muted); letter-spacing: 0.06em;
+  }
+  .am-card.is-sold .am-price { color: var(--fg-subtle); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .am-card.is-sold .am-card__title a { color: var(--fg-muted); }
+  .am-card.is-sold .am-card__thumb { opacity: 0.6; }
+  .am-card.is-sold .am-card__thumb-mark.is-sold {
+    background: oklch(0.55 0.10 230); color: white; border-color: oklch(0.55 0.10 230);
+  }
+  .am-stat[data-s="sold"] { color: oklch(0.82 0.10 230); border-color: oklch(0.50 0.10 230); }
+  .am-stat[data-s="sold"]::before { background: oklch(0.72 0.10 230); }
+  .am-stat[data-s="paused"] { color: var(--fg); border-color: var(--line-strong); }
+  .am-stat[data-s="paused"]::before { background: var(--fg-muted); }
+  .am-stat[data-s="expired"] { color: oklch(0.78 0.14 60); border-color: oklch(0.50 0.12 60); }
+  .am-stat[data-s="expired"]::before { background: oklch(0.78 0.14 60); }
+  .am-stat[data-s="boost"] { color: var(--accent); border-color: oklch(0.55 0.14 80); }
+  .am-stat[data-s="boost"]::before { background: var(--accent); }
+  .am-card__feedback.is-offer {
+    background: oklch(0.55 0.14 145 / 0.10);
+    border-color: oklch(0.48 0.12 145);
+  }
+  .am-card__feedback.is-offer .ic { color: oklch(0.78 0.14 145); }
+  .am-card__feedback.is-offer b { color: oklch(0.85 0.14 145); }
+  .am-card__feedback.is-msg {
+    background: oklch(0.55 0.10 230 / 0.10);
+    border-color: oklch(0.48 0.10 230);
+  }
+  .am-card__feedback.is-msg .ic { color: oklch(0.82 0.10 230); }
+  .am-card__feedback.is-msg b { color: oklch(0.86 0.10 230); }
+  .am-pillar[data-p="synth"] { color: oklch(0.78 0.14 200); border-color: oklch(0.46 0.10 200); }
+  .am-pillar[data-p="drum"] { color: oklch(0.78 0.14 60); border-color: oklch(0.50 0.12 60); }
+  .am-pillar[data-p="sampler"] { color: oklch(0.78 0.14 165); border-color: oklch(0.46 0.10 165); }
+  .am-pillar[data-p="eurorack"] { color: oklch(0.74 0.10 320); border-color: oklch(0.46 0.10 320); }
+  .am-pillar[data-p="fx"] { color: oklch(0.78 0.10 30); border-color: oklch(0.48 0.10 30); }
+  .am-pillar[data-p="acc"] { color: var(--fg-muted); border-color: var(--line-strong); }
+  .am-cond {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted); background: var(--bg);
+  }
+  .am-cond[data-c="new"] { color: oklch(0.82 0.14 145); border-color: oklch(0.48 0.10 145); }
+  .am-cond[data-c="good"] { color: var(--fg); border-color: var(--line-strong); }
+  .am-cond[data-c="used"] { color: var(--fg-muted); }
+  .am-card__head .grow { flex: 1; }
+
+  /* responsive */
+  @media (max-width: 1100px) {
+    .am-card { grid-template-columns: 130px 1fr; }
+    .am-card__side {
+      grid-column: 1 / -1;
+      border-left: 0; border-top: 1px solid var(--line);
+      flex-direction: row; align-items: center; justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .am-card__stats { flex: 1; max-width: 360px; }
+    .am-card__act { flex-direction: row; }
+    .am-card__title { font-size: 22px; }
+  }
+  @media (max-width: 800px) {
+    .am-strip { grid-template-columns: repeat(2, 1fr); }
+    .am-strip__cell:nth-child(odd) { border-right: 1px dashed var(--line); }
+    .am-strip__cell { border-bottom: 1px dashed var(--line); }
+    .am-strip__cell:nth-last-child(-n+2) { border-bottom: 0; }
+    .am-toolbar { grid-template-columns: 1fr 1fr; }
+    .am-search { grid-column: 1 / -1; }
+    .am-card { grid-template-columns: 1fr; }
+    .am-card__thumb { aspect-ratio: 16/7; border-right: 0; border-bottom: 1px solid var(--line); }
+  }
+  </style>
+</head>
+<body data-screen-label="17 Cont — Anunțurile mele">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 6h18v12H3z"/><path d="M3 6l9 7 9-7"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/></symbol>
+      <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13 7l4 4"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20h4l10-10-4-4L4 16z"/><path d="M14 6l4 4"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><rect x="8" y="8" width="13" height="13"/><path d="M16 8V4H3v13h4"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 7h16"/><path d="M10 4h4l1 3H9z"/><path d="M6 7l1 13h10l1-13"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 12h16M14 6l6 6-6 6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <a class="icon-btn has-badge" href="Cont - Notificări.html" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></a>
+        <a class="icon-btn" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+        <a class="icon-btn has-badge" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <div class="avatar-menu" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item" href="Cont - Contribuții.html" role="menuitem">
+              <svg><use href="#i-stack"/></svg> Contribuții Tezaur
+              <span class="avatar-drop__tag">12</span>
+            </a>
+            <a class="avatar-drop__item" href="Cont - Articolele Mele.html" role="menuitem">
+              <svg><use href="#i-pen"/></svg> Articolele mele
+              <span class="avatar-drop__tag">8</span>
+            </a>
+            <a class="avatar-drop__item is-active" href="Cont - Anunturile Mele.html" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem">
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+            <div class="avatar-drop__sep"></div>
+            <a class="avatar-drop__item" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+            <div class="avatar-drop__sep"></div>
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- PAGE HEAD -->
+    <header class="page-head crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div class="page-head__row">
+        <div>
+          <span class="block__sub">// Cont · Anunțurile mele</span>
+          <h1 class="page-title">Anunțurile<br/>mele<span class="dot">.</span></h1>
+          <p class="page-lede">
+            Anunțurile tale din Bazar — active, în moderare, vândute. Vezi mesajele și ofertele primite,
+            răspunzi direct din pagină, marchezi „vândut" cu un click. Listare gratuită, fără comision.
+          </p>
+        </div>
+        <a class="page-head__cta" href="Bazar - Adaugă.html">
+          <span class="plus">+</span> Anunț nou
+        </a>
+      </div>
+    </header>
+
+    <!-- SUMMARY -->
+    <div class="am-strip">
+      <button class="am-strip__cell is-active" data-filter="all" type="button">
+        <span class="am-strip__k">// Total</span>
+        <span class="am-strip__v">16</span>
+        <span class="am-strip__sub">din martie 2024</span>
+      </button>
+      <button class="am-strip__cell" data-filter="active" type="button">
+        <span class="am-strip__k">// Active</span>
+        <span class="am-strip__v up">3</span>
+        <span class="am-strip__sub">1 842 vizualizări · 7 zile</span>
+      </button>
+      <button class="am-strip__cell" data-filter="offers" type="button">
+        <span class="am-strip__k">// Oferte primite</span>
+        <span class="am-strip__v warn">4</span>
+        <span class="am-strip__sub">2 noi · maxim 3 800 RON</span>
+      </button>
+      <button class="am-strip__cell" data-filter="msg" type="button">
+        <span class="am-strip__k">// Mesaje noi</span>
+        <span class="am-strip__v warn">7</span>
+        <span class="am-strip__sub">din 4 conversații</span>
+      </button>
+      <button class="am-strip__cell" data-filter="sold" type="button">
+        <span class="am-strip__k">// Vândute</span>
+        <span class="am-strip__v muted">11</span>
+        <span class="am-strip__sub">31 420 RON încasați</span>
+      </button>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="am-toolbar">
+      <div class="am-search">
+        <svg><use href="#i-search"/></svg>
+        <input type="search" placeholder="Caută în anunțurile tale — brand, model, oraș…" />
+        <kbd>⌘ K</kbd>
+      </div>
+      <div class="am-sel">
+        <span class="am-sel__label">categorie</span>
+        <select>
+          <option>Toate categoriile</option>
+          <option>Sintetizator</option>
+          <option>Drum machine</option>
+          <option>Sampler</option>
+          <option>Eurorack</option>
+          <option>Efecte / DSP</option>
+          <option>Accesorii</option>
+        </select>
+      </div>
+      <div class="am-sel">
+        <span class="am-sel__label">status</span>
+        <select>
+          <option>Orice status</option>
+          <option>Activ</option>
+          <option>În moderare</option>
+          <option>Pauzat</option>
+          <option>Expirat</option>
+          <option>Vândut</option>
+          <option>Schiță</option>
+        </select>
+      </div>
+      <div class="am-sel">
+        <span class="am-sel__label">interval</span>
+        <select>
+          <option>Toate timpurile</option>
+          <option>Ultimele 30 zile</option>
+          <option>2026</option>
+          <option>2025</option>
+          <option>2024</option>
+        </select>
+      </div>
+      <div class="am-sel">
+        <span class="am-sel__label">sort</span>
+        <select>
+          <option>Cele mai recente</option>
+          <option>Cu cele mai multe mesaje</option>
+          <option>Cu cele mai multe oferte</option>
+          <option>Expiră curând</option>
+          <option>Preț ↓</option>
+          <option>Preț ↑</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- NEEDS ATTENTION -->
+    <div class="am-h">
+      <h2>Necesită răspuns</h2>
+      <span class="meta">Oferte și mesaje fără răspuns mai vechi de 24h — răspunzi sau marchezi „nu mă interesează"</span>
+    </div>
+
+    <div class="am-list">
+
+      <!-- (1) Active w/ pending offer -->
+      <article class="am-card is-priority">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">SH-101</span>
+          <div class="gear-fill" data-gear="sh-101"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="published">activ</span>
+            <span class="am-cond" data-c="good">Foarte bună</span>
+            <span class="am-card__meta">
+              <span>postat 14 mai · 18:04</span>
+              <span class="sep">·</span>
+              <span>expiră în <b>23 zile</b></span>
+            </span>
+            <span class="am-price">3 800<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="Bazar - Roland Juno-60.html">Roland SH-101 — gri, 1983, service mid '24, original key-grip</a></h3>
+          <p class="am-card__deck">Vând SH-101 cumpărat din Belgia în 2019, service complet la Tehnosynth în mai '24 (capse noi, slider-uri curățate, baterie nouă). Cutia originală, manualul în EN, fără strap. Locație: București, Floreasca, ridicare sau curier cu asigurare.</p>
+          <div class="am-card__feedback is-offer">
+            <span class="ic">→</span>
+            <div>
+              <b>Andrei B. (@andrei.b)</b> oferă <b>3 400 RON</b> + posibil schimb parțial cu un Volca FM ca nou. Mesaj: „Am bani gata azi, mâine pot veni la tine în Floreasca. Volca-ul e la 6 luni vechime, cu cutie." <b>Expiră în 8h.</b>
+              <span class="who">Acum 16h · prima ofertă · scor cumpărător 4.8</span>
+            </div>
+          </div>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>842</b><k>vizualizări</k></div>
+            <div class="cell"><b>18</b><k>favorit</k></div>
+            <div class="cell"><b>5</b><k>mesaje</k></div>
+            <div class="cell"><b>2</b><k>oferte</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn pri" href="Cont - Mesaje.html">
+              <svg><use href="#i-mail"/></svg> Răspunde
+              <span class="key">⏎</span>
+            </a>
+            <button class="am-btn ghost" type="button">
+              <svg><use href="#i-more"/></svg> Mai mult
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (2) In review -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">Octatrack</span>
+          <div class="gear-fill" data-gear="octatrack-mk2"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="sampler">Sampler</span>
+            <span class="am-stat" data-s="review">în moderare</span>
+            <span class="am-cond" data-c="good">Foarte bună</span>
+            <span class="am-card__meta">
+              <span>trimis 21 mai · 09:47</span>
+              <span class="sep">·</span>
+              <span>la moderare de <b>2h 14m</b></span>
+            </span>
+            <span class="am-price">6 200<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Elektron Octatrack MKII black — full kit, 2 CF carduri, cutie</a></h3>
+          <p class="am-card__deck">Octatrack MKII black, cumpărat 2022 din UK. Funcționează impecabil, încărcătorul original, două carduri CF (16GB + 32GB) cu sample-uri. Cutia originală + foam. Vând pentru că am trecut pe Digitakt II.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b class="muted">—</b><k>vizualizări</k></div>
+            <div class="cell"><b class="muted">—</b><k>favorit</k></div>
+            <div class="cell"><b>8</b><k>foto</k></div>
+            <div class="cell"><b>0</b><k>mesaje</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn" href="Bazar - Adaugă.html">
+              <svg><use href="#i-eye"/></svg> Vezi anunțul
+            </a>
+            <button class="am-btn ghost" type="button">Retrage din moderare</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- ACTIVE -->
+    <div class="am-h">
+      <h2>Active</h2>
+      <span class="meta">3 anunțuri publicate · ⌥+click pe rând pentru duplicare · reînnoirea automată este pornită</span>
+    </div>
+
+    <div class="am-list">
+
+      <!-- (3) Active — top performer -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark is-featured">Boost · 4 zile</span>
+          <img src="https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg" alt="Juno-60" />
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="boost">activ · boostat</span>
+            <span class="am-cond" data-c="good">Foarte bună</span>
+            <span class="am-card__meta">
+              <span>postat 08 mai</span>
+              <span class="sep">·</span>
+              <span>expiră în <b>17 zile</b></span>
+              <span class="sep">·</span>
+              <span>boost până 26 mai</span>
+            </span>
+            <span class="am-price">4 200<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="Bazar - Roland Juno-60.html">Roland Juno-60 — restored 2023, MIDI Tubbutec mod, cutie originală</a></h3>
+          <p class="am-card__deck">Juno-60 din '83, restaurat complet în 2023: capse înlocuite, slider-uri curățate, RAM-battery nouă, Tubbutec MIDI installed (intern). Sună cum trebuie să sune. Cutia originală, manualul în EN, alimentator. Vând pentru că-mi iau un Jupiter-6.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>1 248</b><k>vizualizări</k></div>
+            <div class="cell"><b>42</b><k>favorit</k></div>
+            <div class="cell"><b>11</b><k>mesaje</k></div>
+            <div class="cell"><b>3</b><k>oferte</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn" href="Bazar - Roland Juno-60.html">
+              <svg><use href="#i-eye"/></svg> Vezi live
+            </a>
+            <button class="am-btn ghost" type="button">
+              <svg><use href="#i-edit"/></svg> Editează
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (4) Active — quiet -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">MS-20</span>
+          <div class="gear-fill" data-gear="ms-20"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="published">activ</span>
+            <span class="am-cond" data-c="good">Bună</span>
+            <span class="am-card__meta">
+              <span>postat 02 mai</span>
+              <span class="sep">·</span>
+              <span>expiră în <b>11 zile</b></span>
+            </span>
+            <span class="am-price">2 100<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Korg MS-20 Mini — cu cablu patch original și manual RO</a></h3>
+          <p class="am-card__deck">MS-20 Mini cumpărat 2019. Funcționează perfect, mufele jack curățate anul trecut. Cabluri patch incluse (5 buc, originale). Locație: București, ridicare preferată dar pot trimite cu curier.</p>
+          <div class="am-card__feedback is-msg">
+            <span class="ic">…</span>
+            <div>
+              <b>Negocierea s-a oprit:</b> 2 mesaje fără răspuns din partea ta către Mihai R. (a oferit 1 800 RON, ai cerut 2 000 RON, n-ai mai răspuns acum 5 zile). Pierzi o ofertă caldă?
+              <span class="who">Ultim mesaj: 17 mai · 21:14</span>
+            </div>
+          </div>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>312</b><k>vizualizări</k></div>
+            <div class="cell"><b>8</b><k>favorit</k></div>
+            <div class="cell"><b>4</b><k>mesaje</k></div>
+            <div class="cell"><b>1</b><k>oferte</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn" href="Cont - Mesaje.html">
+              <svg><use href="#i-mail"/></svg> Reia conversația
+            </a>
+            <button class="am-btn ghost" type="button">Scade prețul</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (5) Active — low traffic -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">Volca FM</span>
+          <img src="https://cdn.korg.com/ro/products/upload/497a8c904235c795605923a8d6860810_sp.jpg" alt="Volca FM" />
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="published">activ</span>
+            <span class="am-cond" data-c="new">Ca nou</span>
+            <span class="am-card__meta">
+              <span>postat 11 mai</span>
+              <span class="sep">·</span>
+              <span>expiră în <b>20 zile</b></span>
+            </span>
+            <span class="am-price">620<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Korg Volca FM mk1 — adăugat 8 luni, fără urme</a></h3>
+          <p class="am-card__deck">Volca FM cumpărat în septembrie '25, folosit ocazional acasă. Cu adaptor original Korg (achizițonat separat, ~80 RON). Vând pentru că-mi iau un FM-X. Bonus: un set de baterii Eneloop reîncărcabile.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>282</b><k>vizualizări</k></div>
+            <div class="cell"><b>4</b><k>favorit</k></div>
+            <div class="cell"><b>2</b><k>mesaje</k></div>
+            <div class="cell"><b>0</b><k>oferte</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn" href="#">
+              <svg><use href="#i-eye"/></svg> Vezi live
+            </a>
+            <button class="am-btn ghost" type="button">
+              <svg><use href="#i-edit"/></svg> Editează
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- DRAFTS & EXPIRED -->
+    <div class="am-h">
+      <h2>Schițe &amp; expirate</h2>
+      <span class="meta">2 anunțuri · reînnoirea expirate are reducere -20% la boost</span>
+    </div>
+
+    <div class="am-list">
+
+      <!-- (6) Draft -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">DX7</span>
+          <div class="gear-fill" data-gear="dx7"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="draft">schiță · auto-salvată</span>
+            <span class="am-card__meta">
+              <span>creat 19 mai</span>
+              <span class="sep">·</span>
+              <span>autosave: <b>acum 4m</b></span>
+              <span class="sep">·</span>
+              <span>3/6 câmpuri completate</span>
+            </span>
+            <span class="am-price" style="color:var(--fg-subtle)">3 500<small>RON · est</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="Bazar - Adaugă.html">Yamaha DX7 mk1 — service complet în martie, fără modificări</a></h3>
+          <p class="am-card__deck">Yamaha DX7 din '85, service complet la TehnoSynth în martie '26. Capse înlocuite, panelu' curățat, baterie nouă. Vine cu… <em>(de completat: cartridge-uri, manual, alimentator?)</em></p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>50%</b><k>completare</k></div>
+            <div class="cell"><b>3</b><k>foto</k></div>
+            <div class="cell"><b class="muted">—</b><k>preț final</k></div>
+            <div class="cell"><b class="muted">—</b><k>locație</k></div>
+          </div>
+          <div class="am-card__act">
+            <a class="am-btn pri" href="Bazar - Adaugă.html">
+              <svg><use href="#i-edit"/></svg> Continuă
+            </a>
+            <button class="am-btn ghost" type="button">
+              <svg><use href="#i-trash"/></svg> Șterge
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (7) Expired -->
+      <article class="am-card">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark">0-Coast</span>
+          <div class="gear-fill" data-gear="0-coast"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="eurorack">Semi-modular</span>
+            <span class="am-stat" data-s="expired">expirat · acum 6 zile</span>
+            <span class="am-cond" data-c="good">Bună</span>
+            <span class="am-card__meta">
+              <span>postat 16 aprilie</span>
+              <span class="sep">·</span>
+              <span>expirat 16 mai</span>
+            </span>
+            <span class="am-price" style="color:var(--fg-subtle)">2 200<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#" style="color:var(--fg-muted)">Make Noise 0-Coast — cu cabluri patch și power supply</a></h3>
+          <p class="am-card__deck">N-am primit decât un mesaj relevant într-o lună, ceilalți voiau schimburi cu chitări. Repostez la preț redus sau renunț.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>184</b><k>vizualizări</k></div>
+            <div class="cell"><b>3</b><k>favorit</k></div>
+            <div class="cell"><b>6</b><k>mesaje</k></div>
+            <div class="cell"><b>0</b><k>oferte</k></div>
+          </div>
+          <div class="am-card__act">
+            <button class="am-btn pri" type="button">
+              <svg><use href="#i-arrow"/></svg> Reactivează -20%
+            </button>
+            <button class="am-btn ghost" type="button">
+              <svg><use href="#i-copy"/></svg> Duplică
+            </button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- SOLD & ARCHIVED -->
+    <div class="am-h">
+      <h2>Vândute &amp; arhivate</h2>
+      <span class="meta">11 vândute · 31 420 RON încasați total · scor vânzător <b style="color:var(--accent)">★ 4.9</b> din 18 recenzii</span>
+    </div>
+
+    <div class="am-list">
+
+      <!-- (8) Sold -->
+      <article class="am-card is-sold">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark is-sold">Vândut · 04 mai</span>
+          <div class="gear-fill" data-gear="microfreak"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="sold">vândut</span>
+            <span class="am-cond" data-c="good">Foarte bună</span>
+            <span class="am-card__meta">
+              <span>postat 18 aprilie</span>
+              <span class="sep">·</span>
+              <span>vândut în <b>16 zile</b></span>
+              <span class="sep">·</span>
+              <span>către <b>Radu T. (@radutone)</b></span>
+            </span>
+            <span class="am-price">1 750<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Arturia MicroFreak v5 — cu silicon dust cover</a></h3>
+          <p class="am-card__deck">Vândut local în București, predare la Floreasca. Cumpărătorul a lăsat ★5 cu mesajul: „Tip de treabă, gear curat, l-am testat 30min înainte și sună impecabil." Tranzacție closed-loop.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>682</b><k>vizualizări</k></div>
+            <div class="cell"><b>22</b><k>favorit</k></div>
+            <div class="cell"><b>14</b><k>mesaje</k></div>
+            <div class="cell"><b>★ 5.0</b><k>review primit</k></div>
+          </div>
+          <div class="am-card__act">
+            <button class="am-btn" type="button">
+              <svg><use href="#i-copy"/></svg> Repostează similar
+            </button>
+            <button class="am-btn ghost" type="button">Lasă recenzie cumpărător</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (9) Sold -->
+      <article class="am-card is-sold">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark is-sold">Vândut · 12 aprilie</span>
+          <img src="https://dt7v1i9vyp3mf.cloudfront.net/styles/news_large/s3/imagelibrary/B/BehringerModelD_01-KpMPqNs9xNDsKI7jXXKkQy5HsOTdEOOF.jpg" alt="Model D" />
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="synth">Sintetizator</span>
+            <span class="am-stat" data-s="sold">vândut</span>
+            <span class="am-cond" data-c="new">Ca nou</span>
+            <span class="am-card__meta">
+              <span>postat 02 aprilie</span>
+              <span class="sep">·</span>
+              <span>vândut în <b>9 zile</b></span>
+              <span class="sep">·</span>
+              <span>curier · Brașov</span>
+            </span>
+            <span class="am-price">1 450<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Behringer Model D — cu rack ears și USB cable</a></h3>
+          <p class="am-card__deck">Trimis cu curier asigurat către Brașov, primit fără probleme. Cumpărătorul a lăsat ★5 și a confirmat că funcționează identic descrierii.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>458</b><k>vizualizări</k></div>
+            <div class="cell"><b>11</b><k>favorit</k></div>
+            <div class="cell"><b>8</b><k>mesaje</k></div>
+            <div class="cell"><b>★ 5.0</b><k>review primit</k></div>
+          </div>
+          <div class="am-card__act">
+            <button class="am-btn" type="button">
+              <svg><use href="#i-copy"/></svg> Repostează similar
+            </button>
+            <button class="am-btn ghost" type="button">Vezi recenzia</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- (10) Sold -->
+      <article class="am-card is-sold">
+        <div class="am-card__thumb">
+          <span class="am-card__thumb-mark is-sold">Vândut · 02 martie</span>
+          <div class="gear-fill" data-gear="tb-303"></div>
+        </div>
+        <div class="am-card__body">
+          <div class="am-card__head">
+            <span class="am-pillar" data-p="drum">Drum / bass</span>
+            <span class="am-stat" data-s="sold">vândut</span>
+            <span class="am-cond" data-c="good">Bună</span>
+            <span class="am-card__meta">
+              <span>postat 14 februarie</span>
+              <span class="sep">·</span>
+              <span>vândut în <b>16 zile</b></span>
+              <span class="sep">·</span>
+              <span>ridicare · București</span>
+            </span>
+            <span class="am-price">2 400<small>RON</small></span>
+          </div>
+          <h3 class="am-card__title"><a href="#">Roland TB-03 — Aira Compact, cutie + alimentator</a></h3>
+          <p class="am-card__deck">Vândut către un producător din Sibiu venit în București pentru un live. Tranzacție rapidă, fără negociere.</p>
+        </div>
+        <div class="am-card__side">
+          <div class="am-card__stats">
+            <div class="cell"><b>1 102</b><k>vizualizări</k></div>
+            <div class="cell"><b>38</b><k>favorit</k></div>
+            <div class="cell"><b>21</b><k>mesaje</k></div>
+            <div class="cell"><b>★ 4.5</b><k>review primit</k></div>
+          </div>
+          <div class="am-card__act">
+            <button class="am-btn" type="button">
+              <svg><use href="#i-copy"/></svg> Repostează similar
+            </button>
+            <button class="am-btn ghost" type="button">Vezi recenzia</button>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <!-- PAGER -->
+    <div class="am-pager">
+      <span>Afișez <b style="color:var(--fg)">1–10</b> din 16 anunțuri</span>
+      <div class="am-pager__ctrls">
+        <button type="button" disabled>← Anterior</button>
+        <button type="button" class="is-active">1</button>
+        <button type="button">2</button>
+        <button type="button">Următoarea →</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col"><h4>// Platformă</h4><ul><li><a href="Tezaur.html">Tezaur</a></li><li><a href="Bazar.html">Bazar</a></li><li><a href="Revista.html">Revistă</a></li><li><a href="Forum.html">Forum</a></li></ul></div>
+        <div class="foot__col"><h4>// Sintezaur</h4><ul><li><a href="#">Despre</a></li><li><a href="#">Contact</a></li><li><a href="#">Termeni</a></li><li><a href="#">Confidențialitate</a></li></ul></div>
+        <div class="foot__col"><h4>// Social</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">Bandcamp</a></li><li><a href="#">SoundCloud</a></li></ul></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale"><span class="is-active">RO</span><span>EN — în lucru</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // Inject gear illustrations
+    document.querySelectorAll('[data-gear]').forEach(el => {
+      const key = el.dataset.gear;
+      if (window.GearSvg && window.GearSvg[key]) {
+        el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+      }
+    });
+
+    // Avatar dropdown
+    (function () {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        drop.hidden = open;
+      });
+      document.addEventListener('click', e => {
+        if (!menu.contains(e.target)) {
+          btn.setAttribute('aria-expanded', 'false'); drop.hidden = true;
+        }
+      });
+    })();
+
+    // Strip filter (visual only — toggles is-active)
+    document.querySelectorAll('.am-strip__cell').forEach(c => {
+      c.addEventListener('click', () => {
+        document.querySelectorAll('.am-strip__cell').forEach(x => x.classList.remove('is-active'));
+        c.classList.add('is-active');
+      });
+    });
+  </script>
+</body>
+</html>

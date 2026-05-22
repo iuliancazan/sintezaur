@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Articol nou — Revistă — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.forum.css" />
+  <script src="reveals.js"></script>
+  <script src="gear-illustrations.js"></script>
+
+  <style>
+  /* ============================================================
+     ARTICLE COMPOSER  (page-specific only — uses styles.forum.css
+     fn-* primitives for form chrome and styles.css ad-body for prose)
+     ============================================================ */
+
+  /* sticky header bar with autosave + actions, just under topbar */
+  .ed-bar {
+    position: sticky; top: 64px; z-index: 50;
+    margin: 0 calc(var(--gutter-x) * -1);
+    padding: 10px var(--gutter-x);
+    background: color-mix(in oklab, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  .ed-bar__crumb {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .ed-bar__crumb a { color: var(--fg-muted); }
+  .ed-bar__crumb a:hover { color: var(--fg); }
+  .ed-bar__crumb .sep { color: var(--fg-subtle); }
+  .ed-bar__crumb .cur { color: var(--fg); }
+  .ed-bar__status {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+  }
+  .ed-bar__status::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: oklch(0.72 0.16 145);
+    box-shadow: 0 0 0 3px oklch(0.55 0.14 145 / 0.18);
+  }
+  .ed-bar__status.is-saving::before {
+    background: var(--accent);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .ed-bar__status .v { color: var(--fg); }
+  .ed-bar__actions { display: flex; gap: 6px; }
+  .ed-bar__btn {
+    padding: 8px 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    color: var(--fg); cursor: pointer;
+    transition: border-color 0.12s, background 0.12s, color 0.12s;
+  }
+  .ed-bar__btn:hover { border-color: var(--fg-muted); }
+  .ed-bar__btn.pri {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+  }
+  .ed-bar__btn.pri:hover { filter: brightness(1.08); }
+  .ed-bar__btn.ghost { border-color: transparent; color: var(--fg-muted); padding-left: 10px; padding-right: 10px; }
+  .ed-bar__btn.ghost:hover { color: var(--fg); background: var(--bg-card); }
+
+  /* page hero — kicker + huge title input + deck textarea */
+  .ed-hero { padding: 30px 0 18px; }
+  .ed-hero__pillar {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+  }
+  .ed-hero__pillar::before {
+    content: ""; width: 24px; height: 1px;
+    background: var(--accent); display: inline-block;
+  }
+  .ed-hero__pillar .sel {
+    position: relative; display: inline-flex;
+    background: transparent; border: 1px dashed var(--line);
+    margin-left: 2px;
+  }
+  .ed-hero__pillar .sel select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0; outline: none;
+    padding: 4px 26px 4px 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--accent); cursor: pointer;
+  }
+  .ed-hero__pillar .sel::after {
+    content: "▾"; position: absolute; right: 8px;
+    top: 50%; transform: translateY(-50%);
+    color: var(--accent); pointer-events: none; font-size: 9px;
+  }
+
+  /* TITLE: contenteditable display-font input */
+  .ed-title-wrap {
+    position: relative;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, transparent 0%, color-mix(in oklab, var(--bg-elev) 50%, transparent) 100%);
+    margin: 0 0 4px;
+    padding-top: 26px;
+  }
+  .ed-title-wrap::before {
+    content: "// TITLU \2014  click pentru a edita";
+    position: absolute; top: 8px; left: 0;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-subtle);
+    pointer-events: none;
+    transition: color 0.15s;
+  }
+  .ed-title-wrap:focus-within::before { color: var(--accent); }
+  .ed-title {
+    display: block; width: 100%;
+    background: transparent; border: 0; outline: 0;
+    padding: 4px 0 18px;
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(44px, 6vw, 88px); line-height: 0.92;
+    letter-spacing: 0.01em; color: var(--fg);
+    text-transform: uppercase;
+    resize: none;
+    text-wrap: balance;
+  }
+  .ed-title:empty::before {
+    content: attr(data-placeholder);
+    color: var(--fg-subtle); pointer-events: none;
+  }
+  .ed-title:focus { outline: none; }
+  .ed-title-wrap:focus-within { border-color: var(--accent); }
+  .ed-title-bar {
+    position: absolute; right: 0; bottom: 8px;
+    display: flex; gap: 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.06em;
+  }
+  .ed-title-bar b { color: var(--fg-muted); }
+
+  /* DECK */
+  .ed-deck-wrap {
+    position: relative;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+  }
+  .ed-deck-wrap::before {
+    content: "// DECK \2014  subtitlu / lede";
+    display: block;
+    padding-top: 14px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--fg-subtle);
+    transition: color 0.15s;
+  }
+  .ed-deck-wrap:focus-within::before { color: var(--accent); }
+  .ed-deck {
+    display: block; width: 100%;
+    background: transparent; border: 0; outline: 0;
+    padding: 4px 0 22px;
+    font-family: var(--font-ui); font-weight: 400;
+    font-size: clamp(17px, 1.5vw, 21px); line-height: 1.55;
+    color: var(--fg-muted);
+    resize: none;
+  }
+  .ed-deck:empty::before {
+    content: attr(data-placeholder);
+    color: var(--fg-subtle); pointer-events: none;
+  }
+  .ed-deck:focus { color: var(--fg); }
+
+  /* TWO-COLUMN MAIN */
+  .ed-shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 36px;
+    margin: 0 0 var(--gutter-y);
+    align-items: flex-start;
+  }
+
+  /* COVER UPLOAD */
+  .ed-cover {
+    display: block;
+    position: relative;
+    border: 1px dashed var(--line-strong);
+    background: var(--bg-card);
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    margin-bottom: 22px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ed-cover:hover { border-color: var(--accent); }
+  .ed-cover.has-image { border-style: solid; cursor: default; }
+  .ed-cover__placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-subtle);
+    background-image:
+      repeating-linear-gradient(135deg, transparent 0 12px, color-mix(in oklab, var(--line) 60%, transparent) 12px 13px);
+  }
+  .ed-cover__placeholder svg { width: 28px; height: 28px; color: var(--fg-muted); }
+  .ed-cover__placeholder b { color: var(--fg-muted); font-weight: 600; }
+  .ed-cover__placeholder small { color: var(--fg-subtle); font-size: 10px; letter-spacing: 0.06em; text-transform: none; }
+  .ed-cover.has-image .ed-cover__placeholder { display: none; }
+  .ed-cover__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ed-cover__bar {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.7) 100%);
+    color: #fff;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .ed-cover.has-image:hover .ed-cover__bar { opacity: 1; }
+  .ed-cover__bar input[type="text"] {
+    flex: 1; background: rgba(0,0,0,0.5); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2); outline: none;
+    padding: 5px 8px; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+  .ed-cover__bar button {
+    background: transparent; border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; padding: 5px 8px; cursor: pointer;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+  }
+  .ed-cover__bar button:hover { background: rgba(255,255,255,0.1); }
+
+  .ed-cover-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: -16px; margin-bottom: 22px;
+    padding: 0 2px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; color: var(--fg-subtle);
+  }
+  .ed-cover-meta b { color: var(--fg-muted); }
+  .ed-cover-meta a { color: var(--accent); }
+
+  /* TIPTAP EDITOR ============================================ */
+  .ed-tt {
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    margin-bottom: 26px;
+  }
+  .ed-tt__toolbar {
+    display: flex; flex-wrap: wrap;
+    gap: 0; align-items: center;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-elev);
+    padding: 0;
+    position: sticky; top: 64px; z-index: 30;
+    backdrop-filter: blur(6px);
+  }
+  .ed-tt__group {
+    display: flex; align-items: stretch;
+    border-right: 1px solid var(--line);
+  }
+  .ed-tt__group:last-child { border-right: 0; }
+  .ed-tt__btn {
+    width: 36px; height: 38px;
+    display: grid; place-items: center;
+    color: var(--fg-muted);
+    cursor: pointer;
+    font-family: var(--font-ui); font-size: 13px;
+    transition: color 0.12s, background 0.12s;
+    position: relative;
+    background: transparent; border: 0;
+  }
+  .ed-tt__btn:hover { color: var(--fg); background: var(--bg-card); }
+  .ed-tt__btn.is-active { color: var(--accent); background: var(--bg-card); }
+  .ed-tt__btn.is-active::after {
+    content: ""; position: absolute; left: 6px; right: 6px; bottom: 3px;
+    height: 2px; background: var(--accent);
+  }
+  .ed-tt__btn svg { width: 15px; height: 15px; }
+  .ed-tt__btn.bold { font-weight: 700; }
+  .ed-tt__btn.ital { font-style: italic; }
+  .ed-tt__btn.under { text-decoration: underline; }
+  .ed-tt__btn.strike { text-decoration: line-through; }
+  .ed-tt__btn.code-i { font-family: var(--font-mono); font-size: 11px; color: var(--accent); }
+  .ed-tt__btn.h1 { font-family: var(--font-display); font-size: 18px; line-height: 1; padding-top: 4px; letter-spacing: 0.02em; }
+  .ed-tt__btn.h2 { font-family: var(--font-display); font-size: 15px; line-height: 1; padding-top: 4px; letter-spacing: 0.02em; }
+  .ed-tt__btn.h3 { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; }
+  .ed-tt__sep { width: 1px; background: var(--line); align-self: stretch; margin: 0; }
+
+  /* select-style block menu */
+  .ed-tt__select {
+    appearance: none; -webkit-appearance: none;
+    background: transparent; border: 0; outline: 0;
+    padding: 0 28px 0 12px;
+    height: 38px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg); cursor: pointer; min-width: 130px;
+    background-image: linear-gradient(45deg, transparent 50%, var(--fg-muted) 50%),
+                      linear-gradient(135deg, var(--fg-muted) 50%, transparent 50%);
+    background-position: calc(100% - 14px) 17px, calc(100% - 10px) 17px;
+    background-size: 4px 4px, 4px 4px;
+    background-repeat: no-repeat;
+  }
+  .ed-tt__select:hover { color: var(--accent); }
+
+  .ed-tt__spacer { flex: 1; }
+  .ed-tt__undo {
+    display: flex; gap: 0; padding-right: 4px;
+  }
+
+  /* The actual ProseMirror surface */
+  .ed-tt__area {
+    padding: 36px clamp(20px, 4vw, 56px) 56px;
+    min-height: 540px;
+    max-height: 80vh;
+    overflow-y: auto;
+    font-family: var(--font-ui);
+    color: var(--fg);
+    font-size: 18px; line-height: 1.7;
+    cursor: text;
+  }
+  .ed-tt__area:focus { outline: none; }
+  .ed-tt__area .ProseMirror {
+    outline: none;
+    max-width: 680px;
+    margin: 0 auto;
+    min-height: 460px;
+  }
+  /* placeholder via Tiptap's Placeholder extension */
+  .ed-tt__area .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--fg-subtle);
+    pointer-events: none;
+    height: 0;
+    font-family: var(--font-ui);
+    font-style: normal;
+  }
+  /* Prose styling — mirrors styles.css .ad-body but slightly tighter */
+  .ed-tt__area p {
+    margin: 0 0 22px;
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--fg);
+    text-wrap: pretty;
+  }
+  .ed-tt__area h1 {
+    font-family: var(--font-display);
+    font-size: clamp(34px, 4vw, 52px);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 40px 0 16px;
+    color: var(--fg);
+  }
+  .ed-tt__area h2 {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 3vw, 36px);
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    margin: 36px 0 14px;
+    color: var(--fg);
+  }
+  .ed-tt__area h2::before { content: "* "; color: var(--accent); }
+  .ed-tt__area h3 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin: 30px 0 10px;
+    font-weight: 600;
+  }
+  .ed-tt__area h3::before { content: "// "; color: var(--accent); }
+  .ed-tt__area strong { color: var(--accent); font-weight: 600; }
+  .ed-tt__area em { font-style: italic; }
+  .ed-tt__area u { text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  .ed-tt__area a { color: var(--accent); border-bottom: 1px solid var(--accent); cursor: pointer; }
+  .ed-tt__area code {
+    font-family: var(--font-mono); font-size: 0.86em;
+    padding: 1px 6px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    color: var(--accent);
+  }
+  .ed-tt__area pre {
+    font-family: var(--font-mono); font-size: 13px; line-height: 1.55;
+    padding: 16px 18px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    margin: 22px 0;
+    overflow-x: auto;
+    color: var(--fg);
+  }
+  .ed-tt__area pre code { background: transparent; border: 0; padding: 0; color: inherit; }
+  .ed-tt__area blockquote {
+    margin: 28px -24px;
+    padding: 22px 28px;
+    border-left: 3px solid var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    font-family: var(--font-display);
+    font-size: clamp(22px, 2.2vw, 32px);
+    line-height: 1.2;
+    color: var(--fg);
+    letter-spacing: 0.005em;
+    text-wrap: balance;
+    text-transform: uppercase;
+  }
+  .ed-tt__area ul, .ed-tt__area ol {
+    margin: 18px 0 22px;
+    padding-left: 26px;
+  }
+  .ed-tt__area ul li, .ed-tt__area ol li {
+    margin: 8px 0; list-style: revert;
+    line-height: 1.65;
+  }
+  .ed-tt__area ul li::marker { color: var(--accent); }
+  .ed-tt__area ol li::marker { color: var(--accent); font-family: var(--font-mono); }
+  .ed-tt__area hr {
+    border: 0;
+    height: 1px;
+    background:
+      linear-gradient(90deg, transparent, var(--line-strong) 30%, var(--line-strong) 70%, transparent);
+    margin: 36px 0;
+    position: relative;
+  }
+  .ed-tt__area hr::after {
+    content: "* * *";
+    position: absolute; left: 50%; top: -10px;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 14px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+  }
+  .ed-tt__area img {
+    display: block;
+    max-width: 100%;
+    margin: 28px auto;
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+  }
+  .ed-tt__area .gear-mention {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 1px 8px 1px 4px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    text-decoration: none;
+    transition: border-color 0.12s, color 0.12s;
+  }
+  .ed-tt__area .gear-mention::before {
+    content: "@"; color: var(--accent); font-weight: 600;
+  }
+  .ed-tt__area .gear-mention:hover {
+    border-color: var(--accent); color: var(--accent);
+  }
+
+  /* foot bar with counts */
+  .ed-tt__foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 9px 14px;
+    border-top: 1px dashed var(--line);
+    background: var(--bg-elev);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+  }
+  .ed-tt__foot .lbl { display: flex; gap: 14px; }
+  .ed-tt__foot b { color: var(--fg); }
+  .ed-tt__foot .read {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    color: var(--fg);
+  }
+
+  /* Bubble menu (selection toolbar) */
+  .ed-tt__bubble {
+    display: flex;
+    background: var(--bg);
+    border: 1px solid var(--line-strong);
+    box-shadow: 0 12px 32px -10px rgba(0,0,0,0.5);
+    overflow: hidden;
+  }
+  .ed-tt__bubble .ed-tt__btn { width: 32px; height: 32px; }
+
+  /* slash-command popover (static demo) */
+  .ed-tt__slash {
+    position: absolute;
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    width: 280px;
+    box-shadow: 0 18px 48px -12px rgba(0,0,0,0.6);
+    z-index: 40;
+    display: none;
+  }
+  .ed-tt__slash.is-open { display: block; }
+  .ed-tt__slash__hd {
+    padding: 8px 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg-muted);
+    border-bottom: 1px dashed var(--line);
+    background: var(--bg-elev);
+  }
+  .ed-tt__slash__hd::before { content: "/ "; color: var(--accent); }
+  .ed-tt__slash__list { padding: 4px; max-height: 280px; overflow-y: auto; }
+  .ed-tt__slash__item {
+    display: grid; grid-template-columns: 28px 1fr auto;
+    gap: 10px; align-items: center;
+    padding: 8px 10px; cursor: pointer;
+    border-radius: 1px;
+    background: transparent; border: 0; width: 100%;
+    text-align: left; color: var(--fg);
+  }
+  .ed-tt__slash__item:hover, .ed-tt__slash__item.is-hl { background: var(--bg-elev); }
+  .ed-tt__slash__item .ic {
+    width: 28px; height: 28px;
+    display: grid; place-items: center;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--accent);
+  }
+  .ed-tt__slash__item .ic svg { width: 14px; height: 14px; }
+  .ed-tt__slash__item .nm { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .ed-tt__slash__item .nm .b { font-size: 13px; font-weight: 500; color: var(--fg); }
+  .ed-tt__slash__item .nm .s {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.04em; color: var(--fg-muted);
+  }
+  .ed-tt__slash__item .key {
+    font-family: var(--font-mono); font-size: 9px;
+    padding: 2px 6px;
+    background: var(--bg); border: 1px solid var(--line);
+    color: var(--fg-subtle); letter-spacing: 0.06em;
+  }
+
+  /* SIDEBAR (publishing panel) */
+  .ed-side { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 130px; }
+  .ed-side__block { border: 1px solid var(--line); background: var(--bg-elev); }
+  .ed-side__head {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .ed-side__head::before { content: "// "; color: var(--accent); }
+  .ed-side__head .num {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+  }
+  .ed-side__body { padding: 14px; }
+
+  /* status pill (right rail) */
+  .ed-status-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--line-strong);
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .ed-status-pill::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--fg-subtle);
+  }
+  .ed-status-pill[data-s="draft"]::before { background: var(--fg-muted); }
+  .ed-status-pill[data-s="review"]::before { background: var(--accent); animation: pulse 1.4s ease-in-out infinite; }
+  .ed-status-pill[data-s="scheduled"]::before { background: oklch(0.72 0.10 230); }
+  .ed-status-pill[data-s="published"] { color: oklch(0.82 0.16 145); border-color: oklch(0.45 0.12 145); }
+  .ed-status-pill[data-s="published"]::before { background: oklch(0.72 0.16 145); }
+
+  /* visibility radio list */
+  .ed-vis { display: flex; flex-direction: column; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .ed-vis__row {
+    display: grid; grid-template-columns: 22px 1fr;
+    gap: 12px; padding: 11px 14px;
+    background: var(--bg);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .ed-vis__row:hover { background: var(--bg-elev); }
+  .ed-vis__row.is-active { background: var(--bg-elev); }
+  .ed-vis__radio {
+    width: 16px; height: 16px; border-radius: 50%;
+    border: 2px solid var(--line-strong);
+    align-self: center; position: relative;
+  }
+  .ed-vis__row.is-active .ed-vis__radio { border-color: var(--accent); }
+  .ed-vis__row.is-active .ed-vis__radio::after {
+    content: ""; position: absolute; inset: 2px;
+    background: var(--accent); border-radius: 50%;
+  }
+  .ed-vis__nm { display: flex; flex-direction: column; gap: 2px; }
+  .ed-vis__nm .b { font-size: 13px; font-weight: 500; color: var(--fg); }
+  .ed-vis__nm .s {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-muted); letter-spacing: 0.04em;
+  }
+
+  /* small input */
+  .ed-small-input {
+    width: 100%;
+    padding: 9px 12px;
+    background: var(--bg); border: 1px solid var(--line-strong);
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--fg); outline: none;
+  }
+  .ed-small-input:focus { border-color: var(--accent); }
+  .ed-small-input::placeholder { color: var(--fg-subtle); }
+
+  .ed-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 0;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted); letter-spacing: 0.04em;
+    border-bottom: 1px dashed var(--line);
+  }
+  .ed-row:last-child { border-bottom: 0; }
+  .ed-row .k { color: var(--fg-subtle); text-transform: uppercase; letter-spacing: 0.10em; font-size: 10px; }
+  .ed-row .v { color: var(--fg); }
+  .ed-row .v a { color: var(--accent); border-bottom: 1px solid currentColor; }
+
+  /* SEO slug input */
+  .ed-slug {
+    display: flex; align-items: center; gap: 0;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+  }
+  .ed-slug .pfx {
+    padding: 9px 4px 9px 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .ed-slug input {
+    flex: 1; padding: 9px 10px 9px 0;
+    background: transparent; border: 0; outline: none;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--accent); letter-spacing: 0.04em;
+  }
+
+  .ed-meta-line {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: center; gap: 12px;
+    margin-top: 6px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; color: var(--fg-subtle);
+  }
+  .ed-meta-line b { color: var(--fg-muted); }
+
+  /* author block */
+  .ed-author {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ed-author .avatar { width: 36px; height: 36px; font-size: 12px; }
+  .ed-author__nm { font-size: 13px; font-weight: 500; color: var(--fg); }
+  .ed-author__role {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; color: var(--fg-muted);
+  }
+
+  /* tips list */
+  .ed-tips { display: flex; flex-direction: column; gap: 10px; }
+  .ed-tips li {
+    display: grid; grid-template-columns: 22px 1fr; gap: 8px;
+    font-size: 12px; line-height: 1.5;
+    color: var(--fg-muted);
+  }
+  .ed-tips li .n {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--accent); padding-top: 2px;
+    letter-spacing: 0.04em;
+  }
+  .ed-tips li b { color: var(--fg); font-weight: 500; }
+
+  /* changelog / activity */
+  .ed-log {
+    list-style: none; padding: 0; margin: 0;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--fg-muted); display: flex; flex-direction: column; gap: 8px;
+  }
+  .ed-log li {
+    display: grid; grid-template-columns: 56px 1fr;
+    gap: 10px;
+    padding-left: 10px; border-left: 1px solid var(--line);
+    position: relative; line-height: 1.5;
+  }
+  .ed-log li::before {
+    content: ""; position: absolute;
+    left: -3px; top: 6px;
+    width: 5px; height: 5px;
+    background: var(--fg-subtle); border-radius: 50%;
+  }
+  .ed-log li.is-now::before { background: var(--accent); box-shadow: 0 0 0 3px oklch(0.55 0.14 80 / 0.18); }
+  .ed-log li .t { color: var(--fg-subtle); letter-spacing: 0.04em; }
+  .ed-log li .m { color: var(--fg); }
+  .ed-log li .m b { color: var(--accent); font-weight: 500; }
+
+  /* gear mention picker (inline below editor) */
+  .ed-mentions {
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+    margin-bottom: 26px;
+  }
+  .ed-mentions__hd {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    color: var(--fg); background: var(--bg-elev);
+  }
+  .ed-mentions__hd::before { content: "// "; color: var(--accent); }
+  .ed-mentions__hd .meta {
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  .ed-mentions__body { padding: 14px; }
+
+  /* tag-input matches fn-tag-input look */
+  .ed-tag-input {
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    padding: 7px 8px;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    min-height: 44px;
+  }
+  .ed-tag-input input {
+    flex: 1; min-width: 140px;
+    background: transparent; border: 0; outline: 0;
+    padding: 7px 4px;
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--fg);
+  }
+  .ed-tag-input input::placeholder { color: var(--fg-subtle); }
+  .ed-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 8px 4px 5px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.02em;
+    color: var(--fg);
+  }
+  .ed-tag .thumb {
+    width: 22px; height: 16px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .ed-tag .thumb .gear-fill { padding: 2px; }
+  .ed-tag .x { color: var(--fg-subtle); cursor: pointer; padding-left: 2px; }
+  .ed-tag .x:hover { color: oklch(0.72 0.18 28); }
+  .ed-tag.is-text {
+    padding-left: 8px;
+    color: var(--fg-muted);
+  }
+  .ed-tag.is-text::before {
+    content: "#"; color: var(--accent); font-weight: 600;
+  }
+
+  /* mentions help / autocomplete */
+  .ed-mentions__list {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    margin-top: 10px;
+  }
+  .ed-mentions__list .h {
+    padding: 7px 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--fg-subtle); letter-spacing: 0.06em;
+    border-bottom: 1px dashed var(--line);
+    background: var(--bg-elev);
+    text-transform: uppercase;
+  }
+  .ed-mentions__list .i {
+    display: grid; grid-template-columns: 36px 1fr auto;
+    align-items: center; gap: 10px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .ed-mentions__list .i:last-child { border-bottom: 0; }
+  .ed-mentions__list .i:hover, .ed-mentions__list .i.is-hl { background: var(--bg-elev); }
+  .ed-mentions__list .mini {
+    width: 36px; height: 26px;
+    background: var(--bg-card-2);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .ed-mentions__list .mini .gear-fill { padding: 3px; }
+  .ed-mentions__list .nm .b { font-weight: 600; font-size: 12.5px; }
+  .ed-mentions__list .nm .m {
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.06em; color: var(--fg-muted);
+  }
+  .ed-mentions__list .key {
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 7px; background: var(--bg-card);
+    border: 1px solid var(--line); color: var(--fg-muted);
+  }
+
+  /* responsive */
+  @media (max-width: 1080px) {
+    .ed-shell { grid-template-columns: 1fr; }
+    .ed-side { position: static; flex-direction: row; flex-wrap: wrap; }
+    .ed-side__block { flex: 1; min-width: 260px; }
+  }
+  @media (max-width: 720px) {
+    .ed-bar { gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+    .ed-bar__crumb { font-size: 10px; }
+    .ed-bar__status { font-size: 9px; padding: 4px 7px; }
+    .ed-bar__btn { padding: 6px 10px; font-size: 10px; }
+    .ed-tt__area { padding: 22px 16px 36px; font-size: 16px; }
+  }
+
+  /* avatar drop (copied from cont-pages so the topbar works on its own) */
+  .icon-btn.has-badge { position: relative; }
+  .icon-btn.has-badge::after {
+    content: attr(data-count);
+    position: absolute; top: -3px; right: -3px;
+    min-width: 16px; height: 16px; padding: 0 4px;
+    background: var(--accent); color: var(--accent-fg);
+    font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+    line-height: 16px; text-align: center; border-radius: 999px;
+    box-shadow: 0 0 0 2px var(--bg);
+  }
+  .avatar.avatar--sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.avatar--md { width: 32px; height: 32px; font-size: 12px; }
+  .avatar.avatar--lg { width: 44px; height: 44px; font-size: 15px; }
+  .avatar[data-uid] { font-family: var(--font-mono); font-weight: 700; letter-spacing: 0.02em; border-radius: 999px; }
+  .avatar-menu { position: relative; }
+  .avatar-btn { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px 2px 2px; border: 1px solid transparent; border-radius: 999px; transition: border-color 0.15s ease, background 0.15s ease; }
+  .avatar-btn:hover { border-color: var(--line); background: var(--bg-elev); }
+  .avatar-btn[aria-expanded="true"] { border-color: var(--line-strong); background: var(--bg-elev); }
+  .avatar-btn__caret { color: var(--fg-muted); transition: transform 0.18s ease; }
+  .avatar-btn[aria-expanded="true"] .avatar-btn__caret { transform: rotate(180deg); }
+  .avatar-drop {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    min-width: 280px;
+    background: var(--bg-card);
+    border: 1px solid var(--line); border-radius: 2px;
+    box-shadow: 0 18px 48px -12px rgba(0,0,0,0.45), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    z-index: 60; padding: 6px;
+  }
+  [data-theme="light"] .avatar-drop { box-shadow: 0 18px 48px -12px rgba(60,50,20,0.18); }
+  .avatar-drop__head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 12px 14px; margin: -6px -6px 6px;
+    border-bottom: 1px solid var(--line); background: var(--bg-elev);
+  }
+  .avatar-drop__id { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+  .avatar-drop__name { font-weight: 600; font-size: 14px; color: var(--fg); }
+  .avatar-drop__handle { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); margin-top: 3px; }
+  .avatar-drop__item {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 9px 10px; font-size: 13px; color: var(--fg);
+    text-align: left; border-radius: 2px;
+    background: transparent; border: 0; cursor: pointer;
+  }
+  .avatar-drop__item:hover { background: var(--bg-elev); }
+  .avatar-drop__item svg { width: 16px; height: 16px; color: var(--fg-muted); flex-shrink: 0; }
+  .avatar-drop__item:hover svg { color: var(--accent); }
+  .avatar-drop__item.is-active { background: var(--bg-elev); color: var(--fg); }
+  .avatar-drop__item.is-active svg { color: var(--accent); }
+  .avatar-drop__item.is-danger { color: oklch(0.72 0.16 28); }
+  .avatar-drop__item.is-danger:hover { background: oklch(0.42 0.14 28 / 0.18); color: oklch(0.82 0.18 28); }
+  .avatar-drop__tag {
+    margin-left: auto;
+    font-family: var(--font-mono); font-size: 10px;
+    padding: 2px 6px; background: var(--bg-card-2);
+    border: 1px solid var(--line); color: var(--fg-muted); border-radius: 2px;
+  }
+  .avatar-drop__tag.is-admin {
+    background: var(--accent); color: var(--accent-fg); border-color: var(--accent);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .avatar-drop__sep { height: 1px; background: var(--line); margin: 6px 0; }
+
+  </style>
+</head>
+<body data-screen-label="15 Revista — Adaugă Articol">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></symbol>
+      <symbol id="i-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M12 20s-7-4.35-7-10a4 4 0 0 1 7-2.65A4 4 0 0 1 19 10c0 5.65-7 10-7 10z"/></symbol>
+      <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"><path d="M3 6h18v12H3z"/><path d="M3 6l9 7 9-7"/></symbol>
+      <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+      <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+      <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 10v4l13 5V5z"/><path d="M16 9a3 3 0 0 1 0 6"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M14 3h6v18h-6"/><path d="M10 8l-4 4 4 4M6 12h11"/></symbol>
+      <symbol id="i-stack" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/></symbol>
+      <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1z"/><path d="M13 7l4 4"/></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 6l-6 6 6 6"/></symbol>
+      <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><rect x="3" y="4" width="18" height="16"/><circle cx="9" cy="10" r="1.5"/><path d="M3 17l5-5 4 4 3-3 6 6"/></symbol>
+      <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M10 13a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 11a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/></symbol>
+      <symbol id="i-quote" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M6 7h5v6H7l-1 4V7zM14 7h5v6h-4l-1 4V7z"/></symbol>
+      <symbol id="i-list-ul" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1" fill="currentColor"/><circle cx="4.5" cy="12" r="1" fill="currentColor"/><circle cx="4.5" cy="18" r="1" fill="currentColor"/></symbol>
+      <symbol id="i-list-ol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M3 4v4M4 8H2M3 11l-1 1h2v1H2M2 16h3v2H2v2h3"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></symbol>
+      <symbol id="i-codeblock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><rect x="3" y="4" width="18" height="16"/><path d="M9 9l-2 3 2 3M15 9l2 3-2 3"/></symbol>
+      <symbol id="i-hr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M3 12h18"/><path d="M5 7h2M11 7h2M17 7h2M5 17h2M11 17h2M17 17h2" stroke-dasharray="0"/></symbol>
+      <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M9 14l-5-4 5-4"/><path d="M4 10h9a6 6 0 0 1 6 6v2"/></symbol>
+      <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M15 14l5-4-5-4"/><path d="M20 10h-9a6 6 0 0 0-6 6v2"/></symbol>
+      <symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M12 4v12"/><path d="M7 9l5-5 5 5"/><path d="M4 18v2h16v-2"/></symbol>
+      <symbol id="i-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="4"/><path d="M16 8v6a3 3 0 0 0 6 0v-2a10 10 0 1 0-4 8"/></symbol>
+      <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav" aria-label="Principal">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link is-active" href="Revista.html">Revistă</a>
+        <a class="nav__link" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools tools--auth">
+        <button class="icon-btn" aria-label="Caută"><svg><use href="#i-search"/></svg></button>
+        <a class="icon-btn has-badge" href="Cont - Notificări.html" aria-label="Notificări" data-count="3"><svg><use href="#i-bell"/></svg></a>
+        <a class="icon-btn" href="Cont - Favorite.html" aria-label="Favorite"><svg><use href="#i-heart"/></svg></a>
+        <a class="icon-btn has-badge" href="Cont - Mesaje.html" aria-label="Mesaje" data-count="2"><svg><use href="#i-mail"/></svg></a>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <div class="avatar-menu" data-avatar-menu>
+          <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false" data-avatar-toggle>
+            <span class="avatar avatar--md" data-uid="u_8472" data-initials="TI">TI</span>
+            <svg class="avatar-btn__caret" width="12" height="12"><use href="#i-chevron"/></svg>
+          </button>
+          <div class="avatar-drop" role="menu" hidden>
+            <div class="avatar-drop__head">
+              <span class="avatar avatar--lg" data-uid="u_8472" data-initials="TI">TI</span>
+              <div class="avatar-drop__id">
+                <span class="avatar-drop__name">Tudor Ionescu</span>
+                <span class="avatar-drop__handle">@tudor.i · admin</span>
+              </div>
+            </div>
+            <a class="avatar-drop__item" href="Cont - Setari.html" role="menuitem">
+              <svg><use href="#i-cog"/></svg> Setări
+            </a>
+            <a class="avatar-drop__item" href="Cont - Contribuții.html" role="menuitem">
+              <svg><use href="#i-stack"/></svg> Contribuții Tezaur
+              <span class="avatar-drop__tag">12</span>
+            </a>
+            <a class="avatar-drop__item is-active" href="Cont - Articolele Mele.html" role="menuitem">
+              <svg><use href="#i-pen"/></svg> Articolele mele
+              <span class="avatar-drop__tag">8</span>
+            </a>
+            <a class="avatar-drop__item" href="Cont - Anunturile Mele.html" role="menuitem">
+              <svg><use href="#i-megaphone"/></svg> Anunțurile mele
+              <span class="avatar-drop__tag">3</span>
+            </a>
+            <button class="avatar-drop__item" type="button" role="menuitem">
+              <svg><use href="#i-doc"/></svg> Trimite feedback
+            </button>
+            <div class="avatar-drop__sep"></div>
+            <a class="avatar-drop__item" href="Admin - Dashboard.html" role="menuitem">
+              <svg><use href="#i-shield"/></svg> Dashboard
+              <span class="avatar-drop__tag is-admin">admin</span>
+            </a>
+            <div class="avatar-drop__sep"></div>
+            <button class="avatar-drop__item is-danger" type="button" role="menuitem">
+              <svg><use href="#i-logout"/></svg> Ieși din cont
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- STICKY EDITOR BAR -->
+    <div class="ed-bar">
+      <nav class="ed-bar__crumb" aria-label="Breadcrumb">
+        <a href="Cont - Articolele Mele.html" style="display:inline-flex; align-items:center; gap:6px">
+          <svg width="13" height="13"><use href="#i-back"/></svg>
+          Articolele mele
+        </a>
+        <span class="sep">/</span>
+        <a href="Revista.html">Revistă</a>
+        <span class="sep">/</span>
+        <span class="cur">Articol nou</span>
+      </nav>
+      <div class="ed-bar__status" id="autosave">
+        Schiță salvată · acum <span class="v" id="autosave-ago">8s</span>
+      </div>
+      <div class="ed-bar__actions">
+        <button type="button" class="ed-bar__btn ghost" id="btn-preview">
+          <svg width="12" height="12" style="vertical-align:-2px; margin-right:4px"><use href="#i-eye"/></svg>
+          Previzualizare
+        </button>
+        <button type="button" class="ed-bar__btn" id="btn-draft">Salvează schiță</button>
+        <button type="button" class="ed-bar__btn pri" id="btn-submit">Trimite la editor →</button>
+      </div>
+    </div>
+
+    <!-- HERO: kicker + title + deck -->
+    <header class="ed-hero">
+      <div class="ed-hero__pillar">
+        Categorie ·
+        <span class="sel">
+          <select id="pillar">
+            <option>Recenzii</option>
+            <option>Tutoriale</option>
+            <option>Știri</option>
+            <option selected>Interviuri</option>
+            <option>Ghiduri</option>
+            <option>Deep-dive</option>
+          </select>
+        </span>
+      </div>
+
+      <div class="ed-title-wrap">
+        <div class="ed-title" id="title" contenteditable="true" role="textbox"
+             aria-label="Titlu articol"
+             data-placeholder="Titlul articolului. Pe scurt, ce-ai învățat."></div>
+        <div class="ed-title-bar">
+          <span><b id="title-count">0</b> / 90 caractere</span>
+          <span>SEO: <b id="seo-len">aprox. 60–70</b></span>
+        </div>
+      </div>
+
+      <div class="ed-deck-wrap">
+        <div class="ed-deck" id="deck" contenteditable="true" role="textbox"
+             aria-label="Subtitlu / deck"
+             data-placeholder="Deck-ul (subtitlu): 1–2 fraze care prind atenția — promisiune, nu rezumat."></div>
+      </div>
+    </header>
+
+    <!-- TWO-COLUMN: composer + side -->
+    <div class="ed-shell">
+
+      <main>
+
+        <!-- COVER UPLOAD -->
+        <label for="cover-file" class="ed-cover" id="cover" tabindex="0" role="button" aria-label="Adaugă imagine cover">
+          <input type="file" id="cover-file" accept="image/*" hidden />
+          <div class="ed-cover__placeholder">
+            <svg><use href="#i-upload"/></svg>
+            <b>Trage o imagine sau click pentru cover</b>
+            <small>JPG / PNG / WEBP · min 1600×900 · max 8 MB · 16:9 recomandat</small>
+          </div>
+          <img class="ed-cover__img" id="cover-img" alt="" hidden />
+          <div class="ed-cover__bar">
+            <input type="text" placeholder="Caption (vizibil sub imagine în articol)…" />
+            <button type="button" id="cover-replace">Schimbă</button>
+            <button type="button" id="cover-remove">×</button>
+          </div>
+        </label>
+        <div class="ed-cover-meta">
+          <span><b>Cover</b> · prima imagine din articol, vizibilă pe Revista.html și în social embeds</span>
+          <span><a href="#">⌥ Generează variantă 1×1 pentru Instagram</a></span>
+        </div>
+
+        <!-- TIPTAP EDITOR -->
+        <div class="ed-tt">
+
+          <div class="ed-tt__toolbar" id="tt-toolbar">
+
+            <!-- Block type select -->
+            <div class="ed-tt__group">
+              <select class="ed-tt__select" data-tt="block">
+                <option value="paragraph">Paragraf</option>
+                <option value="h1">Titlu H1</option>
+                <option value="h2">Subtitlu H2</option>
+                <option value="h3">Capitol H3</option>
+                <option value="blockquote">Pullquote</option>
+                <option value="codeBlock">Bloc cod</option>
+              </select>
+            </div>
+
+            <!-- Inline marks -->
+            <div class="ed-tt__group">
+              <button type="button" class="ed-tt__btn bold" data-tt="bold" title="Bold (⌘B)">B</button>
+              <button type="button" class="ed-tt__btn ital" data-tt="italic" title="Italic (⌘I)">i</button>
+              <button type="button" class="ed-tt__btn under" data-tt="underline" title="Underline (⌘U)">U</button>
+              <button type="button" class="ed-tt__btn strike" data-tt="strike" title="Strike">S</button>
+              <button type="button" class="ed-tt__btn code-i" data-tt="code" title="Inline cod (⌘E)">&lt;/&gt;</button>
+            </div>
+
+            <!-- Lists & blocks -->
+            <div class="ed-tt__group">
+              <button type="button" class="ed-tt__btn" data-tt="bulletList" title="Listă"><svg><use href="#i-list-ul"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="orderedList" title="Listă numerotată"><svg><use href="#i-list-ol"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="blockquote" title="Citat"><svg><use href="#i-quote"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="codeBlock" title="Cod bloc"><svg><use href="#i-codeblock"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="hr" title="Separator"><svg><use href="#i-hr"/></svg></button>
+            </div>
+
+            <!-- Embeds -->
+            <div class="ed-tt__group">
+              <button type="button" class="ed-tt__btn" data-tt="link" title="Link (⌘K)"><svg><use href="#i-link"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="image" title="Imagine"><svg><use href="#i-image"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="embed" title="Embed YouTube / SoundCloud / Bandcamp"><svg><use href="#i-play"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="mention" title="Mențiune gear din Tezaur (@)"><svg><use href="#i-at"/></svg></button>
+            </div>
+
+            <span class="ed-tt__spacer"></span>
+
+            <!-- Undo / redo -->
+            <div class="ed-tt__group ed-tt__undo">
+              <button type="button" class="ed-tt__btn" data-tt="undo" title="Înapoi (⌘Z)"><svg><use href="#i-undo"/></svg></button>
+              <button type="button" class="ed-tt__btn" data-tt="redo" title="Înainte (⇧⌘Z)"><svg><use href="#i-redo"/></svg></button>
+            </div>
+          </div>
+
+          <div class="ed-tt__area" id="editor"></div>
+
+          <div class="ed-tt__foot">
+            <span class="lbl">
+              <span>Slash · <b>/</b> pentru bloc</span>
+              <span>@ pentru gear Tezaur</span>
+              <span>Markdown · <b>suportat</b></span>
+              <span>Embeds · <b id="embed-count">2 / 8</b></span>
+            </span>
+            <span>
+              <span class="read"><svg width="11" height="11"><use href="#i-clock"/></svg> <b id="read-time">8</b> min citire</span>
+              · <b id="word-count">0</b> cuvinte
+              · <b id="char-count">0</b> caractere
+            </span>
+          </div>
+        </div>
+
+        <!-- GEAR MENTIONS -->
+        <div class="ed-mentions">
+          <header class="ed-mentions__hd">
+            <span>Gear menționat din Tezaur</span>
+            <span class="meta">Autocomplete · max 8 · apare ca card „Gear menționat" în articol</span>
+          </header>
+          <div class="ed-mentions__body">
+            <div class="ed-tag-input" id="mention-input">
+              <span class="ed-tag">
+                <span class="thumb"><span class="gear-fill" data-gear="juno-60"></span></span>
+                Roland Juno-60
+                <span class="x">×</span>
+              </span>
+              <span class="ed-tag">
+                <span class="thumb"><span class="gear-fill" data-gear="juno-106"></span></span>
+                Roland Juno-106
+                <span class="x">×</span>
+              </span>
+              <span class="ed-tag">
+                <span class="thumb"><span class="gear-fill" data-gear="prophet-6"></span></span>
+                Sequential Prophet-6
+                <span class="x">×</span>
+              </span>
+              <input type="text" placeholder="Caută: dx7, sh-101, ms-20…" value="dx7" />
+            </div>
+
+            <div class="ed-mentions__list">
+              <div class="h">Sugestii pentru „dx7" · 3 rezultate</div>
+              <div class="i is-hl">
+                <span class="mini"><span class="gear-fill" data-gear="dx7"></span></span>
+                <span class="nm">
+                  <div class="b">Yamaha DX7 Mk1</div>
+                  <div class="m">FM polifonic · 1983 · 142 utilizatori dețin</div>
+                </span>
+                <span class="key">⏎ ADAUGĂ</span>
+              </div>
+              <div class="i">
+                <span class="mini"><span class="gear-fill" data-gear="dx7-ii"></span></span>
+                <span class="nm">
+                  <div class="b">Yamaha DX7 II FD</div>
+                  <div class="m">FM polifonic · 1987 · 38 utilizatori dețin</div>
+                </span>
+                <span class="key">↓</span>
+              </div>
+              <div class="i">
+                <span class="mini"><span class="gear-fill" data-gear="dx7s"></span></span>
+                <span class="nm">
+                  <div class="b">Yamaha DX7s</div>
+                  <div class="m">FM polifonic · 1986 · 21 utilizatori dețin</div>
+                </span>
+                <span class="key">↓</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FREE TAGS -->
+        <div class="ed-mentions">
+          <header class="ed-mentions__hd">
+            <span>Etichete libere</span>
+            <span class="meta">Max 6 · folosite pentru categorii laterale + SEO</span>
+          </header>
+          <div class="ed-mentions__body">
+            <div class="ed-tag-input">
+              <span class="ed-tag is-text">polifonice<span class="x">×</span></span>
+              <span class="ed-tag is-text">analog<span class="x">×</span></span>
+              <span class="ed-tag is-text">romania<span class="x">×</span></span>
+              <span class="ed-tag is-text">interviu<span class="x">×</span></span>
+              <input type="text" placeholder="Adaugă etichetă și apasă Enter…" />
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- SIDEBAR -->
+      <aside class="ed-side">
+
+        <!-- Publishing -->
+        <div class="ed-side__block">
+          <header class="ed-side__head">Publicare <span class="num">01</span></header>
+          <div class="ed-side__body">
+            <div style="margin-bottom: 14px;">
+              <span class="ed-status-pill" data-s="draft" id="status-pill">Schiță</span>
+            </div>
+
+            <div class="ed-vis" role="radiogroup" aria-label="Vizibilitate" id="vis">
+              <button type="button" class="ed-vis__row is-active" data-vis="draft" role="radio" aria-checked="true">
+                <span class="ed-vis__radio"></span>
+                <span class="ed-vis__nm">
+                  <span class="b">Schiță</span>
+                  <span class="s">Numai tu vezi · autosave la 12s</span>
+                </span>
+              </button>
+              <button type="button" class="ed-vis__row" data-vis="review" role="radio" aria-checked="false">
+                <span class="ed-vis__radio"></span>
+                <span class="ed-vis__nm">
+                  <span class="b">Trimite la editor</span>
+                  <span class="s">Andrei Mihalache · răspuns &lt; 24h</span>
+                </span>
+              </button>
+              <button type="button" class="ed-vis__row" data-vis="scheduled" role="radio" aria-checked="false">
+                <span class="ed-vis__radio"></span>
+                <span class="ed-vis__nm">
+                  <span class="b">Programare</span>
+                  <span class="s">Vine joi, 21 mai · 09:00</span>
+                </span>
+              </button>
+              <button type="button" class="ed-vis__row" data-vis="published" role="radio" aria-checked="false">
+                <span class="ed-vis__radio"></span>
+                <span class="ed-vis__nm">
+                  <span class="b">Publică direct</span>
+                  <span class="s">Doar admin · skip moderare</span>
+                </span>
+              </button>
+            </div>
+
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 1px;">
+              <div class="ed-row">
+                <span class="k">Autor</span>
+                <span class="v"><div class="ed-author">
+                  <span class="avatar avatar--sm" data-uid="u_8472">TI</span>
+                  <span>
+                    <div class="ed-author__nm" style="font-size:11px">Tudor Ionescu</div>
+                  </span>
+                </div></span>
+              </div>
+              <div class="ed-row">
+                <span class="k">Creat</span>
+                <span class="v">14 mai, 11:42</span>
+              </div>
+              <div class="ed-row">
+                <span class="k">Modificat</span>
+                <span class="v">acum 8s</span>
+              </div>
+              <div class="ed-row">
+                <span class="k">Versiuni</span>
+                <span class="v"><a href="#">14 revizii</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- URL / SEO -->
+        <div class="ed-side__block">
+          <header class="ed-side__head">URL &amp; SEO <span class="num">02</span></header>
+          <div class="ed-side__body">
+            <label class="ed-row" style="border:0; padding:0 0 6px;">
+              <span class="k">slug url</span>
+            </label>
+            <div class="ed-slug">
+              <span class="pfx">sintezaur.ro/revista/</span>
+              <input type="text" id="slug" value="cum-suna-romania-prin-juno-60" />
+            </div>
+            <div class="ed-meta-line">
+              <span>SEO title · auto din titlu</span>
+              <span><b id="slug-len">28</b> / 80</span>
+            </div>
+
+            <div style="margin-top: 14px;">
+              <label class="ed-row" style="border:0; padding:0 0 6px;">
+                <span class="k">Meta description</span>
+              </label>
+              <textarea class="ed-small-input" rows="3" id="meta-desc"
+                placeholder="120–160 caractere · apare în Google + share-uri">Portret cu Khidja și colecția lor de polifonice analogice. O conversație despre tuning instabil, despre Bucureștiul de noapte și despre de ce un Juno reparat de mâna a treia poate fi cel mai bun preț pe care o să-l plătești vreodată pentru un sunet.</textarea>
+              <div class="ed-meta-line">
+                <span><b>Sweet spot</b> 120–160</span>
+                <span><b id="meta-len">278</b> / 160 <span style="color:oklch(0.72 0.16 60)">· peste</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity log -->
+        <div class="ed-side__block">
+          <header class="ed-side__head">Activitate <span class="num">03</span></header>
+          <div class="ed-side__body">
+            <ul class="ed-log">
+              <li class="is-now"><span class="t">acum 8s</span><span class="m">Autosave <b>v14</b></span></li>
+              <li><span class="t">acum 4m</span><span class="m">Adăugat <b>Sequential Prophet-6</b> la mentions</span></li>
+              <li><span class="t">acum 18m</span><span class="m">Upload cover · <b>juno60-khidja.jpg</b> 1920×1080 · 412KB</span></li>
+              <li><span class="t">acum 2h</span><span class="m">Creat draft · pillar <b>Interviu</b></span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Quick tips -->
+        <div class="ed-side__block">
+          <header class="ed-side__head">Cum scrii bine <span class="num">04</span></header>
+          <div class="ed-side__body">
+            <ul class="ed-tips">
+              <li><span class="n">01</span><span><b>Lede-ul</b> spune ce-ai aflat, nu ce vei spune. Promisiune, nu cuprins.</span></li>
+              <li><span class="n">02</span><span><b>Citează concret</b> — euro, ani, modele, locuri. Generalul plictisește.</span></li>
+              <li><span class="n">03</span><span><b>Taggează gear-ul</b> cu @ — articolul apare automat pe pagina aparatului.</span></li>
+              <li><span class="n">04</span><span><b>Pullquote</b> la 2/3 din articol. Una. Niciodată două.</span></li>
+              <li><span class="n">05</span><span><b>Foto cu sursă</b> — fără sursă, intră în coadă pentru clearance.</span></li>
+            </ul>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col"><h4>// Platformă</h4><ul><li><a href="Tezaur.html">Tezaur</a></li><li><a href="Bazar.html">Bazar</a></li><li><a href="Revista.html">Revistă</a></li><li><a href="Forum.html">Forum</a></li></ul></div>
+        <div class="foot__col"><h4>// Sintezaur</h4><ul><li><a href="#">Despre</a></li><li><a href="#">Contact</a></li><li><a href="#">Termeni</a></li><li><a href="#">Confidențialitate</a></li></ul></div>
+        <div class="foot__col"><h4>// Social</h4><ul><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li><li><a href="#">Bandcamp</a></li><li><a href="#">SoundCloud</a></li></ul></div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale"><span class="is-active">RO</span><span>EN — în lucru</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       TIPTAP — real editor via esm.sh
+       ============================================================ -->
+  <script type="module">
+    import { Editor } from 'https://esm.sh/@tiptap/core@2.10.4';
+    import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.10.4';
+    import Link from 'https://esm.sh/@tiptap/extension-link@2.10.4';
+    import Image from 'https://esm.sh/@tiptap/extension-image@2.10.4';
+    import Underline from 'https://esm.sh/@tiptap/extension-underline@2.10.4';
+    import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.10.4';
+    import CharacterCount from 'https://esm.sh/@tiptap/extension-character-count@2.10.4';
+    import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@2.10.4';
+
+    const editor = new Editor({
+      element: document.getElementById('editor'),
+      extensions: [
+        StarterKit.configure({
+          heading: { levels: [1, 2, 3] },
+        }),
+        Underline,
+        Link.configure({ openOnClick: false, HTMLAttributes: { rel: 'noopener', target: '_blank' } }),
+        Image.configure({ inline: false, allowBase64: true }),
+        Placeholder.configure({
+          placeholder: 'Începe să scrii… „/" pentru blocuri, „@" pentru gear din Tezaur. Lipește URL YouTube / SoundCloud / Bandcamp pentru embeds.',
+        }),
+        CharacterCount,
+        TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      ],
+      content: `
+        <p class="lede">La etajul doi al unei case interbelice din Cotroceni, două Juno-uri stau spate-n spate pe aceeași masă de stejar. Unul din 1982, primul an de producție. Celălalt, un Juno-106 din 1984 — cel cu MIDI, cel pe care toată lumea îl rupea. <strong>Khidja</strong> — Florentin și Andrei — le-au cumpărat la un an distanță, pe Reverb, ambele cu service făcut la Berlin.</p>
+
+        <p>Am ajuns la ei pe la șase după-amiază, când lumina cădea exact peste un perete de 70 de CD-uri cu fond galben — Pet Shop Boys, Joe Meek, Tony Allen, Ata Kak. „Astea sunt jumătate din motivul pentru care am cumpărat Juno-ul," spune Andrei.</p>
+
+        <h2>Întâi a fost un DX7. Apoi a venit Juno-ul</h2>
+
+        <p>„Primul nostru sintetizator a fost un <a href="#">DX7 Mk1</a> cumpărat la Cluj în 2010, două sute de euro," spune Florentin. „Era exact ce ne trebuia atunci — bell-uri, basuri FM, sunete metalice. Dar după șase luni am realizat că nu avea ce voiam pentru pads."</p>
+
+        <p>Au cumpărat un <em>Juno-106</em> prin '12 — la 800 de euro, din Germania, cu vocile reparate. Juno-60 a venit zece ani mai târziu, în 2022.</p>
+
+        <blockquote><p>Plug-in-urile sunt aproape, dar nu sunt acolo. Sunetul ăla nu îl mai face nimeni — și nici nu o să-l mai facă vreodată.</p></blockquote>
+
+        <h3>Despre tuning instabil</h3>
+
+        <p>„Juno-60 nu se dezacordează — asta e diferența mare față de Prophet sau Polysix," spune Andrei. „Are DCO-uri, oscilatoare controlate <code>digital</code>. Sunetul rămâne analog, dar tuning-ul e perfect, mereu."</p>
+
+        <ul>
+          <li>Octombrie 2010 · DX7 Mk1 · Cluj · 200 €</li>
+          <li>Martie 2012 · Juno-106 · Germania · 800 €</li>
+          <li>Aprilie 2022 · Juno-60 · Schneider's Laden Berlin · 2 100 €</li>
+        </ul>
+
+        <hr />
+
+        <p>[Continuă să scrii…]</p>
+      `,
+      onUpdate: () => updateStats(),
+      onSelectionUpdate: () => updateToolbar(),
+      onTransaction: () => updateToolbar(),
+    });
+
+    // Expose for slash / external buttons
+    window.__editor = editor;
+
+    // Toolbar wire-up
+    const toolbar = document.getElementById('tt-toolbar');
+    const blockSelect = toolbar.querySelector('[data-tt="block"]');
+
+    const actions = {
+      bold:       () => editor.chain().focus().toggleBold().run(),
+      italic:     () => editor.chain().focus().toggleItalic().run(),
+      underline:  () => editor.chain().focus().toggleUnderline().run(),
+      strike:     () => editor.chain().focus().toggleStrike().run(),
+      code:       () => editor.chain().focus().toggleCode().run(),
+      bulletList: () => editor.chain().focus().toggleBulletList().run(),
+      orderedList:() => editor.chain().focus().toggleOrderedList().run(),
+      blockquote: () => editor.chain().focus().toggleBlockquote().run(),
+      codeBlock:  () => editor.chain().focus().toggleCodeBlock().run(),
+      hr:         () => editor.chain().focus().setHorizontalRule().run(),
+      undo:       () => editor.chain().focus().undo().run(),
+      redo:       () => editor.chain().focus().redo().run(),
+      link: () => {
+        const prev = editor.getAttributes('link').href;
+        const url = window.prompt('URL (gol pentru a șterge):', prev || 'https://');
+        if (url === null) return;
+        if (url === '') { editor.chain().focus().extendMarkRange('link').unsetLink().run(); return; }
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+      },
+      image: () => {
+        const url = window.prompt('URL imagine:', 'https://');
+        if (url) editor.chain().focus().setImage({ src: url, alt: '' }).run();
+      },
+      embed: () => {
+        const url = window.prompt('YouTube / SoundCloud / Bandcamp URL:', 'https://');
+        if (url) editor.chain().focus().insertContent(`<p><a href="${url}">${url}</a></p>`).run();
+      },
+      mention: () => {
+        editor.chain().focus().insertContent('@').run();
+        document.getElementById('mention-input').querySelector('input').focus();
+      }
+    };
+
+    toolbar.querySelectorAll('[data-tt]').forEach(btn => {
+      const k = btn.dataset.tt;
+      if (k === 'block') return;
+      btn.addEventListener('click', () => actions[k] && actions[k]());
+    });
+
+    blockSelect.addEventListener('change', (e) => {
+      const v = e.target.value;
+      const chain = editor.chain().focus();
+      if (v === 'paragraph') chain.setParagraph().run();
+      else if (v === 'h1') chain.toggleHeading({ level: 1 }).run();
+      else if (v === 'h2') chain.toggleHeading({ level: 2 }).run();
+      else if (v === 'h3') chain.toggleHeading({ level: 3 }).run();
+      else if (v === 'blockquote') chain.toggleBlockquote().run();
+      else if (v === 'codeBlock') chain.toggleCodeBlock().run();
+    });
+
+    function updateToolbar() {
+      const checks = {
+        bold:        editor.isActive('bold'),
+        italic:      editor.isActive('italic'),
+        underline:   editor.isActive('underline'),
+        strike:      editor.isActive('strike'),
+        code:        editor.isActive('code'),
+        bulletList:  editor.isActive('bulletList'),
+        orderedList: editor.isActive('orderedList'),
+        blockquote:  editor.isActive('blockquote'),
+        codeBlock:   editor.isActive('codeBlock'),
+        link:        editor.isActive('link'),
+      };
+      toolbar.querySelectorAll('[data-tt]').forEach(btn => {
+        const k = btn.dataset.tt;
+        if (checks[k] !== undefined) btn.classList.toggle('is-active', !!checks[k]);
+      });
+      // sync block select
+      if (editor.isActive('heading', { level: 1 })) blockSelect.value = 'h1';
+      else if (editor.isActive('heading', { level: 2 })) blockSelect.value = 'h2';
+      else if (editor.isActive('heading', { level: 3 })) blockSelect.value = 'h3';
+      else if (editor.isActive('blockquote')) blockSelect.value = 'blockquote';
+      else if (editor.isActive('codeBlock')) blockSelect.value = 'codeBlock';
+      else blockSelect.value = 'paragraph';
+    }
+
+    function updateStats() {
+      const text = editor.getText();
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const chars = editor.storage.characterCount ? editor.storage.characterCount.characters() : text.length;
+      document.getElementById('word-count').textContent = words.toLocaleString('ro');
+      document.getElementById('char-count').textContent = chars.toLocaleString('ro');
+      document.getElementById('read-time').textContent = Math.max(1, Math.round(words / 220));
+      flagAutosave();
+    }
+
+    // autosave indicator
+    let saveT;
+    function flagAutosave() {
+      const el = document.getElementById('autosave');
+      el.classList.add('is-saving');
+      el.innerHTML = `Salvez schiță…`;
+      clearTimeout(saveT);
+      saveT = setTimeout(() => {
+        el.classList.remove('is-saving');
+        el.innerHTML = `Schiță salvată · acum <span class="v" id="autosave-ago">1s</span>`;
+        bumpAutosaveAge();
+      }, 700);
+    }
+    let autosaveSeconds = 8;
+    function bumpAutosaveAge() {
+      autosaveSeconds = 1;
+      clearInterval(window.__autosaveTick);
+      window.__autosaveTick = setInterval(() => {
+        autosaveSeconds += 1;
+        const ago = document.getElementById('autosave-ago');
+        if (!ago) return;
+        const s = autosaveSeconds;
+        ago.textContent = s < 60 ? `${s}s` : s < 3600 ? `${Math.floor(s/60)}m` : `${Math.floor(s/3600)}h`;
+      }, 1000);
+    }
+    bumpAutosaveAge();
+    updateStats();
+    updateToolbar();
+  </script>
+
+  <!-- ============================================================
+       NON-EDITOR INTERACTIONS (theme, avatar, title/deck, cover, etc.)
+       ============================================================ -->
+  <script>
+    // Theme toggle
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    // Inject gear illustrations
+    function paintGears() {
+      document.querySelectorAll('[data-gear]:not([data-painted])').forEach(el => {
+        const key = el.dataset.gear;
+        if (window.GearSvg && window.GearSvg[key]) {
+          el.insertAdjacentHTML('afterbegin', window.GearSvg[key]());
+        }
+        el.dataset.painted = '1';
+      });
+    }
+    paintGears();
+
+    // Avatar dropdown
+    (function () {
+      const menu = document.querySelector('[data-avatar-menu]');
+      if (!menu) return;
+      const btn = menu.querySelector('[data-avatar-toggle]');
+      const drop = menu.querySelector('.avatar-drop');
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        drop.hidden = open;
+      });
+      document.addEventListener('click', e => {
+        if (!menu.contains(e.target)) {
+          btn.setAttribute('aria-expanded', 'false'); drop.hidden = true;
+        }
+      });
+    })();
+
+    // Title + Deck plain-text contenteditable
+    const title = document.getElementById('title');
+    const titleCount = document.getElementById('title-count');
+    title.textContent = 'Cum sună România prin Juno-60';
+    function syncTitle() {
+      const v = title.innerText || '';
+      titleCount.textContent = v.length;
+      // Slug auto-gen
+      const slug = v.toLowerCase()
+        .replace(/[ăâ]/g, 'a').replace(/[î]/g, 'i').replace(/[șş]/g, 's').replace(/[țţ]/g, 't')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+      const slugEl = document.getElementById('slug');
+      if (slugEl && !slugEl.dataset.touched) slugEl.value = slug;
+      const slugLen = document.getElementById('slug-len');
+      if (slugLen) slugLen.textContent = (slugEl ? slugEl.value : slug).length;
+    }
+    title.addEventListener('input', syncTitle);
+    title.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+    syncTitle();
+
+    const deck = document.getElementById('deck');
+    deck.textContent = 'Portret cu Khidja și colecția lor de polifonice analogice. O conversație despre tuning instabil, despre Bucureștiul de noapte și despre de ce un Juno reparat de mâna a treia poate fi cel mai bun preț pe care o să-l plătești vreodată pentru un sunet.';
+
+    // Slug field — user can edit, then auto-sync stops
+    const slugEl = document.getElementById('slug');
+    slugEl.addEventListener('input', () => {
+      slugEl.dataset.touched = '1';
+      document.getElementById('slug-len').textContent = slugEl.value.length;
+    });
+
+    // Meta description count
+    const metaDesc = document.getElementById('meta-desc');
+    const metaLen = document.getElementById('meta-len');
+    function syncMeta() {
+      const l = metaDesc.value.length;
+      metaLen.innerHTML = l + ' / 160';
+      if (l > 160) metaLen.innerHTML += ' <span style="color:oklch(0.72 0.16 60)">· peste</span>';
+      else if (l < 120) metaLen.innerHTML += ' <span style="color:var(--fg-subtle)">· sub</span>';
+    }
+    metaDesc.addEventListener('input', syncMeta); syncMeta();
+
+    // Cover upload
+    const coverLabel = document.getElementById('cover');
+    const coverFile = document.getElementById('cover-file');
+    const coverImg = document.getElementById('cover-img');
+    function showCover(src) {
+      coverImg.src = src; coverImg.hidden = false;
+      coverLabel.classList.add('has-image');
+    }
+    function clearCover() {
+      coverImg.src = ''; coverImg.hidden = true;
+      coverLabel.classList.remove('has-image');
+    }
+    coverFile.addEventListener('change', e => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      showCover(url);
+    });
+    document.getElementById('cover-remove').addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation(); clearCover();
+    });
+    document.getElementById('cover-replace').addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation(); coverFile.click();
+    });
+    // drag-drop
+    ['dragover','dragenter'].forEach(ev => coverLabel.addEventListener(ev, e => { e.preventDefault(); coverLabel.style.borderColor = 'var(--accent)'; }));
+    ['dragleave','drop'].forEach(ev => coverLabel.addEventListener(ev, e => { e.preventDefault(); coverLabel.style.borderColor = ''; }));
+    coverLabel.addEventListener('drop', e => {
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f && f.type.startsWith('image/')) showCover(URL.createObjectURL(f));
+    });
+    // Seed cover image
+    showCover('https://15questions.net/site_media/2023/2/tools-creation-roland-juno-60-787.jpg');
+    coverImg.onerror = () => clearCover();
+
+    // Visibility radio
+    const visGroup = document.getElementById('vis');
+    const statusPill = document.getElementById('status-pill');
+    const statusLabels = {
+      draft: { label: 'Schiță', s: 'draft' },
+      review: { label: 'În moderare', s: 'review' },
+      scheduled: { label: 'Programat', s: 'scheduled' },
+      published: { label: 'Publicat', s: 'published' },
+    };
+    visGroup.addEventListener('click', e => {
+      const row = e.target.closest('.ed-vis__row');
+      if (!row) return;
+      visGroup.querySelectorAll('.ed-vis__row').forEach(r => {
+        r.classList.remove('is-active');
+        r.setAttribute('aria-checked', 'false');
+      });
+      row.classList.add('is-active');
+      row.setAttribute('aria-checked', 'true');
+      const k = row.dataset.vis;
+      statusPill.dataset.s = statusLabels[k].s;
+      statusPill.textContent = statusLabels[k].label;
+    });
+
+    // Submit / draft / preview buttons — wire to status
+    document.getElementById('btn-submit').addEventListener('click', () => {
+      const reviewRow = visGroup.querySelector('[data-vis="review"]');
+      reviewRow.click();
+      reviewRow.scrollIntoView({ block: 'nearest' });
+    });
+    document.getElementById('btn-draft').addEventListener('click', () => {
+      const el = document.getElementById('autosave');
+      el.classList.add('is-saving');
+      el.innerHTML = 'Salvez schiță…';
+      setTimeout(() => {
+        el.classList.remove('is-saving');
+        el.innerHTML = `Schiță salvată · acum <span class="v" id="autosave-ago">0s</span>`;
+      }, 600);
+    });
+    document.getElementById('btn-preview').addEventListener('click', () => {
+      window.open('Revista - Cum suna Romania prin Juno-60.html', '_blank');
+    });
+
+    // Tag remove (×)
+    document.querySelectorAll('.ed-tag .x').forEach(x => {
+      x.addEventListener('click', e => {
+        e.preventDefault();
+        x.closest('.ed-tag').remove();
+      });
+    });
+
+    // mention list click — adds a chip
+    document.querySelectorAll('.ed-mentions__list .i').forEach(item => {
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.ed-mentions__list .i').forEach(i => i.classList.remove('is-hl'));
+        item.classList.add('is-hl');
+      });
+    });
+
+    // Pillar select → update title kicker
+    document.getElementById('pillar').addEventListener('change', e => {
+      // (just illustrative)
+    });
+  </script>
+
+</body>
+</html>

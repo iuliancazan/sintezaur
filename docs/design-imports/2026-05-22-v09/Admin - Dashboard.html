@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark" data-density="comfortable">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sintezaur Admin — Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.admin.css" />
+  <script src="reveals.js"></script>
+</head>
+<body class="admin-body" data-screen-label="Admin · Dashboard">
+
+  <!-- SVG sprite -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+      <symbol id="i-chev-l" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M14 6l-6 6 6 6"/>
+      </symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+      </symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </symbol>
+      <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/>
+        <circle cx="17" cy="9" r="2.5"/><path d="M16 14a5 5 0 0 1 5.5 5"/>
+      </symbol>
+      <symbol id="i-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="3" y="4" width="18" height="4"/><path d="M5 8v12h14V8"/><path d="M10 12h4"/>
+      </symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="8" cy="9" r="1.5"/>
+      </symbol>
+      <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 4h7a3 3 0 0 1 3 3v13"/><path d="M20 4h-7a3 3 0 0 0-3 3v13"/>
+        <path d="M4 4v15h7"/><path d="M20 4v15h-7"/>
+      </symbol>
+      <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 5h16v12H8l-4 4V5z"/>
+      </symbol>
+      <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M5 21V4h12l-2 4 2 4H5"/>
+      </symbol>
+      <symbol id="i-log" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <rect x="4" y="3" width="16" height="18"/><path d="M8 8h8M8 12h8M8 16h5"/>
+      </symbol>
+      <symbol id="i-coins" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <ellipse cx="9" cy="7" rx="6" ry="3"/><path d="M3 7v5c0 1.7 2.7 3 6 3s6-1.3 6-3V7"/>
+        <path d="M3 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/>
+        <ellipse cx="17" cy="14" rx="4" ry="2"/><path d="M13 14v5c0 1.1 1.8 2 4 2s4-.9 4-2v-5"/>
+      </symbol>
+      <symbol id="i-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M12 2l3 4 5 1-3 4 1 5-6-2-6 2 1-5-3-4 5-1z"/>
+      </symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 7h12M4 12h8M4 17h14"/><circle cx="18" cy="7" r="2"/><circle cx="14" cy="12" r="2"/><circle cx="20" cy="17" r="2"/>
+      </symbol>
+      <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <path d="M12 3l10 18H2z"/><path d="M12 10v5"/><circle cx="12" cy="18" r="0.7" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r="0.7" fill="currentColor"/>
+      </symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square">
+        <path d="M12 5v14M5 12h14"/>
+      </symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 11a8 8 0 1 1-2.3-5.7L20 8"/><path d="M20 4v4h-4"/>
+      </symbol>
+      <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M5 5h7M5 5v14h14v-7M14 4h6v6M11 13l9-9"/>
+      </symbol>
+      <symbol id="i-density" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 5h16M4 12h16M4 19h16"/>
+      </symbol>
+      <symbol id="i-density-c" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 8h16M4 12h16M4 16h16"/>
+      </symbol>
+      <symbol id="i-density-s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M4 5h16M4 12h16M4 19h16"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="admin-shell" id="shell">
+
+    <!-- ============================================================ SIDEBAR -->
+    <aside class="side">
+      <a class="side__brand" href="Home.html" title="Înapoi la public site">
+        <img src="assets/logo-black.png" alt="" />
+        <span class="side__brand-text">Sintezaur</span>
+      </a>
+
+      <div class="side__scroll">
+        <div class="side__group">Operare</div>
+        <a class="side__item is-active" href="Admin - Dashboard.html">
+          <svg><use href="#i-grid"/></svg>
+          <span class="side__item-label">Dashboard</span>
+        </a>
+        <a class="side__item" href="Admin - Useri.html">
+          <svg><use href="#i-users"/></svg>
+          <span class="side__item-label">Useri</span>
+          <span class="side__item-badge is-warn">3</span>
+        </a>
+
+        <div class="side__group">Conținut</div>
+        <a class="side__item" href="#">
+          <svg><use href="#i-archive"/></svg>
+          <span class="side__item-label">Tezaur</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-tag"/></svg>
+          <span class="side__item-label">Bazar</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-book"/></svg>
+          <span class="side__item-label">Revistă</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-chat"/></svg>
+          <span class="side__item-label">Forum</span>
+        </a>
+
+        <div class="side__group">Sistem</div>
+        <a class="side__item" href="#">
+          <svg><use href="#i-flag"/></svg>
+          <span class="side__item-label">Rapoarte</span>
+          <span class="side__item-badge">7</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-log"/></svg>
+          <span class="side__item-label">Audit log</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-coins"/></svg>
+          <span class="side__item-label">Currency rates</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-badge"/></svg>
+          <span class="side__item-label">Badges</span>
+        </a>
+        <a class="side__item" href="#">
+          <svg><use href="#i-sliders"/></svg>
+          <span class="side__item-label">Config</span>
+        </a>
+      </div>
+
+      <div class="side__foot">
+        <button class="side__collapse" data-collapse>
+          <svg><use href="#i-chev-l"/></svg>
+          <span>Restrânge</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ============================================================ MAIN -->
+    <main class="main">
+
+      <!-- TOP BAR -->
+      <header class="atop">
+        <label class="atop__search" for="top-search">
+          <svg><use href="#i-search"/></svg>
+          <input id="top-search" type="text" placeholder="Caută user, gear, listing, articol, thread… (ID sau text)" />
+          <kbd>⌘K</kbd>
+        </label>
+        <div class="atop__tools">
+          <button class="atop__btn" aria-label="Notificări"><svg><use href="#i-bell"/></svg><span class="dot-warn"></span></button>
+          <button class="atop__btn" data-theme-toggle aria-label="Schimbă tema">
+            <svg class="icon-sun"><use href="#i-sun"/></svg>
+            <svg class="icon-moon"><use href="#i-moon"/></svg>
+          </button>
+          <button class="atop__btn atop__density" data-density-toggle aria-label="Schimbă densitatea" title="Densitate: comfortable">
+            <svg><use href="#i-density"/></svg>
+            <span class="atop__density-dot"></span>
+          </button>
+          <a class="atop__btn" href="Home.html" title="Vezi site-ul public"><svg><use href="#i-external"/></svg></a>
+          <button class="atop__avatar">
+            <span class="avt">AC</span>
+            <span style="text-align:left">
+              <span class="name">Alexandru C.</span>
+              <span class="role">admin</span>
+            </span>
+            <span class="chev">▾</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="main__pad">
+
+        <!-- Page header -->
+        <div class="ph-row">
+          <div class="ph-title-block">
+            <span class="ph-eyebrow">/admin</span>
+            <h1 class="ph-title">Dashboard</h1>
+            <p class="ph-sub">Vedere de ansamblu Sintezaur · ultima actualizare acum 12 sec.</p>
+          </div>
+          <div class="ph-actions">
+            <button class="btn btn--ghost"><svg><use href="#i-refresh"/></svg>Reîmprospătează</button>
+            <button class="btn btn--primary"><svg><use href="#i-plus"/></svg>Acțiune rapidă</button>
+          </div>
+        </div>
+
+        <!-- Stat strip -->
+        <div class="stat-strip">
+          <div class="stat">
+            <span class="stat__label">Utilizatori activi</span>
+            <span class="stat__num">2,418</span>
+            <span class="stat__delta">▲ +47 săptămâna asta</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Listings active</span>
+            <span class="stat__num">1,247</span>
+            <span class="stat__delta">▲ +12 azi</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Articole publicate</span>
+            <span class="stat__num">89</span>
+            <span class="stat__delta">▲ +3 săptămâna asta</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Threaduri active</span>
+            <span class="stat__num">142</span>
+            <span class="stat__delta">▲ +18 azi</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Rapoarte open</span>
+            <span class="stat__corner">acțiune</span>
+            <span class="stat__num is-warn">7</span>
+            <span class="stat__delta is-danger">▲ +2 azi</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Tranzacții confirmate</span>
+            <span class="stat__num">234</span>
+            <span class="stat__delta is-flat">— total ultimele 30 zile</span>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="alerts">
+          <div class="alert is-danger">
+            <span class="alert__ico"><svg><use href="#i-flag"/></svg></span>
+            <div class="alert__body">
+              <strong>7 rapoarte</strong> în coadă, dintre care 2 critice (CSAM, hate speech). SLA depășit pe <code>rpt_2814</code>.
+            </div>
+            <a class="alert__cta" href="#">Rezolvă acum →</a>
+          </div>
+          <div class="alert is-warn">
+            <span class="alert__ico"><svg><use href="#i-alert"/></svg></span>
+            <div class="alert__body">
+              Currency rate <code>EUR/RON</code> nu a fost actualizat de <strong>35 zile</strong>. Listing-urile cu prețuri afișate dual pot fi inexacte.
+            </div>
+            <a class="alert__cta" href="#">Actualizează →</a>
+          </div>
+          <div class="alert">
+            <span class="alert__ico"><svg><use href="#i-info"/></svg></span>
+            <div class="alert__body">
+              <strong>3 users</strong> awaiting approval pentru rolul <code>editor</code> (@radu.m, @ioana.b, @stefan.p).
+            </div>
+            <a class="alert__cta" href="#">Vezi cererile →</a>
+          </div>
+        </div>
+
+        <!-- Two-column: activity feed + quick actions -->
+        <div class="grid-main-side">
+
+          <!-- Recent activity -->
+          <section class="card">
+            <header class="card__head">
+              <h2 class="card__title">Activitate recentă</h2>
+              <span class="card__head-meta">audit_log · last 20 entries</span>
+            </header>
+            <div class="card__body--flush" id="feed"></div>
+            <div class="pager">
+              <span>Afișând <b style="color:var(--fg)">1–20</b> din 14,728 entries</span>
+              <a class="btn btn--quiet btn--sm" href="#">Deschide audit log complet →</a>
+            </div>
+          </section>
+
+          <!-- Quick actions -->
+          <aside>
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Acțiuni rapide</h2>
+              </header>
+              <div class="card__body card__body--flush" style="padding:0">
+                <div class="qa-grid qa-grid--stack">
+                  <a class="qa-item" href="#">
+                    <span class="qa-item__ico"><svg><use href="#i-archive"/></svg></span>
+                    <div>
+                      <div class="qa-item__title">Adaugă gear nou</div>
+                      <div class="qa-item__sub">/admin/tezaur/new</div>
+                    </div>
+                    <span class="qa-item__arr"><svg width="14" height="14"><use href="#i-arrow"/></svg></span>
+                  </a>
+                  <a class="qa-item" href="#">
+                    <span class="qa-item__ico"><svg><use href="#i-book"/></svg></span>
+                    <div>
+                      <div class="qa-item__title">Articol nou</div>
+                      <div class="qa-item__sub">/admin/revista/new</div>
+                    </div>
+                    <span class="qa-item__arr"><svg width="14" height="14"><use href="#i-arrow"/></svg></span>
+                  </a>
+                  <a class="qa-item" href="#">
+                    <span class="qa-item__ico"><svg><use href="#i-coins"/></svg></span>
+                    <div>
+                      <div class="qa-item__title">Update currency rate</div>
+                      <div class="qa-item__sub">/admin/currency-rates</div>
+                    </div>
+                    <span class="qa-item__arr"><svg width="14" height="14"><use href="#i-arrow"/></svg></span>
+                  </a>
+                  <a class="qa-item" href="#">
+                    <span class="qa-item__ico"><svg><use href="#i-flag"/></svg></span>
+                    <div>
+                      <div class="qa-item__title">Verifică rapoarte</div>
+                      <div class="qa-item__sub">/admin/reports · 7 deschise</div>
+                    </div>
+                    <span class="qa-item__arr"><svg width="14" height="14"><use href="#i-arrow"/></svg></span>
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Stats by section mini -->
+            <section class="card">
+              <header class="card__head">
+                <h2 class="card__title">Pulse pe secțiuni</h2>
+                <span class="card__head-meta">azi · 14 mai</span>
+              </header>
+              <div class="card__body" style="padding:0">
+                <div style="display:flex;flex-direction:column">
+                  <div style="display:grid;grid-template-columns:1fr auto auto;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);align-items:center">
+                    <span style="font-size:13px;font-weight:600">Tezaur</span>
+                    <span class="tbl__mono">847 gear</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--ok)">+2</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr auto auto;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);align-items:center">
+                    <span style="font-size:13px;font-weight:600">Bazar</span>
+                    <span class="tbl__mono">1,247 listings</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--ok)">+12</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr auto auto;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);align-items:center">
+                    <span style="font-size:13px;font-weight:600">Revistă</span>
+                    <span class="tbl__mono">89 articole</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--ok)">+1</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:1fr auto auto;gap:14px;padding:12px 20px;align-items:center">
+                    <span style="font-size:13px;font-weight:600">Forum</span>
+                    <span class="tbl__mono">142 thr · 3,891 msg</span>
+                    <span style="font-family:var(--font-mono);font-size:11px;color:var(--ok)">+18</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function theme() {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = (m) => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // ---------- SIDEBAR COLLAPSE ----------
+    (function collapse(){
+      const KEY = 'sintezaur-admin-side';
+      const shell = document.getElementById('shell');
+      const btn = document.querySelector('[data-collapse]');
+      if (localStorage.getItem(KEY) === '1') shell.classList.add('is-collapsed');
+      btn.addEventListener('click', () => {
+        shell.classList.toggle('is-collapsed');
+        localStorage.setItem(KEY, shell.classList.contains('is-collapsed') ? '1' : '0');
+      });
+    })();
+
+    // ---------- DENSITY TOGGLE ----------
+    (function density(){
+      const KEY = 'sintezaur-admin-density';
+      const ORDER = ['compact', 'comfortable', 'spacious'];
+      const LABEL = { compact: 'Compact', comfortable: 'Comfortable', spacious: 'Spațios' };
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-density-toggle]');
+      const apply = (d) => {
+        root.setAttribute('data-density', d);
+        btn.title = 'Densitate: ' + LABEL[d] + ' · click pentru următoarea';
+        btn.setAttribute('aria-label', 'Densitate: ' + LABEL[d]);
+      };
+      apply(localStorage.getItem(KEY) || 'comfortable');
+      btn.addEventListener('click', () => {
+        const cur = root.getAttribute('data-density') || 'comfortable';
+        const next = ORDER[(ORDER.indexOf(cur) + 1) % ORDER.length];
+        localStorage.setItem(KEY, next);
+        apply(next);
+      });
+    })();
+
+    // ---------- FEED DATA ----------
+    const FEED = [
+      { t: "14:32:08", actor: "AC", actorName: "alex.c",     action: "UPDATE",  klass: "is-update", target: "User @radu.m → role: editor",        ref: "usr_8421" },
+      { t: "14:28:51", actor: "MR", actorName: "mod.radu",   action: "BAN",     klass: "is-ban",    target: "User @spam.daniel → 30 days",         ref: "usr_8918" },
+      { t: "14:21:03", actor: "VP", actorName: "vlad.p",     action: "CREATE",  klass: "is-create", target: "Listing · Roland Juno-60 (4 200 RON)",ref: "lst_2814" },
+      { t: "14:15:42", actor: "AC", actorName: "alex.c",     action: "PUBLISH", klass: "is-publish",target: "Articol · «Cum sună România prin Juno-60»", ref: "art_0127" },
+      { t: "14:08:19", actor: "—",  actorName: "system",     action: "UPDATE",  klass: "is-update", target: "Currency rate EUR/RON → 4.9772",      ref: "fx_0518" },
+      { t: "13:54:11", actor: "LS", actorName: "laura.s",    action: "CREATE",  klass: "is-create", target: "Thread · «MIDI sync Digitakt II + OP-1»",  ref: "thr_4421" },
+      { t: "13:41:27", actor: "MR", actorName: "mod.radu",   action: "DELETE",  klass: "is-delete", target: "Post · forum thread #4391",            ref: "pst_18244" },
+      { t: "13:30:02", actor: "—",  actorName: "system",     action: "UPDATE",  klass: "is-update", target: "Sitemap regenerated · 2,418 entries", ref: "sys_0099" },
+      { t: "13:22:48", actor: "AC", actorName: "alex.c",     action: "UPDATE",  klass: "is-update", target: "Gear · Roland Juno-60 specs (3 fields)", ref: "gr_juno-60" },
+      { t: "13:12:55", actor: "GO", actorName: "geo.r",      action: "CREATE",  klass: "is-create", target: "Listing · Arturia MicroFreak (1 750 RON)", ref: "lst_2813" },
+      { t: "12:58:14", actor: "MR", actorName: "mod.radu",   action: "BAN",     klass: "is-ban",    target: "User @adscam → permanent",             ref: "usr_8901" },
+      { t: "12:47:31", actor: "RT", actorName: "raul.t",     action: "CREATE",  klass: "is-create", target: "Review · Roland TR-808 (5★)",        ref: "rev_0742" },
+      { t: "12:33:09", actor: "AC", actorName: "alex.c",     action: "UPDATE",  klass: "is-update", target: "Config · enable_id_verification = true", ref: "cfg_018" },
+      { t: "12:19:55", actor: "DA", actorName: "dan.a",      action: "CREATE",  klass: "is-create", target: "Listing · Moog Subsequent 37 (5 990 RON)", ref: "lst_2812" },
+      { t: "12:04:22", actor: "—",  actorName: "system",     action: "PUBLISH", klass: "is-publish",target: "Weekly digest · trimis la 8,421 abonați", ref: "ml_0042" },
+      { t: "11:51:38", actor: "MR", actorName: "mod.radu",   action: "UPDATE",  klass: "is-update", target: "Raport rpt_2811 → resolved",         ref: "rpt_2811" },
+      { t: "11:42:01", actor: "AB", actorName: "andrei.b",   action: "CREATE",  klass: "is-create", target: "Listing · Korg Minilogue XD (2 850 RON)", ref: "lst_2811" },
+      { t: "11:28:46", actor: "AC", actorName: "alex.c",     action: "PUBLISH", klass: "is-publish",target: "Articol · «Modular în RO: starter pack»",  ref: "art_0126" },
+      { t: "11:14:12", actor: "VP", actorName: "vlad.p",     action: "UPDATE",  klass: "is-update", target: "Profil propriu · trust → phone_verified", ref: "usr_4421" },
+      { t: "10:58:30", actor: "—",  actorName: "system",     action: "UPDATE",  klass: "is-update", target: "Backup db · 4.2 GB · OK",             ref: "sys_0098" },
+    ];
+
+    document.getElementById('feed').innerHTML = FEED.map(f => `
+      <div class="feed-row">
+        <span class="t">${f.t}</span>
+        <div class="actor">
+          <span class="avt">${f.actor}</span>
+          <span class="nm">@${f.actorName}</span>
+        </div>
+        <span class="action ${f.klass}">${f.action}</span>
+        <span class="target">${f.target}</span>
+        <span class="ref tbl__mono">${f.ref}<span class="arr"> →</span></span>
+      </div>
+    `).join('');
+  </script>
+</body>
+</html>

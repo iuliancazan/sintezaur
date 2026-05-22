@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forum — Sintezaur</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script src="reveals.js"></script>
+</head>
+<body data-screen-label="05 Forum — list">
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/>
+      </symbol>
+      <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M6 9a6 6 0 0 1 12 0v4l1.5 3h-15L6 13V9z"/><path d="M10 19a2 2 0 0 0 4 0"/>
+      </symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>
+      </symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square">
+        <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="Home.html">
+        <img class="brand__mark" src="assets/logo-black.png" alt="Sintezaur" />
+        <span class="brand__wordmark">Sintezaur</span>
+      </a>
+      <nav class="nav">
+        <a class="nav__link" href="Home.html">Acasă</a>
+        <a class="nav__link" href="Tezaur.html">Tezaur</a>
+        <a class="nav__link" href="Bazar.html">Bazar</a>
+        <a class="nav__link" href="Revista.html">Revistă</a>
+        <a class="nav__link is-active" href="Forum.html">Forum</a>
+      </nav>
+      <div class="topbar__tools">
+        <a class="icon-btn" href="Forum - Cauta.html" aria-label="Caută"><svg><use href="#i-search"/></svg></a>
+        <button class="icon-btn" data-theme-toggle aria-label="Schimbă tema">
+          <svg class="icon-sun"><use href="#i-sun"/></svg>
+          <svg class="icon-moon"><use href="#i-moon"/></svg>
+        </button>
+        <button class="btn-ghost">Înregistrare</button>
+        <button class="btn-login">Conectează-te</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+
+    <!-- HEADER -->
+    <section class="fm-header crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <div>
+        <p class="fm-header__sub">Forum · Comunitatea Sintezaur</p>
+        <h1>Forum<span class="dot">.</span></h1>
+      </div>
+      <p class="fm-header__lede">
+        Întrebări despre gear, recomandări, troubleshooting și discuții despre scena română de music tech.
+        Threading liniar — fără indentare, fără limită de adâncime. Sintaxă simplă, conversație directă.
+      </p>
+    </section>
+
+    <!-- ACTION ROW -->
+    <div class="fm-actions">
+      <a class="bz-actions__primary" href="Forum - Nou.html">Începe un thread nou</a>
+      <div class="fm-actions__tabs">
+        <a class="is-active" href="#">Toate</a>
+        <a href="#">Subscrise (4)</a>
+        <a href="#">Necitite (12)</a>
+      </div>
+    </div>
+
+    <!-- FORUM BODY: categories + trending sidebar -->
+    <div class="fm-body">
+
+      <!-- CATEGORIES -->
+      <div class="fm-cats" id="fm-cats"></div>
+
+      <!-- TRENDING (right rail) -->
+      <aside class="fm-trending crosses">
+        <span class="crosses-tl"></span><span class="crosses-tr"></span>
+        <header class="fm-trending__head">
+          <span class="fm-trending__title">Active acum</span>
+          <span class="fm-trending__live">Update live</span>
+        </header>
+        <div class="fm-trending__scroll">
+          <a class="fm-trending__card" href="Forum - Thread TR-808.html">
+            <span class="ttl">TR-808 vs TR-8S — chiar e o diferență audibilă în 2026?</span>
+            <span class="meta">142 răspunsuri · @vlad.b · acum 8 min</span>
+          </a>
+          <a class="fm-trending__card" href="Forum - Thread TR-808.html">
+            <span class="ttl">Clock drift între Digitakt II și OP-1 după 30 min — fix?</span>
+            <span class="meta">68 răspunsuri · @rares.s · acum 14 min</span>
+          </a>
+          <a class="fm-trending__card" href="Forum - Thread TR-808.html">
+            <span class="ttl">Primul rack 84HP — ce module sunt obligatorii?</span>
+            <span class="meta">87 răspunsuri · @anaaaa · acum 22 min</span>
+          </a>
+          <a class="fm-trending__card" href="Forum - Thread TR-808.html">
+            <span class="ttl">Cel mai bun preamp pentru vocale lo-fi sub 2000 RON</span>
+            <span class="meta">52 răspunsuri · @mihaela_m · acum 38 min</span>
+          </a>
+          <a class="fm-trending__card" href="Forum - Thread TR-808.html">
+            <span class="ttl">Setup live cu 3 piese MIDI-clocked — cum o faceți voi?</span>
+            <span class="meta">41 răspunsuri · @tudor.b · acum 1 oră</span>
+          </a>
+        </div>
+      </aside>
+
+    </div>
+
+    <!-- ONLINE USERS -->
+    <section class="fm-online crosses">
+      <span class="crosses-tl"></span><span class="crosses-tr"></span>
+      <span class="fm-online__label">Online acum</span>
+      <div class="fm-online__avatars" id="fm-online-avatars"></div>
+      <span class="fm-online__count">142 utilizatori activi · 28 vizibili</span>
+      <span style="margin-left:auto; font-family:var(--font-mono); font-size:11px; color:var(--fg-muted); letter-spacing:0.04em;">Recordul lunii: <strong style="color:var(--fg)">312</strong> · 06 Mai 2026</span>
+    </section>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="shell">
+      <div class="foot__grid">
+        <div class="foot__brand-col">
+          <a class="brand" href="Home.html">
+            <img class="brand__mark" src="assets/logo-black.png" alt="" />
+            <span class="brand__wordmark">Sintezaur</span>
+          </a>
+          <p>Enciclopedia, bazarul, revista și forumul producției muzicale în limba română.</p>
+        </div>
+        <div class="foot__col">
+          <h4>// Platformă</h4>
+          <ul>
+            <li><a href="Tezaur.html">Tezaur</a></li>
+            <li><a href="Bazar.html">Bazar</a></li>
+            <li><a href="Revista.html">Revistă</a></li>
+            <li><a href="Forum.html">Forum</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Sintezaur</h4>
+          <ul>
+            <li><a href="#">Despre</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Termeni</a></li>
+            <li><a href="#">Confidențialitate</a></li>
+          </ul>
+        </div>
+        <div class="foot__col">
+          <h4>// Social</h4>
+          <ul>
+            <li><a href="#">Instagram</a></li>
+            <li><a href="#">YouTube</a></li>
+            <li><a href="#">Bandcamp</a></li>
+            <li><a href="#">SoundCloud</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="foot__bottom">
+        <span>© 2026 Sintezaur · Construit la București</span>
+        <div class="locale">
+          <span class="is-active">RO</span>
+          <span>EN — în lucru</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Theme toggle
+    (function () {
+      const KEY = 'sintezaur-theme';
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      const apply = m => root.setAttribute('data-theme', m);
+      apply(localStorage.getItem(KEY) || 'dark');
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(KEY, next); apply(next);
+      });
+    })();
+
+    const CATS = [
+      { n: "01", title: "Tezaur — Întrebări", desc: "Întrebări despre gear specific: setup, troubleshooting, recomandări. Threaduri tagged cu gear din enciclopedie.", subs: ["Synth", "Drum machine", "Sampler", "Modular"], threads: 487, lastUser: "rares.s", lastTime: "acum 8 min" },
+      { n: "02", title: "Producție", desc: "DAW, mixing, mastering, workflow. Discuții despre proces — de la idee la master final.", subs: ["DAW", "Mixing", "Mastering", "Workflow"], threads: 312, lastUser: "mihaela_m", lastTime: "acum 22 min" },
+      { n: "03", title: "Modular & Eurorack", desc: "Plănuirea unui rack, recomandări de module, patch-uri, troubleshooting modular.", subs: ["Plănuire rack", "Module DIY", "Patch ideas", "Power & cabling"], threads: 218, lastUser: "anaaaa", lastTime: "acum 1 oră" },
+      { n: "04", title: "Bazar — Discuții", desc: "Discuții despre piață, prețuri corecte, dispute, reviews vânzători. Nu listinguri — listing-urile sunt în Bazar.", subs: ["Prețuri", "Verificare", "Dispute"], threads: 146, lastUser: "vlad.b", lastTime: "acum 2 ore" },
+      { n: "05", title: "Software & Plugins", desc: "VST/AU/AAX, DAW-uri, sintetizatoare software, samplere și totul digital în studio.", subs: ["VST", "DAW", "Sample packs", "iOS / iPad"], threads: 178, lastUser: "tudor.b", lastTime: "acum 4 ore" },
+      { n: "06", title: "Live & Performance", desc: "Setup-uri live, MIDI sync între piese, hardware portabil, festivaluri și backline.", subs: ["Setup live", "MIDI clock", "Backline", "Festivaluri"], threads: 92, lastUser: "andreea.k", lastTime: "acum 6 ore" }
+    ];
+
+    const CAT_HREFS = [
+      "Forum - Tezaur Intrebari.html",
+      "Forum - Tezaur Intrebari.html",
+      "Forum - Tezaur Intrebari.html",
+      "Forum - Tezaur Intrebari.html",
+      "Forum - Tezaur Intrebari.html",
+      "Forum - Tezaur Intrebari.html"
+    ];
+    document.getElementById('fm-cats').innerHTML = CATS.map((c, i) => `
+      <a class="fm-cat" href="${CAT_HREFS[i] || '#'}">
+        <span class="fm-cat__num">${c.n}</span>
+        <div class="fm-cat__body">
+          <h3 class="fm-cat__title">${c.title}</h3>
+          <p class="fm-cat__desc">${c.desc}</p>
+          <div class="fm-cat__subs">${c.subs.map(s => `<span class="fm-cat__sub-chip">${s}</span>`).join('')}</div>
+        </div>
+        <div class="fm-cat__activity">
+          <span><strong>${c.lastUser}</strong></span>
+          <span>${c.lastTime}</span>
+        </div>
+        <div class="fm-cat__count">
+          <span class="v">${c.threads}</span>
+          <span class="k">threaduri</span>
+        </div>
+      </a>
+    `).join('');
+
+    // Online avatars
+    const AVATARS = ["RS", "AB", "VP", "MD", "LS", "GO", "RT", "MN", "AN", "PR", "TS", "IC", "DN", "CH", "VL", "EL", "GN", "FA"];
+    document.getElementById('fm-online-avatars').innerHTML =
+      AVATARS.slice(0, 10).map(a => `<span class="avatar">${a}</span>`).join('');
+  </script>
+</body>
+</html>
