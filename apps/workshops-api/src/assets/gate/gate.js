@@ -1,7 +1,7 @@
 // Gate page logic — external file because helmet's default CSP blocks
 // inline scripts. Talks only to /api/auth/* and /api/workshops.
 (function () {
-  var I18N = {
+  const I18N = {
     en: {
       tagline: 'Hands-on courses & workshop materials',
       workshop: 'WORKSHOP',
@@ -31,13 +31,13 @@
       error: 'Ceva n-a mers. Încearcă din nou.',
     },
   };
-  var lang = 'en';
+  let lang = 'en';
   try {
-    var stored = localStorage.getItem('ws_lang');
+    const stored = localStorage.getItem('ws_lang');
     if (stored === 'ro' || stored === 'en') lang = stored;
-  } catch (e) { /* ignore */ }
-  var superadmin = false;
-  var workshops = [];
+  } catch { /* ignore */ }
+  let superadmin = false;
+  let workshops = [];
 
   function t(key) { return I18N[lang][key] || key; }
   function $(id) { return document.getElementById(id); }
@@ -46,9 +46,9 @@
     document.documentElement.lang = lang;
     $('lang-en').classList.toggle('on', lang === 'en');
     $('lang-ro').classList.toggle('on', lang === 'ro');
-    var nodes = document.querySelectorAll('[data-i18n]');
-    for (var i = 0; i < nodes.length; i++) {
-      var key = nodes[i].getAttribute('data-i18n');
+    const nodes = document.querySelectorAll('[data-i18n]');
+    for (let i = 0; i < nodes.length; i++) {
+      const key = nodes[i].getAttribute('data-i18n');
       if (key === 'enter') {
         nodes[i].textContent = superadmin ? t('panel_enter') : t('enter');
       } else if (key === 'panel_link') {
@@ -59,17 +59,17 @@
     }
     $('workshop-block').classList.toggle('hidden', superadmin);
     $('superadmin-block').classList.toggle('hidden', !superadmin);
-    var single = workshops.length === 1;
+    const single = workshops.length === 1;
     $('select-block').classList.toggle('hidden', single);
     $('workshop-name').classList.toggle('hidden', !single);
     if (single) {
       $('workshop-name').textContent =
         lang === 'ro' ? workshops[0].titleRo : workshops[0].titleEn;
     }
-    var sel = $('workshop');
+    const sel = $('workshop');
     sel.innerHTML = '';
-    for (var j = 0; j < workshops.length; j++) {
-      var opt = document.createElement('option');
+    for (let j = 0; j < workshops.length; j++) {
+      const opt = document.createElement('option');
       opt.value = workshops[j].slug;
       opt.textContent =
         lang === 'ro' ? workshops[j].titleRo : workshops[j].titleEn;
@@ -79,12 +79,12 @@
 
   function setLang(next) {
     lang = next;
-    try { localStorage.setItem('ws_lang', next); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('ws_lang', next); } catch { /* ignore */ }
     render();
   }
 
   function showError(msg) {
-    var el = $('error');
+    const el = $('error');
     el.textContent = msg;
     el.classList.add('show');
   }
@@ -100,14 +100,14 @@
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('error').classList.remove('show');
-    var body, url;
+    let body, url;
     if (superadmin) {
-      var sp = $('sa-password').value;
+      const sp = $('sa-password').value;
       if (!sp) return showError(t('missing_password'));
       url = '/api/auth/superadmin';
       body = { password: sp };
     } else {
-      var p = $('password').value;
+      const p = $('password').value;
       if (!p) return showError(t('missing_password'));
       url = '/api/auth/login';
       body = { slug: $('workshop').value || (workshops[0] && workshops[0].slug), password: p };

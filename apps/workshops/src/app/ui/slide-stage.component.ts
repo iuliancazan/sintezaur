@@ -25,7 +25,7 @@ import type { SlideDef } from '../content/types';
 @Component({
   selector: 'ws-slide-stage',
   template: `
-    <div class="stage" #stageEl (click)="onStageClick($event)">
+    <div class="stage" #stageEl>
       <div
         class="stage__canvas"
         [style.transform]="'scale(' + scale() + ')'"
@@ -202,6 +202,9 @@ export class SlideStageComponent {
     this.scheduleHudHide();
   }
 
+  // Host-level click: tap navigation + in-slide data-go jumps. Keyboard
+  // navigation is the document-level keydown listener above.
+  @HostListener('click', ['$event'])
   protected onStageClick(event: MouseEvent) {
     // In-slide navigation: course-map circles and "← COURSE MAP" carry
     // data-go="<slide id>" (set by the port).
