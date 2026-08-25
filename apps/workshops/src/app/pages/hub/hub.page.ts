@@ -13,6 +13,8 @@ interface HubCard {
   hintKey: string;
   adminOnly: boolean;
   available: boolean;
+  /** Router link once the deliverable exists; undefined = coming soon. */
+  route?: string[];
 }
 
 @Component({
@@ -89,6 +91,7 @@ export class HubPage {
     const role = this.role();
     const isStaff = role === 'admin' || role === 'superadmin';
     const guestSlides = this.workshop()?.guestSeesSlides ?? false;
+    const slug = this.workshop()?.slug;
     const cards: HubCard[] = [
       {
         key: 'slides',
@@ -96,6 +99,7 @@ export class HubPage {
         hintKey: 'hub.slides_hint',
         adminOnly: false,
         available: isStaff || guestSlides,
+        route: slug ? ['/w', slug, 'slides'] : undefined,
       },
       {
         key: 'handbook',

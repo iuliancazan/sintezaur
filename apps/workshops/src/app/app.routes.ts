@@ -18,5 +18,11 @@ export const appRoutes: Route[] = [
     canActivate: [workshopGuard],
     loadComponent: () => import('./pages/hub/hub.page').then((m) => m.HubPage),
   },
+  {
+    path: 'w/:slug/slides',
+    canActivate: [workshopGuard],
+    loadComponent: () =>
+      import('./pages/deck/deck.page').then((m) => m.DeckPage),
+  },
   { path: '**', redirectTo: '' },
 ];

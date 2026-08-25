@@ -3,6 +3,8 @@
  * "Design System.dc.html"). Dark is the only screen theme; print themes
  * live with the doc components. */
 
+@use './course-fonts';
+
 :root {
   /* Surfaces */
   --ws-bg: #000000;

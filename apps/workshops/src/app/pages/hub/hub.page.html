@@ -39,16 +39,32 @@
     <p class="hub__section-label">{{ 'hub.materials' | transloco }}</p>
     <section class="hub__cards">
       @for (card of cards(); track card.key) {
-        <div class="hub__card">
-          <div class="hub__card-head">
-            <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
-            @if (card.adminOnly) {
-              <span class="hub__badge">{{ 'hub.admin_only' | transloco }}</span>
-            }
+        @if (card.route) {
+          <a class="hub__card" [routerLink]="card.route">
+            <div class="hub__card-head">
+              <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
+              @if (card.adminOnly) {
+                <span class="hub__badge">{{
+                  'hub.admin_only' | transloco
+                }}</span>
+              }
+            </div>
+            <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
+          </a>
+        } @else {
+          <div class="hub__card hub__card--soon">
+            <div class="hub__card-head">
+              <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
+              @if (card.adminOnly) {
+                <span class="hub__badge">{{
+                  'hub.admin_only' | transloco
+                }}</span>
+              }
+            </div>
+            <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
+            <p class="hub__card-soon">{{ 'hub.coming_soon' | transloco }}</p>
           </div>
-          <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
-          <p class="hub__card-soon">{{ 'hub.coming_soon' | transloco }}</p>
-        </div>
+        }
       }
     </section>
 
