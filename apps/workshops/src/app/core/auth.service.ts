@@ -44,16 +44,14 @@ export class AuthService {
     }
   }
 
-  async login(slug: string, password: string): Promise<Session> {
+  async login(
+    slug: string,
+    username: string,
+    password: string,
+  ): Promise<Session> {
     await firstValueFrom(
-      this.http.post('/api/auth/login', { slug, password }),
+      this.http.post('/api/auth/login', { slug, username, password }),
     );
-    this.session.set(undefined);
-    return (await this.resolve()) as Session;
-  }
-
-  async loginSuperadmin(password: string): Promise<Session> {
-    await firstValueFrom(this.http.post('/api/auth/superadmin', { password }));
     this.session.set(undefined);
     return (await this.resolve()) as Session;
   }

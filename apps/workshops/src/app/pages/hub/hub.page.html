@@ -3,6 +3,9 @@
     <p class="hub__brand">{{ 'common.brand' | transloco }}</p>
     <div class="hub__top-right">
       <ws-lang-toggle />
+      <a class="hub__panel-link" routerLink="/">
+        {{ 'hub.all_workshops' | transloco }}
+      </a>
       @if (isSuperadmin()) {
         <a class="hub__panel-link" routerLink="/panel">
           {{ 'hub.open_panel' | transloco }}

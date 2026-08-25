@@ -42,8 +42,9 @@ import { LanguageService } from '../core/language.service';
       cursor: pointer;
     }
     .langs__pill--active {
-      border-color: var(--ws-accent-bright);
-      color: var(--ws-accent-bright);
+      /* Pages can rebrand the toggle via --lt-accent (e.g. Sintezaur gold). */
+      border-color: var(--lt-accent, var(--ws-accent-bright));
+      color: var(--lt-accent, var(--ws-accent-bright));
     }
   `,
 })

@@ -1,10 +1,10 @@
 <main class="gate">
   <div class="gate__top">
-    <p class="gate__brand">{{ 'common.brand' | transloco }}</p>
+    <a class="gate__back" routerLink="/">← {{ 'login.all_workshops' | transloco }}</a>
     <ws-lang-toggle />
   </div>
 
-  <h1 class="gate__title">{{ 'common.workshops' | transloco }}</h1>
+  <h1 class="gate__title">{{ brand }}</h1>
   <svg class="gate__scribble" viewBox="0 0 860 24" fill="none" aria-hidden="true">
     <path
       d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3"
@@ -13,74 +13,39 @@
       stroke-linecap="round"
     />
   </svg>
-  <p class="gate__subtitle">{{ 'login.tagline' | transloco }}</p>
+  @if (subtitle()) {
+    <p class="gate__subtitle">{{ subtitle() }}</p>
+  }
 
   <form class="gate__card" (ngSubmit)="submit()">
-    @if (mode() === 'workshop') {
-      @if (!singleWorkshop()) {
-        <label class="gate__label" for="workshop">
-          {{ 'login.workshop' | transloco }}
-        </label>
-        <select
-          id="workshop"
-          class="gate__input gate__select"
-          name="workshop"
-          [(ngModel)]="slug"
-        >
-          @for (w of workshops(); track w.slug) {
-            <option [value]="w.slug">{{ workshopTitle(w) }}</option>
-          }
-        </select>
-      } @else {
-        <p class="gate__workshop-name">{{ workshopTitle(workshops()[0]) }}</p>
-      }
+    <label class="gate__label" for="username">
+      {{ 'login.username' | transloco }}
+    </label>
+    <input
+      id="username"
+      class="gate__input"
+      type="text"
+      name="username"
+      autocomplete="username"
+      autocapitalize="none"
+      [(ngModel)]="username"
+    />
 
-      <label class="gate__label" for="password">
-        {{ 'login.password' | transloco }}
-      </label>
-      <input
-        id="password"
-        class="gate__input"
-        type="password"
-        name="password"
-        autocomplete="current-password"
-        [(ngModel)]="password"
-        [placeholder]="'•••••••••'"
-      />
-      <button class="gate__button" type="submit" [disabled]="busy()">
-        {{ 'login.enter' | transloco }}
-      </button>
-      <button
-        type="button"
-        class="gate__mode-link"
-        (click)="switchMode('superadmin')"
-      >
-        {{ 'login.panel_link' | transloco }}
-      </button>
-    } @else {
-      <label class="gate__label" for="sa-password">
-        {{ 'login.panel_password' | transloco }}
-      </label>
-      <input
-        id="sa-password"
-        class="gate__input"
-        type="password"
-        name="sa-password"
-        autocomplete="current-password"
-        [(ngModel)]="password"
-        [placeholder]="'•••••••••'"
-      />
-      <button class="gate__button" type="submit" [disabled]="busy()">
-        {{ 'login.panel_enter' | transloco }}
-      </button>
-      <button
-        type="button"
-        class="gate__mode-link"
-        (click)="switchMode('workshop')"
-      >
-        {{ 'login.back_to_login' | transloco }}
-      </button>
-    }
+    <label class="gate__label" for="password">
+      {{ 'login.password' | transloco }}
+    </label>
+    <input
+      id="password"
+      class="gate__input"
+      type="password"
+      name="password"
+      autocomplete="current-password"
+      [(ngModel)]="password"
+      [placeholder]="'•••••••••'"
+    />
+    <button class="gate__button" type="submit" [disabled]="busy()">
+      {{ 'login.enter' | transloco }}
+    </button>
   </form>
 
   <footer class="gate__footer">

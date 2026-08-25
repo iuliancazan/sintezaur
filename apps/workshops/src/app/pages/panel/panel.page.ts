@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -20,8 +20,13 @@ export interface PanelWorkshop {
   venue: string | null;
   published: boolean;
   guestSeesSlides: boolean;
-  hasGuestPassword: boolean;
-  hasAdminPassword: boolean;
+}
+
+interface PanelAccount {
+  id: string;
+  username: string;
+  role: 'guest' | 'admin';
+  updatedAt: string;
 }
 
 interface WorkshopStats {
@@ -77,8 +82,15 @@ export class PanelPage {
   protected readonly showNewForm = signal(false);
 
   protected newForm: NewWorkshopForm = { ...EMPTY_NEW };
-  /** Per-workshop password inputs (cleared after set). */
-  protected passwords: Record<string, { guest: string; admin: string }> = {};
+  /** Accounts per workshop id, loaded when the section opens. */
+  protected readonly accounts = signal<Record<string, PanelAccount[]>>({});
+  /** New-account form inputs per workshop. */
+  protected newAccounts: Record<
+    string,
+    { username: string; role: 'guest' | 'admin'; password: string }
+  > = {};
+  /** Password-reset inputs per account id. */
+  protected resetInputs: Record<string, string> = {};
 
   constructor() {
     void this.reload();
@@ -90,8 +102,105 @@ export class PanelPage {
     );
     this.workshops.set(list);
     for (const w of list) {
-      this.passwords[w.id] ??= { guest: '', admin: '' };
+      this.newAccounts[w.id] ??= { username: '', role: 'guest', password: '' };
     }
+  }
+
+  protected async loadAccounts(w: PanelWorkshop) {
+    const list = await firstValueFrom(
+      this.http.get<PanelAccount[]>(`/api/panel/workshops/${w.id}/accounts`),
+    );
+    this.accounts.update((a) => ({ ...a, [w.id]: list }));
+  }
+
+  protected async addAccount(w: PanelWorkshop) {
+    const form = this.newAccounts[w.id];
+    const missing: string[] = [];
+    if (!form.username.trim()) {
+      missing.push(this.transloco.translate('panel.account_username'));
+    }
+    if (!form.password) {
+      missing.push(this.transloco.translate('panel.account_password'));
+    }
+    if (missing.length > 0) {
+      this.toast.error(
+        this.transloco.translate('panel.missing_fields', {
+          fields: missing.join(', '),
+        }),
+      );
+      return;
+    }
+    if (form.password.length < 8) {
+      this.toast.error(this.transloco.translate('panel.password_too_short'));
+      return;
+    }
+    try {
+      const list = await firstValueFrom(
+        this.http.post<PanelAccount[]>(
+          `/api/panel/workshops/${w.id}/accounts`,
+          {
+            username: form.username.trim().toLowerCase(),
+            role: form.role,
+            password: form.password,
+          },
+        ),
+      );
+      this.accounts.update((a) => ({ ...a, [w.id]: list }));
+      this.newAccounts[w.id] = { username: '', role: 'guest', password: '' };
+      this.toast.success(this.transloco.translate('panel.account_created'));
+    } catch (err) {
+      this.toast.error(this.accountErrorMessage(err));
+    }
+  }
+
+  protected async setAccountPassword(w: PanelWorkshop, account: PanelAccount) {
+    const password = this.resetInputs[account.id] ?? '';
+    if (!password) {
+      this.toast.error(
+        this.transloco.translate('panel.missing_fields', {
+          fields: this.transloco.translate('panel.new_password'),
+        }),
+      );
+      return;
+    }
+    if (password.length < 8) {
+      this.toast.error(this.transloco.translate('panel.password_too_short'));
+      return;
+    }
+    const list = await firstValueFrom(
+      this.http.put<PanelAccount[]>(
+        `/api/panel/workshops/${w.id}/accounts/${account.id}/password`,
+        { password },
+      ),
+    );
+    this.accounts.update((a) => ({ ...a, [w.id]: list }));
+    this.resetInputs[account.id] = '';
+    this.toast.success(this.transloco.translate('panel.password_saved'));
+  }
+
+  protected async deleteAccount(w: PanelWorkshop, account: PanelAccount) {
+    const list = await firstValueFrom(
+      this.http.delete<PanelAccount[]>(
+        `/api/panel/workshops/${w.id}/accounts/${account.id}`,
+      ),
+    );
+    this.accounts.update((a) => ({ ...a, [w.id]: list }));
+    this.toast.success(this.transloco.translate('panel.account_deleted'));
+  }
+
+  private accountErrorMessage(err: unknown): string {
+    const message =
+      err instanceof HttpErrorResponse ? err.error?.message : undefined;
+    if (message === 'username_taken') {
+      return this.transloco.translate('panel.username_taken');
+    }
+    if (message === 'reserved_username') {
+      return this.transloco.translate('panel.reserved_username');
+    }
+    if (Array.isArray(message) && String(message[0]).includes('username')) {
+      return this.transloco.translate('panel.username_format');
+    }
+    return this.transloco.translate('common.error_generic');
   }
 
   protected async save(w: PanelWorkshop) {
@@ -138,38 +247,6 @@ export class PanelPage {
         guestSeesSlides: !w.guestSeesSlides,
       }),
     );
-    await this.reload();
-  }
-
-  protected async setPasswords(w: PanelWorkshop) {
-    const input = this.passwords[w.id];
-    const body: Record<string, string> = {};
-    if (input.guest) {
-      body['guestPassword'] = input.guest;
-    }
-    if (input.admin) {
-      body['adminPassword'] = input.admin;
-    }
-    if (Object.keys(body).length === 0) {
-      this.toast.error(
-        this.transloco.translate('panel.missing_fields', {
-          fields: this.transloco.translate('panel.passwords'),
-        }),
-      );
-      return;
-    }
-    if (
-      (body['guestPassword'] && body['guestPassword'].length < 8) ||
-      (body['adminPassword'] && body['adminPassword'].length < 8)
-    ) {
-      this.toast.error(this.transloco.translate('panel.password_too_short'));
-      return;
-    }
-    await firstValueFrom(
-      this.http.put(`/api/panel/workshops/${w.id}/passwords`, body),
-    );
-    this.passwords[w.id] = { guest: '', admin: '' };
-    this.toast.success(this.transloco.translate('panel.passwords_saved'));
     await this.reload();
   }
 

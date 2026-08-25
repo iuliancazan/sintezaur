@@ -127,38 +127,98 @@
         </button>
       </div>
 
-      <details class="panel__section">
-        <summary>{{ 'panel.passwords' | transloco }}</summary>
-        <div class="panel__grid">
-          <label class="panel__field">
-            <span>{{ 'panel.guest_password' | transloco }}</span>
-            <input
-              [name]="'guest-pw-' + w.id"
-              type="text"
-              autocomplete="off"
-              [(ngModel)]="passwords[w.id].guest"
-            />
-          </label>
-          <label class="panel__field">
-            <span>{{ 'panel.admin_password' | transloco }}</span>
-            <input
-              [name]="'admin-pw-' + w.id"
-              type="text"
-              autocomplete="off"
-              [(ngModel)]="passwords[w.id].admin"
-            />
-          </label>
-        </div>
-        <p class="panel__hint">{{ 'panel.password_hint' | transloco }}</p>
-        <div class="panel__row-end">
-          <button
-            type="button"
-            class="panel__primary"
-            (click)="setPasswords(w)"
-          >
-            {{ 'panel.set_passwords' | transloco }}
-          </button>
-        </div>
+      <details class="panel__section" (toggle)="loadAccounts(w)">
+        <summary>{{ 'panel.accounts' | transloco }}</summary>
+        <p class="panel__hint">{{ 'panel.accounts_hint' | transloco }}</p>
+        @if (accounts()[w.id]; as accountList) {
+          <ul class="panel__accounts">
+            @for (account of accountList; track account.id) {
+              <li class="panel__account">
+                <div class="panel__account-id">
+                  <span class="panel__account-user">{{
+                    account.username
+                  }}</span>
+                  <span
+                    class="panel__badge"
+                    [class.panel__badge--admin]="account.role === 'admin'"
+                    >{{ 'panel.role_' + account.role | transloco }}</span
+                  >
+                </div>
+                <div class="panel__account-actions">
+                  <input
+                    class="panel__account-input"
+                    [name]="'reset-' + account.id"
+                    type="text"
+                    autocomplete="off"
+                    [placeholder]="'panel.new_password' | transloco"
+                    [(ngModel)]="resetInputs[account.id]"
+                  />
+                  <button
+                    type="button"
+                    class="panel__mini"
+                    (click)="setAccountPassword(w, account)"
+                  >
+                    {{ 'panel.set_password' | transloco }}
+                  </button>
+                  <button
+                    type="button"
+                    class="panel__mini panel__mini--danger"
+                    (click)="deleteAccount(w, account)"
+                  >
+                    {{ 'panel.delete_account' | transloco }}
+                  </button>
+                </div>
+              </li>
+            }
+          </ul>
+          <div class="panel__add-account">
+            <p class="panel__hint">
+              {{ 'panel.add_account' | transloco }} ·
+              {{ 'panel.username_format' | transloco }}
+              {{ 'panel.password_hint' | transloco }}
+            </p>
+            <div class="panel__account-actions">
+              <input
+                class="panel__account-input"
+                [name]="'new-user-' + w.id"
+                type="text"
+                autocomplete="off"
+                autocapitalize="none"
+                [placeholder]="'panel.account_username' | transloco"
+                [(ngModel)]="newAccounts[w.id].username"
+              />
+              <select
+                class="panel__account-input panel__account-input--select"
+                [name]="'new-role-' + w.id"
+                [(ngModel)]="newAccounts[w.id].role"
+              >
+                <option value="guest">
+                  {{ 'panel.role_guest' | transloco }}
+                </option>
+                <option value="admin">
+                  {{ 'panel.role_admin' | transloco }}
+                </option>
+              </select>
+              <input
+                class="panel__account-input"
+                [name]="'new-pass-' + w.id"
+                type="text"
+                autocomplete="off"
+                [placeholder]="'panel.account_password' | transloco"
+                [(ngModel)]="newAccounts[w.id].password"
+              />
+              <button
+                type="button"
+                class="panel__mini"
+                (click)="addAccount(w)"
+              >
+                + {{ 'panel.add_account' | transloco }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <p class="panel__hint">{{ 'common.loading' | transloco }}</p>
+        }
       </details>
 
       <details class="panel__section" (toggle)="toggleStats(w)">

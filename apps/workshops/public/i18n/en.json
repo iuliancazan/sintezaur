@@ -11,20 +11,21 @@
     "download_pdf": "Download PDF",
     "print": "Print"
   },
+  "selection": {
+    "kicker": "Hands-on courses & workshop materials",
+    "subtitle": "Pick your workshop. Each one has its own access details — use the username and password you received.",
+    "empty": "No workshops are open right now.",
+    "footer": "Bucharest's community for people who love synthesis"
+  },
   "login": {
-    "tagline": "Hands-on courses & workshop materials",
-    "workshop": "WORKSHOP",
-    "password": "WORKSHOP PASSWORD",
+    "username": "USERNAME",
+    "password": "PASSWORD",
     "enter": "ENTER",
-    "bad_password": "Wrong password. Check the one you received and try again.",
+    "all_workshops": "All workshops",
+    "bad_credentials": "Wrong username or password. Check the details you received and try again.",
     "unknown_workshop": "This workshop is not available.",
     "throttled": "Too many attempts — wait a minute, then try again.",
-    "missing_password": "Enter the workshop password.",
-    "missing_workshop": "Pick a workshop.",
-    "panel_link": "Control panel",
-    "panel_password": "SUPERADMIN PASSWORD",
-    "panel_enter": "OPEN PANEL",
-    "back_to_login": "Back to workshop login"
+    "missing_fields": "Missing: {{fields}}"
   },
   "hub": {
     "materials": "MATERIALS",
@@ -47,7 +48,7 @@
   },
   "panel": {
     "title": "CONTROL PANEL",
-    "subtitle": "Workshops, passwords, visibility, access",
+    "subtitle": "Workshops, accounts, visibility, access",
     "new_workshop": "New workshop",
     "published": "Published",
     "unpublished": "Hidden",
@@ -60,13 +61,26 @@
     "event_date": "Event date",
     "venue": "Venue",
     "slug": "Slug (URL)",
-    "passwords": "Passwords",
-    "guest_password": "New guest password",
-    "admin_password": "New admin password",
-    "password_hint": "Min. 8 characters. Leave empty to keep the current one.",
-    "set_passwords": "Set passwords",
-    "passwords_saved": "Passwords updated.",
     "saved": "Saved.",
+    "accounts": "Accounts",
+    "account_username": "Username",
+    "account_role": "Role",
+    "role_guest": "guest",
+    "role_admin": "admin",
+    "add_account": "Add account",
+    "account_password": "Password",
+    "new_password": "New password",
+    "set_password": "Set password",
+    "delete_account": "Delete",
+    "account_created": "Account created.",
+    "password_saved": "Password updated.",
+    "account_deleted": "Account deleted.",
+    "username_taken": "That username already exists on this workshop.",
+    "reserved_username": "That username is reserved.",
+    "username_format": "Username: lowercase letters, digits, dots or dashes (2–32).",
+    "password_hint": "Min. 8 characters.",
+    "password_too_short": "Passwords need at least 8 characters.",
+    "accounts_hint": "People log in with username + password. The reserved username \"superadmin\" (env password) opens this panel.",
     "stats": "Access",
     "stats_logins": "Logins",
     "stats_uniques": "Unique visitors (approx.)",
@@ -74,7 +88,6 @@
     "stats_recent": "Recent activity",
     "stats_empty": "No activity yet.",
     "created": "Workshop created.",
-    "missing_fields": "Missing: {{fields}}",
-    "password_too_short": "Passwords need at least 8 characters."
+    "missing_fields": "Missing: {{fields}}"
   }
 }

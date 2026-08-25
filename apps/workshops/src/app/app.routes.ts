@@ -5,13 +5,18 @@ export const appRoutes: Route[] = [
   {
     path: '',
     loadComponent: () =>
-      import('./pages/login/login.page').then((m) => m.LoginPage),
+      import('./pages/selection/selection.page').then((m) => m.SelectionPage),
   },
   {
     path: 'panel',
     canActivate: [roleGuard('superadmin')],
     loadComponent: () =>
       import('./pages/panel/panel.page').then((m) => m.PanelPage),
+  },
+  {
+    path: 'w/:slug/login',
+    loadComponent: () =>
+      import('./pages/login/login.page').then((m) => m.LoginPage),
   },
   {
     path: 'w/:slug',

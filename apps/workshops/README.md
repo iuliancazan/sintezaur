@@ -26,10 +26,18 @@ pnpm workshops-api         # NestJS on http://localhost:3300
 pnpm workshops             # Angular on http://localhost:4300 (proxies /api)
 ```
 
-Open http://localhost:4300 — password `fourm-guest` (or `fourm-admin` for
-everything). Superadmin panel: the "Control panel" link on the login page;
-dev password `workshops-dev` (hash in `.env`, base64-encoded — regenerate
-with `pnpm tsx tools/scripts/workshops-hash-password.ts <password>`).
+Open http://localhost:4300 → the Sintezaur-branded selection page → pick
+the workshop → log in with **username + password**:
+
+| account | password | gets |
+|---|---|---|
+| `guest` | `fourm-guest` | handbook (+ slides only if the panel toggle is on) |
+| `admin` | `fourm-admin` | everything |
+| `superadmin` | `workshops-dev` (dev) | everything + the control panel (link appears in the hub navbar after login — there is deliberately no panel surface on the login page) |
+
+Accounts are managed per workshop in the panel (add/reset/delete);
+`superadmin` is reserved and checks the env hash (base64 —
+`pnpm tsx tools/scripts/workshops-hash-password.ts <password>`).
 
 Content edits (slides/handbook/script files) hot-reload in the browser.
 Backend edits need a restart of `pnpm workshops-api`.
@@ -50,6 +58,8 @@ ported by `tools/scripts/port-course-slides.ts` / `port-course-docs.ts`.
 ```bash
 # with both dev servers running:
 pnpm workshops:pdf         # → apps/workshops-api/src/assets/pdf/<slug>/  (commit these)
+# logs in as admin/fourm-admin by default; override with
+# WORKSHOPS_PDF_USERNAME / WORKSHOPS_PDF_PASSWORD for other workshops
 ```
 
 Regenerate + commit whenever content changes. Production serves the
@@ -81,8 +91,8 @@ NODE_ENV=production
 Domain `workshops.sintezaur.ro` (DNS: Cloudflare A → 65.21.188.102, DNS
 only) — Traefik issues TLS. Set watch paths so only
 `apps/workshops*`/`tools`-related pushes redeploy it. After first deploy:
-log into the panel and set real guest/admin passwords (the seed's dev
-passwords are placeholders).
+log in as `superadmin` and, in the panel's Accounts section, replace the
+seeded dev accounts' passwords (guest/admin) with real ones.
 
 Deleting the whole section later = remove the two app folders, the Coolify
 service, the DNS record, and `DROP DATABASE sintezaur_workshops`

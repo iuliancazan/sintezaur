@@ -11,20 +11,21 @@
     "download_pdf": "Descarcă PDF",
     "print": "Printează"
   },
+  "selection": {
+    "kicker": "Cursuri hands-on & materiale de workshop",
+    "subtitle": "Alege workshopul tău. Fiecare are propriile date de acces — folosește utilizatorul și parola primite.",
+    "empty": "Niciun workshop deschis momentan.",
+    "footer": "Comunitatea din București pentru oamenii care iubesc sinteza"
+  },
   "login": {
-    "tagline": "Cursuri hands-on & materiale de workshop",
-    "workshop": "WORKSHOP",
-    "password": "PAROLA WORKSHOPULUI",
+    "username": "UTILIZATOR",
+    "password": "PAROLA",
     "enter": "INTRĂ",
-    "bad_password": "Parolă greșită. Verifică parola primită și încearcă din nou.",
+    "all_workshops": "Toate workshopurile",
+    "bad_credentials": "Utilizator sau parolă greșite. Verifică datele primite și încearcă din nou.",
     "unknown_workshop": "Workshopul acesta nu este disponibil.",
     "throttled": "Prea multe încercări — așteaptă un minut și încearcă din nou.",
-    "missing_password": "Scrie parola workshopului.",
-    "missing_workshop": "Alege un workshop.",
-    "panel_link": "Panou de control",
-    "panel_password": "PAROLA DE SUPERADMIN",
-    "panel_enter": "DESCHIDE PANOUL",
-    "back_to_login": "Înapoi la login-ul de workshop"
+    "missing_fields": "Lipsesc: {{fields}}"
   },
   "hub": {
     "materials": "MATERIALE",
@@ -47,7 +48,7 @@
   },
   "panel": {
     "title": "PANOU DE CONTROL",
-    "subtitle": "Workshopuri, parole, vizibilitate, accesări",
+    "subtitle": "Workshopuri, conturi, vizibilitate, accesări",
     "new_workshop": "Workshop nou",
     "published": "Publicat",
     "unpublished": "Ascuns",
@@ -60,13 +61,26 @@
     "event_date": "Data evenimentului",
     "venue": "Locația",
     "slug": "Slug (URL)",
-    "passwords": "Parole",
-    "guest_password": "Parolă nouă de invitat",
-    "admin_password": "Parolă nouă de admin",
-    "password_hint": "Minim 8 caractere. Lasă gol ca să păstrezi parola actuală.",
-    "set_passwords": "Setează parolele",
-    "passwords_saved": "Parolele au fost actualizate.",
     "saved": "Salvat.",
+    "accounts": "Conturi",
+    "account_username": "Utilizator",
+    "account_role": "Rol",
+    "role_guest": "invitat",
+    "role_admin": "admin",
+    "add_account": "Adaugă cont",
+    "account_password": "Parolă",
+    "new_password": "Parolă nouă",
+    "set_password": "Setează parola",
+    "delete_account": "Șterge",
+    "account_created": "Cont creat.",
+    "password_saved": "Parola a fost actualizată.",
+    "account_deleted": "Cont șters.",
+    "username_taken": "Utilizatorul există deja pe acest workshop.",
+    "reserved_username": "Utilizatorul acesta este rezervat.",
+    "username_format": "Utilizator: litere mici, cifre, puncte sau liniuțe (2–32).",
+    "password_hint": "Minim 8 caractere.",
+    "password_too_short": "Parolele au nevoie de minim 8 caractere.",
+    "accounts_hint": "Oamenii se loghează cu utilizator + parolă. Utilizatorul rezervat „superadmin\" (parola din env) deschide acest panou.",
     "stats": "Accesări",
     "stats_logins": "Autentificări",
     "stats_uniques": "Vizitatori unici (aprox.)",
@@ -74,7 +88,6 @@
     "stats_recent": "Activitate recentă",
     "stats_empty": "Nicio activitate încă.",
     "created": "Workshop creat.",
-    "missing_fields": "Lipsesc: {{fields}}",
-    "password_too_short": "Parolele au nevoie de minim 8 caractere."
+    "missing_fields": "Lipsesc: {{fields}}"
   }
 }

@@ -1,0 +1,210 @@
+/* Sintezaur platform look (V05 tokens, scoped locally): dark neutral bg
+ * with the gold dot grid, Big Shoulders Stencil display type, IBM Plex,
+ * framed 1px cards. Deliberately different from the course pages. */
+
+:host {
+  /* V05 tokens (subset), scoped */
+  --sz-bg: #0a0a0b;
+  --sz-bg-elev: #131314;
+  --sz-bg-card: #181819;
+  --sz-line: #2a2a2c;
+  --sz-line-strong: #3e3e40;
+  --sz-fg: #edecea;
+  --sz-fg-muted: #8e8d8a;
+  --sz-fg-subtle: #5c5b58;
+  --sz-accent: #ebb023;
+  --sz-accent-2: #f08a1b;
+  --sz-grid-dots: rgba(235, 176, 35, 0.16);
+  --sz-font-display: 'Big Shoulders Stencil Display', 'Big Shoulders Display',
+    Impact, system-ui, sans-serif;
+  --sz-font-ui: 'IBM Plex Sans', system-ui, sans-serif;
+  --sz-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Shared lang toggle picks up the platform accent here. */
+  --lt-accent: var(--sz-accent);
+
+  display: block;
+  min-height: 100dvh;
+  background: var(--sz-bg);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--sz-grid-dots) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+  color: var(--sz-fg);
+  font-family: var(--sz-font-ui);
+}
+
+.sz {
+  max-width: 920px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  padding: 22px clamp(16px, 4vw, 40px) 40px;
+  display: flex;
+  flex-direction: column;
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  &__brand-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__logo {
+    height: 40px;
+    width: auto;
+  }
+
+  &__wordmark {
+    font-family: var(--sz-font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.45em;
+    color: var(--sz-fg);
+  }
+
+  &__hero {
+    margin-top: clamp(48px, 10vh, 110px);
+  }
+
+  &__kicker {
+    margin: 0;
+    font-family: var(--sz-font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sz-fg-muted);
+
+    &::before {
+      content: '* ';
+      color: var(--sz-accent);
+    }
+  }
+
+  &__title {
+    margin: 10px 0 0;
+    font-family: var(--sz-font-display);
+    font-weight: 600;
+    font-size: clamp(56px, 12vw, 128px);
+    line-height: 0.9;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  &__dot {
+    color: var(--sz-accent);
+  }
+
+  &__sub {
+    margin: 18px 0 0;
+    max-width: 560px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--sz-fg-muted);
+  }
+
+  &__list {
+    margin-top: clamp(34px, 6vh, 56px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &__card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 22px clamp(18px, 3vw, 30px);
+    background: var(--sz-bg-elev);
+    border: 1px solid var(--sz-line);
+    border-radius: 2px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+
+    &:hover {
+      border-color: var(--sz-accent);
+      background: var(--sz-bg-card);
+    }
+
+    &:hover .sz__card-arrow {
+      color: var(--sz-accent);
+      transform: translateX(4px);
+    }
+  }
+
+  &__card-main {
+    min-width: 0;
+  }
+
+  &__card-brand {
+    margin: 0;
+    font-family: var(--sz-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    color: var(--sz-accent);
+  }
+
+  &__card-title {
+    margin: 8px 0 0;
+    font-family: var(--sz-font-display);
+    font-weight: 600;
+    font-size: clamp(26px, 4.5vw, 40px);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  &__card-sub {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--sz-fg-muted);
+  }
+
+  &__card-meta {
+    margin: 10px 0 0;
+    font-family: var(--sz-font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sz-fg-subtle);
+  }
+
+  &__card-arrow {
+    flex: 0 0 auto;
+    font-size: 26px;
+    color: var(--sz-fg-subtle);
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  &__empty {
+    padding: 30px 0;
+    color: var(--sz-fg-muted);
+  }
+
+  &__footer {
+    margin-top: auto;
+    padding-top: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--sz-font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sz-fg-subtle);
+
+    span:first-child::first-letter {
+      color: var(--sz-accent);
+    }
+  }
+}

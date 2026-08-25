@@ -21,12 +21,17 @@
     justify-content: space-between;
   }
 
-  &__brand {
-    margin: 0;
+  &__back {
+    display: inline-flex;
+    align-items: center;
     font-family: var(--ws-font-body);
-    font-size: 15px;
-    letter-spacing: 5px;
-    color: var(--ws-text-label);
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--ws-text-faint);
+
+    &:hover {
+      color: var(--ws-accent-bright);
+    }
   }
 
   &__title {
@@ -66,15 +71,6 @@
     flex-direction: column;
   }
 
-  &__workshop-name {
-    margin: 0 0 22px;
-    font-family: var(--ws-font-display);
-    font-stretch: 92%;
-    font-size: 21px;
-    color: var(--ws-text);
-    text-align: center;
-  }
-
   &__label {
     font-family: var(--ws-font-body);
     font-size: 13px;
@@ -102,11 +98,6 @@
     }
   }
 
-  &__select {
-    appearance: none;
-    cursor: pointer;
-  }
-
   &__button {
     padding: 12px 16px;
     font-family: var(--ws-font-body);
@@ -125,22 +116,6 @@
     &:disabled {
       opacity: 0.35;
       cursor: not-allowed;
-    }
-  }
-
-  &__mode-link {
-    margin-top: 16px;
-    min-height: 0;
-    background: none;
-    border: none;
-    font-family: var(--ws-font-body);
-    font-size: 13px;
-    letter-spacing: 1px;
-    color: var(--ws-text-faint);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--ws-accent-bright);
     }
   }
 
