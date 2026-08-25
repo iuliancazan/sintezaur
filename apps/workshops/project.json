@@ -1,0 +1,79 @@
+{
+  "name": "workshops",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "ws",
+  "sourceRoot": "apps/workshops/src",
+  "tags": ["scope:frontend"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/workshops",
+        "browser": "apps/workshops/src/main.ts",
+        "tsConfig": "apps/workshops/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/workshops/public"
+          }
+        ],
+        "styles": ["apps/workshops/src/styles.scss"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "options": {
+        "port": 4300,
+        "proxyConfig": "apps/workshops/proxy.conf.json"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "workshops:build:production"
+        },
+        "development": {
+          "buildTarget": "workshops:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "workshops:build",
+        "staticFilePath": "dist/apps/workshops/browser",
+        "spa": true
+      }
+    }
+  }
+}

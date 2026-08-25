@@ -13,6 +13,8 @@
     "worker": "CI=true nx serve worker",
     "site": "CI=true nx serve site",
     "dashboard": "CI=true nx serve dashboard",
+    "workshops": "CI=true nx serve workshops",
+    "workshops-api": "CI=true nx serve workshops-api",
     "migrate": "tsx tools/scripts/migrate.ts",
     "migrate:generate": "drizzle-kit generate",
     "seed:superadmin": "tsx tools/scripts/create-superadmin.ts",

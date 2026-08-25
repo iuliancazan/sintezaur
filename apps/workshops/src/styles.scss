@@ -1,0 +1,59 @@
+/* Workshops global styles — design tokens lifted 1:1 from the course
+ * design system (planning vault: claude-design-prototypes/2026-08-17-v02.1,
+ * "Design System.dc.html"). Dark is the only screen theme; print themes
+ * live with the doc components. */
+
+:root {
+  /* Surfaces */
+  --ws-bg: #000000;
+  --ws-card-bg: rgba(255, 255, 255, 0.02);
+  --ws-card-border: #454545;
+
+  /* Text */
+  --ws-text: #e8e8e8;
+  --ws-text-dim: #b4b4b4;
+  --ws-text-faint: #8f8f8f;
+  --ws-text-label: #a7a7a7;
+
+  /* Accents (PPT scribble orange + diagram orange) */
+  --ws-accent: #e97132;
+  --ws-accent-bright: #ff8a48;
+
+  /* Type — self-hosted Lato + Instrument Sans land with the content port;
+   * until then the stacks fall back to system faces. */
+  --ws-font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --ws-font-body: 'Lato', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--ws-bg);
+  color: var(--ws-text);
+  font-family: var(--ws-font-body);
+  font-size: 16px; /* prevents iOS input auto-zoom (repo-wide rule) */
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--ws-accent-bright);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--ws-accent);
+  }
+}
+
+button,
+a {
+  min-height: 44px; /* touch-target minimum (repo-wide rule) */
+}
