@@ -1,0 +1,221 @@
+<main class="panel">
+  <header class="panel__top">
+    <p class="panel__brand">{{ 'common.brand' | transloco }}</p>
+    <div class="panel__top-right">
+      <ws-lang-toggle />
+      <button type="button" class="panel__logout" (click)="logout()">
+        {{ 'common.logout' | transloco }}
+      </button>
+    </div>
+  </header>
+
+  <section class="panel__hero">
+    <h1 class="panel__title">{{ 'panel.title' | transloco }}</h1>
+    <p class="panel__subtitle">{{ 'panel.subtitle' | transloco }}</p>
+  </section>
+
+  <div class="panel__actions">
+    <button
+      type="button"
+      class="panel__new-btn"
+      (click)="showNewForm.set(!showNewForm())"
+    >
+      + {{ 'panel.new_workshop' | transloco }}
+    </button>
+  </div>
+
+  @if (showNewForm()) {
+    <form class="panel__card panel__new" (ngSubmit)="create()">
+      <div class="panel__grid">
+        <label class="panel__field">
+          <span>{{ 'panel.slug' | transloco }}</span>
+          <input name="slug" [(ngModel)]="newForm.slug" placeholder="my-workshop" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.event_date' | transloco }}</span>
+          <input name="eventDate" type="date" [(ngModel)]="newForm.eventDate" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.title_en' | transloco }}</span>
+          <input name="titleEn" [(ngModel)]="newForm.titleEn" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.title_ro' | transloco }}</span>
+          <input name="titleRo" [(ngModel)]="newForm.titleRo" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.subtitle_en' | transloco }}</span>
+          <input name="subtitleEn" [(ngModel)]="newForm.subtitleEn" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.subtitle_ro' | transloco }}</span>
+          <input name="subtitleRo" [(ngModel)]="newForm.subtitleRo" />
+        </label>
+        <label class="panel__field panel__field--wide">
+          <span>{{ 'panel.venue' | transloco }}</span>
+          <input name="venue" [(ngModel)]="newForm.venue" />
+        </label>
+      </div>
+      <div class="panel__row-end">
+        <button type="submit" class="panel__primary">
+          {{ 'common.save' | transloco }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @for (w of workshops(); track w.id) {
+    <section class="panel__card">
+      <header class="panel__card-head">
+        <div>
+          <h2 class="panel__card-title">
+            {{ languageService.lang() === 'ro' ? w.titleRo : w.titleEn }}
+          </h2>
+          <a class="panel__card-slug" [routerLink]="['/w', w.slug]"
+            >/w/{{ w.slug }}</a
+          >
+        </div>
+        <button
+          type="button"
+          class="panel__chip"
+          [class.panel__chip--on]="w.published"
+          (click)="togglePublished(w)"
+        >
+          {{ (w.published ? 'panel.published' : 'panel.unpublished') | transloco }}
+        </button>
+      </header>
+
+      <div class="panel__grid">
+        <label class="panel__field">
+          <span>{{ 'panel.title_en' | transloco }}</span>
+          <input [name]="'titleEn-' + w.id" [(ngModel)]="w.titleEn" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.title_ro' | transloco }}</span>
+          <input [name]="'titleRo-' + w.id" [(ngModel)]="w.titleRo" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.subtitle_en' | transloco }}</span>
+          <input [name]="'subtitleEn-' + w.id" [(ngModel)]="w.subtitleEn" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.subtitle_ro' | transloco }}</span>
+          <input [name]="'subtitleRo-' + w.id" [(ngModel)]="w.subtitleRo" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.event_date' | transloco }}</span>
+          <input [name]="'eventDate-' + w.id" type="date" [(ngModel)]="w.eventDate" />
+        </label>
+        <label class="panel__field">
+          <span>{{ 'panel.venue' | transloco }}</span>
+          <input [name]="'venue-' + w.id" [(ngModel)]="w.venue" />
+        </label>
+      </div>
+
+      <label class="panel__toggle">
+        <input
+          type="checkbox"
+          [checked]="w.guestSeesSlides"
+          (change)="toggleGuestSlides(w)"
+        />
+        <span>{{ 'panel.guest_sees_slides' | transloco }}</span>
+      </label>
+
+      <div class="panel__row-end">
+        <button type="button" class="panel__primary" (click)="save(w)">
+          {{ 'common.save' | transloco }}
+        </button>
+      </div>
+
+      <details class="panel__section">
+        <summary>{{ 'panel.passwords' | transloco }}</summary>
+        <div class="panel__grid">
+          <label class="panel__field">
+            <span>{{ 'panel.guest_password' | transloco }}</span>
+            <input
+              [name]="'guest-pw-' + w.id"
+              type="text"
+              autocomplete="off"
+              [(ngModel)]="passwords[w.id].guest"
+            />
+          </label>
+          <label class="panel__field">
+            <span>{{ 'panel.admin_password' | transloco }}</span>
+            <input
+              [name]="'admin-pw-' + w.id"
+              type="text"
+              autocomplete="off"
+              [(ngModel)]="passwords[w.id].admin"
+            />
+          </label>
+        </div>
+        <p class="panel__hint">{{ 'panel.password_hint' | transloco }}</p>
+        <div class="panel__row-end">
+          <button
+            type="button"
+            class="panel__primary"
+            (click)="setPasswords(w)"
+          >
+            {{ 'panel.set_passwords' | transloco }}
+          </button>
+        </div>
+      </details>
+
+      <details class="panel__section" (toggle)="toggleStats(w)">
+        <summary>{{ 'panel.stats' | transloco }}</summary>
+        @if (stats()[w.id]; as s) {
+          <div class="panel__stats">
+            <div class="panel__stat">
+              <span class="panel__stat-num">{{
+                loginsFor(w.id, 'guest')
+              }}</span>
+              <span class="panel__stat-label"
+                >{{ 'panel.stats_logins' | transloco }} ·
+                {{ 'hub.role_guest' | transloco }}</span
+              >
+            </div>
+            <div class="panel__stat">
+              <span class="panel__stat-num">{{
+                loginsFor(w.id, 'admin')
+              }}</span>
+              <span class="panel__stat-label"
+                >{{ 'panel.stats_logins' | transloco }} ·
+                {{ 'hub.role_admin' | transloco }}</span
+              >
+            </div>
+            <div class="panel__stat">
+              <span class="panel__stat-num">{{ s.uniqueVisitors }}</span>
+              <span class="panel__stat-label">{{
+                'panel.stats_uniques' | transloco
+              }}</span>
+            </div>
+          </div>
+          @if (s.views.length > 0) {
+            <p class="panel__hint">{{ 'panel.stats_views' | transloco }}:</p>
+            <ul class="panel__views">
+              @for (v of s.views; track $index) {
+                <li>{{ v.document ?? '—' }} · {{ v.event }} · {{ v.total }}</li>
+              }
+            </ul>
+          }
+          @if (s.recent.length > 0) {
+            <p class="panel__hint">{{ 'panel.stats_recent' | transloco }}:</p>
+            <ul class="panel__recent">
+              @for (r of s.recent; track $index) {
+                <li>
+                  {{ formatWhen(r.createdAt) }} · {{ r.role }} · {{ r.event
+                  }}@if (r.document) { · {{ r.document }}}@if (r.lang) { ·
+                  {{ r.lang }}}
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="panel__hint">{{ 'panel.stats_empty' | transloco }}</p>
+          }
+        } @else {
+          <p class="panel__hint">{{ 'common.loading' | transloco }}</p>
+        }
+      </details>
+    </section>
+  }
+</main>

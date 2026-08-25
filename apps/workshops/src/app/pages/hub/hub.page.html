@@ -1,0 +1,65 @@
+<main class="hub">
+  <header class="hub__top">
+    <p class="hub__brand">{{ 'common.brand' | transloco }}</p>
+    <div class="hub__top-right">
+      <ws-lang-toggle />
+      @if (isSuperadmin()) {
+        <a class="hub__panel-link" routerLink="/panel">
+          {{ 'hub.open_panel' | transloco }}
+        </a>
+      }
+      <button type="button" class="hub__logout" (click)="logout()">
+        {{ 'common.logout' | transloco }}
+      </button>
+    </div>
+  </header>
+
+  @if (workshop(); as w) {
+    <section class="hub__hero">
+      <h1 class="hub__title">{{ title() }}</h1>
+      <svg
+        class="hub__scribble"
+        viewBox="0 0 860 24"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3"
+          stroke="#E97132"
+          stroke-width="6.5"
+          stroke-linecap="round"
+        />
+      </svg>
+      <p class="hub__subtitle">{{ subtitle() }}</p>
+      @if (meta()) {
+        <p class="hub__meta">{{ meta() }}</p>
+      }
+    </section>
+
+    <p class="hub__section-label">{{ 'hub.materials' | transloco }}</p>
+    <section class="hub__cards">
+      @for (card of cards(); track card.key) {
+        <div class="hub__card">
+          <div class="hub__card-head">
+            <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
+            @if (card.adminOnly) {
+              <span class="hub__badge">{{ 'hub.admin_only' | transloco }}</span>
+            }
+          </div>
+          <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
+          <p class="hub__card-soon">{{ 'hub.coming_soon' | transloco }}</p>
+        </div>
+      }
+    </section>
+
+    <footer class="hub__footer">
+      <span class="hub__role">
+        {{ 'hub.your_role' | transloco }}:
+        {{ 'hub.role_' + role() | transloco }}
+      </span>
+      <span class="hub__powered">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</span>
+    </footer>
+  } @else {
+    <p class="hub__loading">{{ 'common.loading' | transloco }}</p>
+  }
+</main>
