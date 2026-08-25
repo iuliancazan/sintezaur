@@ -17,6 +17,7 @@ import { chromium, type BrowserContext, type Page } from '@playwright/test';
  */
 const slug = process.argv[2] ?? 'sequential-fourm';
 const BASE = process.env.WORKSHOPS_PDF_BASE ?? 'http://localhost:4300';
+const USERNAME = process.env.WORKSHOPS_PDF_USERNAME ?? 'admin';
 const PASSWORD = process.env.WORKSHOPS_PDF_PASSWORD ?? 'fourm-admin';
 const OUT_DIR = path.resolve(
   process.cwd(),
@@ -26,11 +27,11 @@ const OUT_DIR = path.resolve(
 
 async function login(context: BrowserContext) {
   const res = await context.request.post(`${BASE}/api/auth/login`, {
-    data: { slug, password: PASSWORD },
+    data: { slug, username: USERNAME, password: PASSWORD },
   });
   if (!res.ok()) {
     throw new Error(
-      `Login failed (${res.status()}) — are both dev servers running and is WORKSHOPS_PDF_PASSWORD an admin password for "${slug}"?`,
+      `Login failed (${res.status()}) — are both dev servers running and are WORKSHOPS_PDF_USERNAME/WORKSHOPS_PDF_PASSWORD an admin account for "${slug}"?`,
     );
   }
 }

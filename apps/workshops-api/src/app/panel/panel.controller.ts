@@ -1,6 +1,8 @@
 import {
   Body,
+  ConflictException,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
@@ -12,6 +14,7 @@ import {
 import {
   IsBoolean,
   IsDateString,
+  IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -19,10 +22,15 @@ import {
   MinLength,
 } from 'class-validator';
 import bcrypt from 'bcryptjs';
-import { count, countDistinct, desc, eq, sql } from 'drizzle-orm';
+import { and, count, countDistinct, desc, eq, sql } from 'drizzle-orm';
 import { RequireRoles } from '../auth/roles';
+import { SUPERADMIN_USERNAME } from '../auth/auth.service';
 import { DbService } from '../db/db.service';
-import { accessEvents, workshops } from '../../db/schema';
+import {
+  accessEvents,
+  workshopAccounts,
+  workshops,
+} from '../../db/schema';
 
 class CreateWorkshopDto {
   @IsString()
@@ -90,17 +98,34 @@ class UpdateWorkshopDto {
   guestSeesSlides?: boolean;
 }
 
-class SetPasswordsDto {
+class CreateAccountDto {
   @IsString()
-  @MinLength(8)
-  @IsOptional()
-  guestPassword?: string;
+  @Matches(/^[a-z0-9][a-z0-9._-]{1,31}$/, {
+    message:
+      'username must be lowercase letters/digits/dots/dashes, 2–32 chars',
+  })
+  username!: string;
+
+  @IsIn(['guest', 'admin'])
+  role!: 'guest' | 'admin';
 
   @IsString()
   @MinLength(8)
-  @IsOptional()
-  adminPassword?: string;
+  password!: string;
 }
+
+class SetAccountPasswordDto {
+  @IsString()
+  @MinLength(8)
+  password!: string;
+}
+
+const accountColumns = {
+  id: workshopAccounts.id,
+  username: workshopAccounts.username,
+  role: workshopAccounts.role,
+  updatedAt: workshopAccounts.updatedAt,
+};
 
 /** Workshop row shape returned to the panel — never includes hashes. */
 const panelWorkshopColumns = {
@@ -114,8 +139,6 @@ const panelWorkshopColumns = {
   venue: workshops.venue,
   published: workshops.published,
   guestSeesSlides: workshops.guestSeesSlides,
-  hasGuestPassword: sql<boolean>`(${workshops.guestPasswordHash} is not null)`,
-  hasAdminPassword: sql<boolean>`(${workshops.adminPasswordHash} is not null)`,
   createdAt: workshops.createdAt,
 };
 
@@ -161,27 +184,88 @@ export class PanelController {
     return this.getOne(id);
   }
 
-  @Put(':id/passwords')
-  async setPasswords(
+  @Get(':id/accounts')
+  listAccounts(@Param('id', ParseUUIDPipe) id: string) {
+    return this.db
+      .select(accountColumns)
+      .from(workshopAccounts)
+      .where(eq(workshopAccounts.workshopId, id))
+      .orderBy(workshopAccounts.createdAt);
+  }
+
+  @Post(':id/accounts')
+  async createAccount(
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: SetPasswordsDto,
+    @Body() dto: CreateAccountDto,
   ) {
-    const patch: Record<string, string | Date> = { updatedAt: new Date() };
-    if (dto.guestPassword) {
-      patch['guestPasswordHash'] = bcrypt.hashSync(dto.guestPassword, 12);
+    const username = dto.username.toLowerCase();
+    if (username === SUPERADMIN_USERNAME) {
+      throw new ConflictException('reserved_username');
     }
-    if (dto.adminPassword) {
-      patch['adminPasswordHash'] = bcrypt.hashSync(dto.adminPassword, 12);
+    const existing = await this.db
+      .select({ id: workshopAccounts.id })
+      .from(workshopAccounts)
+      .where(
+        and(
+          eq(workshopAccounts.workshopId, id),
+          eq(workshopAccounts.username, username),
+        ),
+      );
+    if (existing.length > 0) {
+      throw new ConflictException('username_taken');
     }
+    await this.db.insert(workshopAccounts).values({
+      workshopId: id,
+      username,
+      role: dto.role,
+      passwordHash: bcrypt.hashSync(dto.password, 12),
+    });
+    return this.listAccounts(id);
+  }
+
+  @Put(':id/accounts/:accountId/password')
+  async setAccountPassword(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('accountId', ParseUUIDPipe) accountId: string,
+    @Body() dto: SetAccountPasswordDto,
+  ) {
     const updated = await this.db
-      .update(workshops)
-      .set(patch)
-      .where(eq(workshops.id, id))
-      .returning({ id: workshops.id });
+      .update(workshopAccounts)
+      .set({
+        passwordHash: bcrypt.hashSync(dto.password, 12),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(workshopAccounts.id, accountId),
+          eq(workshopAccounts.workshopId, id),
+        ),
+      )
+      .returning({ id: workshopAccounts.id });
     if (updated.length === 0) {
       throw new NotFoundException();
     }
-    return this.getOne(id);
+    return this.listAccounts(id);
+  }
+
+  @Delete(':id/accounts/:accountId')
+  async deleteAccount(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('accountId', ParseUUIDPipe) accountId: string,
+  ) {
+    const deleted = await this.db
+      .delete(workshopAccounts)
+      .where(
+        and(
+          eq(workshopAccounts.id, accountId),
+          eq(workshopAccounts.workshopId, id),
+        ),
+      )
+      .returning({ id: workshopAccounts.id });
+    if (deleted.length === 0) {
+      throw new NotFoundException();
+    }
+    return this.listAccounts(id);
   }
 
   @Get(':id/stats')

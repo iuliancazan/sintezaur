@@ -1,17 +1,20 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import { workshops } from '../../apps/workshops-api/src/db/schema';
+import {
+  workshopAccounts,
+  workshops,
+} from '../../apps/workshops-api/src/db/schema';
 
 /**
- * Idempotent seed for the first workshop (sequential-fourm). Creates the row
- * if missing; on an existing row it only fills in ABSENT password hashes and
- * never overwrites edits made through the panel.
+ * Idempotent seed for the first workshop (sequential-fourm) and its two
+ * default accounts. Existing rows are never overwritten — the panel owns
+ * them after creation.
  *
- * Dev default passwords (change them in the panel for anything real):
- *   guest: fourm-guest · admin: fourm-admin
+ * Dev default accounts (change the passwords in the panel for anything real):
+ *   guest / fourm-guest  ·  admin / fourm-admin
  */
 async function main() {
   const databaseUrl = process.env.WORKSHOPS_DATABASE_URL;
@@ -22,45 +25,59 @@ async function main() {
   const db = drizzle(pool);
   try {
     const slug = 'sequential-fourm';
-    const existing = await db
+    let rows = await db
       .select()
       .from(workshops)
       .where(eq(workshops.slug, slug));
 
-    if (existing.length === 0) {
-      await db.insert(workshops).values({
-        slug,
-        titleEn: 'Intro to Synthesis',
-        titleRo: 'Intro to Synthesis',
-        subtitleEn:
-          'A crash course in subtractive synthesis, on the Sequential Fourm',
-        subtitleRo:
-          'Un crash course de sinteză subtractivă, pe Sequential Fourm',
-        eventDate: '2026-09-21',
-        venue: 'Club Control, București',
-        published: true,
-        guestSeesSlides: false,
-        guestPasswordHash: bcrypt.hashSync('fourm-guest', 12),
-        adminPasswordHash: bcrypt.hashSync('fourm-admin', 12),
-      });
-      console.log(`[seed:workshops] created "${slug}" (dev passwords set).`);
-      return;
+    if (rows.length === 0) {
+      rows = await db
+        .insert(workshops)
+        .values({
+          slug,
+          titleEn: 'Intro to Synthesis',
+          titleRo: 'Intro to Synthesis',
+          subtitleEn:
+            'A crash course in subtractive synthesis, on the Sequential Fourm',
+          subtitleRo:
+            'Un crash course de sinteză subtractivă, pe Sequential Fourm',
+          eventDate: '2026-09-21',
+          venue: 'Club Control, București',
+          published: true,
+          guestSeesSlides: false,
+        })
+        .returning();
+      console.log(`[seed:workshops] created "${slug}".`);
     }
+    const workshop = rows[0];
 
-    const row = existing[0];
-    const patch: Partial<typeof workshops.$inferInsert> = {};
-    if (!row.guestPasswordHash) {
-      patch.guestPasswordHash = bcrypt.hashSync('fourm-guest', 12);
+    const defaults = [
+      { username: 'guest', role: 'guest', password: 'fourm-guest' },
+      { username: 'admin', role: 'admin', password: 'fourm-admin' },
+    ];
+    for (const acc of defaults) {
+      const existing = await db
+        .select({ id: workshopAccounts.id })
+        .from(workshopAccounts)
+        .where(
+          and(
+            eq(workshopAccounts.workshopId, workshop.id),
+            eq(workshopAccounts.username, acc.username),
+          ),
+        );
+      if (existing.length === 0) {
+        await db.insert(workshopAccounts).values({
+          workshopId: workshop.id,
+          username: acc.username,
+          role: acc.role,
+          passwordHash: bcrypt.hashSync(acc.password, 12),
+        });
+        console.log(
+          `[seed:workshops] created account "${acc.username}" (${acc.role}).`,
+        );
+      }
     }
-    if (!row.adminPasswordHash) {
-      patch.adminPasswordHash = bcrypt.hashSync('fourm-admin', 12);
-    }
-    if (Object.keys(patch).length > 0) {
-      await db.update(workshops).set(patch).where(eq(workshops.id, row.id));
-      console.log(`[seed:workshops] "${slug}" existed — filled missing passwords.`);
-    } else {
-      console.log(`[seed:workshops] "${slug}" already seeded — nothing to do.`);
-    }
+    console.log('[seed:workshops] done.');
   } finally {
     await pool.end();
   }

@@ -32,10 +32,8 @@ class WorkshopLoginDto {
 
   @IsString()
   @IsNotEmpty()
-  password!: string;
-}
+  username!: string;
 
-class SuperadminLoginDto {
   @IsString()
   @IsNotEmpty()
   password!: string;
@@ -89,30 +87,17 @@ export class AuthController {
   ) {
     const { payload, workshop } = await this.auth.loginWorkshop(
       dto.slug,
+      dto.username,
       dto.password,
     );
     const visitorId = this.setSession(req, res, payload);
     this.events.record({
-      workshopId: workshop.id,
+      workshopId: workshop?.id,
       visitorId,
       role: payload.role,
       event: 'login',
     });
-    return { role: payload.role, slug: workshop.slug };
-  }
-
-  @Post('superadmin')
-  @HttpCode(200)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  superadmin(
-    @Body() dto: SuperadminLoginDto,
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const payload = this.auth.loginSuperadmin(dto.password);
-    const visitorId = this.setSession(req, res, payload);
-    this.events.record({ visitorId, role: 'superadmin', event: 'login' });
-    return { role: payload.role };
+    return { role: payload.role, slug: workshop?.slug ?? dto.slug };
   }
 
   @Post('logout')

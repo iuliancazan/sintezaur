@@ -1,33 +1,40 @@
-// Gate page logic — external file because helmet's default CSP blocks
-// inline scripts. Talks only to /api/auth/* and /api/workshops.
+// Gate logic — external file because helmet's default CSP blocks inline
+// scripts. Two screens: Sintezaur-branded workshop selection, then the
+// selected workshop's own login (username + password).
 (function () {
   const I18N = {
     en: {
-      tagline: 'Hands-on courses & workshop materials',
-      workshop: 'WORKSHOP',
-      password: 'WORKSHOP PASSWORD',
+      kicker: 'Hands-on courses & workshop materials',
+      select_sub:
+        'Pick your workshop. Each one has its own access details — use the username and password you received.',
+      footer: "Bucharest's community for people who love synthesis",
+      loading: 'Loading…',
+      empty: 'No workshops are open right now.',
+      all_workshops: 'All workshops',
+      username: 'USERNAME',
+      password: 'PASSWORD',
       enter: 'ENTER',
-      panel_password: 'SUPERADMIN PASSWORD',
-      panel_enter: 'OPEN PANEL',
-      panel_link: 'Control panel',
-      back: 'Back to workshop login',
-      bad_password: 'Wrong password. Check the one you received and try again.',
+      bad_credentials:
+        'Wrong username or password. Check the details you received and try again.',
       throttled: 'Too many attempts — wait a minute, then try again.',
-      missing_password: 'Enter the workshop password.',
+      missing: 'Enter the username and the password.',
       error: 'Something went wrong. Try again.',
     },
     ro: {
-      tagline: 'Cursuri hands-on & materiale de workshop',
-      workshop: 'WORKSHOP',
-      password: 'PAROLA WORKSHOPULUI',
+      kicker: 'Cursuri hands-on & materiale de workshop',
+      select_sub:
+        'Alege workshopul tău. Fiecare are propriile date de acces — folosește utilizatorul și parola primite.',
+      footer: 'Comunitatea din București pentru oamenii care iubesc sinteza',
+      loading: 'Se încarcă…',
+      empty: 'Niciun workshop deschis momentan.',
+      all_workshops: 'Toate workshopurile',
+      username: 'UTILIZATOR',
+      password: 'PAROLA',
       enter: 'INTRĂ',
-      panel_password: 'PAROLA DE SUPERADMIN',
-      panel_enter: 'DESCHIDE PANOUL',
-      panel_link: 'Panou de control',
-      back: 'Înapoi la login-ul de workshop',
-      bad_password: 'Parolă greșită. Verifică parola primită și încearcă din nou.',
+      bad_credentials:
+        'Utilizator sau parolă greșite. Verifică datele primite și încearcă din nou.',
       throttled: 'Prea multe încercări — așteaptă un minut și încearcă din nou.',
-      missing_password: 'Scrie parola workshopului.',
+      missing: 'Completează utilizatorul și parola.',
       error: 'Ceva n-a mers. Încearcă din nou.',
     },
   };
@@ -36,51 +43,111 @@
     const stored = localStorage.getItem('ws_lang');
     if (stored === 'ro' || stored === 'en') lang = stored;
   } catch { /* ignore */ }
-  let superadmin = false;
   let workshops = [];
+  let selected = null;
 
   function t(key) { return I18N[lang][key] || key; }
   function $(id) { return document.getElementById(id); }
+  function brandFromSlug(slug) {
+    return slug.replace(/-/g, ' ').toUpperCase();
+  }
 
-  function render() {
+  function renderTexts() {
     document.documentElement.lang = lang;
-    $('lang-en').classList.toggle('on', lang === 'en');
-    $('lang-ro').classList.toggle('on', lang === 'ro');
+    const pills = document.querySelectorAll('.pill');
+    for (const pill of pills) {
+      pill.classList.toggle('on', pill.getAttribute('data-lang') === lang);
+    }
     const nodes = document.querySelectorAll('[data-i18n]');
-    for (let i = 0; i < nodes.length; i++) {
-      const key = nodes[i].getAttribute('data-i18n');
-      if (key === 'enter') {
-        nodes[i].textContent = superadmin ? t('panel_enter') : t('enter');
-      } else if (key === 'panel_link') {
-        nodes[i].textContent = superadmin ? t('back') : t('panel_link');
-      } else {
-        nodes[i].textContent = t(key);
+    for (const node of nodes) {
+      node.textContent = t(node.getAttribute('data-i18n'));
+    }
+    renderList();
+    renderLogin();
+  }
+
+  function renderList() {
+    const list = $('list');
+    list.innerHTML = '';
+    if (workshops.length === 0) {
+      const p = document.createElement('p');
+      p.className = 'empty';
+      p.textContent = t('empty');
+      list.appendChild(p);
+      return;
+    }
+    for (const w of workshops) {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card';
+      const main = document.createElement('div');
+      const brand = document.createElement('p');
+      brand.className = 'cbrand';
+      brand.textContent = brandFromSlug(w.slug);
+      const title = document.createElement('h2');
+      title.className = 'ctitle';
+      title.textContent = lang === 'ro' ? w.titleRo : w.titleEn;
+      main.appendChild(brand);
+      main.appendChild(title);
+      const sub = lang === 'ro' ? w.subtitleRo : w.subtitleEn;
+      if (sub) {
+        const p = document.createElement('p');
+        p.className = 'csub';
+        p.textContent = sub;
+        main.appendChild(p);
       }
+      const metaParts = [];
+      if (w.eventDate) {
+        metaParts.push(
+          new Date(w.eventDate + 'T00:00:00').toLocaleDateString(
+            lang === 'ro' ? 'ro-RO' : 'en-GB',
+            { day: 'numeric', month: 'long', year: 'numeric' },
+          ),
+        );
+      }
+      if (w.venue) metaParts.push(w.venue);
+      if (metaParts.length > 0) {
+        const p = document.createElement('p');
+        p.className = 'cmeta';
+        p.textContent = metaParts.join(' · ');
+        main.appendChild(p);
+      }
+      const arrow = document.createElement('span');
+      arrow.className = 'arrow';
+      arrow.textContent = '→';
+      card.appendChild(main);
+      card.appendChild(arrow);
+      card.addEventListener('click', function () { openLogin(w); });
+      list.appendChild(card);
     }
-    $('workshop-block').classList.toggle('hidden', superadmin);
-    $('superadmin-block').classList.toggle('hidden', !superadmin);
-    const single = workshops.length === 1;
-    $('select-block').classList.toggle('hidden', single);
-    $('workshop-name').classList.toggle('hidden', !single);
-    if (single) {
-      $('workshop-name').textContent =
-        lang === 'ro' ? workshops[0].titleRo : workshops[0].titleEn;
-    }
-    const sel = $('workshop');
-    sel.innerHTML = '';
-    for (let j = 0; j < workshops.length; j++) {
-      const opt = document.createElement('option');
-      opt.value = workshops[j].slug;
-      opt.textContent =
-        lang === 'ro' ? workshops[j].titleRo : workshops[j].titleEn;
-      sel.appendChild(opt);
-    }
+  }
+
+  function renderLogin() {
+    if (!selected) return;
+    $('login-brand').textContent = brandFromSlug(selected.slug);
+    const sub = lang === 'ro' ? selected.subtitleRo : selected.subtitleEn;
+    $('login-sub').textContent = sub || '';
+  }
+
+  function openLogin(w) {
+    selected = w;
+    $('error').classList.remove('show');
+    renderLogin();
+    $('screen-select').classList.add('hidden');
+    $('screen-login').classList.remove('hidden');
+    $('username').focus();
+  }
+
+  function backToSelect() {
+    selected = null;
+    $('screen-login').classList.add('hidden');
+    $('screen-select').classList.remove('hidden');
   }
 
   function setLang(next) {
     lang = next;
     try { localStorage.setItem('ws_lang', next); } catch { /* ignore */ }
-    render();
+    renderTexts();
   }
 
   function showError(msg) {
@@ -89,52 +156,45 @@
     el.classList.add('show');
   }
 
-  $('lang-en').addEventListener('click', function () { setLang('en'); });
-  $('lang-ro').addEventListener('click', function () { setLang('ro'); });
-  $('mode').addEventListener('click', function () {
-    superadmin = !superadmin;
-    $('error').classList.remove('show');
-    render();
-  });
+  for (const pill of document.querySelectorAll('.pill')) {
+    pill.addEventListener('click', function () {
+      setLang(pill.getAttribute('data-lang'));
+    });
+  }
+  $('back').addEventListener('click', backToSelect);
 
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('error').classList.remove('show');
-    let body, url;
-    if (superadmin) {
-      const sp = $('sa-password').value;
-      if (!sp) return showError(t('missing_password'));
-      url = '/api/auth/superadmin';
-      body = { password: sp };
-    } else {
-      const p = $('password').value;
-      if (!p) return showError(t('missing_password'));
-      url = '/api/auth/login';
-      body = { slug: $('workshop').value || (workshops[0] && workshops[0].slug), password: p };
-    }
+    const username = $('username').value.trim();
+    const password = $('password').value;
+    if (!username || !password) return showError(t('missing'));
     $('submit').disabled = true;
-    fetch(url, {
+    fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ slug: selected ? selected.slug : '', username: username, password: password }),
     })
       .then(function (res) {
         if (res.ok) { window.location.reload(); return null; }
         if (res.status === 429) throw new Error('throttled');
-        if (res.status === 401) throw new Error('bad_password');
+        if (res.status === 401) throw new Error('bad_credentials');
         throw new Error('error');
       })
       .catch(function (err) {
         showError(t(err.message === 'throttled' ? 'throttled'
-          : err.message === 'bad_password' ? 'bad_password' : 'error'));
+          : err.message === 'bad_credentials' ? 'bad_credentials' : 'error'));
       })
       .then(function () { $('submit').disabled = false; });
   });
 
   fetch('/api/workshops')
     .then(function (r) { return r.json(); })
-    .then(function (list) { workshops = Array.isArray(list) ? list : []; render(); })
-    .catch(function () { render(); });
+    .then(function (list) {
+      workshops = Array.isArray(list) ? list : [];
+      renderTexts();
+    })
+    .catch(function () { renderTexts(); });
 
-  render();
+  renderTexts();
 })();

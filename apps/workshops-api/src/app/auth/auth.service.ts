@@ -3,7 +3,14 @@ import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { and, eq } from 'drizzle-orm';
 import { DbService } from '../db/db.service';
-import { workshops, type Workshop } from '../../db/schema';
+import {
+  workshopAccounts,
+  workshops,
+  type Workshop,
+} from '../../db/schema';
+
+/** Reserved login that maps to the env-configured superadmin. */
+export const SUPERADMIN_USERNAME = 'superadmin';
 import {
   SESSION_TTL_S,
   type SessionPayload,
@@ -40,13 +47,26 @@ export class AuthService {
   ) {}
 
   /**
-   * Workshop login: one password field; whichever hash it matches decides
-   * the role (guest first, then admin — workshops-spec.md §4.1).
+   * Workshop login: username + password (workshops-spec.md §4.1). The
+   * reserved username `superadmin` checks the env hash and grants the
+   * cross-workshop superadmin role — there is no separate login surface
+   * for it, on purpose.
    */
   async loginWorkshop(
     slug: string,
+    username: string,
     password: string,
-  ): Promise<{ payload: SessionPayload; workshop: Workshop }> {
+  ): Promise<{ payload: SessionPayload; workshop: Workshop | null }> {
+    const user = username.trim().toLowerCase();
+
+    if (user === SUPERADMIN_USERNAME) {
+      const hash = superadminHash();
+      if (!hash || !bcrypt.compareSync(password, hash)) {
+        throw new UnauthorizedException('bad_credentials');
+      }
+      return { payload: { role: 'superadmin' }, workshop: null };
+    }
+
     const rows = await this.dbService.db
       .select()
       .from(workshops)
@@ -56,34 +76,32 @@ export class AuthService {
       throw new UnauthorizedException('unknown_workshop');
     }
 
-    let role: SessionRole | null = null;
+    const accounts = await this.dbService.db
+      .select()
+      .from(workshopAccounts)
+      .where(
+        and(
+          eq(workshopAccounts.workshopId, workshop.id),
+          eq(workshopAccounts.username, user),
+        ),
+      );
+    const account = accounts[0];
     if (
-      workshop.guestPasswordHash &&
-      bcrypt.compareSync(password, workshop.guestPasswordHash)
+      !account ||
+      !bcrypt.compareSync(password, account.passwordHash) ||
+      (account.role !== 'guest' && account.role !== 'admin')
     ) {
-      role = 'guest';
-    } else if (
-      workshop.adminPasswordHash &&
-      bcrypt.compareSync(password, workshop.adminPasswordHash)
-    ) {
-      role = 'admin';
-    }
-    if (!role) {
-      throw new UnauthorizedException('bad_password');
+      throw new UnauthorizedException('bad_credentials');
     }
 
     return {
-      payload: { role, workshopId: workshop.id, slug: workshop.slug },
+      payload: {
+        role: account.role as SessionRole,
+        workshopId: workshop.id,
+        slug: workshop.slug,
+      },
       workshop,
     };
-  }
-
-  loginSuperadmin(password: string): SessionPayload {
-    const hash = superadminHash();
-    if (!hash || !bcrypt.compareSync(password, hash)) {
-      throw new UnauthorizedException('bad_password');
-    }
-    return { role: 'superadmin' };
   }
 
   sign(payload: SessionPayload): string {

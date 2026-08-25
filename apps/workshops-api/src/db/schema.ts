@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -27,8 +28,6 @@ export const workshops = pgTable('workshops', {
   published: boolean('published').notNull().default(false),
   /** Panel toggle: whether guest sessions may open the slides. */
   guestSeesSlides: boolean('guest_sees_slides').notNull().default(false),
-  guestPasswordHash: text('guest_password_hash'),
-  adminPasswordHash: text('admin_password_hash'),
   createdAt: timestamp('created_at', { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -36,6 +35,36 @@ export const workshops = pgTable('workshops', {
     .notNull()
     .defaultNow(),
 });
+
+/**
+ * Login accounts per workshop (username + password → role). Managed in the
+ * panel; usernames are stored lowercase. The superadmin is NOT here — it
+ * logs in with the reserved username `superadmin` against the env hash.
+ */
+export const workshopAccounts = pgTable(
+  'workshop_accounts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workshopId: uuid('workshop_id')
+      .notNull()
+      .references(() => workshops.id, { onDelete: 'cascade' }),
+    username: text('username').notNull(),
+    role: text('role').notNull(), // guest | admin
+    passwordHash: text('password_hash').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('workshop_accounts_workshop_username_idx').on(
+      table.workshopId,
+      table.username,
+    ),
+  ],
+);
 
 export const accessEvents = pgTable(
   'access_events',
@@ -63,4 +92,5 @@ export const accessEvents = pgTable(
 );
 
 export type Workshop = typeof workshops.$inferSelect;
+export type WorkshopAccount = typeof workshopAccounts.$inferSelect;
 export type AccessEvent = typeof accessEvents.$inferSelect;

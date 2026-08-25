@@ -18,6 +18,10 @@ export class PublicWorkshopsController {
         slug: workshops.slug,
         titleEn: workshops.titleEn,
         titleRo: workshops.titleRo,
+        subtitleEn: workshops.subtitleEn,
+        subtitleRo: workshops.subtitleRo,
+        eventDate: workshops.eventDate,
+        venue: workshops.venue,
       })
       .from(workshops)
       .where(eq(workshops.published, true))
