@@ -107,6 +107,7 @@ export class HubPage {
         hintKey: 'hub.handbook_hint',
         adminOnly: false,
         available: true,
+        route: slug ? ['/w', slug, 'handbook'] : undefined,
       },
       {
         key: 'script',
@@ -114,6 +115,7 @@ export class HubPage {
         hintKey: 'hub.script_hint',
         adminOnly: true,
         available: isStaff,
+        route: slug ? ['/w', slug, 'script'] : undefined,
       },
       {
         key: 'run-of-show',
@@ -121,6 +123,7 @@ export class HubPage {
         hintKey: 'hub.run_of_show_hint',
         adminOnly: true,
         available: isStaff,
+        route: slug ? ['/w', slug, 'run-of-show'] : undefined,
       },
     ];
     return cards.filter((c) => c.available);
