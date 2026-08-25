@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
@@ -11,6 +11,13 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(cookieParser());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
 
   // API under /api; everything else will be the gated SPA (served by this
   // process in production — wired in W1's static-serving step).
