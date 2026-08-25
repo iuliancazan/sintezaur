@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sintezaur Workshops</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#000000">
+<style>
+  /* Self-contained gate — system fonts on purpose: nothing else is served
+     to unauthenticated visitors. Visuals mirror the app's login page. */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: #000; color: #e8e8e8;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 16px; -webkit-font-smoothing: antialiased;
+  }
+  .gate { min-height: 100dvh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; }
+  .top { position: absolute; top: 0; left: 0; right: 0; padding: 22px 28px;
+    display: flex; align-items: center; justify-content: space-between; }
+  .brand { margin: 0; font-size: 15px; letter-spacing: 5px; color: #a7a7a7; }
+  .langs { display: flex; gap: 10px; }
+  .pill { padding: 7px 20px; border-radius: 999px; font-size: 14px;
+    letter-spacing: 3px; background: none; border: 2px solid #454545;
+    color: #8f8f8f; cursor: pointer; }
+  .pill.on { border-color: #ff8a48; color: #ff8a48; }
+  h1 { margin: 0; font-weight: 400; font-size: clamp(44px, 9vw, 92px);
+    line-height: 1; text-align: center; letter-spacing: -1px; }
+  .scribble { width: min(420px, 70vw); height: 12px; margin-top: 14px; }
+  .subtitle { margin: 22px 0 0; font-size: 18px; color: #b4b4b4; text-align: center; }
+  form { margin-top: 52px; width: min(420px, 100%); padding: 34px 30px 22px;
+    border: 2.5px solid #454545; border-radius: 30px;
+    background: rgba(255,255,255,0.02); display: flex; flex-direction: column; }
+  label { font-size: 13px; letter-spacing: 3px; color: #8f8f8f; }
+  select, input { margin: 12px 0 18px; padding: 12px 16px; min-height: 44px;
+    font-size: 16px; color: #e8e8e8; background: rgba(255,255,255,0.04);
+    border: 1px solid #454545; border-radius: 10px; outline: none; width: 100%; }
+  select:focus, input:focus { border-color: #ff8a48; }
+  .workshop-name { margin: 0 0 22px; font-size: 21px; text-align: center; }
+  button[type=submit] { padding: 12px 16px; min-height: 44px; font-size: 15px;
+    letter-spacing: 3px; color: #000; background: #ff8a48; border: none;
+    border-radius: 999px; cursor: pointer; }
+  button[type=submit]:hover { background: #e97132; }
+  button[type=submit]:disabled { opacity: .35; cursor: not-allowed; }
+  .mode { margin-top: 16px; background: none; border: none; font-size: 13px;
+    color: #8f8f8f; cursor: pointer; min-height: 44px; }
+  .mode:hover { color: #ff8a48; }
+  .error { margin: 0 0 14px; padding: 10px 14px; border: 1px solid #7a2e2e;
+    border-radius: 10px; background: #1d0e0e; font-size: 14px; display: none; }
+  .error.show { display: block; }
+  footer { margin-top: 46px; font-size: 12px; letter-spacing: 4px;
+    color: #8f8f8f; text-align: center; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main class="gate">
+  <div class="top">
+    <p class="brand">SINTEZAUR</p>
+    <div class="langs">
+      <button type="button" class="pill" id="lang-en">EN</button>
+      <button type="button" class="pill" id="lang-ro">RO</button>
+    </div>
+  </div>
+
+  <h1>WORKSHOPS</h1>
+  <svg class="scribble" viewBox="0 0 860 24" fill="none" aria-hidden="true">
+    <path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3"
+      stroke="#E97132" stroke-width="6.5" stroke-linecap="round"/>
+  </svg>
+  <p class="subtitle" data-i18n="tagline">Hands-on courses &amp; workshop materials</p>
+
+  <form id="form">
+    <p class="error" id="error"></p>
+
+    <div id="workshop-block">
+      <p class="workshop-name hidden" id="workshop-name"></p>
+      <div id="select-block">
+        <label for="workshop" data-i18n="workshop">WORKSHOP</label>
+        <select id="workshop"></select>
+      </div>
+      <label for="password" data-i18n="password">WORKSHOP PASSWORD</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="•••••••••">
+    </div>
+
+    <div id="superadmin-block" class="hidden">
+      <label for="sa-password" data-i18n="panel_password">SUPERADMIN PASSWORD</label>
+      <input id="sa-password" type="password" autocomplete="current-password" placeholder="•••••••••">
+    </div>
+
+    <button type="submit" id="submit" data-i18n="enter">ENTER</button>
+    <button type="button" class="mode" id="mode" data-i18n="panel_link">Control panel</button>
+  </form>
+
+  <footer>SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</footer>
+</main>
+<script src="/gate.js"></script>
+</body>
+</html>

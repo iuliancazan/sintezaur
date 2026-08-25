@@ -5,12 +5,15 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app/app.module';
+import { mountSpaGate } from './app/spa-gate';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(helmet());
   app.use(cookieParser());
+  // Gate + static SPA serving (prod). No-op in dev (Angular dev server).
+  mountSpaGate(app);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
