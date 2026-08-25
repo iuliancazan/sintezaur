@@ -38,6 +38,15 @@ export class LanguageService {
   }
 
   private initial(): Lang {
+    // Explicit ?lang= wins (deep links, the PDF renderer).
+    try {
+      const param = new URLSearchParams(window.location.search).get('lang');
+      if (param === 'en' || param === 'ro') {
+        return param;
+      }
+    } catch {
+      // ignore — not in a browser context
+    }
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === 'en' || stored === 'ro') {

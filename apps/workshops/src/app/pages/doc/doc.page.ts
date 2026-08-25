@@ -32,6 +32,9 @@ const TITLE_KEYS: Record<DocKind, string> = {
         <span class="docview__title">{{ titleKey | transloco }}</span>
         <div class="docview__actions">
           <ws-lang-toggle />
+          <a class="docview__action" [href]="pdfUrl()">
+            {{ 'common.download_pdf' | transloco }}
+          </a>
           <button
             type="button"
             class="docview__action"
@@ -87,6 +90,8 @@ const TITLE_KEYS: Record<DocKind, string> = {
       gap: 14px;
     }
     .docview__action {
+      display: inline-flex;
+      align-items: center;
       min-height: 0;
       padding: 8px 18px;
       border-radius: 999px;
@@ -168,6 +173,11 @@ export class DocViewPage {
         this.flowingDoc.set(m.RUN_OF_SHOW),
       );
     }
+  }
+
+  /** PDF in the CURRENTLY SELECTED language (round 2 rule). */
+  protected pdfUrl(): string {
+    return `/api/pdf/${this.slug}/${this.kind}?lang=${this.languageService.lang()}`;
   }
 
   protected print() {

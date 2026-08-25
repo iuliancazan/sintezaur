@@ -11,6 +11,7 @@ import { EventsService } from './events/events.service';
 import { EventsController } from './events/events.controller';
 import { PublicWorkshopsController } from './workshops/public.controller';
 import { PanelController } from './panel/panel.controller';
+import { PdfController } from './pdf/pdf.controller';
 
 function sessionSecret(): string {
   const secret = process.env.WORKSHOPS_SESSION_SECRET;
@@ -40,6 +41,7 @@ function sessionSecret(): string {
     EventsController,
     PublicWorkshopsController,
     PanelController,
+    PdfController,
   ],
   providers: [AuthService, SessionGuard, RolesGuard, EventsService],
 })

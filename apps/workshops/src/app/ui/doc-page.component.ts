@@ -48,6 +48,12 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       min-height: 0;
       background: #fff;
       color: #111;
+      padding: 52px 64px;
+    }
+    /* The prototype's running footer used a shadow-DOM slot; without that
+     * host it would render inline at the top — hide it. */
+    .doc ::ng-deep [slot='footer'] {
+      display: none;
     }
     /* Handbook pages are explicit flex columns sized for A4. */
     .doc__sheet ::ng-deep section.page {

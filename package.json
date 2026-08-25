@@ -20,6 +20,7 @@
     "migrate:workshops": "tsx tools/scripts/migrate-workshops.ts",
     "migrate:workshops:generate": "drizzle-kit generate --config=drizzle-workshops.config.ts",
     "seed:workshops": "tsx tools/scripts/seed-workshops.ts",
+    "workshops:pdf": "tsx tools/scripts/workshops-pdf.ts",
     "seed:superadmin": "tsx tools/scripts/create-superadmin.ts",
     "seed:tezaur": "tsx tools/scripts/seed-tezaur.ts",
     "seed:dev": "tsx tools/scripts/guards/dev-only.ts && tsx tools/scripts/seed-dev.ts",
