@@ -11,7 +11,10 @@ import {
 /**
  * Idempotent seed for the first workshop (sequential-fourm) and its two
  * default accounts. Existing rows are never overwritten — the panel owns
- * them after creation.
+ * them after creation. The default accounts are seeded ONLY when the
+ * workshop itself is first created: once it exists, account management
+ * belongs entirely to the panel (a deliberately deleted account must NOT
+ * resurrect with the public dev password on the next deploy).
  *
  * Dev default accounts (change the passwords in the panel for anything real):
  *   guest / fourm-guest  ·  admin / fourm-admin
@@ -30,7 +33,9 @@ async function main() {
       .from(workshops)
       .where(eq(workshops.slug, slug));
 
+    let createdNow = false;
     if (rows.length === 0) {
+      createdNow = true;
       rows = await db
         .insert(workshops)
         .values({
@@ -51,30 +56,32 @@ async function main() {
     }
     const workshop = rows[0];
 
-    const defaults = [
-      { username: 'guest', role: 'guest', password: 'fourm-guest' },
-      { username: 'admin', role: 'admin', password: 'fourm-admin' },
-    ];
-    for (const acc of defaults) {
-      const existing = await db
-        .select({ id: workshopAccounts.id })
-        .from(workshopAccounts)
-        .where(
-          and(
-            eq(workshopAccounts.workshopId, workshop.id),
-            eq(workshopAccounts.username, acc.username),
-          ),
-        );
-      if (existing.length === 0) {
-        await db.insert(workshopAccounts).values({
-          workshopId: workshop.id,
-          username: acc.username,
-          role: acc.role,
-          passwordHash: bcrypt.hashSync(acc.password, 12),
-        });
-        console.log(
-          `[seed:workshops] created account "${acc.username}" (${acc.role}).`,
-        );
+    if (createdNow) {
+      const defaults = [
+        { username: 'guest', role: 'guest', password: 'fourm-guest' },
+        { username: 'admin', role: 'admin', password: 'fourm-admin' },
+      ];
+      for (const acc of defaults) {
+        const existing = await db
+          .select({ id: workshopAccounts.id })
+          .from(workshopAccounts)
+          .where(
+            and(
+              eq(workshopAccounts.workshopId, workshop.id),
+              eq(workshopAccounts.username, acc.username),
+            ),
+          );
+        if (existing.length === 0) {
+          await db.insert(workshopAccounts).values({
+            workshopId: workshop.id,
+            username: acc.username,
+            role: acc.role,
+            passwordHash: bcrypt.hashSync(acc.password, 12),
+          });
+          console.log(
+            `[seed:workshops] created account "${acc.username}" (${acc.role}).`,
+          );
+        }
       }
     }
     console.log('[seed:workshops] done.');

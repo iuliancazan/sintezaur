@@ -2,6 +2,7 @@ import {
   afterRenderEffect,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   signal,
@@ -157,7 +158,7 @@ function initialZoom(): number {
         }
         <div class="docview__well" #wellEl (scroll)="onWellScroll()">
           @if (loaded()) {
-            <div class="docview__zoom" [style.zoom]="zoom()">
+            <div class="docview__zoom" [style.zoom]="effectiveZoom()">
               <ws-doc-page
                 [pages]="pages()"
                 [flowing]="flowingHtml()"
@@ -353,6 +354,14 @@ function initialZoom(): number {
         display: none;
       }
     }
+    @media (max-width: 640px) {
+      .docview__ghost {
+        display: none; /* printing from a phone: use the PDF */
+      }
+      .docview__sep {
+        display: none;
+      }
+    }
     @media print {
       :host,
       .docview {
@@ -406,6 +415,13 @@ export class DocViewPage {
   protected readonly maxZoom = ZOOM_STEPS[ZOOM_STEPS.length - 1];
   protected readonly zoomPercent = computed(
     () => `${Math.round(this.zoom() * 100)}%`,
+  );
+
+  /** Fit-to-width on narrow screens: 100% = the sheet fills the well; the
+   * user zoom multiplies on top (Adobe-style "fit width" semantics). */
+  private readonly fitScale = signal(1);
+  protected readonly effectiveZoom = computed(() =>
+    Number((this.fitScale() * this.zoom()).toFixed(4)),
   );
 
   /** Flowing docs: rail rows derived from the rendered section headers. */
@@ -480,6 +496,23 @@ export class DocViewPage {
         return;
       }
       this.collectTocTargets();
+    });
+
+    // Fit-to-width: track the well's inner width against the A4 sheet.
+    effect((onCleanup) => {
+      const well = this.wellEl().nativeElement;
+      const measure = () => {
+        const styles = getComputedStyle(well);
+        const avail =
+          well.clientWidth -
+          Number.parseFloat(styles.paddingLeft) -
+          Number.parseFloat(styles.paddingRight);
+        this.fitScale.set(avail > 0 ? Math.min(1, avail / 794) : 1);
+      };
+      const observer = new ResizeObserver(measure);
+      observer.observe(well);
+      measure();
+      onCleanup(() => observer.disconnect());
     });
   }
 

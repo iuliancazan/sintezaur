@@ -1,5 +1,6 @@
-import { Body, Controller, HttpCode, Post, Req } from '@nestjs/common';
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
 import { RequireRoles } from '../auth/roles';
 import type { AuthedRequest } from '../auth/session.guard';
 import { VISITOR_COOKIE } from '../auth/session';
@@ -10,6 +11,7 @@ class RecordEventDto {
   event!: 'view' | 'download';
 
   @IsString()
+  @MaxLength(64)
   @IsOptional()
   document?: string;
 
@@ -19,6 +21,7 @@ class RecordEventDto {
 }
 
 @Controller('events')
+@UseGuards(ThrottlerGuard)
 export class EventsController {
   constructor(private readonly events: EventsService) {}
 

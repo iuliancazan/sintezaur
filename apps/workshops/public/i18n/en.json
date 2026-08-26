@@ -101,7 +101,9 @@
     "stats_recent": "Recent activity",
     "stats_empty": "No activity yet.",
     "created": "Workshop created.",
-    "missing_fields": "Missing: {{fields}}"
+    "missing_fields": "Missing: {{fields}}",
+    "slug_taken": "A workshop with that slug already exists.",
+    "slug_format": "Slug: lowercase letters, digits and dashes (kebab-case)."
   },
   "viewer": {
     "contents": "Contents",

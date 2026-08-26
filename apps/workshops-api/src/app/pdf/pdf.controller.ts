@@ -22,6 +22,8 @@ import { workshops } from '../../db/schema';
 const DOCS = ['slides', 'handbook', 'script', 'run-of-show'] as const;
 type DocKind = (typeof DOCS)[number];
 const ADMIN_ONLY: DocKind[] = ['script', 'run-of-show'];
+/** Slugs are kebab-case by construction; anything else never hits the disk. */
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
  * Serves the pre-generated PDFs (tools/scripts/workshops-pdf.ts →
@@ -45,7 +47,7 @@ export class PdfController {
     @Res() res: Response,
   ) {
     const lang = langRaw === 'ro' ? 'ro' : 'en';
-    if (!DOCS.includes(doc as DocKind)) {
+    if (!DOCS.includes(doc as DocKind) || !SLUG_RE.test(slug)) {
       throw new NotFoundException();
     }
     const session = req.session;

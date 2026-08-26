@@ -120,6 +120,18 @@ class SetAccountPasswordDto {
   password!: string;
 }
 
+/** Postgres unique-violation (23505), possibly wrapped by drizzle. */
+function isUniqueViolation(err: unknown): boolean {
+  let current: unknown = err;
+  for (let depth = 0; current && depth < 4; depth++) {
+    if ((current as { code?: string }).code === '23505') {
+      return true;
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
 const accountColumns = {
   id: workshopAccounts.id,
   username: workshopAccounts.username,
@@ -161,11 +173,18 @@ export class PanelController {
 
   @Post()
   async create(@Body() dto: CreateWorkshopDto) {
-    const inserted = await this.db
-      .insert(workshops)
-      .values({ ...dto })
-      .returning({ id: workshops.id });
-    return this.getOne(inserted[0].id);
+    try {
+      const inserted = await this.db
+        .insert(workshops)
+        .values({ ...dto })
+        .returning({ id: workshops.id });
+      return this.getOne(inserted[0].id);
+    } catch (err) {
+      if (isUniqueViolation(err)) {
+        throw new ConflictException('slug_taken');
+      }
+      throw err;
+    }
   }
 
   @Patch(':id')
@@ -214,12 +233,20 @@ export class PanelController {
     if (existing.length > 0) {
       throw new ConflictException('username_taken');
     }
-    await this.db.insert(workshopAccounts).values({
-      workshopId: id,
-      username,
-      role: dto.role,
-      passwordHash: bcrypt.hashSync(dto.password, 12),
-    });
+    try {
+      await this.db.insert(workshopAccounts).values({
+        workshopId: id,
+        username,
+        role: dto.role,
+        passwordHash: bcrypt.hashSync(dto.password, 12),
+      });
+    } catch (err) {
+      // Concurrent create racing past the pre-check hits the unique index.
+      if (isUniqueViolation(err)) {
+        throw new ConflictException('username_taken');
+      }
+      throw err;
+    }
     return this.listAccounts(id);
   }
 

@@ -264,21 +264,38 @@ export class PanelPage {
       );
       return;
     }
-    await firstValueFrom(
-      this.http.post('/api/panel/workshops', {
-        slug: this.newForm.slug,
-        titleEn: this.newForm.titleEn,
-        titleRo: this.newForm.titleRo,
-        subtitleEn: this.newForm.subtitleEn || undefined,
-        subtitleRo: this.newForm.subtitleRo || undefined,
-        eventDate: this.newForm.eventDate || undefined,
-        venue: this.newForm.venue || undefined,
-      }),
-    );
+    try {
+      await firstValueFrom(
+        this.http.post('/api/panel/workshops', {
+          slug: this.newForm.slug.trim().toLowerCase(),
+          titleEn: this.newForm.titleEn,
+          titleRo: this.newForm.titleRo,
+          subtitleEn: this.newForm.subtitleEn || undefined,
+          subtitleRo: this.newForm.subtitleRo || undefined,
+          eventDate: this.newForm.eventDate || undefined,
+          venue: this.newForm.venue || undefined,
+        }),
+      );
+    } catch (err) {
+      this.toast.error(this.createErrorMessage(err));
+      return;
+    }
     this.newForm = { ...EMPTY_NEW };
     this.showNewForm.set(false);
     this.toast.success(this.transloco.translate('panel.created'));
     await this.reload();
+  }
+
+  private createErrorMessage(err: unknown): string {
+    const message =
+      err instanceof HttpErrorResponse ? err.error?.message : undefined;
+    if (message === 'slug_taken') {
+      return this.transloco.translate('panel.slug_taken');
+    }
+    if (Array.isArray(message) && String(message[0]).includes('slug')) {
+      return this.transloco.translate('panel.slug_format');
+    }
+    return this.transloco.translate('common.error_generic');
   }
 
   protected async toggleStats(w: PanelWorkshop) {

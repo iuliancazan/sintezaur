@@ -52,5 +52,10 @@ COPY --from=builder /app/drizzle-workshops.config.ts ./drizzle-workshops.config.
 ENV NODE_ENV=production
 EXPOSE 3300
 
+# Drop root: the app only reads the baked files and talks to Postgres.
+# HOME=/tmp so pnpm/corepack can write their small caches.
+ENV HOME=/tmp
+USER node
+
 # Migrate, seed the first workshop if missing (idempotent), then serve.
 CMD ["sh", "-c", "pnpm migrate:workshops && pnpm seed:workshops && node dist/apps/workshops-api/main.js"]

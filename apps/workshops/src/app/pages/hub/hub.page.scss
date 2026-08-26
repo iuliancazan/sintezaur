@@ -64,9 +64,20 @@
     text-transform: uppercase;
     color: var(--ws-text-faint);
     cursor: pointer;
+    white-space: nowrap;
 
     &:hover {
       color: var(--ws-text);
+    }
+  }
+
+  &__role-name {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    &__navsep {
+      display: none;
     }
   }
 

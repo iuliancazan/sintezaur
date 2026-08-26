@@ -100,19 +100,34 @@ export interface PortalCrumb {
     }
     .nav__crumb--current {
       color: var(--ws-accent-bright);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
     }
     .nav__right {
       display: flex;
       align-items: center;
       gap: 20px;
     }
+    /* Phones: crumbs on their own line, controls wrap underneath. */
     @media (max-width: 640px) {
+      .nav {
+        height: auto;
+        min-height: 76px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+        align-content: center;
+      }
       .nav__crumbs {
+        flex: 1 1 100%;
         letter-spacing: 2px;
         gap: 10px;
       }
       .nav__right {
-        gap: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
       }
     }
   `,

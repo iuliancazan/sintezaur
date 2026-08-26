@@ -63,11 +63,15 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   &__top {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    row-gap: 10px;
     justify-content: space-between;
     gap: 16px;
   }
@@ -220,6 +224,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    flex-wrap: wrap;
     font-family: var(--sz-font-mono);
     font-size: 11px;
     text-transform: uppercase;
@@ -228,6 +233,12 @@
 
     span:first-child::first-letter {
       color: var(--sz-accent);
+    }
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
     }
   }
 }

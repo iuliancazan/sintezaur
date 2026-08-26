@@ -101,7 +101,9 @@
     "stats_recent": "Activitate recentă",
     "stats_empty": "Nicio activitate încă.",
     "created": "Workshop creat.",
-    "missing_fields": "Lipsesc: {{fields}}"
+    "missing_fields": "Lipsesc: {{fields}}",
+    "slug_taken": "Există deja un workshop cu acest slug.",
+    "slug_format": "Slug: litere mici, cifre și cratime (kebab-case)."
   },
   "viewer": {
     "contents": "Cuprins",

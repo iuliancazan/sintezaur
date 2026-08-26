@@ -70,6 +70,22 @@ import { ThemeToggleComponent } from './theme-toggle.component';
       align-items: center;
       gap: 16px;
     }
+    /* Phones: the bar wraps into rows instead of overflowing. */
+    @media (max-width: 720px) {
+      .vbar {
+        height: auto;
+        min-height: 56px;
+        flex-wrap: wrap;
+        row-gap: 8px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        align-content: center;
+      }
+      .vbar__right {
+        flex-wrap: wrap;
+        row-gap: 8px;
+      }
+    }
     @media (max-width: 640px) {
       .vbar__crumb {
         display: none;

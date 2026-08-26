@@ -176,6 +176,14 @@
   .login .theme-btn { border-width: 1px; }
   .login .theme-btn:hover { color: var(--gl-text); border-color: var(--gl-text); }
   .actions { display: flex; align-items: center; gap: 12px; }
+  /* Phones: top rows wrap instead of overflowing. */
+  @media (max-width: 640px) {
+    .select .top { flex-wrap: wrap; row-gap: 10px; }
+    .actions { flex-wrap: wrap; justify-content: flex-end; }
+    .login .top { height: auto; min-height: 56px; flex-wrap: wrap;
+      row-gap: 10px; padding-top: 12px; padding-bottom: 6px; }
+    .login .crumbs { flex: 1 1 100%; letter-spacing: 2px; }
+  }
 </style>
 </head>
 <body>

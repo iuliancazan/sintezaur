@@ -519,13 +519,14 @@ export class SlideStageComponent {
     }
   }
 
-  /** Public: the deck bar's PRESENT button calls this too. */
+  /** Public: the deck bar's PRESENT button calls this too. iPhone Safari
+   * has no requestFullscreen — swallow the rejection, nothing to present. */
   toggleFullscreen() {
     const el = this.host.nativeElement as HTMLElement;
     if (document.fullscreenElement) {
-      void document.exitFullscreen();
-    } else {
-      void el.requestFullscreen();
+      document.exitFullscreen().catch(() => undefined);
+    } else if (typeof el.requestFullscreen === 'function') {
+      el.requestFullscreen().catch(() => undefined);
     }
   }
 
