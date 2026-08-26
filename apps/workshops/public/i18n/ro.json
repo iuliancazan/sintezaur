@@ -20,6 +20,8 @@
   "login": {
     "username": "UTILIZATOR",
     "password": "PAROLA",
+    "show_password": "Arată parola",
+    "hide_password": "Ascunde parola",
     "enter": "INTRĂ",
     "all_workshops": "Toate workshopurile",
     "bad_credentials": "Utilizator sau parolă greșite. Verifică datele primite și încearcă din nou.",

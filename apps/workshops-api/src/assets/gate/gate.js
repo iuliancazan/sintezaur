@@ -19,6 +19,8 @@
       throttled: 'Too many attempts — wait a minute, then try again.',
       missing: 'Enter the username and the password.',
       error: 'Something went wrong. Try again.',
+      show_password: 'Show password',
+      hide_password: 'Hide password',
     },
     ro: {
       kicker: 'Cursuri hands-on & materiale de workshop',
@@ -36,6 +38,8 @@
       throttled: 'Prea multe încercări — așteaptă un minut și încearcă din nou.',
       missing: 'Completează utilizatorul și parola.',
       error: 'Ceva n-a mers. Încearcă din nou.',
+      show_password: 'Arată parola',
+      hide_password: 'Ascunde parola',
     },
   };
   let lang = 'en';
@@ -62,8 +66,18 @@
     for (const node of nodes) {
       node.textContent = t(node.getAttribute('data-i18n'));
     }
+    syncPasswordToggle();
     renderList();
     renderLogin();
+  }
+
+  function syncPasswordToggle() {
+    const hidden = $('password').type === 'password';
+    const toggle = $('pw-toggle');
+    toggle.setAttribute('aria-label', t(hidden ? 'show_password' : 'hide_password'));
+    toggle.setAttribute('aria-pressed', hidden ? 'false' : 'true');
+    $('eye-show').classList.toggle('hidden', !hidden);
+    $('eye-hide').classList.toggle('hidden', hidden);
   }
 
   function renderList() {
@@ -163,6 +177,13 @@
   }
   $('back').addEventListener('click', backToSelect);
 
+  $('pw-toggle').addEventListener('click', function () {
+    const input = $('password');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    syncPasswordToggle();
+    input.focus();
+  });
+
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('error').classList.remove('show');
@@ -176,7 +197,18 @@
       body: JSON.stringify({ slug: selected ? selected.slug : '', username: username, password: password }),
     })
       .then(function (res) {
-        if (res.ok) { window.location.reload(); return null; }
+        if (res.ok) {
+          // Land in the workshop hub. A deep link INTO this workshop
+          // (e.g. /w/x/handbook) survives the gate and is honoured.
+          const base = '/w/' + (selected ? selected.slug : '');
+          const path = window.location.pathname;
+          if (selected && path.indexOf(base + '/') === 0 && path !== base + '/login') {
+            window.location.reload();
+          } else {
+            window.location.assign(selected ? base : '/');
+          }
+          return null;
+        }
         if (res.status === 429) throw new Error('throttled');
         if (res.status === 401) throw new Error('bad_credentials');
         throw new Error('error');
@@ -193,6 +225,13 @@
     .then(function (list) {
       workshops = Array.isArray(list) ? list : [];
       renderTexts();
+      // Deep link (e.g. /w/sequential-fourm/handbook): skip the selection
+      // screen and open that workshop's own login directly.
+      const match = window.location.pathname.match(/^\/w\/([^/]+)/);
+      const deepLinked = match
+        ? workshops.find(function (w) { return w.slug === match[1]; })
+        : undefined;
+      if (deepLinked) openLogin(deepLinked);
     })
     .catch(function () { renderTexts(); });
 

@@ -37,9 +37,14 @@ export class LoginPage {
   protected readonly brand = brandFromSlug(this.slug);
   protected readonly workshop = signal<PublicWorkshop | null>(null);
   protected readonly busy = signal(false);
+  protected readonly showPassword = signal(false);
 
   protected username = '';
   protected password = '';
+
+  protected togglePassword() {
+    this.showPassword.update((v) => !v);
+  }
 
   protected readonly subtitle = computed(() => {
     const w = this.workshop();

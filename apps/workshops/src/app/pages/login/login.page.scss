@@ -98,6 +98,42 @@
     }
   }
 
+  &__pw {
+    position: relative;
+    margin: 12px 0 18px;
+
+    .gate__input {
+      margin: 0;
+      width: 100%;
+      padding-right: 54px;
+    }
+  }
+
+  &__pw-toggle {
+    position: absolute;
+    top: 50%;
+    right: 7px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: none;
+    border: none;
+    color: var(--ws-text-faint);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--ws-text);
+    }
+
+    svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
+  }
+
   &__button {
     padding: 12px 16px;
     font-family: var(--ws-font-body);

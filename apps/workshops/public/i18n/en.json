@@ -20,6 +20,8 @@
   "login": {
     "username": "USERNAME",
     "password": "PASSWORD",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
     "enter": "ENTER",
     "all_workshops": "All workshops",
     "bad_credentials": "Wrong username or password. Check the details you received and try again.",
