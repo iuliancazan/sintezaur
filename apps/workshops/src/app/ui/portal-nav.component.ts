@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LangToggleComponent } from './lang-toggle.component';
+import { ThemeToggleComponent } from './theme-toggle.component';
 
 export interface PortalCrumb {
   label: string;
@@ -17,7 +18,7 @@ export interface PortalCrumb {
  */
 @Component({
   selector: 'ws-portal-nav',
-  imports: [RouterLink, LangToggleComponent],
+  imports: [RouterLink, LangToggleComponent, ThemeToggleComponent],
   template: `
     <header class="nav" [class.nav--underline]="underline()">
       <nav class="nav__crumbs">
@@ -51,6 +52,7 @@ export interface PortalCrumb {
       </nav>
       <div class="nav__right">
         <ws-lang-toggle />
+        <ws-theme-toggle />
         <ng-content />
       </div>
     </header>

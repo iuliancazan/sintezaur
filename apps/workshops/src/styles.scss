@@ -2,7 +2,9 @@
  * Portal chrome tokens follow the 2026-08-26-v02 redesign (planning vault:
  * claude-design-prototypes/2026-08-26-v02, "Workshop Portal.dc.html"):
  * #0A0908 + faint dot grid, Instrument Sans for text, IBM Plex Mono for all
- * chrome (breadcrumbs, labels, pills). Course slide/doc CONTENT keeps its
+ * chrome (breadcrumbs, labels, pills). The ◐ toggle flips the chrome to the
+ * light palette below (html[data-ws-theme='light'], persisted as ws_theme,
+ * applied pre-paint by theme-boot.js). Course slide/doc CONTENT keeps its
  * own inline styles from the v02.1 port and is untouched by these tokens. */
 
 @use './course-fonts';
@@ -17,6 +19,16 @@
   --ws-border: rgba(255, 255, 255, 0.14);
   --ws-border-strong: rgba(255, 255, 255, 0.18);
   --ws-card-border: #454545; /* course-era border (login card, panel) */
+  --ws-hairline: rgba(255, 255, 255, 0.12);
+  --ws-rule: rgba(255, 255, 255, 0.1);
+  --ws-role-border: rgba(255, 255, 255, 0.2);
+  --ws-note-border: rgba(255, 255, 255, 0.15);
+  --ws-row-hover: rgba(255, 255, 255, 0.05);
+  --ws-input-bg: rgba(0, 0, 0, 0.4);
+  --ws-seg-active-bg: rgba(255, 255, 255, 0.12);
+  --ws-sheet-border: rgba(255, 255, 255, 0.14);
+  --ws-shell-border: rgba(255, 255, 255, 0.12);
+  --ws-pager-hover-border: rgba(255, 255, 255, 0.4);
 
   /* Text */
   --ws-title: #f0eeea;
@@ -25,9 +37,11 @@
   --ws-text-label: #a7a7a7;
   --ws-text-faint: #8f8f8f;
   --ws-text-muted: #6e6c68;
+  --ws-label-strong: #c6c6c6;
   --ws-crumb-sep: #4a4844;
 
-  /* Accents (course orange) */
+  /* Accents (course orange; -bright is the TEXT accent and darkens on
+   * light backgrounds, matching the print materials' #C25010) */
   --ws-accent: #e97132;
   --ws-accent-bright: #ff8a48;
   --ws-accent-border: rgba(233, 113, 50, 0.5);
@@ -45,6 +59,41 @@
   --ws-font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
   --ws-font-body: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
   --ws-font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+html[data-ws-theme='light'] {
+  --ws-bg: #f5f2ec;
+  --ws-nav-bg: rgba(245, 242, 236, 0.7);
+  --ws-card-bg: rgba(255, 255, 255, 0.55);
+  --ws-line: rgba(0, 0, 0, 0.08);
+  --ws-border: rgba(0, 0, 0, 0.14);
+  --ws-border-strong: rgba(0, 0, 0, 0.22);
+  --ws-card-border: #c9c4ba;
+  --ws-hairline: rgba(0, 0, 0, 0.12);
+  --ws-rule: rgba(0, 0, 0, 0.1);
+  --ws-role-border: rgba(0, 0, 0, 0.2);
+  --ws-note-border: rgba(0, 0, 0, 0.18);
+  --ws-row-hover: rgba(0, 0, 0, 0.05);
+  --ws-input-bg: #ffffff;
+  --ws-seg-active-bg: rgba(0, 0, 0, 0.1);
+  --ws-sheet-border: rgba(0, 0, 0, 0.12);
+  --ws-shell-border: rgba(0, 0, 0, 0.16);
+  --ws-pager-hover-border: rgba(0, 0, 0, 0.4);
+
+  --ws-title: #161513;
+  --ws-text: #1f1d1a;
+  --ws-text-dim: #454545;
+  --ws-text-label: #5c5a55;
+  --ws-text-faint: #6e6c68;
+  --ws-text-muted: #8a8781;
+  --ws-label-strong: #4a4844;
+  --ws-crumb-sep: #c2bdb4;
+
+  --ws-accent-bright: #c25010;
+  --ws-accent-card-bg: rgba(233, 113, 50, 0.05);
+
+  --ws-dotgrid: radial-gradient(rgba(0, 0, 0, 0.075) 1px, transparent 1px);
+  --ws-dotgrid-well: radial-gradient(rgba(0, 0, 0, 0.055) 1px, transparent 1px);
 }
 
 * {

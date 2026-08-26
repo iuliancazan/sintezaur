@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { ThemeToggleComponent } from './theme-toggle.component';
 
 /**
  * Slim 56px viewer bar shared by the deck and the document viewers:
@@ -8,7 +9,7 @@ import { RouterLink } from '@angular/router';
  */
 @Component({
   selector: 'ws-viewer-bar',
-  imports: [RouterLink],
+  imports: [RouterLink, ThemeToggleComponent],
   template: `
     <header class="vbar">
       <nav class="vbar__crumbs">
@@ -19,6 +20,7 @@ import { RouterLink } from '@angular/router';
       </nav>
       <div class="vbar__right">
         <ng-content />
+        <ws-theme-toggle size="sm" />
       </div>
     </header>
   `,

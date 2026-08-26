@@ -22,6 +22,8 @@
       show_password: 'Show password',
       hide_password: 'Hide password',
       helper: 'Use the access details you received.',
+      theme_to_light: 'Switch to the light theme',
+      theme_to_dark: 'Switch to the dark theme',
     },
     ro: {
       kicker: 'Cursuri hands-on & materiale de workshop',
@@ -42,6 +44,8 @@
       show_password: 'Arată parola',
       hide_password: 'Ascunde parola',
       helper: 'Folosește datele de acces primite.',
+      theme_to_light: 'Treci pe tema deschisă',
+      theme_to_dark: 'Treci pe tema închisă',
     },
   };
   let lang = 'en';
@@ -69,6 +73,7 @@
       node.textContent = t(node.getAttribute('data-i18n'));
     }
     syncPasswordToggle();
+    syncThemeButtons();
     renderList();
     renderLogin();
   }
@@ -80,6 +85,33 @@
     toggle.setAttribute('aria-pressed', hidden ? 'false' : 'true');
     $('eye-show').classList.toggle('hidden', !hidden);
     $('eye-hide').classList.toggle('hidden', hidden);
+  }
+
+  // Light/dark chrome — shared with the SPA (ws_theme; /theme-boot.js
+  // applied the persisted value before first paint).
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-ws-theme') === 'light'
+      ? 'light'
+      : 'dark';
+  }
+
+  function syncThemeButtons() {
+    const label = t(currentTheme() === 'dark' ? 'theme_to_light' : 'theme_to_dark');
+    for (const btn of document.querySelectorAll('.theme-btn')) {
+      btn.setAttribute('aria-label', label);
+      btn.setAttribute('title', label);
+    }
+  }
+
+  function toggleTheme() {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    if (next === 'light') {
+      document.documentElement.setAttribute('data-ws-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-ws-theme');
+    }
+    try { localStorage.setItem('ws_theme', next); } catch { /* ignore */ }
+    syncThemeButtons();
   }
 
   function renderList() {
@@ -187,6 +219,10 @@
     syncPasswordToggle();
     input.focus();
   });
+
+  for (const btn of document.querySelectorAll('.theme-btn')) {
+    btn.addEventListener('click', toggleTheme);
+  }
 
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();

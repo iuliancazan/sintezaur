@@ -40,7 +40,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       max-width: 100%;
       min-height: 1122px;
       background: #050505;
-      border: 1px solid rgba(255, 255, 255, 0.14);
+      border: 1px solid var(--ws-sheet-border);
       border-radius: 6px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       overflow: hidden;

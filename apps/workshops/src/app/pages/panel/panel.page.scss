@@ -164,7 +164,7 @@
       min-height: 44px;
       font-size: 16px;
       color: var(--ws-text);
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--ws-input-bg);
       border: 1px solid var(--ws-card-border);
       border-radius: 10px;
       outline: none;
@@ -339,7 +339,7 @@
     width: 170px;
     font-size: 14px;
     color: var(--ws-text);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--ws-input-bg);
     border: 1px solid var(--ws-card-border);
     border-radius: 8px;
     outline: none;

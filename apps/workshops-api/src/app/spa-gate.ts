@@ -59,6 +59,12 @@ export function mountSpaGate(app: NestExpressApplication) {
     if (req.path === '/gate.js' && gateDir) {
       return res.sendFile(path.join(gateDir, 'gate.js'));
     }
+    // Theme boot is shared with the gate (persisted ws_theme, no flash) —
+    // it carries no content, so it may ship unauthenticated.
+    const themeBoot = path.join(spaDist, 'theme-boot.js');
+    if (req.path === '/theme-boot.js' && existsSync(themeBoot)) {
+      return res.sendFile(themeBoot);
+    }
     if (!gateDir) {
       return res.status(503).send('gate unavailable');
     }

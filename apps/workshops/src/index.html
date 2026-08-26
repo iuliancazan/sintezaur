@@ -17,12 +17,17 @@
       href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script src="theme-boot.js"></script>
     <style>
-      /* Pre-bootstrap paint: keep the flash dark, never white. */
+      /* Pre-bootstrap paint: match the persisted theme, never flash. */
       html,
       body {
         margin: 0;
-        background: #000;
+        background: #0a0908;
+      }
+      html[data-ws-theme='light'],
+      html[data-ws-theme='light'] body {
+        background: #f5f2ec;
       }
     </style>
   </head>

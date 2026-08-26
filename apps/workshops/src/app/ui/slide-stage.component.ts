@@ -205,7 +205,7 @@ const RAIL_KEY = 'ws_deck_rail';
       flex: none;
       overflow: hidden;
       background: #000;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border: 1px solid var(--ws-shell-border);
       border-radius: 6px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
     }
@@ -282,13 +282,13 @@ const RAIL_KEY = 'ws_deck_rail';
     }
     .stage__pager-btn:hover {
       color: var(--ws-text);
-      border-color: rgba(255, 255, 255, 0.4);
+      border-color: var(--ws-pager-hover-border);
     }
     .stage__count {
       font-family: var(--ws-font-mono);
       font-size: 12px;
       letter-spacing: 2px;
-      color: #c6c6c6;
+      color: var(--ws-label-strong);
     }
     /* ---- fullscreen HUD ---- */
     .stage__hud {

@@ -75,7 +75,7 @@
     font-family: var(--ws-font-mono);
     font-size: 11px;
     letter-spacing: 3px;
-    color: #c6c6c6;
+    color: var(--ws-label-strong);
   }
 
   &__input {
@@ -84,7 +84,7 @@
     font-size: 16px;
     font-family: var(--ws-font-body);
     color: var(--ws-text);
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--ws-input-bg);
     border: 1px solid var(--ws-border-strong);
     border-radius: 8px;
     outline: none;

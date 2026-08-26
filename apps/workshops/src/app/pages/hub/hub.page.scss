@@ -14,14 +14,14 @@
   &__navsep {
     width: 1px;
     height: 24px;
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--ws-hairline);
   }
 
   &__role {
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--ws-role-border);
     border-radius: 999px;
     padding: 6px 14px;
   }
@@ -131,7 +131,7 @@
     font-size: 12px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: #c6c6c6;
+    color: var(--ws-label-strong);
 
     &--admin {
       color: var(--ws-accent-bright);
@@ -152,7 +152,7 @@
   &__section-rule {
     flex: 1;
     height: 1px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--ws-rule);
 
     &--admin {
       background: rgba(233, 113, 50, 0.3);
@@ -233,7 +233,7 @@
 
   &__note {
     margin-top: 28px;
-    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border: 1px dashed var(--ws-note-border);
     border-radius: 14px;
     padding: 20px 28px;
     display: flex;

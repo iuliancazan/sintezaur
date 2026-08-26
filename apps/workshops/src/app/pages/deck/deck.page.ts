@@ -79,7 +79,7 @@ import { ViewerBarComponent } from '../../ui/viewer-bar.component';
     .deck__sep {
       width: 1px;
       height: 20px;
-      background: rgba(255, 255, 255, 0.12);
+      background: var(--ws-hairline);
     }
     .deck__pdf {
       min-height: 0;
@@ -97,7 +97,7 @@ import { ViewerBarComponent } from '../../ui/viewer-bar.component';
 
       &:hover {
         color: var(--ws-text);
-        border-color: rgba(255, 255, 255, 0.4);
+        border-color: var(--ws-pager-hover-border);
       }
     }
     .deck__present {

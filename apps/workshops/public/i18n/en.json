@@ -113,6 +113,13 @@
     "print": "Print",
     "pdf": "PDF",
     "collapse": "Collapse the list",
-    "expand": "Expand the list"
+    "expand": "Expand the list",
+    "zoom_in": "Zoom in",
+    "zoom_out": "Zoom out",
+    "zoom_reset": "Reset zoom (100%)"
+  },
+  "theme": {
+    "to_light": "Switch to the light theme",
+    "to_dark": "Switch to the dark theme"
   }
 }

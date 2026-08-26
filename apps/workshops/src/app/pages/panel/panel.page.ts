@@ -8,6 +8,7 @@ import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { ToastService } from '../../core/toast.service';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import { ThemeToggleComponent } from '../../ui/theme-toggle.component';
 
 export interface PanelWorkshop {
   id: string;
@@ -64,7 +65,7 @@ const EMPTY_NEW: NewWorkshopForm = {
 
 @Component({
   selector: 'ws-panel-page',
-  imports: [FormsModule, TranslocoPipe, LangToggleComponent, RouterLink],
+  imports: [FormsModule, TranslocoPipe, LangToggleComponent, ThemeToggleComponent, RouterLink],
   templateUrl: './panel.page.html',
   styleUrl: './panel.page.scss',
 })

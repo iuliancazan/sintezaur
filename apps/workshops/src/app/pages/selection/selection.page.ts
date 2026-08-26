@@ -2,12 +2,14 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { LanguageService } from '../../core/language.service';
+import { ThemeService } from '../../core/theme.service';
 import {
   brandFromSlug,
   PublicWorkshop,
   PublicWorkshopsService,
 } from '../../core/public-workshops.service';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import { ThemeToggleComponent } from '../../ui/theme-toggle.component';
 
 /**
  * The neutral front door — Sintezaur platform branding (V05 tokens: Big
@@ -16,13 +18,14 @@ import { LangToggleComponent } from '../../ui/lang-toggle.component';
  */
 @Component({
   selector: 'ws-selection-page',
-  imports: [RouterLink, TranslocoPipe, LangToggleComponent],
+  imports: [RouterLink, TranslocoPipe, LangToggleComponent, ThemeToggleComponent],
   templateUrl: './selection.page.html',
   styleUrl: './selection.page.scss',
 })
 export class SelectionPage {
   private readonly publicWorkshops = inject(PublicWorkshopsService);
   protected readonly languageService = inject(LanguageService);
+  protected readonly themeService = inject(ThemeService);
 
   protected readonly workshops = signal<PublicWorkshop[]>([]);
   protected readonly loaded = signal(false);

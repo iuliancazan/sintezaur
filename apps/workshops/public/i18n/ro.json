@@ -113,6 +113,13 @@
     "print": "Print",
     "pdf": "PDF",
     "collapse": "Restrânge lista",
-    "expand": "Extinde lista"
+    "expand": "Extinde lista",
+    "zoom_in": "Mărește",
+    "zoom_out": "Micșorează",
+    "zoom_reset": "Resetează zoomul (100%)"
+  },
+  "theme": {
+    "to_light": "Treci pe tema deschisă",
+    "to_dark": "Treci pe tema închisă"
   }
 }

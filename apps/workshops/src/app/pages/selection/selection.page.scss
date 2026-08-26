@@ -36,6 +36,21 @@
   font-family: var(--sz-font-ui);
 }
 
+/* Light V05 variant (◐ toggle): warm paper, darkened gold for contrast. */
+:host-context(html[data-ws-theme='light']) {
+  --sz-bg: #faf7f1;
+  --sz-bg-elev: #ffffff;
+  --sz-bg-card: #f5efe3;
+  --sz-line: #e3ddd1;
+  --sz-line-strong: #cfc8b9;
+  --sz-fg: #1c1a16;
+  --sz-fg-muted: #5d5a52;
+  --sz-fg-subtle: #8b867b;
+  --sz-accent: #a9770a;
+  --sz-accent-2: #b56a12;
+  --sz-grid-dots: rgba(169, 119, 10, 0.2);
+}
+
 .sz {
   max-width: 920px;
   margin: 0 auto;
@@ -43,6 +58,12 @@
   padding: 22px clamp(16px, 4vw, 40px) 40px;
   display: flex;
   flex-direction: column;
+
+  &__top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
   &__top {
     display: flex;

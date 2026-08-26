@@ -83,7 +83,7 @@ export interface RailItem {
       flex: none;
     }
     .rail__row:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--ws-row-hover);
     }
     .rail__row--active {
       background: var(--ws-accent-row-bg);

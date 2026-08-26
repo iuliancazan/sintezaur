@@ -3,12 +3,19 @@
     <div class="sz__brand-row">
       <img
         class="sz__logo"
-        src="/course/logo-sintezaur-white.png"
+        [src]="
+          themeService.theme() === 'light'
+            ? '/course/logo-sintezaur-dark.png'
+            : '/course/logo-sintezaur-white.png'
+        "
         alt="Sintezaur"
       />
       <span class="sz__wordmark">SINTEZAUR</span>
     </div>
-    <ws-lang-toggle variant="outline" />
+    <div class="sz__top-actions">
+      <ws-lang-toggle variant="outline" />
+      <ws-theme-toggle />
+    </div>
   </header>
 
   <section class="sz__hero">
