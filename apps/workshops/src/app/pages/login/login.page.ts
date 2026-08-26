@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
@@ -11,16 +11,20 @@ import {
   PublicWorkshopsService,
 } from '../../core/public-workshops.service';
 import { ToastService } from '../../core/toast.service';
-import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import {
+  PortalNavComponent,
+  type PortalCrumb,
+} from '../../ui/portal-nav.component';
 
 /**
- * Per-workshop gate, in the workshop's own visual identity. Username +
- * password (workshops-spec.md §4.1); the reserved `superadmin` username
- * grants the panel — no separate login surface exists for it.
+ * Per-workshop gate (2026-08-26-v02 "Workshop Portal" 1c): breadcrumb nav,
+ * centered hero in the workshop's identity, username + password card. The
+ * reserved `superadmin` username grants the panel — no separate login
+ * surface exists for it (workshops-spec.md §4.1).
  */
 @Component({
   selector: 'ws-login-page',
-  imports: [FormsModule, TranslocoPipe, LangToggleComponent, RouterLink],
+  imports: [FormsModule, TranslocoPipe, PortalNavComponent],
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
@@ -46,6 +50,14 @@ export class LoginPage {
     this.showPassword.update((v) => !v);
   }
 
+  protected readonly title = computed(() => {
+    const w = this.workshop();
+    if (!w) {
+      return this.brand;
+    }
+    return this.languageService.lang() === 'ro' ? w.titleRo : w.titleEn;
+  });
+
   protected readonly subtitle = computed(() => {
     const w = this.workshop();
     if (!w) {
@@ -56,6 +68,12 @@ export class LoginPage {
       ''
     );
   });
+
+  /** Chrome crumbs — "WORKSHOPS" is identical in both dictionaries. */
+  protected readonly crumbs: PortalCrumb[] = [
+    { label: 'SINTEZAUR', href: 'https://sintezaur.ro' },
+    { label: 'WORKSHOPS', link: '/' },
+  ];
 
   constructor() {
     // Already unlocked (or superadmin)? Straight into the hub.

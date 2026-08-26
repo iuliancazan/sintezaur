@@ -21,6 +21,8 @@ export interface SlideDef {
 export interface DocPageDef {
   /** Page id, e.g. "p1". */
   id: string;
+  /** Short editor-facing label shown in the viewer's contents rail. */
+  label?: string;
   /** Full-page HTML (A4), one entry per language. */
   en: string;
   ro: string;

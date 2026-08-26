@@ -1,82 +1,101 @@
 <main class="hub">
-  <header class="hub__top">
-    <p class="hub__brand">{{ 'common.brand' | transloco }}</p>
-    <div class="hub__top-right">
-      <ws-lang-toggle />
-      <a class="hub__panel-link" routerLink="/">
-        {{ 'hub.all_workshops' | transloco }}
-      </a>
-      @if (isSuperadmin()) {
-        <a class="hub__panel-link" routerLink="/panel">
-          {{ 'hub.open_panel' | transloco }}
-        </a>
-      }
-      <button type="button" class="hub__logout" (click)="logout()">
-        {{ 'common.logout' | transloco }}
-      </button>
+  <ws-portal-nav [crumbs]="crumbs()">
+    <div class="hub__navsep"></div>
+    <div class="hub__role" [class.hub__role--staff]="isStaff()">
+      <span class="hub__role-dot"></span>
+      <span class="hub__role-name">{{ 'hub.role_' + role() | transloco }}</span>
     </div>
-  </header>
+    <button type="button" class="hub__logout" (click)="logout()">
+      {{ 'common.logout' | transloco }}
+    </button>
+  </ws-portal-nav>
 
   @if (workshop(); as w) {
     <section class="hub__hero">
+      <p class="hub__kicker">{{ brand() }}</p>
       <h1 class="hub__title">{{ title() }}</h1>
       <svg
         class="hub__scribble"
-        viewBox="0 0 860 24"
-        fill="none"
+        viewBox="0 0 430 14"
+        preserveAspectRatio="none"
         aria-hidden="true"
       >
         <path
-          d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3"
+          d="M4 9 C 90 4, 200 11, 300 7 S 410 6, 426 8"
+          fill="none"
           stroke="#E97132"
-          stroke-width="6.5"
+          stroke-width="4"
           stroke-linecap="round"
         />
       </svg>
       <p class="hub__subtitle">{{ subtitle() }}</p>
-      @if (meta()) {
-        <p class="hub__meta">{{ meta() }}</p>
-      }
     </section>
 
-    <p class="hub__section-label">{{ 'hub.materials' | transloco }}</p>
-    <section class="hub__cards">
-      @for (card of cards(); track card.key) {
-        @if (card.route) {
+    <section class="hub__content">
+      <div class="hub__section">
+        <span class="hub__section-label">{{ 'hub.materials' | transloco }}</span>
+        <span class="hub__section-rule"></span>
+      </div>
+      <div class="hub__grid hub__grid--two">
+        @for (card of materialCards(); track card.key) {
           <a class="hub__card" [routerLink]="card.route">
-            <div class="hub__card-head">
-              <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
-              @if (card.adminOnly) {
-                <span class="hub__badge">{{
-                  'hub.admin_only' | transloco
-                }}</span>
-              }
+            <p class="hub__card-kicker">{{ card.kickerKey | transloco }}</p>
+            <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
+            <div class="hub__card-foot">
+              <span class="hub__card-hint">{{ card.hintKey | transloco }}</span>
+              <span class="hub__card-arrow">→</span>
             </div>
-            <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
           </a>
-        } @else {
-          <div class="hub__card hub__card--soon">
-            <div class="hub__card-head">
-              <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
-              @if (card.adminOnly) {
-                <span class="hub__badge">{{
-                  'hub.admin_only' | transloco
-                }}</span>
-              }
-            </div>
-            <p class="hub__card-hint">{{ card.hintKey | transloco }}</p>
-            <p class="hub__card-soon">{{ 'hub.coming_soon' | transloco }}</p>
-          </div>
         }
+      </div>
+
+      @if (adminCards().length > 0) {
+        <div class="hub__section hub__section--admin">
+          <span class="hub__section-label hub__section-label--admin">{{
+            'hub.presenter_tools' | transloco
+          }}</span>
+          <span class="hub__admin-chip">{{ 'hub.admin_only' | transloco }}</span>
+          <span class="hub__section-rule hub__section-rule--admin"></span>
+        </div>
+        <div
+          class="hub__grid"
+          [class.hub__grid--two]="adminCards().length === 2"
+          [class.hub__grid--three]="adminCards().length === 3"
+        >
+          @for (card of adminCards(); track card.key) {
+            <a class="hub__card hub__card--admin" [routerLink]="card.route">
+              <p class="hub__card-kicker">{{ card.kickerKey | transloco }}</p>
+              <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
+              <div class="hub__card-foot">
+                <span class="hub__card-hint">{{
+                  card.hintKey | transloco
+                }}</span>
+                <span class="hub__card-arrow">→</span>
+              </div>
+            </a>
+          }
+        </div>
+      }
+
+      @if (role() === 'guest') {
+        <div class="hub__note">
+          <span class="hub__note-label">{{ 'hub.note_label' | transloco }}</span>
+          <span class="hub__note-text">{{ 'hub.guest_note' | transloco }}</span>
+        </div>
       }
     </section>
 
+    <div class="hub__spacer"></div>
     <footer class="hub__footer">
-      <span class="hub__role">
-        {{ 'hub.your_role' | transloco }}:
-        {{ 'hub.role_' + role() | transloco }}
+      <span>
+        @if (isSuperadmin()) {
+          {{ 'hub.logged_in_as' | transloco }}
+          {{ 'hub.role_superadmin' | transloco }}
+        } @else {
+          {{ 'hub.your_role' | transloco }}: {{ 'hub.role_' + role() | transloco }}
+        }
       </span>
-      <span class="hub__powered">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</span>
+      <span>SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</span>
     </footer>
   } @else {
     <p class="hub__loading">{{ 'common.loading' | transloco }}</p>

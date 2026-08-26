@@ -126,11 +126,13 @@
     background: var(--sz-bg-elev);
     border: 1px solid var(--sz-line);
     border-radius: 2px;
+    color: var(--sz-fg); /* the card is a link — don't inherit accent */
     transition: border-color 0.15s ease, background 0.15s ease;
 
     &:hover {
       border-color: var(--sz-accent);
       background: var(--sz-bg-card);
+      color: var(--sz-fg);
     }
 
     &:hover .sz__card-arrow {

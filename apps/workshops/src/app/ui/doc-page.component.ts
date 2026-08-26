@@ -34,19 +34,23 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       flex-direction: column;
       align-items: center;
       gap: 26px;
-      padding: 26px 12px 60px;
     }
     .doc__sheet {
       width: 794px;
       max-width: 100%;
       min-height: 1122px;
-      background: #000;
-      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+      background: #050505;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 6px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
       overflow: hidden;
     }
+    /* Script + run of show read as light paper on screen — same face as
+     * their print/PDF output (2026-08-26-v02 turn 4). */
     .doc__sheet--flow {
       min-height: 0;
-      background: #fff;
+      background: #fdfcfa;
+      border: none;
       color: #111;
       padding: 52px 64px;
     }
@@ -72,6 +76,8 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       }
       .doc__sheet {
         box-shadow: none;
+        border: none;
+        border-radius: 0;
         max-width: none;
         overflow: visible;
         break-after: page;
@@ -81,6 +87,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
       }
       .doc__sheet--flow {
         break-after: auto;
+        background: #fff;
       }
     }
   `,

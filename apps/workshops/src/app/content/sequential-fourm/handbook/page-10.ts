@@ -4,6 +4,7 @@ import type { DocPageDef } from '../../types';
 // via --hb-* vars, see handbook-theme.scss). EN+RO colocated.
 export const PAGE_10: DocPageDef = {
   id: 'p10',
+  label: 'Arp & sequencer',
   en: `<section class="page" id="p10" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULE 08 · ARPEGGIATOR &amp; SEQUENCER</p>

@@ -27,7 +27,8 @@
     "bad_credentials": "Wrong username or password. Check the details you received and try again.",
     "unknown_workshop": "This workshop is not available.",
     "throttled": "Too many attempts — wait a minute, then try again.",
-    "missing_fields": "Missing: {{fields}}"
+    "missing_fields": "Missing: {{fields}}",
+    "helper": "Use the access details you received."
   },
   "hub": {
     "materials": "MATERIALS",
@@ -39,14 +40,24 @@
     "script_hint": "Beat-by-beat, with timings",
     "run_of_show": "Run of show",
     "run_of_show_hint": "Setup checklist & timeline",
-    "admin_only": "admin",
+    "admin_only": "Admin only",
     "your_role": "Access level",
     "role_guest": "guest",
     "role_admin": "admin",
     "role_superadmin": "superadmin",
     "all_workshops": "All workshops",
     "open_panel": "Control panel",
-    "coming_soon": "In production — lands with the content port"
+    "coming_soon": "In production — lands with the content port",
+    "presenter_tools": "Presenter tools",
+    "kicker_slides": "Deck · EN + RO",
+    "kicker_handbook": "A4 · EN + RO · print or screen",
+    "kicker_script": "RO · 90 min",
+    "kicker_run_of_show": "Day-of",
+    "kicker_panel": "Superadmin",
+    "panel_hint": "Users, access & workshops",
+    "note_label": "Note",
+    "guest_note": "Everything here stays online after the workshop — come back anytime.",
+    "logged_in_as": "Logged in as"
   },
   "panel": {
     "title": "CONTROL PANEL",
@@ -91,5 +102,17 @@
     "stats_empty": "No activity yet.",
     "created": "Workshop created.",
     "missing_fields": "Missing: {{fields}}"
+  },
+  "viewer": {
+    "contents": "Contents",
+    "modules": "Modules",
+    "sections": "Sections",
+    "slides": "Slides",
+    "present": "Present",
+    "screen": "Screen",
+    "print": "Print",
+    "pdf": "PDF",
+    "collapse": "Collapse the list",
+    "expand": "Expand the list"
   }
 }

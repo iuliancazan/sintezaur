@@ -5,21 +5,28 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { AuthService, type WorkshopInfo } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
-import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import {
+  PortalNavComponent,
+  type PortalCrumb,
+} from '../../ui/portal-nav.component';
 
 interface HubCard {
-  key: 'slides' | 'handbook' | 'script' | 'run-of-show';
+  key: 'slides' | 'handbook' | 'script' | 'run-of-show' | 'panel';
   titleKey: string;
   hintKey: string;
-  adminOnly: boolean;
-  available: boolean;
-  /** Router link once the deliverable exists; undefined = coming soon. */
-  route?: string[];
+  kickerKey: string;
+  route: string[];
 }
 
+/**
+ * Workshop landing (2026-08-26-v02 "Workshop Portal" 1a/1b/2a): breadcrumb
+ * nav with role pill, centered hero, MATERIALS grid, the orange PRESENTER
+ * TOOLS group for staff (superadmin also gets the Control panel card) and
+ * the dashed note for guests.
+ */
 @Component({
   selector: 'ws-hub-page',
-  imports: [TranslocoPipe, LangToggleComponent, RouterLink],
+  imports: [TranslocoPipe, RouterLink, PortalNavComponent],
   templateUrl: './hub.page.html',
   styleUrl: './hub.page.scss',
 })
@@ -55,6 +62,12 @@ export class HubPage {
     });
   }
 
+  protected readonly slug = computed(() => this.workshop()?.slug ?? '');
+
+  protected readonly brand = computed(() =>
+    this.slug().replace(/-/g, ' ').toUpperCase(),
+  );
+
   protected readonly title = computed(() => {
     const w = this.workshop();
     if (!w) {
@@ -73,63 +86,78 @@ export class HubPage {
     );
   });
 
-  protected readonly meta = computed(() => {
-    const w = this.workshop();
-    if (!w) {
-      return '';
-    }
-    const date = w.eventDate
-      ? new Date(w.eventDate + 'T00:00:00').toLocaleDateString(
-          this.languageService.lang() === 'ro' ? 'ro-RO' : 'en-GB',
-          { day: 'numeric', month: 'long', year: 'numeric' },
-        )
-      : '';
-    return [date, w.venue].filter(Boolean).join(' · ');
-  });
+  /** Chrome crumbs — "WORKSHOPS" is identical in both dictionaries. */
+  protected readonly crumbs = computed<PortalCrumb[]>(() => [
+    { label: 'SINTEZAUR', href: 'https://sintezaur.ro' },
+    { label: 'WORKSHOPS', link: '/' },
+    { label: this.title().toUpperCase() },
+  ]);
 
-  protected readonly cards = computed<HubCard[]>(() => {
-    const role = this.role();
-    const isStaff = role === 'admin' || role === 'superadmin';
+  protected readonly isStaff = computed(
+    () => this.role() === 'admin' || this.role() === 'superadmin',
+  );
+  protected readonly isSuperadmin = computed(
+    () => this.role() === 'superadmin',
+  );
+
+  protected readonly materialCards = computed<HubCard[]>(() => {
     const guestSlides = this.workshop()?.guestSeesSlides ?? false;
-    const slug = this.workshop()?.slug;
-    const cards: HubCard[] = [
-      {
+    const slug = this.slug();
+    if (!slug) {
+      return [];
+    }
+    const cards: HubCard[] = [];
+    if (this.isStaff() || guestSlides) {
+      cards.push({
         key: 'slides',
         titleKey: 'hub.slides',
         hintKey: 'hub.slides_hint',
-        adminOnly: false,
-        available: isStaff || guestSlides,
-        route: slug ? ['/w', slug, 'slides'] : undefined,
-      },
-      {
-        key: 'handbook',
-        titleKey: 'hub.handbook',
-        hintKey: 'hub.handbook_hint',
-        adminOnly: false,
-        available: true,
-        route: slug ? ['/w', slug, 'handbook'] : undefined,
-      },
+        kickerKey: 'hub.kicker_slides',
+        route: ['/w', slug, 'slides'],
+      });
+    }
+    cards.push({
+      key: 'handbook',
+      titleKey: 'hub.handbook',
+      hintKey: 'hub.handbook_hint',
+      kickerKey: 'hub.kicker_handbook',
+      route: ['/w', slug, 'handbook'],
+    });
+    return cards;
+  });
+
+  protected readonly adminCards = computed<HubCard[]>(() => {
+    const slug = this.slug();
+    if (!slug || !this.isStaff()) {
+      return [];
+    }
+    const cards: HubCard[] = [
       {
         key: 'script',
         titleKey: 'hub.script',
         hintKey: 'hub.script_hint',
-        adminOnly: true,
-        available: isStaff,
-        route: slug ? ['/w', slug, 'script'] : undefined,
+        kickerKey: 'hub.kicker_script',
+        route: ['/w', slug, 'script'],
       },
       {
         key: 'run-of-show',
         titleKey: 'hub.run_of_show',
         hintKey: 'hub.run_of_show_hint',
-        adminOnly: true,
-        available: isStaff,
-        route: slug ? ['/w', slug, 'run-of-show'] : undefined,
+        kickerKey: 'hub.kicker_run_of_show',
+        route: ['/w', slug, 'run-of-show'],
       },
     ];
-    return cards.filter((c) => c.available);
+    if (this.isSuperadmin()) {
+      cards.push({
+        key: 'panel',
+        titleKey: 'hub.open_panel',
+        hintKey: 'hub.panel_hint',
+        kickerKey: 'hub.kicker_panel',
+        route: ['/panel'],
+      });
+    }
+    return cards;
   });
-
-  protected readonly isSuperadmin = computed(() => this.role() === 'superadmin');
 
   protected async logout() {
     await this.auth.logout();

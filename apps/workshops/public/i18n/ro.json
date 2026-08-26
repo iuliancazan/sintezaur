@@ -27,7 +27,8 @@
     "bad_credentials": "Utilizator sau parolă greșite. Verifică datele primite și încearcă din nou.",
     "unknown_workshop": "Workshopul acesta nu este disponibil.",
     "throttled": "Prea multe încercări — așteaptă un minut și încearcă din nou.",
-    "missing_fields": "Lipsesc: {{fields}}"
+    "missing_fields": "Lipsesc: {{fields}}",
+    "helper": "Folosește datele de acces primite."
   },
   "hub": {
     "materials": "MATERIALE",
@@ -39,14 +40,24 @@
     "script_hint": "Beat cu beat, cu minutaj",
     "run_of_show": "Desfășurător & setup",
     "run_of_show_hint": "Checklist de montaj & cronologie",
-    "admin_only": "admin",
+    "admin_only": "Doar admin",
     "your_role": "Nivel de acces",
     "role_guest": "invitat",
     "role_admin": "admin",
     "role_superadmin": "superadmin",
     "all_workshops": "Toate workshopurile",
     "open_panel": "Panou de control",
-    "coming_soon": "În lucru — apare odată cu portarea conținutului"
+    "coming_soon": "În lucru — apare odată cu portarea conținutului",
+    "presenter_tools": "Unelte de prezentator",
+    "kicker_slides": "Deck · EN + RO",
+    "kicker_handbook": "A4 · EN + RO · print sau ecran",
+    "kicker_script": "RO · 90 min",
+    "kicker_run_of_show": "Ziua evenimentului",
+    "kicker_panel": "Superadmin",
+    "panel_hint": "Conturi, accesări și workshopuri",
+    "note_label": "Notă",
+    "guest_note": "Totul rămâne online și după workshop — poți reveni oricând.",
+    "logged_in_as": "Autentificat ca"
   },
   "panel": {
     "title": "PANOU DE CONTROL",
@@ -91,5 +102,17 @@
     "stats_empty": "Nicio activitate încă.",
     "created": "Workshop creat.",
     "missing_fields": "Lipsesc: {{fields}}"
+  },
+  "viewer": {
+    "contents": "Cuprins",
+    "modules": "Module",
+    "sections": "Secțiuni",
+    "slides": "Planșe",
+    "present": "Prezintă",
+    "screen": "Ecran",
+    "print": "Print",
+    "pdf": "PDF",
+    "collapse": "Restrânge lista",
+    "expand": "Extinde lista"
   }
 }

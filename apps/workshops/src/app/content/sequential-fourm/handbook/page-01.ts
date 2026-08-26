@@ -4,6 +4,7 @@ import type { DocPageDef } from '../../types';
 // via --hb-* vars, see handbook-theme.scss). EN+RO colocated.
 export const PAGE_01: DocPageDef = {
   id: 'p1',
+  label: 'Cover',
   en: `<section class="page" id="p1" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <img class="hb-only-dark" src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="height:46px; width:auto;"><img class="hb-only-light" src="/course/logo-sintezaur-dark.png" alt="Sintezaur" style="height:46px; width:auto;">

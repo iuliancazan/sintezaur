@@ -1,7 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslocoPipe } from '@jsverse/transloco';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { TrackService } from '../../core/track.service';
@@ -9,36 +9,55 @@ import { SLIDES_LOADERS } from '../../content/registry';
 import type { SlideDef } from '../../content/types';
 import { SlideStageComponent } from '../../ui/slide-stage.component';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import { ViewerBarComponent } from '../../ui/viewer-bar.component';
 
+/**
+ * Slides viewer (2026-08-26-v02 "Workshop Portal" 3a): slim breadcrumb bar
+ * with EN|RO, ↓ PDF and ⛶ PRESENT, the named slide list + framed stage in
+ * ws-slide-stage underneath.
+ */
 @Component({
   selector: 'ws-deck-page',
-  imports: [SlideStageComponent, LangToggleComponent, RouterLink, TranslocoPipe],
+  imports: [
+    SlideStageComponent,
+    LangToggleComponent,
+    ViewerBarComponent,
+    TranslocoPipe,
+  ],
   template: `
     @if (printMode) {
       <!-- ?print=1 — every slide stacked unscaled; the PDF renderer prints
            this with an exact 1920×1080 page box. -->
       <div class="deck-print">
         @for (slide of slides(); track slide.id) {
-          <div
-            class="deck-print__page"
-            [innerHTML]="printHtml(slide)"
-          ></div>
+          <div class="deck-print__page" [innerHTML]="printHtml(slide)"></div>
         }
       </div>
     } @else {
       <div class="deck">
-        <header class="deck__bar">
-          <a class="deck__back" [routerLink]="['/w', slug]"
-            >← {{ 'common.back' | transloco }}</a
+        <ws-viewer-bar
+          [backLink]="['/w', slug]"
+          [crumb]="crumbTitle()"
+          [title]="'viewer.slides' | transloco"
+        >
+          <ws-lang-toggle size="sm" />
+          <div class="deck__sep"></div>
+          <a class="deck__pdf" [href]="pdfUrl()"
+            >↓ {{ 'viewer.pdf' | transloco }}</a
           >
-          <ws-lang-toggle />
-        </header>
+          <button type="button" class="deck__present" (click)="present()">
+            ⛶ {{ 'viewer.present' | transloco }}
+          </button>
+        </ws-viewer-bar>
         @if (slides().length > 0) {
           <ws-slide-stage
             class="deck__stage"
             [slides]="slides()"
             [lang]="languageService.lang()"
             [index]="index()"
+            [railHeading]="railHeading()"
+            [collapseLabel]="'viewer.collapse' | transloco"
+            [expandLabel]="'viewer.expand' | transloco"
             (indexChange)="onIndex($event)"
           />
         } @else {
@@ -55,30 +74,52 @@ import { LangToggleComponent } from '../../ui/lang-toggle.component';
       height: 100dvh;
       display: flex;
       flex-direction: column;
-      background: #000;
+      background: var(--ws-bg);
     }
-    .deck__bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
-      opacity: 0.25;
-      transition: opacity 0.25s ease;
+    .deck__sep {
+      width: 1px;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.12);
     }
-    .deck__bar:hover {
-      opacity: 1;
-    }
-    .deck__back {
-      font-family: 'Lato', sans-serif;
-      font-size: 13px;
-      letter-spacing: 2px;
+    .deck__pdf {
+      min-height: 0;
       display: inline-flex;
       align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--ws-border-strong);
+      border-radius: 999px;
+      font-family: var(--ws-font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ws-text-faint);
+
+      &:hover {
+        color: var(--ws-text);
+        border-color: rgba(255, 255, 255, 0.4);
+      }
+    }
+    .deck__present {
+      min-height: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border: none;
+      border-radius: 999px;
+      background: var(--ws-accent);
+      font-family: var(--ws-font-mono);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--ws-bg);
+      cursor: pointer;
+
+      &:hover {
+        background: var(--ws-accent-bright);
+      }
     }
     .deck__stage {
       flex: 1;
@@ -86,7 +127,7 @@ import { LangToggleComponent } from '../../ui/lang-toggle.component';
     }
     .deck__loading {
       margin: auto;
-      color: #8f8f8f;
+      color: var(--ws-text-faint);
     }
     .deck-print__page {
       position: relative;
@@ -101,6 +142,11 @@ import { LangToggleComponent } from '../../ui/lang-toggle.component';
       width: 1920px;
       height: 1080px;
     }
+    @media (max-width: 640px) {
+      .deck__present {
+        display: none;
+      }
+    }
   `,
 })
 export class DeckPage {
@@ -109,6 +155,7 @@ export class DeckPage {
   private readonly auth = inject(AuthService);
   private readonly track = inject(TrackService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly transloco = inject(TranslocoService);
   protected readonly languageService = inject(LanguageService);
 
   protected readonly slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -117,6 +164,8 @@ export class DeckPage {
   protected readonly printMode =
     this.route.snapshot.queryParamMap.get('print') === '1';
 
+  private readonly stage = viewChild(SlideStageComponent);
+
   /** Query-param index, clamped to the loaded deck. */
   protected readonly index = computed(() =>
     Math.max(
@@ -124,6 +173,21 @@ export class DeckPage {
       Math.min(this.queryIndex(), Math.max(this.slides().length - 1, 0)),
     ),
   );
+
+  protected readonly crumbTitle = computed(() => {
+    const w = this.auth.session()?.workshop;
+    if (w) {
+      return (
+        this.languageService.lang() === 'ro' ? w.titleRo : w.titleEn
+      ).toUpperCase();
+    }
+    return this.slug.replace(/-/g, ' ').toUpperCase();
+  });
+
+  protected readonly railHeading = computed(() => {
+    this.languageService.lang();
+    return `${this.transloco.translate('viewer.slides')} · ${this.slides().length}`;
+  });
 
   constructor() {
     // Guests reach this page only when the panel toggle allows slides.
@@ -156,6 +220,15 @@ export class DeckPage {
     return this.sanitizer.bypassSecurityTrustHtml(
       this.languageService.lang() === 'ro' ? slide.ro : slide.en,
     );
+  }
+
+  /** PDF in the CURRENTLY SELECTED language (round 2 rule). */
+  protected pdfUrl(): string {
+    return `/api/pdf/${this.slug}/slides?lang=${this.languageService.lang()}`;
+  }
+
+  protected present() {
+    this.stage()?.toggleFullscreen();
   }
 
   protected onIndex(idx: number) {

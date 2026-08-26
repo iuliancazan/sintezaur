@@ -10,7 +10,7 @@
       footer: "Bucharest's community for people who love synthesis",
       loading: 'Loading…',
       empty: 'No workshops are open right now.',
-      all_workshops: 'All workshops',
+      workshops: 'WORKSHOPS',
       username: 'USERNAME',
       password: 'PASSWORD',
       enter: 'ENTER',
@@ -21,6 +21,7 @@
       error: 'Something went wrong. Try again.',
       show_password: 'Show password',
       hide_password: 'Hide password',
+      helper: 'Use the access details you received.',
     },
     ro: {
       kicker: 'Cursuri hands-on & materiale de workshop',
@@ -29,7 +30,7 @@
       footer: 'Comunitatea din București pentru oamenii care iubesc sinteza',
       loading: 'Se încarcă…',
       empty: 'Niciun workshop deschis momentan.',
-      all_workshops: 'Toate workshopurile',
+      workshops: 'WORKSHOPS',
       username: 'UTILIZATOR',
       password: 'PAROLA',
       enter: 'INTRĂ',
@@ -40,6 +41,7 @@
       error: 'Ceva n-a mers. Încearcă din nou.',
       show_password: 'Arată parola',
       hide_password: 'Ascunde parola',
+      helper: 'Folosește datele de acces primite.',
     },
   };
   let lang = 'en';
@@ -139,6 +141,8 @@
   function renderLogin() {
     if (!selected) return;
     $('login-brand').textContent = brandFromSlug(selected.slug);
+    const title = lang === 'ro' ? selected.titleRo : selected.titleEn;
+    $('login-title').textContent = title || brandFromSlug(selected.slug);
     const sub = lang === 'ro' ? selected.subtitleRo : selected.subtitleEn;
     $('login-sub').textContent = sub || '';
   }

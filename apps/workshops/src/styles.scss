@@ -1,31 +1,50 @@
-/* Workshops global styles — design tokens lifted 1:1 from the course
- * design system (planning vault: claude-design-prototypes/2026-08-17-v02.1,
- * "Design System.dc.html"). Dark is the only screen theme; print themes
- * live with the doc components. */
+/* Workshops global styles.
+ * Portal chrome tokens follow the 2026-08-26-v02 redesign (planning vault:
+ * claude-design-prototypes/2026-08-26-v02, "Workshop Portal.dc.html"):
+ * #0A0908 + faint dot grid, Instrument Sans for text, IBM Plex Mono for all
+ * chrome (breadcrumbs, labels, pills). Course slide/doc CONTENT keeps its
+ * own inline styles from the v02.1 port and is untouched by these tokens. */
 
 @use './course-fonts';
 @use './app/content/sequential-fourm/handbook/handbook-theme';
 
 :root {
   /* Surfaces */
-  --ws-bg: #000000;
+  --ws-bg: #0a0908;
+  --ws-nav-bg: rgba(10, 9, 8, 0.7);
   --ws-card-bg: rgba(255, 255, 255, 0.02);
-  --ws-card-border: #454545;
+  --ws-line: rgba(255, 255, 255, 0.08);
+  --ws-border: rgba(255, 255, 255, 0.14);
+  --ws-border-strong: rgba(255, 255, 255, 0.18);
+  --ws-card-border: #454545; /* course-era border (login card, panel) */
 
   /* Text */
+  --ws-title: #f0eeea;
   --ws-text: #e8e8e8;
   --ws-text-dim: #b4b4b4;
-  --ws-text-faint: #8f8f8f;
   --ws-text-label: #a7a7a7;
+  --ws-text-faint: #8f8f8f;
+  --ws-text-muted: #6e6c68;
+  --ws-crumb-sep: #4a4844;
 
-  /* Accents (PPT scribble orange + diagram orange) */
+  /* Accents (course orange) */
   --ws-accent: #e97132;
   --ws-accent-bright: #ff8a48;
+  --ws-accent-border: rgba(233, 113, 50, 0.5);
+  --ws-accent-card-border: rgba(233, 113, 50, 0.35);
+  --ws-accent-card-bg: rgba(233, 113, 50, 0.04);
+  --ws-accent-row-bg: rgba(233, 113, 50, 0.1);
+  --ws-accent-row-border: rgba(233, 113, 50, 0.4);
 
-  /* Type — self-hosted Lato + Instrument Sans land with the content port;
-   * until then the stacks fall back to system faces. */
+  /* Dot grids (page + viewer wells) */
+  --ws-dotgrid: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  --ws-dotgrid-well: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  --ws-dotgrid-size: 26px 26px;
+
+  /* Type */
   --ws-font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
-  --ws-font-body: 'Lato', system-ui, sans-serif;
+  --ws-font-body: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --ws-font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 }
 
 * {
