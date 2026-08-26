@@ -1,0 +1,11 @@
+# Keep docker build contexts lean (all app Dockerfiles build from repo root).
+node_modules
+dist
+.nx
+.angular
+.git
+storage
+tmp
+planning
+design-imports
+**/.DS_Store
