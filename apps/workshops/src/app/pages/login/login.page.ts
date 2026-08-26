@@ -50,6 +50,13 @@ export class LoginPage {
     this.showPassword.update((v) => !v);
   }
 
+  /** Explicit Enter-to-submit — implicit form submission is unreliable
+   * with password-manager dropdowns in the way. */
+  protected onEnter(event: Event) {
+    event.preventDefault();
+    void this.submit();
+  }
+
   protected readonly title = computed(() => {
     const w = this.workshop();
     if (!w) {

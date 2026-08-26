@@ -35,6 +35,7 @@
           autocomplete="username"
           autocapitalize="none"
           [(ngModel)]="username"
+          (keydown.enter)="onEnter($event)"
         />
       </div>
 
@@ -51,6 +52,7 @@
             autocomplete="current-password"
             [(ngModel)]="password"
             [placeholder]="'••••••••'"
+            (keydown.enter)="onEnter($event)"
           />
           <button
             class="gate__pw-toggle"

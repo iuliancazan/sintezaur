@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/auth.service';
@@ -72,7 +72,6 @@ const EMPTY_NEW: NewWorkshopForm = {
 export class PanelPage {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly transloco = inject(TranslocoService);
   protected readonly languageService = inject(LanguageService);
@@ -309,7 +308,10 @@ export class PanelPage {
 
   protected async logout() {
     await this.auth.logout();
-    await this.router.navigateByUrl('/');
+    // Full reload on purpose: without a session the server gates every
+    // asset (lazy chunks, images), so the running SPA would strand — the
+    // reload lands on the self-contained gate.
+    window.location.assign('/');
   }
 
   private missingFields(fields: Record<string, string | null>): string[] {

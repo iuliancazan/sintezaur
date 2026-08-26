@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
 import { AuthService, type WorkshopInfo } from '../../core/auth.service';
@@ -32,7 +32,6 @@ interface HubCard {
 })
 export class HubPage {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   protected readonly languageService = inject(LanguageService);
@@ -161,6 +160,9 @@ export class HubPage {
 
   protected async logout() {
     await this.auth.logout();
-    await this.router.navigateByUrl('/');
+    // Full reload on purpose: without a session the server gates every
+    // asset (lazy chunks, images), so the running SPA would strand — the
+    // reload lands on the self-contained gate.
+    window.location.assign('/');
   }
 }

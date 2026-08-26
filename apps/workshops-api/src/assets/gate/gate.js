@@ -224,6 +224,21 @@
     btn.addEventListener('click', toggleTheme);
   }
 
+  // Explicit Enter-to-submit: don't rely on the browser's implicit form
+  // submission (password-manager dropdowns and some key handling eat it).
+  function submitFromKeyboard(ev) {
+    const isEnter =
+      ev.key === 'Enter' || ev.code === 'Enter' ||
+      ev.code === 'NumpadEnter' || ev.keyCode === 13;
+    if (!isEnter) return;
+    ev.preventDefault();
+    const form = $('form');
+    if (typeof form.requestSubmit === 'function') form.requestSubmit();
+    else form.dispatchEvent(new Event('submit', { cancelable: true }));
+  }
+  $('username').addEventListener('keydown', submitFromKeyboard);
+  $('password').addEventListener('keydown', submitFromKeyboard);
+
   $('form').addEventListener('submit', function (ev) {
     ev.preventDefault();
     $('error').classList.remove('show');
