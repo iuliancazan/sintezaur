@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { StageSettingsService } from '../../core/stage-settings.service';
+import { StageCamComponent } from './stage-cam.component';
 import { StageScopeComponent } from './stage-scope.component';
 
 /**
@@ -18,7 +19,7 @@ import { StageScopeComponent } from './stage-scope.component';
  */
 @Component({
   selector: 'ws-stage-column',
-  imports: [TranslocoPipe, StageScopeComponent],
+  imports: [TranslocoPipe, StageCamComponent, StageScopeComponent],
   template: `
     <div class="col">
       @if (!camOn() && !scopeOn()) {
@@ -30,9 +31,7 @@ import { StageScopeComponent } from './stage-scope.component';
           <div class="tile tile--cam">
             <span class="tile__head">{{ 'stage.cam' | transloco }}</span>
             <div class="tile__body">
-              <p class="tile__placeholder">
-                {{ 'stage.pick_camera' | transloco }}
-              </p>
+              <ws-stage-cam />
             </div>
           </div>
         }

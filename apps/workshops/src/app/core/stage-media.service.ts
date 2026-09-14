@@ -119,6 +119,13 @@ export class StageMediaService {
   private waveNode: AnalyserNode | null = null;
   private specNode: AnalyserNode | null = null;
 
+  readonly camState = signal<StageTileState>('idle');
+  /** The single camera stream, shared by the column tile and the dialog
+   * preview: a second getUserMedia on the same device can renegotiate the
+   * capture and drop the first one. */
+  readonly camStream = signal<MediaStream | null>(null);
+  private camToken = 0;
+
   private channel: ScopeChannel = 'left';
   private startToken = 0;
   private levelAt = 0;
@@ -353,6 +360,73 @@ export class StageMediaService {
 
     if (!keepState) {
       this.audioState.set('idle');
+    }
+  }
+
+  /**
+   * Start (or restart) the camera. deviceId is always exact: macOS will
+   * happily switch to a nearby iPhone offering itself as a Continuity
+   * Camera, and mid-demo is the worst possible moment for that.
+   */
+  async startCam(deviceId: string): Promise<StageTileState> {
+    this.stopCam(true);
+    const token = ++this.camToken;
+    this.camState.set('starting');
+
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: { exact: deviceId },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 30 },
+        },
+        audio: false,
+      });
+    } catch (err) {
+      if (token !== this.camToken) {
+        return this.camState();
+      }
+      const state = mediaErrorState(err);
+      this.camState.set(state);
+      return state;
+    }
+
+    if (token !== this.camToken) {
+      stream.getTracks().forEach((t) => t.stop());
+      return this.camState();
+    }
+
+    const track = stream.getVideoTracks()[0];
+    const settings = track?.getSettings() ?? {};
+    console.info('[stage] camera', {
+      label: track?.label,
+      width: settings.width,
+      height: settings.height,
+      frameRate: settings.frameRate,
+    });
+    if (track) {
+      track.addEventListener('ended', () => {
+        this.stopCam(true);
+        this.camState.set('not-found');
+      });
+      // Cam Link with no HDMI sync: the device is there, the frames are not.
+      track.addEventListener('mute', () => this.camState.set('in-use'));
+      track.addEventListener('unmute', () => this.camState.set('live'));
+    }
+
+    this.camStream.set(stream);
+    this.camState.set('live');
+    return 'live';
+  }
+
+  stopCam(keepState = false) {
+    this.camToken++;
+    this.camStream()?.getTracks().forEach((t) => t.stop());
+    this.camStream.set(null);
+    if (!keepState) {
+      this.camState.set('idle');
     }
   }
 
