@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { StageSettingsService } from '../../core/stage-settings.service';
+import { StageScopeComponent } from './stage-scope.component';
 
 /**
  * Stage Mode column (spec §3 and §5.1): the fixed-width strip to the right
@@ -17,7 +18,7 @@ import { StageSettingsService } from '../../core/stage-settings.service';
  */
 @Component({
   selector: 'ws-stage-column',
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, StageScopeComponent],
   template: `
     <div class="col">
       @if (!camOn() && !scopeOn()) {
@@ -45,9 +46,7 @@ import { StageSettingsService } from '../../core/stage-settings.service';
               }
             </span>
             <div class="tile__body">
-              <p class="tile__placeholder">
-                {{ 'stage.pick_audio' | transloco }}
-              </p>
+              <ws-stage-scope />
             </div>
           </div>
         }
