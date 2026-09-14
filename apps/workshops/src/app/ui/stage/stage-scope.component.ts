@@ -128,7 +128,6 @@ export class StageScopeComponent implements OnDestroy {
   // ArrayBufferLike default that an explicit annotation would give.
   private buf = new Float32Array(0);
   private env = 0;
-  private lastTrigger = 0;
   private detachDeviceChange: (() => void) | null = null;
   private readonly onVisibility = () => {
     if (document.hidden) {
@@ -302,9 +301,21 @@ export class StageScopeComponent implements OnDestroy {
     const buf = this.buf;
     analyser.getFloatTimeDomainData(buf);
 
+    const rate = this.media.sampleRate() || 48000;
+    const n = Math.min(
+      Math.max(2, Math.round((this.stage.scope().timeDiv * 10 * rate) / 1000)),
+      buf.length - 2,
+    );
+    // Analyse only the recent past: at least four windows and at least
+    // 100 ms, which covers everything down to 10 Hz. The analyser's buffer
+    // is 683 ms at 48 kHz and starts out full of zeros, so measuring all of
+    // it skews the midpoint for the first second and makes the trace walk.
+    const region = Math.min(buf.length, Math.max(4 * n, Math.round(rate / 10)));
+    const regionStart = buf.length - region;
+
     let min = Infinity;
     let max = -Infinity;
-    for (let i = 0; i < buf.length; i++) {
+    for (let i = regionStart; i < buf.length; i++) {
       const v = buf[i];
       if (v < min) {
         min = v;
@@ -330,26 +341,32 @@ export class StageScopeComponent implements OnDestroy {
       ? Math.min(MAX_GAIN, TARGET / Math.max(this.env, 1e-6))
       : 1;
 
-    const rate = this.media.sampleRate() || 48000;
-    const n = Math.min(
-      Math.max(2, Math.round((this.stage.scope().timeDiv * 10 * rate) / 1000)),
-      buf.length,
-    );
-    const start = this.trigger(buf, Math.max(0, buf.length - n), min, max);
+    // The crossing sits at a fractional sample position; the whole trace is
+    // shifted by that fraction so the edge does not jitter by a pixel from
+    // frame to frame. Whole-sample triggering reads as a shimmer at the
+    // fast time bases, where a pixel is less than two samples wide.
+    const crossing = this.trigger(buf, regionStart + 1, buf.length - n, min, max);
+    const first = Math.max(0, Math.floor(crossing) - 1);
+    const last = Math.min(buf.length - 1, first + n + 2);
+    const pxPerSample = w / n;
+    const xOf = (i: number) => (i - crossing) * pxPerSample;
     const yOf = (v: number) => half - v * gain * half;
 
     ctx.beginPath();
-    const perPixel = n / w;
-    if (perPixel > 1) {
-      // One vertical segment per pixel column, between the column's min and
-      // max: cheaper than a segment per sample and it shows the real
-      // peak-to-peak, which is what reads from five metres away.
+    if (pxPerSample < 1) {
+      // More than one sample per pixel column: draw each column as the span
+      // between its lowest and highest sample, as one continuous zigzag.
+      // Each column also includes the last sample of the column before it,
+      // so an edge that falls between two columns is still drawn. Without
+      // that overlap a hard edge is invisible: no single column holds both
+      // the sample before and the sample after it.
+      let prevY: number | null = null;
       for (let px = 0; px < w; px++) {
-        const from = start + Math.floor(px * perPixel);
-        const to = Math.min(start + n, start + Math.floor((px + 1) * perPixel));
+        const from = Math.max(first, Math.floor(crossing + px / pxPerSample));
+        const to = Math.min(last, Math.floor(crossing + (px + 1) / pxPerSample));
         let lo = Infinity;
         let hi = -Infinity;
-        for (let i = from; i < to; i++) {
+        for (let i = from; i <= to; i++) {
           const v = buf[i];
           if (v < lo) {
             lo = v;
@@ -362,14 +379,27 @@ export class StageScopeComponent implements OnDestroy {
           continue;
         }
         const x = px + 0.5;
-        ctx.moveTo(x, yOf(hi));
-        ctx.lineTo(x, yOf(lo));
+        const yHi = yOf(hi);
+        const yLo = yOf(lo);
+        if (prevY === null) {
+          ctx.moveTo(x, yHi);
+          ctx.lineTo(x, yLo);
+          prevY = yLo;
+        } else if (Math.abs(prevY - yHi) <= Math.abs(prevY - yLo)) {
+          ctx.lineTo(x, yHi);
+          ctx.lineTo(x, yLo);
+          prevY = yLo;
+        } else {
+          ctx.lineTo(x, yLo);
+          ctx.lineTo(x, yHi);
+          prevY = yHi;
+        }
       }
     } else {
-      for (let i = 0; i < n; i++) {
-        const x = (i / (n - 1)) * w;
-        const y = yOf(buf[start + i]);
-        if (i === 0) {
+      for (let i = first; i <= last; i++) {
+        const x = xOf(i);
+        const y = yOf(buf[i]);
+        if (i === first) {
           ctx.moveTo(x, y);
         } else {
           ctx.lineTo(x, y);
@@ -380,7 +410,7 @@ export class StageScopeComponent implements OnDestroy {
   }
 
   /**
-   * Last rising crossing of the window's midpoint, so the freshest window
+   * Last rising crossing of the region's midpoint, so the freshest window
    * wins. The midpoint rather than zero makes it immune to a DC offset.
    *
    * Hysteresis has to ARM rather than test the preceding sample: on any
@@ -390,23 +420,26 @@ export class StageScopeComponent implements OnDestroy {
    * trace arms when the signal dips below mid - hyst and fires on the next
    * upward crossing of mid.
    *
-   * On a miss the previous index is reused, so the trace holds still instead
-   * of snapping back to the start of the buffer.
+   * Returns the crossing as a FRACTIONAL sample position, interpolated
+   * between the two samples either side of it. Without a crossing (noise,
+   * a transient) the trace free-runs from the freshest window.
    */
   private trigger(
     buf: Float32Array,
+    searchStart: number,
     searchEnd: number,
     min: number,
     max: number,
   ): number {
-    if (searchEnd <= 1) {
-      return 0;
+    const freshest = Math.max(1, searchEnd - 1);
+    if (searchEnd <= searchStart) {
+      return freshest;
     }
     const mid = (min + max) / 2;
     const hyst = Math.max(0.05 * (max - min), 1e-3);
     let armed = false;
     let found = -1;
-    for (let i = 1; i < searchEnd; i++) {
+    for (let i = Math.max(1, searchStart); i < searchEnd; i++) {
       const v = buf[i];
       if (v < mid - hyst) {
         armed = true;
@@ -415,11 +448,13 @@ export class StageScopeComponent implements OnDestroy {
         armed = false;
       }
     }
-    if (found >= 0) {
-      this.lastTrigger = found;
-      return found;
+    if (found < 0) {
+      return freshest;
     }
-    return this.lastTrigger < searchEnd ? this.lastTrigger : 0;
+    const a = buf[found - 1];
+    const b = buf[found];
+    const frac = b !== a ? Math.min(1, Math.max(0, (mid - a) / (b - a))) : 0;
+    return found - 1 + frac;
   }
 
   private flatLine(ctx: CanvasRenderingContext2D, w: number, half: number) {
