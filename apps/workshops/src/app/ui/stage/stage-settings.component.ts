@@ -1,20 +1,32 @@
 import {
   Component,
   ElementRef,
+  OnDestroy,
   afterNextRender,
   computed,
   inject,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import {
+  StageMediaService,
+  listDevices,
+} from '../../core/stage-media.service';
+import {
+  SCOPE_TIME_DIVS,
   STAGE_CANVAS_WIDTH,
   STAGE_COL_MAX,
   STAGE_COL_MIN,
-  STAGE_COL_STEP,
+  STAGE_ROTATIONS,
   StageSettingsService,
+  type ScopeChannel,
+  type ScopeMode,
+  type ScopeTimeDiv,
+  type StageRotation,
 } from '../../core/stage-settings.service';
+import { StageCamComponent } from './stage-cam.component';
 
 /** Well padding and column gap, in canvas px (spec §3). */
 const WELL_PADDING = 24;
@@ -34,7 +46,7 @@ const CANVAS_HEIGHT = 1080;
  */
 @Component({
   selector: 'ws-stage-settings',
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, StageCamComponent],
   template: `
     <div class="ov">
       <div
@@ -57,6 +69,15 @@ const CANVAS_HEIGHT = 1080;
             ✕
           </button>
         </header>
+
+        @if (needsGrant()) {
+          <section class="sec">
+            <p class="hint">{{ 'stage.grant_hint' | transloco }}</p>
+            <button type="button" class="btn" (click)="grant()">
+              {{ 'stage.grant' | transloco }}
+            </button>
+          </section>
+        }
 
         <section class="sec">
           <h3 class="sec__title">{{ 'stage.section_mode' | transloco }}</h3>
@@ -101,6 +122,150 @@ const CANVAS_HEIGHT = 1080;
             <button type="button" class="btn" (click)="stage.reset()">
               {{ 'stage.reset' | transloco }}
             </button>
+          </div>
+        </section>
+
+        <section class="sec">
+          <h3 class="sec__title">{{ 'stage.section_cam' | transloco }}</h3>
+          <div class="split">
+            <div class="split__main">
+              <label class="row row--check">
+                <input
+                  type="checkbox"
+                  [checked]="stage.cam().enabled"
+                  (change)="stage.toggleCam()"
+                />
+                <span>{{ 'stage.enable_cam' | transloco }}</span>
+              </label>
+              <div class="row">
+                <span class="row__label">{{ 'stage.device' | transloco }}</span>
+                <select class="sel" (change)="pickCam($event)">
+                  <option value="" [selected]="!stage.cam().deviceId">—</option>
+                  @for (d of cameras(); track d.deviceId) {
+                    <option
+                      [value]="d.deviceId"
+                      [selected]="d.deviceId === stage.cam().deviceId"
+                    >
+                      {{ d.label || d.deviceId }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="row">
+                <span class="row__label">{{
+                  'stage.rotation' | transloco
+                }}</span>
+                <select class="sel sel--sm" (change)="pickRotation($event)">
+                  @for (r of rotations; track r) {
+                    <option [value]="r" [selected]="r === stage.cam().rotation">
+                      {{ r }}°
+                    </option>
+                  }
+                </select>
+                <label class="row--check">
+                  <input
+                    type="checkbox"
+                    [checked]="stage.cam().mirror"
+                    (change)="stage.patchCam({ mirror: !stage.cam().mirror })"
+                  />
+                  <span>{{ 'stage.mirror' | transloco }}</span>
+                </label>
+              </div>
+              <p class="hint">{{ 'stage.rotation_hint' | transloco }}</p>
+            </div>
+            <div class="preview">
+              <ws-stage-cam [owner]="false" />
+            </div>
+          </div>
+        </section>
+
+        <section class="sec">
+          <h3 class="sec__title">{{ 'stage.section_scope' | transloco }}</h3>
+          <label class="row row--check">
+            <input
+              type="checkbox"
+              [checked]="stage.scope().enabled"
+              (change)="stage.toggleScope()"
+            />
+            <span>{{ 'stage.enable_scope' | transloco }}</span>
+          </label>
+          <div class="row">
+            <span class="row__label">{{ 'stage.device' | transloco }}</span>
+            <select class="sel" (change)="pickAudio($event)">
+              <option value="" [selected]="!stage.scope().deviceId">—</option>
+              @for (d of inputs(); track d.deviceId) {
+                <option
+                  [value]="d.deviceId"
+                  [selected]="d.deviceId === stage.scope().deviceId"
+                >
+                  {{ d.label || d.deviceId }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="row">
+            <span class="row__label">{{ 'stage.channel' | transloco }}</span>
+            <select class="sel sel--sm" (change)="pickChannel($event)">
+              <option value="left" [selected]="stage.scope().channel === 'left'">
+                1
+              </option>
+              <option
+                value="right"
+                [disabled]="mono()"
+                [selected]="stage.scope().channel === 'right'"
+              >
+                2
+              </option>
+              <option
+                value="mix"
+                [disabled]="mono()"
+                [selected]="stage.scope().channel === 'mix'"
+              >
+                1+2
+              </option>
+            </select>
+            <span class="row__note">{{ 'stage.level' | transloco }}</span>
+            <span class="meter"
+              ><span class="meter__fill" [style.width.%]="levelPct()"></span
+            ></span>
+          </div>
+          <p class="hint">{{ 'stage.channel_hint' | transloco }}</p>
+          @if (mono()) {
+            <p class="hint hint--warn">{{ 'stage.mono_hint' | transloco }}</p>
+          }
+          <div class="row">
+            <span class="row__label">{{ 'stage.mode' | transloco }}</span>
+            <select class="sel sel--sm" (change)="pickMode($event)">
+              <option value="wave" [selected]="stage.scope().mode === 'wave'">
+                {{ 'stage.mode_wave' | transloco }}
+              </option>
+              <option
+                value="spectrum"
+                [selected]="stage.scope().mode === 'spectrum'"
+              >
+                {{ 'stage.mode_spectrum' | transloco }}
+              </option>
+            </select>
+          </div>
+          <div class="row">
+            <span class="row__label">{{ 'stage.time_div' | transloco }}</span>
+            <select class="sel sel--sm" (change)="pickTimeDiv($event)">
+              @for (d of timeDivs; track d) {
+                <option [value]="d" [selected]="d === stage.scope().timeDiv">
+                  {{ d }} ms/div
+                </option>
+              }
+            </select>
+            <label class="row--check">
+              <input
+                type="checkbox"
+                [checked]="stage.scope().autoGain"
+                (change)="
+                  stage.patchScope({ autoGain: !stage.scope().autoGain })
+                "
+              />
+              <span>{{ 'stage.auto_gain' | transloco }}</span>
+            </label>
           </div>
         </section>
 
@@ -179,6 +344,24 @@ const CANVAS_HEIGHT = 1080;
       text-transform: uppercase;
       color: var(--ws-stage-tile-faint);
     }
+    .split {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .split__main {
+      flex: 1;
+      min-width: 0;
+    }
+    .preview {
+      flex: none;
+      width: 84px;
+      aspect-ratio: 9 / 16;
+      overflow: hidden;
+      border: 1px solid var(--ws-stage-tile-border);
+      border-radius: 10px;
+      background: #000;
+    }
     .row {
       display: flex;
       align-items: center;
@@ -190,10 +373,15 @@ const CANVAS_HEIGHT = 1080;
       margin-bottom: 0;
     }
     .row--check {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ws-text-dim);
       cursor: pointer;
     }
     .row__label {
-      min-width: 150px;
+      min-width: 110px;
       font-size: 13px;
       color: var(--ws-text-dim);
     }
@@ -201,6 +389,48 @@ const CANVAS_HEIGHT = 1080;
       font-family: var(--ws-font-mono);
       font-size: 11px;
       color: var(--ws-stage-tile-faint);
+    }
+    .hint {
+      margin: 0 0 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--ws-stage-tile-faint);
+    }
+    .hint--warn {
+      color: var(--ws-accent-bright);
+    }
+    .sel {
+      flex: 1;
+      min-width: 0;
+      max-width: 320px;
+      min-height: 0;
+      padding: 6px 8px;
+      border: 1px solid var(--ws-stage-tile-border);
+      border-radius: 8px;
+      background: var(--ws-input-bg);
+      color: var(--ws-text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+    .sel--sm {
+      flex: none;
+      width: auto;
+      min-width: 96px;
+    }
+    .meter {
+      flex: 1;
+      min-width: 60px;
+      max-width: 160px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+    .meter__fill {
+      display: block;
+      height: 100%;
+      background: var(--ws-accent);
+      transition: width 0.1s linear;
     }
     .stepper {
       display: inline-flex;
@@ -269,17 +499,33 @@ const CANVAS_HEIGHT = 1080;
     }
   `,
 })
-export class StageSettingsComponent {
+export class StageSettingsComponent implements OnDestroy {
   protected readonly stage = inject(StageSettingsService);
+  private readonly media = inject(StageMediaService);
 
   readonly closed = output<void>();
 
   protected readonly min = STAGE_COL_MIN;
   protected readonly max = STAGE_COL_MAX;
-  protected readonly step = STAGE_COL_STEP;
+  protected readonly rotations = STAGE_ROTATIONS;
+  protected readonly timeDivs = SCOPE_TIME_DIVS;
+
+  protected readonly cameras = signal<MediaDeviceInfo[]>([]);
+  protected readonly inputs = signal<MediaDeviceInfo[]>([]);
+  /** enumerateDevices returns blank labels until access is granted once. */
+  protected readonly needsGrant = computed(
+    () =>
+      [...this.cameras(), ...this.inputs()].some((d) => !d.label) ||
+      (this.cameras().length === 0 && this.inputs().length === 0),
+  );
+  protected readonly mono = computed(() => this.media.audioChannels() === 1);
+  protected readonly levelPct = computed(() =>
+    Math.min(100, Math.round(this.media.audioLevel() * 100)),
+  );
 
   private readonly panel =
     viewChild.required<ElementRef<HTMLDivElement>>('panel');
+  private detachDeviceChange: (() => void) | null = null;
 
   /**
    * The scale the slide would get at the chosen width, on a 1920x1080
@@ -288,7 +534,10 @@ export class StageSettingsComponent {
    */
   protected readonly slidePct = computed(() => {
     const fit =
-      STAGE_CANVAS_WIDTH - 2 * WELL_PADDING - COL_GAP - this.stage.columnWidth();
+      STAGE_CANVAS_WIDTH -
+      2 * WELL_PADDING -
+      COL_GAP -
+      this.stage.columnWidth();
     const height = CANVAS_HEIGHT - 2 * WELL_PADDING;
     const scale = Math.min(fit / STAGE_CANVAS_WIDTH, height / CANVAS_HEIGHT);
     return Math.round(scale * 100);
@@ -296,6 +545,65 @@ export class StageSettingsComponent {
 
   constructor() {
     afterNextRender(() => this.panel().nativeElement.focus());
+    void this.refreshDevices();
+    this.detachDeviceChange = this.media.onDeviceChange(() =>
+      void this.refreshDevices(),
+    );
+  }
+
+  ngOnDestroy() {
+    this.detachDeviceChange?.();
+    this.detachDeviceChange = null;
+  }
+
+  private async refreshDevices() {
+    this.cameras.set(await listDevices('videoinput'));
+    this.inputs.set(await listDevices('audioinput'));
+  }
+
+  protected async grant() {
+    await this.media.grantAccess();
+    await this.refreshDevices();
+  }
+
+  private pick(
+    event: Event,
+    list: MediaDeviceInfo[],
+  ): { deviceId: string | null; deviceLabel: string | null } {
+    const id = (event.target as HTMLSelectElement).value;
+    if (!id) {
+      return { deviceId: null, deviceLabel: null };
+    }
+    const found = list.find((d) => d.deviceId === id);
+    return { deviceId: id, deviceLabel: found?.label ?? null };
+  }
+
+  protected pickCam(event: Event) {
+    this.stage.patchCam(this.pick(event, this.cameras()));
+  }
+
+  protected pickAudio(event: Event) {
+    this.stage.patchScope(this.pick(event, this.inputs()));
+  }
+
+  protected pickRotation(event: Event) {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.stage.patchCam({ rotation: value as StageRotation });
+  }
+
+  protected pickChannel(event: Event) {
+    const value = (event.target as HTMLSelectElement).value as ScopeChannel;
+    this.stage.patchScope({ channel: value });
+  }
+
+  protected pickMode(event: Event) {
+    const value = (event.target as HTMLSelectElement).value as ScopeMode;
+    this.stage.patchScope({ mode: value });
+  }
+
+  protected pickTimeDiv(event: Event) {
+    const value = Number((event.target as HTMLSelectElement).value);
+    this.stage.patchScope({ timeDiv: value as ScopeTimeDiv });
   }
 
   /**
