@@ -12,7 +12,10 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import type { SlideDef } from '../content/types';
+import { StageSettingsService } from '../core/stage-settings.service';
 import { ViewerRailComponent, type RailItem } from './viewer-rail.component';
+import { StageColumnComponent } from './stage/stage-column.component';
+import { StageSettingsComponent } from './stage/stage-settings.component';
 
 const RAIL_KEY = 'ws_deck_rail';
 
@@ -28,7 +31,7 @@ const RAIL_KEY = 'ws_deck_rail';
  */
 @Component({
   selector: 'ws-slide-stage',
-  imports: [ViewerRailComponent],
+  imports: [ViewerRailComponent, StageColumnComponent, StageSettingsComponent],
   template: `
     @if (!fullscreen() && !railCollapsed()) {
       <div class="railwrap">
@@ -57,7 +60,12 @@ const RAIL_KEY = 'ws_deck_rail';
         ›
       </button>
     }
-    <div class="stage" [class.stage--fullscreen]="fullscreen()">
+    <div
+      class="stage"
+      [class.stage--fullscreen]="fullscreen()"
+      [class.stage--stage]="stageOn()"
+      [style.--stage-col]="stageColCss()"
+    >
       <div class="stage__well">
         <div class="stage__fit" #fitEl>
           <div
@@ -68,10 +76,26 @@ const RAIL_KEY = 'ws_deck_rail';
             <div
               class="stage__canvas"
               [style.transform]="'scale(' + scale() + ')'"
+              [style.marginTop.px]="canvasOffset()"
               [innerHTML]="currentHtml()"
             ></div>
           </div>
         </div>
+        <!-- Stage Mode lives behind a single conditional so that with the
+             flag off this component renders exactly what it did before the
+             feature existed (spec §0 rule 1). -->
+        @if (stageUi()) {
+          @if (stageOn()) {
+            @defer (on immediate) {
+              <ws-stage-column />
+            }
+          }
+          @if (settingsOpen()) {
+            @defer (on immediate) {
+              <ws-stage-settings (closed)="closeSettings()" />
+            }
+          }
+        }
       </div>
       @if (!fullscreen()) {
         <div class="stage__controls">
@@ -96,6 +120,16 @@ const RAIL_KEY = 'ws_deck_rail';
             >
               →
             </button>
+            @if (stageOn()) {
+              <button
+                type="button"
+                class="stage__pager-btn stage__gear"
+                (click)="toggleSettings()"
+                [attr.aria-label]="stageSettingsLabel()"
+              >
+                ⚙
+              </button>
+            }
           </div>
           <span class="stage__credit">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</span>
         </div>
@@ -117,6 +151,16 @@ const RAIL_KEY = 'ws_deck_rail';
           >
             ⛶
           </button>
+          @if (stageOn()) {
+            <button
+              type="button"
+              class="stage__hud-btn stage__gear"
+              (click)="toggleSettings()"
+              [attr.aria-label]="stageSettingsLabel()"
+            >
+              ⚙
+            </button>
+          }
         </div>
       }
     </div>
@@ -331,6 +375,35 @@ const RAIL_KEY = 'ws_deck_rail';
       letter-spacing: 2px;
       color: var(--ws-text-faint);
     }
+    /* ---- Stage Mode (spec §3) ----
+       Every rule here is gated on .stage--stage, which is only ever set when
+       the flag is on. The shell's height and the canvas offset are NOT here:
+       they are inline style bindings, so a stylesheet rule could not win
+       against them and they are computed in TypeScript instead. */
+    .stage--stage .stage__well {
+      gap: 24px;
+    }
+    .stage--fullscreen.stage--stage .stage__well {
+      padding: 24px;
+    }
+    /* The three boxes float on black in fullscreen, so the slide keeps its
+       frame. outline instead of border: no box-model effect, so restoring
+       the frame does not crop 2px off the slide. */
+    .stage--fullscreen.stage--stage .stage__shell {
+      border-radius: 6px;
+      outline: 1px solid #454545;
+      outline-offset: -1px;
+    }
+    .stage__gear {
+      font-size: 14px;
+    }
+    /* Presenter-only feature: below this width the column would swallow the
+       deck, so a persisted flag cannot ruin a small window. */
+    @media (max-width: 1024px) {
+      .stage--stage ws-stage-column {
+        display: none;
+      }
+    }
     @media (max-width: 900px) {
       .stage__credit {
         display: none;
@@ -353,6 +426,7 @@ const RAIL_KEY = 'ws_deck_rail';
 export class SlideStageComponent {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly stage = inject(StageSettingsService);
 
   readonly slides = input.required<SlideDef[]>();
   readonly lang = input.required<'en' | 'ro'>();
@@ -360,19 +434,57 @@ export class SlideStageComponent {
   readonly railHeading = input('');
   readonly collapseLabel = input('Collapse');
   readonly expandLabel = input('Expand');
+  readonly stageSettingsLabel = input('Stage Mode settings');
   readonly indexChange = output<number>();
 
   private readonly fitEl =
     viewChild.required<ElementRef<HTMLDivElement>>('fitEl');
 
   protected readonly scale = signal(1);
+  /** Measured height of .stage__fit, taken in the same pass as the scale. */
+  private readonly fitHeight = signal(0);
   protected readonly hudHidden = signal(false);
   protected readonly fullscreen = signal(false);
   protected readonly railCollapsed = signal(this.initialRail());
+  protected readonly settingsOpen = signal(false);
   private hudTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** Stage Mode master flag; false means the deck of before this feature. */
+  protected readonly stageOn = this.stage.enabled;
+  /** Anything Stage Mode renders hangs off this one conditional. */
+  protected readonly stageUi = computed(
+    () => this.stageOn() || this.settingsOpen(),
+  );
+  protected readonly stageColCss = computed(() =>
+    this.stageOn() ? `${this.stage.columnWidth()}px` : null,
+  );
+
   protected readonly shellWidth = computed(() => 1920 * this.scale());
-  protected readonly shellHeight = computed(() => 1080 * this.scale());
+
+  /**
+   * With the column on, the black slide frame stretches to the full height
+   * of the fit box and the 16:9 content is centred inside it, so the frame
+   * lines up with the tiles (spec §3). This has to be the bound value, not a
+   * CSS rule, because the height is an inline style binding.
+   */
+  protected readonly shellHeight = computed(() =>
+    this.stageOn() && this.fitHeight() > 0
+      ? this.fitHeight()
+      : 1080 * this.scale(),
+  );
+
+  /**
+   * Vertical centring of the canvas inside a taller shell. Returns null when
+   * Stage Mode is off so Angular writes no margin-top at all and the style
+   * attribute stays exactly what it was before this feature.
+   */
+  protected readonly canvasOffset = computed(() => {
+    if (!this.stageOn()) {
+      return null;
+    }
+    const slack = this.shellHeight() - 1080 * this.scale();
+    return slack > 0 ? Math.round(slack / 2) : null;
+  });
 
   protected readonly currentHtml = computed<SafeHtml>(() => {
     const slide = this.slides()[this.index()];
@@ -427,7 +539,10 @@ export class SlideStageComponent {
   private rescale() {
     const el = this.fitEl().nativeElement;
     const scale = Math.min(el.clientWidth / 1920, el.clientHeight / 1080);
-    this.scale.set(scale > 0 ? scale : 1);
+    // A transient zero (mid-layout, or a hidden tab) must not blow the shell
+    // up to full size; 0.01 is far below any usable deck scale.
+    this.scale.set(Number.isFinite(scale) && scale > 0.01 ? scale : 1);
+    this.fitHeight.set(el.clientHeight);
   }
 
   @HostListener('document:fullscreenchange')
@@ -440,6 +555,15 @@ export class SlideStageComponent {
     if (event.target instanceof HTMLInputElement) {
       return;
     }
+    // The dialog stops propagation on its own; this covers the case where
+    // focus has landed on the body while the dialog is open.
+    if (
+      (event.target as HTMLElement | null)?.closest?.('ws-stage-settings') !=
+      null
+    ) {
+      return;
+    }
+    this.onStageKey(event);
     switch (event.key) {
       case 'ArrowRight':
       case 'ArrowDown':
@@ -464,6 +588,73 @@ export class SlideStageComponent {
         this.toggleFullscreen();
         break;
     }
+  }
+
+  /**
+   * Stage Mode keys (spec §7). Only `k` and `m` do anything with the flag
+   * off; everything else is a no-op, so the deck's keyboard behaviour is
+   * unchanged for anyone who never turns Stage Mode on.
+   *
+   * Bracket and minus/plus are matched on event.code as well as event.key,
+   * because a Romanian keyboard layout reports ă and î on those physical
+   * keys.
+   */
+  private onStageKey(event: KeyboardEvent) {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const key = event.key;
+    const code = event.code;
+
+    if (key === 'k') {
+      event.preventDefault();
+      this.toggleSettings();
+      return;
+    }
+    if (key === 'Escape') {
+      // Note: in fullscreen the browser also exits fullscreen on Esc and
+      // that cannot be prevented. `k` is the safe way to close mid-show.
+      this.settingsOpen.set(false);
+      return;
+    }
+    if (key === 'm') {
+      event.preventDefault();
+      this.stage.toggleEnabled();
+      return;
+    }
+    if (!this.stageOn()) {
+      return;
+    }
+    if (key === 'c') {
+      this.stage.toggleCam();
+    } else if (key === 'o') {
+      this.stage.toggleScope();
+    } else if (key === 's') {
+      this.stage.toggleScopeMode();
+    } else if (key === 'r') {
+      this.stage.cycleRotation();
+    } else if (key === '[' || code === 'BracketLeft') {
+      this.stage.stepTimeDiv(-1);
+    } else if (key === ']' || code === 'BracketRight') {
+      this.stage.stepTimeDiv(1);
+    } else if (key === '-' || code === 'Minus' || code === 'NumpadSubtract') {
+      this.stage.stepColumnWidth(-1);
+    } else if (
+      key === '+' ||
+      key === '=' ||
+      code === 'Equal' ||
+      code === 'NumpadAdd'
+    ) {
+      this.stage.stepColumnWidth(1);
+    }
+  }
+
+  protected toggleSettings() {
+    this.settingsOpen.update((open) => !open);
+  }
+
+  protected closeSettings() {
+    this.settingsOpen.set(false);
   }
 
   @HostListener('document:mousemove')

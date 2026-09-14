@@ -5,6 +5,7 @@ import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { TrackService } from '../../core/track.service';
+import { StageSettingsService } from '../../core/stage-settings.service';
 import { SLIDES_LOADERS } from '../../content/registry';
 import type { SlideDef } from '../../content/types';
 import { SlideStageComponent } from '../../ui/slide-stage.component';
@@ -58,6 +59,7 @@ import { ViewerBarComponent } from '../../ui/viewer-bar.component';
             [railHeading]="railHeading()"
             [collapseLabel]="'viewer.collapse' | transloco"
             [expandLabel]="'viewer.expand' | transloco"
+            [stageSettingsLabel]="'stage.settings' | transloco"
             (indexChange)="onIndex($event)"
           />
         } @else {
@@ -156,6 +158,7 @@ export class DeckPage {
   private readonly track = inject(TrackService);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly transloco = inject(TranslocoService);
+  private readonly stageSettings = inject(StageSettingsService);
   protected readonly languageService = inject(LanguageService);
 
   protected readonly slug = this.route.snapshot.paramMap.get('slug') ?? '';
@@ -190,6 +193,20 @@ export class DeckPage {
   });
 
   constructor() {
+    // ?stage=1 turns Stage Mode on and persists it, ?stage=0 turns it off
+    // (spec §6.1). Read once from the snapshot, never written back: the
+    // query string also carries the slide index, so re-reading it on every
+    // navigation would undo an `m` toggle on the next arrow key. Never in
+    // print mode, so the PDF path can not persist the flag.
+    if (!this.printMode) {
+      const stageParam = this.route.snapshot.queryParamMap.get('stage');
+      if (stageParam === '1') {
+        this.stageSettings.setEnabled(true);
+      } else if (stageParam === '0') {
+        this.stageSettings.setEnabled(false);
+      }
+    }
+
     // Guests reach this page only when the panel toggle allows slides.
     void this.auth.resolve().then((session) => {
       if (!session) {

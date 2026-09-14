@@ -50,6 +50,16 @@
   --ws-accent-row-bg: rgba(233, 113, 50, 0.1);
   --ws-accent-row-border: rgba(233, 113, 50, 0.4);
 
+  /* Stage Mode tiles (presenter-only camera + oscilloscope column). These
+   * are deliberately NOT redefined in the light block: the tiles show a
+   * camera image and an orange trace on black, so they stay dark in both
+   * themes, exactly like the slides they sit next to. #454545 matches the
+   * rounded boxes drawn inside the slides' own SVGs. */
+  --ws-stage-tile: #0d0d0d;
+  --ws-stage-tile-border: #454545;
+  --ws-stage-tile-label: #8f8f8f;
+  --ws-stage-tile-faint: #6e6c68;
+
   /* Dot grids (page + viewer wells) */
   --ws-dotgrid: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
   --ws-dotgrid-well: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
