@@ -17,7 +17,7 @@ const execAsync = promisify(exec);
  *
  * Offsite sync (Hetzner Storage Box via rclone/rsync) is configured
  * separately on Coolify as an external cron — see
- * `docs/devops/backups.md`. This job only handles the local dump +
+ * `planning/docs/devops/backups.md`. This job only handles the local dump +
  * retention.
  *
  * Failures are logged but the job doesn't crash the worker — a

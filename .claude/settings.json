@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3)",
+      "Bash(grep -n \"^export class\\\\|^  template: \\\\`\\\\|^  styles: \\\\[\\\\|^  \\\\],$\\\\|^}\\)\" apps/site/src/app/forum/forum-search.page.ts)",
+      "Bash(python3 /tmp/replace_search.py)",
+      "Bash(python /tmp/extract_selectors.py)",
+      "Bash(python /tmp/find_mismatches.py)",
+      "Bash(awk '/^[^[:space:]].*\\\\{[[:space:]]*$|^\\\\..*\\\\{[[:space:]]*$/ {sel=$0} /font-family:[[:space:]]*var\\\\\\(--font-display\\\\\\)/ {print NR\": \"sel}' /Users/Iulian/DevWorkspace/my-projects/sintezaur-ro/apps/site/src/v05.css)",
+      "Bash(awk '/^[^[:space:]].*\\\\{[[:space:]]*$|^\\\\..*\\\\{[[:space:]]*$/ {sel=$0} /font-family:[[:space:]]*var\\\\\\(--font-display\\\\\\)/ {print NR\": \"sel}' /Users/Iulian/DevWorkspace/my-projects/sintezaur-ro/docs/design-imports/2026-05-22-v09/styles.css)",
+      "Bash(awk 'NR>=617 && NR<=720 && /^\\\\.article/' /Users/Iulian/DevWorkspace/my-projects/sintezaur-ro/docs/design-imports/2026-05-22-v09/styles.css)",
+      "Bash(awk '/^[^[:space:]].*\\\\{[[:space:]]*$|^\\\\..*\\\\{[[:space:]]*$/ {sel=$0} /font-family:[[:space:]]*var\\\\\\(--font-display\\\\\\)/ {print NR\": \"sel}' /Users/Iulian/DevWorkspace/my-projects/sintezaur-ro/apps/site/src/v05-forum.css)",
+      "Bash(awk '/^[^[:space:]].*\\\\{[[:space:]]*$|^\\\\..*\\\\{[[:space:]]*$/ {sel=$0} /font-family:[[:space:]]*var\\\\\\(--font-display\\\\\\)/ {print NR\": \"sel}' /Users/Iulian/DevWorkspace/my-projects/sintezaur-ro/docs/design-imports/2026-05-22-v09/styles.forum.css)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:4242)",
+      "Bash(curl -s http://localhost:4242)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4242)"
+    ],
+    "additionalDirectories": [
+      "/Users/Iulian/Library/Mobile Documents/iCloud~md~obsidian/Documents/hq"
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "nx-claude-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "nrwl/nx-ai-agents-config"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "nx@nx-claude-plugins": true
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": ["www.google-analytics.com"]
+    }
+  }
+}

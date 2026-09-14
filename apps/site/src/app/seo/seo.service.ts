@@ -31,7 +31,7 @@ const DEFAULT_OG_IMAGE = '/assets/branding/og-default.png';
 /**
  * Centralised SEO helpers per spec §7.7 (title + description + OG +
  * Twitter cards + JSON-LD). SPA-only for M6-B; full SSR is a M6-B
- * follow-up (see `docs/seo-todo.md`). Modern Google + Bing crawlers
+ * follow-up (see `planning/docs/seo-todo.md`). Modern Google + Bing crawlers
  * execute JS so client-side meta still indexes — slower-to-update
  * than SSR'd HTML but acceptable for soft-launch.
  *

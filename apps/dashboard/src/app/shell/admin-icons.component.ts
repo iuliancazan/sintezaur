@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 /**
  * Global SVG sprite. Mount once at app root; reference symbols
  * elsewhere via `<svg><use href="#i-grid"/></svg>`. Lifted from
- * docs/design-imports/2026-05-16-v04 1:1 with no edits.
+ * planning/design-prototypes/2026-05-16-v04 1:1 with no edits.
  */
 @Component({
   selector: 'sz-admin-icons',

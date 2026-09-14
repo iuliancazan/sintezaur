@@ -5,9 +5,13 @@ tightly-integrated sections — **Tezaur** (catalog), **Bazar**
 (marketplace), **Revista** (magazine), **Forum** (community) — wired
 into a single Nx monorepo.
 
-- Spec: [`docs/spec/spec.md`](docs/spec/spec.md)
-- Execution plan: [`docs/planning/execution-plan.md`](docs/planning/execution-plan.md)
-- Tech stack (locked versions): [`docs/devops/tech-stack.md`](docs/devops/tech-stack.md)
+- Spec: [`planning/docs/spec/spec.md`](planning/docs/spec/spec.md)
+- Execution plan: [`planning/docs/planning/execution-plan.md`](planning/docs/planning/execution-plan.md)
+- Dev status / hand-off: [`planning/docs/STATUS.md`](planning/docs/STATUS.md)
+- Tech stack (locked versions): [`planning/docs/devops/tech-stack.md`](planning/docs/devops/tech-stack.md)
+
+> Planning docs live in the iCloud Obsidian vault (`hq/projects/software/sintezaur/`);
+> `planning/` is a gitignored symlink to it — see `CLAUDE.md`.
 
 ## Stack (M0)
 
@@ -18,7 +22,7 @@ into a single Nx monorepo.
 - PostgreSQL 17 + Drizzle ORM 0.36 + drizzle-kit 0.30
 - PrimeNG 21 + `@primeuix/themes` + PrimeFlex + PrimeIcons
 
-Authoritative version list: [`docs/devops/tech-stack.md`](docs/devops/tech-stack.md).
+Authoritative version list: [`planning/docs/devops/tech-stack.md`](planning/docs/devops/tech-stack.md).
 Read that file before running any `pnpm add` — versions are locked
 1:1 with `musical-deeds` and must not drift.
 
@@ -36,8 +40,8 @@ libs/
   shared/       FE/BE-shared DTOs + helpers (no backend-only imports)
   ui/           Shared Angular components (selector prefix: sintezaur-)
 tools/scripts/  Operator scripts: migrate, seed-dev, create-superadmin
-docs/           Spec, planning, devops references
-design-imports/ Claude Design / Open Design HTML/JSX drops (manual flow)
+planning/       Gitignored symlink → Obsidian vault "hq" (spec, planning, STATUS, design-prototypes)
+design-imports/ Inbox for new Claude Design / Open Design drops (archived versions: planning/design-prototypes/)
 ```
 
 ## Quickstart
@@ -90,7 +94,7 @@ for the full set of rules.
 ## Adding dependencies
 
 1. Confirm the package isn't in the "deliberate exclusions" list in
-   [`docs/devops/tech-stack.md`](docs/devops/tech-stack.md).
+   [`planning/docs/devops/tech-stack.md`](planning/docs/devops/tech-stack.md).
 2. Update that file (version pin + section) FIRST.
 3. THEN run `pnpm add <pkg>@<version>`.
 

@@ -3,12 +3,12 @@
 
 /* V05 design system — tokens, reset, layout primitives, all utility classes
    for hero / listings / threads / spotlight / forum / revista / tezaur / bazar.
-   Source: docs/design-imports/2026-05-16-v05/styles.css.
+   Source: planning/design-prototypes/2026-05-16-v05/styles.css.
    Dark tokens use v2-neutral hex per user decision (2026-05-16). */
 @use './v05.css';
 
 /* V05 Forum design — thread list / detail / new / search.
-   Source: docs/design-imports/2026-05-16-v05/styles.forum.css. */
+   Source: planning/design-prototypes/2026-05-16-v05/styles.forum.css. */
 @use './v05-forum.css';
 
 /* Shared "add item" page styles — `.ta-*` form sections, sticky

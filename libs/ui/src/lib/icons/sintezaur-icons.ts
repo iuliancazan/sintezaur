@@ -1,6 +1,6 @@
 /**
  * SVG symbol sprite for Sintezaur.
- * Source paths/viewBox lifted from docs/design-imports/2026-05-14-v01.
+ * Source paths/viewBox lifted from planning/design-prototypes/2026-05-14-v01.
  *
  * Render once at app bootstrap (see `provideSintezaurIcons` in
  * `libs/ui`), then reference per-icon via `<sz-icon name="search" />`.

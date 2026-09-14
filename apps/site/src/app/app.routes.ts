@@ -346,7 +346,7 @@ const sectionRoutes: Route[] = [
       import('./legal/contact-page.component').then((m) => m.ContactPage),
   },
   // 410 Gone (M6-C) — wired for the post-redirect-expiry flow described
-  // in docs/seo-todo.md. Currently used manually by components that want
+  // in planning/docs/seo-todo.md. Currently used manually by components that want
   // to surface a definitive "this used to exist but won't again" page.
   {
     path: 'gone',

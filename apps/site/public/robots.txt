@@ -10,5 +10,5 @@ Disallow: /verify-email
 
 # Cross-domain sitemap — served by the API host. Production deployment
 # should reverse-proxy /sitemap.xml from sintezaur.ro to the API to
-# keep it same-origin (see docs/seo-todo.md "deferred" notes).
+# keep it same-origin (see planning/docs/seo-todo.md "deferred" notes).
 Sitemap: https://api.sintezaur.ro/sitemap.xml

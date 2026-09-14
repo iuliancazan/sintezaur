@@ -15,7 +15,7 @@ type Variant = 'gone' | 'not-found';
 /**
  * Catch-all 404 + 410 page (M6-C). Variant is controlled by route
  * `data: { variant: 'gone' }` for the `/gone` route used after slug
- * redirect expiry (currently un-wired — see `docs/seo-todo.md` for
+ * redirect expiry (currently un-wired — see `planning/docs/seo-todo.md` for
  * the 410 plan). Default = 404.
  *
  * The page intentionally does NOT carry the topbar / footer accents;

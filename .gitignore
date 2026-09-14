@@ -60,3 +60,9 @@ vitest.config.*.timestamp*
 # match `apps/api/src/app/storage/` or other "storage" subdirs)
 /storage/
 uploads-runtime/
+
+# Planning docs (symlink -> iCloud Obsidian vault "hq")
+/planning
+
+# Claude desktop app drop folder (move outputs to the vault, never commit)
+/Claude outputs/

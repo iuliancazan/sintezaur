@@ -9,7 +9,7 @@ import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
 
 /**
  * Seed the Tezaur catalog from
- * `docs/brainstorming/Seed List - Tezaur Gear Catalog v1.md`.
+ * `tools/scripts/seed-data/Seed List - Tezaur Gear Catalog v1.md`.
  *
  * Idempotent: matches on (brand, model) — re-running updates existing
  * rows in place rather than duplicating. Reads SUPERADMIN_EMAIL
@@ -22,7 +22,7 @@ import { slugFromParts, slugify, uniqueSlug } from '@sintezaur/shared';
 
 const SEED_FILE = resolve(
   process.cwd(),
-  'docs/brainstorming/Seed List - Tezaur Gear Catalog v1.md',
+  'tools/scripts/seed-data/Seed List - Tezaur Gear Catalog v1.md',
 );
 
 interface SeedRow {

@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  * Site-wide SVG icon sprite. Renders 58 symbols at the document root
  * so any page can reference them via `<svg><use href="#i-name"/></svg>`.
  *
- * Source: lifted 1:1 from docs/design-imports/2026-05-16-v05 (M13).
+ * Source: lifted 1:1 from planning/design-prototypes/2026-05-16-v05 (M13).
  * Mount once via `<app-v05-sprite />` in the root shell — it sets
  * `width=0 height=0` and is `aria-hidden`, so it has no layout impact.
  */
