@@ -387,12 +387,22 @@ const RAIL_KEY = 'ws_deck_rail';
       padding: 24px;
     }
     /* The three boxes float on black in fullscreen, so the slide keeps its
-       frame. outline instead of border: no box-model effect, so restoring
-       the frame does not crop 2px off the slide. */
+       frame. Painted by a pseudo-element ABOVE the canvas rather than as an
+       outline on the shell: the canvas is a positioned stacking context and
+       covers anything the shell paints where the two overlap, which showed
+       up as the frame's vertical sides breaking off beside the slide. No
+       border either, so nothing is cropped off the slide. */
     .stage--fullscreen.stage--stage .stage__shell {
       border-radius: 6px;
-      outline: 1px solid #454545;
-      outline-offset: -1px;
+    }
+    .stage--fullscreen.stage--stage .stage__shell::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: 6px;
+      box-shadow: inset 0 0 0 1px #454545;
+      pointer-events: none;
     }
     .stage__gear {
       font-size: 14px;
