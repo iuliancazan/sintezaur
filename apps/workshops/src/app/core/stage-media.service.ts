@@ -89,12 +89,18 @@ export async function resolveDevice(
   );
 }
 
+/**
+ * Real devices of a kind. Until the page has been granted access, Chrome
+ * returns ONE placeholder entry per kind with an empty deviceId and an empty
+ * label, which says a device of that kind exists without identifying it.
+ * Those are dropped here so they cannot become blank rows in a picker.
+ */
 export async function listDevices(
   kind: MediaDeviceKind,
 ): Promise<MediaDeviceInfo[]> {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    return devices.filter((d) => d.kind === kind);
+    return devices.filter((d) => d.kind === kind && d.deviceId !== '');
   } catch {
     return [];
   }

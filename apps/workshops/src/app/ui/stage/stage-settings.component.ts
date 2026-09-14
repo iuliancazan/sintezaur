@@ -73,6 +73,11 @@ const CANVAS_HEIGHT = 1080;
         @if (needsGrant()) {
           <section class="sec">
             <p class="hint">{{ 'stage.grant_hint' | transloco }}</p>
+            @if (grantFailed()) {
+              <p class="hint hint--warn">
+                {{ 'stage.no_permission' | transloco }}
+              </p>
+            }
             <button type="button" class="btn" (click)="grant()">
               {{ 'stage.grant' | transloco }}
             </button>
@@ -519,6 +524,7 @@ export class StageSettingsComponent implements OnDestroy {
   protected readonly rotations = STAGE_ROTATIONS;
   protected readonly timeDivs = SCOPE_TIME_DIVS;
 
+  protected readonly grantFailed = signal(false);
   protected readonly cameras = signal<MediaDeviceInfo[]>([]);
   protected readonly inputs = signal<MediaDeviceInfo[]>([]);
   /** enumerateDevices returns blank labels until access is granted once. */
@@ -571,7 +577,11 @@ export class StageSettingsComponent implements OnDestroy {
   }
 
   protected async grant() {
-    await this.media.grantAccess();
+    // Never fail silently: a denied or dismissed prompt leaves the button
+    // sitting there doing nothing, and Chrome remembers a denial, so the
+    // next click cannot even raise a prompt.
+    const ok = await this.media.grantAccess();
+    this.grantFailed.set(!ok);
     await this.refreshDevices();
   }
 
