@@ -7,6 +7,7 @@ import {
   inject,
   input,
   signal,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -143,9 +144,8 @@ export class StageCamComponent implements OnDestroy {
     }
   });
 
-  private observer: ResizeObserver | null = null;
-  private detachDeviceChange: (() => void) | null = null;
-  private watchdog: ReturnType<typeof setInterval> | null = null;
+  private syncToken = 0;
+  private destroyed = false;
   private lastTime = -1;
 
   constructor() {
@@ -159,7 +159,7 @@ export class StageCamComponent implements OnDestroy {
       }
     });
 
-    effect(() => {
+    effect((onCleanup) => {
       const el = this.host.nativeElement as HTMLElement;
       const observer = new ResizeObserver(() => {
         this.boxWidth.set(el.clientWidth);
@@ -168,23 +168,35 @@ export class StageCamComponent implements OnDestroy {
       observer.observe(el);
       this.boxWidth.set(el.clientWidth);
       this.boxHeight.set(el.clientHeight);
-      this.observer = observer;
+      onCleanup(() => observer.disconnect());
     });
 
+    // Track the device id and nothing else, for the same reason as the scope
+    // tile: an async function's prefix runs inside the reactive context, so
+    // reading the settings object there would make `r` restart the capture.
     effect(() => {
       const id = this.deviceId();
+      const label = untracked(() => this.stage.cam().deviceLabel);
       if (this.owner()) {
-        void this.syncDevice(id);
+        void this.syncDevice(id, label);
       }
     });
 
-    if (this.owner()) {
-      this.detachDeviceChange = this.media.onDeviceChange(() =>
-        void this.syncDevice(this.stage.cam().deviceId),
-      );
+    // Everything owner-gated lives in an effect, not the constructor: a
+    // signal input still holds its declared default while the constructor
+    // runs, so the dialog preview would claim ownership of the capture and
+    // then never release it.
+    effect((onCleanup) => {
+      if (!this.owner()) {
+        return;
+      }
+      const detach = this.media.onDeviceChange(() => {
+        const cfg = untracked(() => this.stage.cam());
+        void this.syncDevice(cfg.deviceId, cfg.deviceLabel);
+      });
       // A device that stops delivering frames leaves the last one on screen,
       // which looks live and is the worst failure mode on a projector.
-      this.watchdog = setInterval(() => {
+      const watchdog = setInterval(() => {
         const el = this.videoRef().nativeElement;
         if (this.media.camState() !== 'live') {
           return;
@@ -193,42 +205,37 @@ export class StageCamComponent implements OnDestroy {
         this.stalled.set(this.lastTime >= 0 && now === this.lastTime);
         this.lastTime = now;
       }, STALL_MS);
-    }
+      onCleanup(() => {
+        detach();
+        clearInterval(watchdog);
+        this.media.stopCam();
+      });
+    });
   }
 
   ngOnDestroy() {
-    this.observer?.disconnect();
-    this.observer = null;
-    this.detachDeviceChange?.();
-    this.detachDeviceChange = null;
-    if (this.watchdog) {
-      clearInterval(this.watchdog);
-      this.watchdog = null;
-    }
-    const el = this.videoRef().nativeElement;
-    el.srcObject = null;
-    if (this.owner()) {
-      this.media.stopCam();
-    }
+    this.destroyed = true;
+    this.syncToken++;
+    this.videoRef().nativeElement.srcObject = null;
   }
 
-  private async syncDevice(configuredId: string | null) {
-    const cfg = this.stage.cam();
-    if (!configuredId && !cfg.deviceLabel) {
+  private async syncDevice(deviceId: string | null, deviceLabel: string | null) {
+    const token = ++this.syncToken;
+    if (!deviceId && !deviceLabel) {
       this.media.stopCam();
       return;
     }
-    const device = await resolveDevice(
-      'videoinput',
-      configuredId,
-      cfg.deviceLabel,
-    );
+    const device = await resolveDevice('videoinput', deviceId, deviceLabel);
+    // The tile may have been torn down while enumerateDevices was in flight.
+    if (token !== this.syncToken || this.destroyed) {
+      return;
+    }
     if (!device) {
       this.media.stopCam(true);
       this.media.camState.set('not-found');
       return;
     }
-    if (device.deviceId !== cfg.deviceId || device.label !== cfg.deviceLabel) {
+    if (device.deviceId !== deviceId || device.label !== deviceLabel) {
       this.stage.patchCam({
         deviceId: device.deviceId,
         deviceLabel: device.label,

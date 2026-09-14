@@ -5,6 +5,7 @@ import {
   computed,
   effect,
   inject,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -121,6 +122,8 @@ export class StageScopeComponent implements OnDestroy {
   private readonly channel = computed(() => this.stage.scope().channel);
 
   private frame = 0;
+  private syncToken = 0;
+  private destroyed = false;
   // Inferred as Float32Array<ArrayBuffer>: the analyser methods refuse the
   // ArrayBufferLike default that an explicit annotation would give.
   private buf = new Float32Array(0);
@@ -136,20 +139,28 @@ export class StageScopeComponent implements OnDestroy {
   };
 
   constructor() {
+    // Track the device id and NOTHING else. The body of an async function
+    // runs synchronously up to its first await, so reading the settings
+    // object inside syncDevice would subscribe this effect to the whole
+    // object and every time base or mode change would drop the stream.
     effect(() => {
-      this.deviceId();
-      void this.syncDevice();
+      const id = this.deviceId();
+      const label = untracked(() => this.stage.scope().deviceLabel);
+      void this.syncDevice(id, label);
     });
     effect(() => this.media.setChannel(this.channel()));
 
-    this.detachDeviceChange = this.media.onDeviceChange(() =>
-      void this.syncDevice(),
-    );
+    this.detachDeviceChange = this.media.onDeviceChange(() => {
+      const cfg = untracked(() => this.stage.scope());
+      void this.syncDevice(cfg.deviceId, cfg.deviceLabel);
+    });
     document.addEventListener('visibilitychange', this.onVisibility);
     this.startLoop();
   }
 
   ngOnDestroy() {
+    this.destroyed = true;
+    this.syncToken++;
     this.stopLoop();
     document.removeEventListener('visibilitychange', this.onVisibility);
     this.detachDeviceChange?.();
@@ -162,29 +173,34 @@ export class StageScopeComponent implements OnDestroy {
    * default input: on stage the laptop microphone is worse than a
    * placeholder that says the device is gone.
    */
-  private async syncDevice() {
-    const cfg = this.stage.scope();
-    if (!cfg.deviceId && !cfg.deviceLabel) {
+  private async syncDevice(deviceId: string | null, deviceLabel: string | null) {
+    const token = ++this.syncToken;
+    if (!deviceId && !deviceLabel) {
       this.media.stopAudio();
       return;
     }
-    const device = await resolveDevice(
-      'audioinput',
-      cfg.deviceId,
-      cfg.deviceLabel,
-    );
+    const device = await resolveDevice('audioinput', deviceId, deviceLabel);
+    // enumerateDevices is a round trip; the tile may have been destroyed or
+    // another sync may have started while it was in flight. Without this the
+    // panic key can be followed by a microphone that reopens itself.
+    if (token !== this.syncToken || this.destroyed) {
+      return;
+    }
     if (!device) {
       this.media.stopAudio(true);
       this.media.audioState.set('not-found');
       return;
     }
-    if (device.deviceId !== cfg.deviceId || device.label !== cfg.deviceLabel) {
+    if (device.deviceId !== deviceId || device.label !== deviceLabel) {
       this.stage.patchScope({
         deviceId: device.deviceId,
         deviceLabel: device.label,
       });
     }
-    await this.media.startAudio(device.deviceId, cfg.channel);
+    await this.media.startAudio(
+      device.deviceId,
+      untracked(() => this.stage.scope().channel),
+    );
   }
 
   private startLoop() {
@@ -301,10 +317,11 @@ export class StageScopeComponent implements OnDestroy {
     this.media.reportLevel(peak);
 
     if (!(peak > SIGNAL_FLOOR)) {
+      this.media.setNoSignal(true);
       this.flatLine(ctx, w, half);
-      this.stamp(ctx, w, 'NO SIGNAL');
       return;
     }
+    this.media.setNoSignal(false);
 
     // Auto gain: instant attack, about a second of release, clamped so
     // silence does not blow the noise floor up to full scale.
@@ -412,14 +429,6 @@ export class StageScopeComponent implements OnDestroy {
     ctx.stroke();
   }
 
-  private stamp(ctx: CanvasRenderingContext2D, w: number, text: string) {
-    ctx.font = '11px ui-monospace, Menlo, monospace';
-    ctx.fillStyle = GRID_MID;
-    ctx.textAlign = 'right';
-    ctx.fillText(text, w - 10, 18);
-    ctx.textAlign = 'left';
-  }
-
   private xOfHz(hz: number, w: number): number {
     const span = Math.log(SPECTRUM_MAX_HZ / SPECTRUM_MIN_HZ);
     return (Math.log(hz / SPECTRUM_MIN_HZ) / span) * w;
@@ -522,5 +531,6 @@ export class StageScopeComponent implements OnDestroy {
       }
     }
     this.media.reportLevel(peak);
+    this.media.setNoSignal(!(peak > SIGNAL_FLOOR));
   }
 }

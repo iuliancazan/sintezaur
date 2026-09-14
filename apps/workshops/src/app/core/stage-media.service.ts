@@ -107,6 +107,8 @@ export class StageMediaService {
    * detection passes per second in this zoneless app. */
   readonly audioLevel = signal(0);
   readonly sampleRate = signal(0);
+  /** Peak below the floor: the tile header says so, in the chosen language. */
+  readonly noSignal = signal(false);
   /** 1 means a mono device, so channel 2 and the mix are dead. */
   readonly audioChannels = signal(0);
 
@@ -141,6 +143,13 @@ export class StageMediaService {
 
   get specAnalyser(): AnalyserNode | null {
     return this.specNode;
+  }
+
+  /** Written every frame, so it only reaches the signal on a transition. */
+  setNoSignal(value: boolean) {
+    if (this.noSignal() !== value) {
+      this.noSignal.set(value);
+    }
   }
 
   /** Feed from the draw loop; throttled before it reaches a signal. */
@@ -346,6 +355,7 @@ export class StageMediaService {
     this.stream = null;
     this.audioLevel.set(0);
     this.audioChannels.set(0);
+    this.noSignal.set(false);
 
     if (this.resumeBound) {
       document.removeEventListener('keydown', this.resumeBound);

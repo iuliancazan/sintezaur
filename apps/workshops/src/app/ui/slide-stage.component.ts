@@ -555,12 +555,19 @@ export class SlideStageComponent {
     if (event.target instanceof HTMLInputElement) {
       return;
     }
-    // The dialog stops propagation on its own; this covers the case where
-    // focus has landed on the body while the dialog is open.
+    // While the dialog is open it owns the keyboard, whatever has focus.
+    // Gating on the target alone is not enough: clicking the backdrop blurs
+    // the panel and focus falls back to the body, and space would then page
+    // the deck behind the open dialog.
     if (
+      this.settingsOpen() ||
       (event.target as HTMLElement | null)?.closest?.('ws-stage-settings') !=
-      null
+        null
     ) {
+      if (event.key === 'Escape' || event.key === 'k') {
+        event.preventDefault();
+        this.closeSettings();
+      }
       return;
     }
     this.onStageKey(event);

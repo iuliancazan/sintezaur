@@ -140,7 +140,9 @@ const CANVAS_HEIGHT = 1080;
               <div class="row">
                 <span class="row__label">{{ 'stage.device' | transloco }}</span>
                 <select class="sel" (change)="pickCam($event)">
-                  <option value="" [selected]="!stage.cam().deviceId">—</option>
+                  <option value="" [selected]="!stage.cam().deviceId">
+                    {{ 'stage.device_none' | transloco }}
+                  </option>
                   @for (d of cameras(); track d.deviceId) {
                     <option
                       [value]="d.deviceId"
@@ -192,7 +194,9 @@ const CANVAS_HEIGHT = 1080;
           <div class="row">
             <span class="row__label">{{ 'stage.device' | transloco }}</span>
             <select class="sel" (change)="pickAudio($event)">
-              <option value="" [selected]="!stage.scope().deviceId">—</option>
+              <option value="" [selected]="!stage.scope().deviceId">
+                {{ 'stage.device_none' | transloco }}
+              </option>
               @for (d of inputs(); track d.deviceId) {
                 <option
                   [value]="d.deviceId"
@@ -276,6 +280,11 @@ const CANVAS_HEIGHT = 1080;
     </div>
   `,
   styles: `
+    /* Not a flex item of .stage__well: the panel is fixed, but an empty host
+       would still take a 24px gap and shrink the deck when the dialog opens. */
+    :host {
+      display: contents;
+    }
     .ov {
       position: fixed;
       inset: 0;
@@ -294,7 +303,7 @@ const CANVAS_HEIGHT = 1080;
       background: var(--ws-stage-tile);
       border: 1px solid var(--ws-stage-tile-border);
       border-radius: 16px;
-      color: var(--ws-text);
+      color: var(--ws-stage-tile-text);
       box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
     }
     .panel:focus {
@@ -377,13 +386,13 @@ const CANVAS_HEIGHT = 1080;
       align-items: center;
       gap: 8px;
       font-size: 13px;
-      color: var(--ws-text-dim);
+      color: var(--ws-stage-tile-text);
       cursor: pointer;
     }
     .row__label {
       min-width: 110px;
       font-size: 13px;
-      color: var(--ws-text-dim);
+      color: var(--ws-stage-tile-text);
     }
     .row__note {
       font-family: var(--ws-font-mono);
@@ -407,8 +416,8 @@ const CANVAS_HEIGHT = 1080;
       padding: 6px 8px;
       border: 1px solid var(--ws-stage-tile-border);
       border-radius: 8px;
-      background: var(--ws-input-bg);
-      color: var(--ws-text);
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--ws-stage-tile-text);
       font-family: inherit;
       font-size: 13px;
     }
@@ -444,7 +453,7 @@ const CANVAS_HEIGHT = 1080;
       border: 1px solid var(--ws-stage-tile-border);
       border-radius: 50%;
       background: none;
-      color: var(--ws-text-dim);
+      color: var(--ws-stage-tile-text);
       font-size: 14px;
       line-height: 1;
       cursor: pointer;
@@ -462,7 +471,7 @@ const CANVAS_HEIGHT = 1080;
       text-align: center;
       font-family: var(--ws-font-mono);
       font-size: 12px;
-      color: var(--ws-text);
+      color: var(--ws-stage-tile-text);
     }
     .btn {
       min-height: 0;
@@ -474,7 +483,7 @@ const CANVAS_HEIGHT = 1080;
       font-size: 11px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--ws-text-dim);
+      color: var(--ws-stage-tile-text);
       cursor: pointer;
     }
     .btn:hover {

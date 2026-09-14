@@ -1,5 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { StageMediaService } from '../../core/stage-media.service';
 import { StageSettingsService } from '../../core/stage-settings.service';
 import { StageCamComponent } from './stage-cam.component';
 import { StageScopeComponent } from './stage-scope.component';
@@ -38,7 +39,9 @@ import { StageScopeComponent } from './stage-scope.component';
         @if (scopeOn()) {
           <div class="tile tile--scope">
             <span class="tile__head">
-              @if (scopeMode() === 'spectrum') {
+              @if (noSignal()) {
+                {{ 'stage.no_signal' | transloco }}
+              } @else if (scopeMode() === 'spectrum') {
                 {{ 'stage.spectrum' | transloco }}
               } @else {
                 {{ 'stage.scope_header' | transloco: { ms: timeDiv() } }}
@@ -127,6 +130,10 @@ import { StageScopeComponent } from './stage-scope.component';
 })
 export class StageColumnComponent {
   protected readonly stage = inject(StageSettingsService);
+  private readonly media = inject(StageMediaService);
+
+  /** Spec §5.3: below the floor the tile header says so. */
+  protected readonly noSignal = this.media.noSignal;
 
   protected readonly camOn = computed(() => this.stage.cam().enabled);
   protected readonly scopeOn = computed(() => this.stage.scope().enabled);

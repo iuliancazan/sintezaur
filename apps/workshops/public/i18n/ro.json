@@ -132,12 +132,13 @@
     "slide_scale": "Planșa la {{pct}}%",
     "reset": "Revino la valorile implicite",
     "cam": "CAMERĂ ÎN DIRECT",
-    "scope_header": "OSCILOSCOP {{ms}} ms/div",
+    "scope_header": "OSCILOSCOP · {{ms}} ms/div",
     "spectrum": "SPECTRU",
     "both_off": "Mod scenă: camera și osciloscopul sunt oprite",
     "enable_cam": "Cameră pornită",
     "enable_scope": "Osciloscop pornit",
     "device": "Dispozitiv",
+    "device_none": "Niciunul",
     "rotation": "Rotire",
     "rotation_hint": "90 sau 270: claviatura în stânga sau în dreapta. 180: camera montată dinspre public.",
     "mirror": "Oglindit",
@@ -161,7 +162,7 @@
     "no_signal": "FĂRĂ SEMNAL",
     "press_key_audio": "Apasă o tastă ca să pornească sunetul",
     "error": "Ceva n-a mers cu dispozitivul acesta",
-    "keys": "k setări · m mod scenă · c cameră · o osciloscop · s undă/spectru · r rotire · [ ] bază de timp · - + lățimea coloanei"
+    "keys": "k setări · m mod scenă · c cameră · o osciloscop · s undă/spectru · r rotire · [ ] bază de timp · - + lățimea coloanei · Esc închide"
   },
   "theme": {
     "to_light": "Treci pe tema deschisă",

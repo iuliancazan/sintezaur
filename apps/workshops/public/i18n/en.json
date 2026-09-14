@@ -132,12 +132,13 @@
     "slide_scale": "Slide at {{pct}}%",
     "reset": "Reset to defaults",
     "cam": "LIVE CAM",
-    "scope_header": "SCOPE {{ms}} ms/div",
+    "scope_header": "SCOPE · {{ms}} ms/div",
     "spectrum": "SPECTRUM",
     "both_off": "Stage Mode: camera and scope are off",
     "enable_cam": "Camera on",
     "enable_scope": "Oscilloscope on",
     "device": "Device",
+    "device_none": "None",
     "rotation": "Rotation",
     "rotation_hint": "90 or 270: keyboard on the left or on the right. 180: camera mounted on the audience side.",
     "mirror": "Mirror",
@@ -161,7 +162,7 @@
     "no_signal": "NO SIGNAL",
     "press_key_audio": "Press any key to start audio",
     "error": "Something went wrong with this device",
-    "keys": "k settings · m Stage Mode · c camera · o scope · s wave/spectrum · r rotate · [ ] time base · - + column width"
+    "keys": "k settings · m Stage Mode · c camera · o scope · s wave/spectrum · r rotate · [ ] time base · - + column width · Esc close"
   },
   "theme": {
     "to_light": "Switch to the light theme",
