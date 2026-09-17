@@ -19,16 +19,19 @@ import { DbService } from '../db/db.service';
 import { EventsService } from '../events/events.service';
 import { workshops } from '../../db/schema';
 
-const DOCS = ['slides', 'handbook', 'script', 'run-of-show'] as const;
+const DOCS = ['slides', 'handbook', 'script'] as const;
 type DocKind = (typeof DOCS)[number];
-const ADMIN_ONLY: DocKind[] = ['script', 'run-of-show'];
+const ADMIN_ONLY: DocKind[] = ['script'];
+/** The deck and the script come in two cuts (`?v=short`); the handbook in one. */
+const WITH_VARIANTS: DocKind[] = ['slides', 'script'];
 /** Slugs are kebab-case by construction; anything else never hits the disk. */
 const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 /**
  * Serves the pre-generated PDFs (tools/scripts/workshops-pdf.ts →
- * src/assets/pdf/<slug>/<doc>-<lang>.pdf, committed to the repo) behind the
- * same visibility rules as the live documents (workshops-spec.md §4.3/§10).
+ * src/assets/pdf/<slug>/<doc>[-short]-<lang>.pdf, committed to the repo)
+ * behind the same visibility rules as the live documents
+ * (workshops-spec.md §4.3/§10).
  */
 @Controller('pdf')
 @UseGuards(SessionGuard)
@@ -43,6 +46,7 @@ export class PdfController {
     @Param('slug') slug: string,
     @Param('doc') doc: string,
     @Query('lang') langRaw: string,
+    @Query('v') variantRaw: string,
     @Req() req: AuthedRequest,
     @Res() res: Response,
   ) {
@@ -50,6 +54,10 @@ export class PdfController {
     if (!DOCS.includes(doc as DocKind) || !SLUG_RE.test(slug)) {
       throw new NotFoundException();
     }
+    const cut =
+      variantRaw === 'short' && WITH_VARIANTS.includes(doc as DocKind)
+        ? '-short'
+        : '';
     const session = req.session;
     if (session.role !== 'superadmin' && session.slug !== slug) {
       throw new ForbiddenException();
@@ -72,7 +80,7 @@ export class PdfController {
 
     // Prod: webpack copies src/assets into dist. Dev fallback: read straight
     // from src so freshly generated PDFs work without a rebuild.
-    const rel = ['pdf', slug, `${doc}-${lang}.pdf`];
+    const rel = ['pdf', slug, `${doc}${cut}-${lang}.pdf`];
     const candidates = [
       path.join(__dirname, 'assets', ...rel),
       path.join(
@@ -91,14 +99,14 @@ export class PdfController {
       visitorId: req.cookies?.[VISITOR_COOKIE],
       role: session.role,
       event: 'download',
-      document: doc,
+      document: `${doc}${cut}`,
       lang,
     });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${slug}-${doc}-${lang}.pdf"`,
+      `attachment; filename="${slug}-${doc}${cut}-${lang}.pdf"`,
     );
     res.setHeader('Cache-Control', 'no-store');
     createReadStream(file).pipe(res);

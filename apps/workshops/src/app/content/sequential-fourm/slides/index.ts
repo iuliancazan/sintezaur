@@ -1,4 +1,4 @@
-import type { SlideDef } from '../../types';
+import type { Decks, SlideDef } from '../../types';
 import { SLIDE_S00_00_HUB } from './s00-00-hub';
 import { SLIDE_S00_02_TODAY } from './s00-02-today';
 import { SLIDE_S01_01_COVER } from './s01-01-cover';
@@ -49,7 +49,7 @@ import { SLIDE_S09_01_THE_ROAD_AGAIN } from './s09-01-the-road-again';
 import { SLIDE_S09_02_THANK_YOU } from './s09-02-thank-you';
 import { SLIDE_SAX_01_COVER } from './sAX-01-cover';
 
-/** Deck order — remove a line (and its file) to drop a slide. */
+/** Extended (90') deck order — remove a line (and its file) to drop a slide. */
 export const SLIDES: SlideDef[] = [
   SLIDE_S00_00_HUB,
   SLIDE_S00_02_TODAY,
@@ -101,3 +101,50 @@ export const SLIDES: SlideDef[] = [
   SLIDE_S09_02_THANK_YOU,
   SLIDE_SAX_01_COVER,
 ];
+
+/**
+ * Short (60') deck: the same slide files minus What's in a Sound, Noise, Key
+ * track and the Expression + Arpeggiator modules (they stay in the handbook).
+ */
+export const SLIDES_SHORT: SlideDef[] = [
+  SLIDE_S00_00_HUB,
+  SLIDE_S00_02_TODAY,
+  SLIDE_S01_01_COVER,
+  SLIDE_S01_03_VOICE_PATH,
+  SLIDE_S01_04_WHERE_ON_FOURM,
+  SLIDE_S01_05_THE_MIXER,
+  SLIDE_S01_06_KEY_TERMS,
+  SLIDE_S02_01_COVER,
+  SLIDE_S02_02_WAVESHAPES,
+  SLIDE_S02_03_OCTAVES_AND_TUNING,
+  SLIDE_S02_04_PULSE_WIDTH,
+  SLIDE_S02_05_SUB_TRICK,
+  SLIDE_S02_07_TERMS,
+  SLIDE_S03_01_COVER,
+  SLIDE_S03_02_LOW_PASS,
+  SLIDE_S03_03_RESONANCE,
+  SLIDE_S03_05_KEY_TERMS,
+  SLIDE_S04_01_COVER,
+  SLIDE_S04_02_ADSR,
+  SLIDE_S04_03_TWO_ENVELOPES,
+  SLIDE_S04_04_BASS_VS_PAD,
+  SLIDE_S04_05_KEY_TERMS,
+  SLIDE_S05_01_COVER,
+  SLIDE_S05_02_THE_LFO,
+  SLIDE_S05_03_THE_MODULATION_SECTION,
+  SLIDE_S05_04_KEY_TERMS,
+  SLIDE_S06_01_COVER,
+  SLIDE_S06_02_POLYPHONY,
+  SLIDE_S06_03_UNISON,
+  SLIDE_S06_04_CHORD_MEMORY,
+  SLIDE_S06_05_FEEDBACK,
+  SLIDE_S06_06_TERMS,
+  SLIDE_S09_01_THE_ROAD_AGAIN,
+  SLIDE_S09_02_THANK_YOU,
+  SLIDE_SAX_01_COVER,
+];
+
+export const DECKS: Decks = {
+  extended: SLIDES,
+  short: SLIDES_SHORT,
+};

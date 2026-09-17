@@ -8,38 +8,34 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
 import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { ThemeService } from '../../core/theme.service';
 import { TrackService } from '../../core/track.service';
-import {
-  HANDBOOK_LOADERS,
-  RUN_OF_SHOW_LOADERS,
-  SCRIPT_LOADERS,
-} from '../../content/registry';
+import { VariantService } from '../../core/variant.service';
+import { HANDBOOK_LOADERS, SCRIPT_LOADERS } from '../../content/registry';
 import type { DocPageDef } from '../../content/types';
 import { DocPageComponent } from '../../ui/doc-page.component';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import { VariantToggleComponent } from '../../ui/variant-toggle.component';
 import { ViewerBarComponent } from '../../ui/viewer-bar.component';
 import {
   ViewerRailComponent,
   type RailItem,
 } from '../../ui/viewer-rail.component';
 
-export type DocKind = 'handbook' | 'script' | 'run-of-show';
+export type DocKind = 'handbook' | 'script';
 
 const TITLE_KEYS: Record<DocKind, string> = {
   handbook: 'hub.handbook',
   script: 'hub.script',
-  'run-of-show': 'hub.run_of_show',
 };
 
 const RAIL_HEADING_KEYS: Record<DocKind, string> = {
   handbook: 'viewer.contents',
   script: 'viewer.modules',
-  'run-of-show': 'viewer.sections',
 };
 
 /** Adobe-style zoom stops for the document sheets. */
@@ -62,14 +58,15 @@ function initialZoom(): number {
  * Document viewer (2026-08-26-v02 "Workshop Portal" 4a–4c): slim breadcrumb
  * bar with per-document controls, contents rail on the left, and the pages
  * floating over the dot grid. The handbook gets a SCREEN|PRINT theme
- * toggle; script + run of show render as light paper on screen, matching
- * their print look.
+ * toggle; the presenter script renders as light paper on screen, matching
+ * its print look.
  */
 @Component({
   selector: 'ws-doc-view-page',
   imports: [
     DocPageComponent,
     LangToggleComponent,
+    VariantToggleComponent,
     ViewerBarComponent,
     ViewerRailComponent,
     TranslocoPipe,
@@ -82,6 +79,9 @@ function initialZoom(): number {
         [title]="titleKey | transloco"
       >
         <ws-lang-toggle size="sm" />
+        @if (kind === 'script') {
+          <ws-variant-toggle size="sm" />
+        }
         @if (kind === 'handbook') {
           <div class="docview__seg">
             <button
@@ -386,14 +386,20 @@ function initialZoom(): number {
 })
 export class DocViewPage {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly track = inject(TrackService);
   private readonly auth = inject(AuthService);
   private readonly transloco = inject(TranslocoService);
   private readonly languageService = inject(LanguageService);
+  private readonly variantService = inject(VariantService);
 
   protected readonly slug = this.route.snapshot.paramMap.get('slug') ?? '';
   protected readonly kind = (this.route.snapshot.data['doc'] ??
     'handbook') as DocKind;
+  /** Only the presenter script comes in two cuts. */
+  protected readonly variant = computed(() =>
+    this.kind === 'script' ? this.variantService.variant() : 'extended',
+  );
   protected readonly titleKey = TITLE_KEYS[this.kind];
   protected readonly railHeadingKey = RAIL_HEADING_KEYS[this.kind];
 
@@ -471,19 +477,36 @@ export class DocViewPage {
   });
 
   constructor() {
-    this.track.view(this.kind, this.languageService.lang());
+    if (this.kind === 'script') {
+      // ?v=short|extended picks the cut (deep links, the PDF renderer); the
+      // switch then keeps the URL in step.
+      this.variantService.applyParam(
+        this.route.snapshot.queryParamMap.get('v'),
+      );
+      let shownVariant = this.variant();
+      effect(() => {
+        const variant = this.variant();
+        if (variant === shownVariant) {
+          return;
+        }
+        shownVariant = variant;
+        void this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { v: variant === 'short' ? 'short' : null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true,
+        });
+      });
+    }
+    this.track.view(this.trackedDocument(), this.languageService.lang());
     void this.auth.resolve();
     if (this.kind === 'handbook') {
       void HANDBOOK_LOADERS[this.slug]?.().then((m) =>
         this.handbookPages.set(m.HANDBOOK_PAGES),
       );
-    } else if (this.kind === 'script') {
+    } else {
       void SCRIPT_LOADERS[this.slug]?.().then((m) =>
         this.flowingDoc.set(m.PRESENTER_SCRIPT),
-      );
-    } else {
-      void RUN_OF_SHOW_LOADERS[this.slug]?.().then((m) =>
-        this.flowingDoc.set(m.RUN_OF_SHOW),
       );
     }
 
@@ -584,9 +607,16 @@ export class DocViewPage {
     }
   }
 
-  /** PDF in the CURRENTLY SELECTED language (round 2 rule). */
+  /** `script` or `script-short`; the handbook has one cut. */
+  private trackedDocument(): string {
+    return this.variant() === 'short' ? `${this.kind}-short` : this.kind;
+  }
+
+  /** PDF in the CURRENTLY SELECTED language (round 2 rule) and course cut. */
   protected pdfUrl(): string {
-    return `/api/pdf/${this.slug}/${this.kind}?lang=${this.languageService.lang()}`;
+    const lang = this.languageService.lang();
+    const cut = this.kind === 'script' ? `&v=${this.variant()}` : '';
+    return `/api/pdf/${this.slug}/${this.kind}?lang=${lang}${cut}`;
   }
 
   protected print() {

@@ -38,8 +38,6 @@
     "handbook_hint": "Read on screen, download or print",
     "script": "Presenter script",
     "script_hint": "Beat-by-beat, with timings",
-    "run_of_show": "Run of show",
-    "run_of_show_hint": "Setup checklist & timeline",
     "admin_only": "Admin only",
     "your_role": "Access level",
     "role_guest": "guest",
@@ -49,10 +47,9 @@
     "open_panel": "Control panel",
     "coming_soon": "In production — lands with the content port",
     "presenter_tools": "Presenter tools",
-    "kicker_slides": "Deck · EN + RO",
+    "kicker_slides": "Deck · EN + RO · {{min}} min",
     "kicker_handbook": "A4 · EN + RO · print or screen",
-    "kicker_script": "RO · 90 min",
-    "kicker_run_of_show": "Day-of",
+    "kicker_script": "EN + RO · {{min}} min",
     "kicker_panel": "Superadmin",
     "panel_hint": "Users, access & workshops",
     "note_label": "Note",
@@ -108,7 +105,6 @@
   "viewer": {
     "contents": "Contents",
     "modules": "Modules",
-    "sections": "Sections",
     "slides": "Slides",
     "present": "Present",
     "screen": "Screen",
@@ -167,5 +163,10 @@
   "theme": {
     "to_light": "Switch to the light theme",
     "to_dark": "Switch to the dark theme"
+  },
+  "variant": {
+    "label": "Course length",
+    "extended_aria": "Extended version ({{min}} min)",
+    "short_aria": "Short version ({{min}} min)"
   }
 }

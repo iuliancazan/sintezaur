@@ -1,4 +1,11 @@
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
@@ -6,22 +13,25 @@ import { AuthService } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
 import { TrackService } from '../../core/track.service';
 import { StageSettingsService } from '../../core/stage-settings.service';
+import { VariantService } from '../../core/variant.service';
 import { SLIDES_LOADERS } from '../../content/registry';
-import type { SlideDef } from '../../content/types';
+import type { Decks, SlideDef } from '../../content/types';
 import { SlideStageComponent } from '../../ui/slide-stage.component';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
+import { VariantToggleComponent } from '../../ui/variant-toggle.component';
 import { ViewerBarComponent } from '../../ui/viewer-bar.component';
 
 /**
  * Slides viewer (2026-08-26-v02 "Workshop Portal" 3a): slim breadcrumb bar
- * with EN|RO, ↓ PDF and ⛶ PRESENT, the named slide list + framed stage in
- * ws-slide-stage underneath.
+ * with EN|RO, the 90′|60′ course switch, ↓ PDF and ⛶ PRESENT, the named
+ * slide list + framed stage in ws-slide-stage underneath.
  */
 @Component({
   selector: 'ws-deck-page',
   imports: [
     SlideStageComponent,
     LangToggleComponent,
+    VariantToggleComponent,
     ViewerBarComponent,
     TranslocoPipe,
   ],
@@ -42,6 +52,7 @@ import { ViewerBarComponent } from '../../ui/viewer-bar.component';
           [title]="'viewer.slides' | transloco"
         >
           <ws-lang-toggle size="sm" />
+          <ws-variant-toggle size="sm" />
           <div class="deck__sep"></div>
           <a class="deck__pdf" [href]="pdfUrl()"
             >↓ {{ 'viewer.pdf' | transloco }}</a
@@ -159,10 +170,15 @@ export class DeckPage {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly transloco = inject(TranslocoService);
   private readonly stageSettings = inject(StageSettingsService);
+  private readonly variantService = inject(VariantService);
   protected readonly languageService = inject(LanguageService);
 
   protected readonly slug = this.route.snapshot.paramMap.get('slug') ?? '';
-  protected readonly slides = signal<SlideDef[]>([]);
+  private readonly decks = signal<Decks | null>(null);
+  protected readonly variant = this.variantService.variant;
+  protected readonly slides = computed<SlideDef[]>(
+    () => this.decks()?.[this.variant()] ?? [],
+  );
   private readonly queryIndex = signal(0);
   protected readonly printMode =
     this.route.snapshot.queryParamMap.get('print') === '1';
@@ -193,6 +209,24 @@ export class DeckPage {
   });
 
   constructor() {
+    // ?v=short|extended picks the course cut (deep links, the PDF renderer);
+    // afterwards the switch keeps the URL in step and restarts the deck.
+    this.variantService.applyParam(this.route.snapshot.queryParamMap.get('v'));
+    let shownVariant = this.variant();
+    effect(() => {
+      const variant = this.variant();
+      if (variant === shownVariant) {
+        return;
+      }
+      shownVariant = variant;
+      void this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { s: null, v: variant === 'short' ? 'short' : null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
+
     // ?stage=1 turns Stage Mode on and persists it, ?stage=0 turns it off
     // (spec §6.1). Read once from the snapshot, never written back: the
     // query string also carries the slide index, so re-reading it on every
@@ -219,12 +253,15 @@ export class DeckPage {
         void this.router.navigateByUrl(`/w/${this.slug}`);
         return;
       }
-      this.track.view('slides', this.languageService.lang());
+      this.track.view(
+        this.variant() === 'short' ? 'slides-short' : 'slides',
+        this.languageService.lang(),
+      );
     });
 
     const loader = SLIDES_LOADERS[this.slug];
     if (loader) {
-      void loader().then((m) => this.slides.set(m.SLIDES));
+      void loader().then((m) => this.decks.set(m.DECKS));
     }
 
     this.route.queryParamMap.subscribe((params) => {
@@ -239,9 +276,9 @@ export class DeckPage {
     );
   }
 
-  /** PDF in the CURRENTLY SELECTED language (round 2 rule). */
+  /** PDF in the CURRENTLY SELECTED language (round 2 rule) and course cut. */
   protected pdfUrl(): string {
-    return `/api/pdf/${this.slug}/slides?lang=${this.languageService.lang()}`;
+    return `/api/pdf/${this.slug}/slides?lang=${this.languageService.lang()}&v=${this.variant()}`;
   }
 
   protected present() {

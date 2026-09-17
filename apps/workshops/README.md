@@ -1,7 +1,7 @@
 # Sintezaur Workshops
 
 Password-gated workshop materials on **workshops.sintezaur.ro** — slides,
-student handbook, presenter script and run-of-show per workshop, fully
+student handbook and presenter script per workshop, fully
 bilingual (EN default, RO toggle). Spec: `planning/docs/spec/workshops-spec.md`.
 
 Two apps, one deployable:
@@ -46,8 +46,8 @@ Backend edits need a restart of `pnpm workshops-api`.
 
 One file per slide (`content/sequential-fourm/slides/sNN-MM-*.ts`, EN+RO
 colocated) listed in `slides/index.ts` — **deleting a page = deleting its
-file + its index line**. Handbook pages, presenter script and run-of-show
-live next to them. The handbook is a single dark source; the print/PDF
+file + its index line**. Handbook pages and the presenter script live next
+to them. The handbook is a single dark source; the print/PDF
 light theme is derived (`handbook/handbook-theme.scss`, generated). The
 original v02.1 prototype (reference/archive) lives in the Obsidian vault:
 `planning/design-prototypes/…/claude-design-prototypes/2026-08-17-v02.1`,

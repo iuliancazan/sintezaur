@@ -38,8 +38,6 @@
     "handbook_hint": "Citește pe ecran, descarcă sau printează",
     "script": "Scriptul prezentatorului",
     "script_hint": "Beat cu beat, cu minutaj",
-    "run_of_show": "Desfășurător & setup",
-    "run_of_show_hint": "Checklist de montaj & cronologie",
     "admin_only": "Doar admin",
     "your_role": "Nivel de acces",
     "role_guest": "invitat",
@@ -49,10 +47,9 @@
     "open_panel": "Panou de control",
     "coming_soon": "În lucru — apare odată cu portarea conținutului",
     "presenter_tools": "Unelte de prezentator",
-    "kicker_slides": "Deck · EN + RO",
+    "kicker_slides": "Deck · EN + RO · {{min}} min",
     "kicker_handbook": "A4 · EN + RO · print sau ecran",
-    "kicker_script": "RO · 90 min",
-    "kicker_run_of_show": "Ziua evenimentului",
+    "kicker_script": "EN + RO · {{min}} min",
     "kicker_panel": "Superadmin",
     "panel_hint": "Conturi, accesări și workshopuri",
     "note_label": "Notă",
@@ -108,7 +105,6 @@
   "viewer": {
     "contents": "Cuprins",
     "modules": "Module",
-    "sections": "Secțiuni",
     "slides": "Planșe",
     "present": "Prezintă",
     "screen": "Ecran",
@@ -167,5 +163,10 @@
   "theme": {
     "to_light": "Treci pe tema deschisă",
     "to_dark": "Treci pe tema închisă"
+  },
+  "variant": {
+    "label": "Durata cursului",
+    "extended_aria": "Versiunea extinsă ({{min}} min)",
+    "short_aria": "Versiunea scurtă ({{min}} min)"
   }
 }

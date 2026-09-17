@@ -43,12 +43,5 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./pages/doc/doc.page').then((m) => m.DocViewPage),
   },
-  {
-    path: 'w/:slug/run-of-show',
-    canActivate: [workshopGuard, roleGuard('admin', 'superadmin')],
-    data: { doc: 'run-of-show' },
-    loadComponent: () =>
-      import('./pages/doc/doc.page').then((m) => m.DocViewPage),
-  },
   { path: '**', redirectTo: '' },
 ];

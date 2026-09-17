@@ -3,18 +3,21 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { firstValueFrom } from 'rxjs';
+import { VARIANT_MINUTES } from '../../content/types';
 import { AuthService, type WorkshopInfo } from '../../core/auth.service';
 import { LanguageService } from '../../core/language.service';
+import { VariantService } from '../../core/variant.service';
 import {
   PortalNavComponent,
   type PortalCrumb,
 } from '../../ui/portal-nav.component';
 
 interface HubCard {
-  key: 'slides' | 'handbook' | 'script' | 'run-of-show' | 'panel';
+  key: 'slides' | 'handbook' | 'script' | 'panel';
   titleKey: string;
   hintKey: string;
   kickerKey: string;
+  kickerParams?: Record<string, number>;
   route: string[];
 }
 
@@ -34,6 +37,7 @@ export class HubPage {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
+  private readonly variantService = inject(VariantService);
   protected readonly languageService = inject(LanguageService);
 
   protected readonly session = this.auth.session;
@@ -112,6 +116,7 @@ export class HubPage {
         titleKey: 'hub.slides',
         hintKey: 'hub.slides_hint',
         kickerKey: 'hub.kicker_slides',
+        kickerParams: { min: VARIANT_MINUTES[this.variantService.variant()] },
         route: ['/w', slug, 'slides'],
       });
     }
@@ -136,14 +141,8 @@ export class HubPage {
         titleKey: 'hub.script',
         hintKey: 'hub.script_hint',
         kickerKey: 'hub.kicker_script',
+        kickerParams: { min: VARIANT_MINUTES[this.variantService.variant()] },
         route: ['/w', slug, 'script'],
-      },
-      {
-        key: 'run-of-show',
-        titleKey: 'hub.run_of_show',
-        hintKey: 'hub.run_of_show_hint',
-        kickerKey: 'hub.kicker_run_of_show',
-        route: ['/w', slug, 'run-of-show'],
       },
     ];
     if (this.isSuperadmin()) {

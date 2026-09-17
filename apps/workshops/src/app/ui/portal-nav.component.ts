@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LangToggleComponent } from './lang-toggle.component';
 import { ThemeToggleComponent } from './theme-toggle.component';
+import { VariantToggleComponent } from './variant-toggle.component';
 
 export interface PortalCrumb {
   label: string;
@@ -13,12 +14,18 @@ export interface PortalCrumb {
 
 /**
  * The 76px portal navbar (hub + login): SINTEZAUR / WORKSHOPS / … breadcrumb
- * on the left, EN|RO toggle plus projected extras (role pill, log out) on
- * the right — 2026-08-26-v02 "Workshop Portal" turn 1.
+ * on the left, EN|RO toggle (the hub adds the 90′|60′ course switch) plus
+ * projected extras (role pill, log out) on the right — 2026-08-26-v02
+ * "Workshop Portal" turn 1.
  */
 @Component({
   selector: 'ws-portal-nav',
-  imports: [RouterLink, LangToggleComponent, ThemeToggleComponent],
+  imports: [
+    RouterLink,
+    LangToggleComponent,
+    ThemeToggleComponent,
+    VariantToggleComponent,
+  ],
   template: `
     <header class="nav" [class.nav--underline]="underline()">
       <nav class="nav__crumbs">
@@ -52,6 +59,9 @@ export interface PortalCrumb {
       </nav>
       <div class="nav__right">
         <ws-lang-toggle />
+        @if (showVariant()) {
+          <ws-variant-toggle />
+        }
         <ws-theme-toggle />
         <ng-content />
       </div>
@@ -136,4 +146,6 @@ export class PortalNavComponent {
   readonly crumbs = input.required<PortalCrumb[]>();
   /** The hub draws a hairline under the bar; the login page does not. */
   readonly underline = input(true);
+  /** The hub shows the course-length switch; the login page has no course yet. */
+  readonly showVariant = input(false);
 }

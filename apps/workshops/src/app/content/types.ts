@@ -28,6 +28,19 @@ export interface DocPageDef {
   ro: string;
 }
 
+/**
+ * The two cuts of a course: the full programme and the short one. The
+ * handbook has no variants — only the deck and the presenter script do.
+ */
+export type CourseVariant = 'extended' | 'short';
+export const COURSE_VARIANTS: readonly CourseVariant[] = ['extended', 'short'];
+/** Running time per variant, shown on the switch and the hub cards. */
+export const VARIANT_MINUTES: Record<CourseVariant, number> = {
+  extended: 90,
+  short: 60,
+};
+export type Decks = Record<CourseVariant, SlideDef[]>;
+
 export interface WorkshopContent {
   slug: string;
   slides: SlideDef[];

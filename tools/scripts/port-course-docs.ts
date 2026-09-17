@@ -8,7 +8,7 @@
  *    into inline style when themed); a generated SCSS sets the print values
  *    under `@media print` / `.hb-theme-light`. Logo <img>s are emitted in
  *    both variants with `.hb-only-dark` / `.hb-only-light`.
- *  - Presenter Script + Run of Show (flowing, light, RO-only in v02.1):
+ *  - Presenter Script (flowing, light, RO-only in v02.1):
  *    ported as flowing HTML; the EN field starts as a copy marked TODO and
  *    is replaced by the human-reviewed translation pass.
  *
@@ -381,12 +381,11 @@ ${pairs.map((p) => `  ${p.varName}: ${p.print}; /* screen ${p.screen} */`).join(
     `[docs] handbook: ${pageIds.length} pages ×2 langs, ${pairs.length} themed color pairs`,
   );
 
-  // ---------- Presenter Script + Run of Show (flowing, light) ----------
+  // ---------- Presenter Script (flowing, light) ----------
   const docsDir = path.join(OUT_BASE, 'docs');
   mkdirSync(docsDir, { recursive: true });
   const flowing = [
     { file: 'presenter-script.ts', constName: 'PRESENTER_SCRIPT', src: 'Presenter Script.dc.html' },
-    { file: 'run-of-show.ts', constName: 'RUN_OF_SHOW', src: 'Run of Show.dc.html' },
   ];
   for (const doc of flowing) {
     const ro = remapAssets(flowingBody(read(doc.src)));

@@ -56,20 +56,37 @@ async function main() {
   const page = await context.newPage();
 
   for (const lang of ['en', 'ro'] as const) {
-    // Slides — one 1920×1080 page per slide, vector.
-    await page.goto(`${BASE}/w/${slug}/slides?print=1&lang=${lang}`);
-    await settle(page, '.deck-print__page', 1);
-    const slideCount = await page.evaluate(
-      () => document.querySelectorAll('.deck-print__page').length,
-    );
-    await page.pdf({
-      path: path.join(OUT_DIR, `slides-${lang}.pdf`),
-      width: '1920px',
-      height: '1080px',
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 },
-    });
-    console.log(`[pdf] slides-${lang}.pdf (${slideCount} slides)`);
+    for (const variant of ['extended', 'short'] as const) {
+      const cut = variant === 'short' ? '-short' : '';
+
+      // Slides — one 1920×1080 page per slide, vector.
+      await page.goto(
+        `${BASE}/w/${slug}/slides?print=1&lang=${lang}&v=${variant}`,
+      );
+      await settle(page, '.deck-print__page', 1);
+      const slideCount = await page.evaluate(
+        () => document.querySelectorAll('.deck-print__page').length,
+      );
+      await page.pdf({
+        path: path.join(OUT_DIR, `slides${cut}-${lang}.pdf`),
+        width: '1920px',
+        height: '1080px',
+        printBackground: true,
+        margin: { top: 0, right: 0, bottom: 0, left: 0 },
+      });
+      console.log(`[pdf] slides${cut}-${lang}.pdf (${slideCount} slides)`);
+
+      // Presenter script — flowing A4.
+      await page.goto(`${BASE}/w/${slug}/script?lang=${lang}&v=${variant}`);
+      await settle(page, '.doc__sheet--flow', 1);
+      await page.pdf({
+        path: path.join(OUT_DIR, `script${cut}-${lang}.pdf`),
+        format: 'A4',
+        printBackground: true,
+        margin: { top: '10mm', right: 0, bottom: '12mm', left: 0 },
+      });
+      console.log(`[pdf] script${cut}-${lang}.pdf`);
+    }
 
     // Handbook — A4, light print theme via @media print.
     await page.goto(`${BASE}/w/${slug}/handbook?lang=${lang}`);
@@ -81,19 +98,6 @@ async function main() {
       margin: { top: 0, right: 0, bottom: 0, left: 0 },
     });
     console.log(`[pdf] handbook-${lang}.pdf`);
-
-    // Presenter script + run of show — flowing A4.
-    for (const doc of ['script', 'run-of-show'] as const) {
-      await page.goto(`${BASE}/w/${slug}/${doc}?lang=${lang}`);
-      await settle(page, '.doc__sheet--flow', 1);
-      await page.pdf({
-        path: path.join(OUT_DIR, `${doc}-${lang}.pdf`),
-        format: 'A4',
-        printBackground: true,
-        margin: { top: '10mm', right: 0, bottom: '12mm', left: 0 },
-      });
-      console.log(`[pdf] ${doc}-${lang}.pdf`);
-    }
   }
 
   await browser.close();

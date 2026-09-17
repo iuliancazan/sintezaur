@@ -77,7 +77,7 @@ export const accessEvents = pgTable(
     visitorId: uuid('visitor_id'),
     role: text('role').notNull(), // guest | admin | superadmin
     event: text('event').notNull(), // login | view | download
-    document: text('document'), // slides | handbook | script | run-of-show
+    document: text('document'), // slides | handbook | script (+ "-short" variants)
     lang: text('lang'), // en | ro
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()

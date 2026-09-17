@@ -1,5 +1,5 @@
 <main class="hub">
-  <ws-portal-nav [crumbs]="crumbs()">
+  <ws-portal-nav [crumbs]="crumbs()" [showVariant]="true">
     <div class="hub__navsep"></div>
     <div class="hub__role" [class.hub__role--staff]="isStaff()">
       <span class="hub__role-dot"></span>
@@ -39,7 +39,9 @@
       <div class="hub__grid hub__grid--two">
         @for (card of materialCards(); track card.key) {
           <a class="hub__card" [routerLink]="card.route">
-            <p class="hub__card-kicker">{{ card.kickerKey | transloco }}</p>
+            <p class="hub__card-kicker">
+              {{ card.kickerKey | transloco: card.kickerParams }}
+            </p>
             <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
             <div class="hub__card-foot">
               <span class="hub__card-hint">{{ card.hintKey | transloco }}</span>
@@ -64,7 +66,9 @@
         >
           @for (card of adminCards(); track card.key) {
             <a class="hub__card hub__card--admin" [routerLink]="card.route">
-              <p class="hub__card-kicker">{{ card.kickerKey | transloco }}</p>
+              <p class="hub__card-kicker">
+                {{ card.kickerKey | transloco: card.kickerParams }}
+              </p>
               <h2 class="hub__card-title">{{ card.titleKey | transloco }}</h2>
               <div class="hub__card-foot">
                 <span class="hub__card-hint">{{
