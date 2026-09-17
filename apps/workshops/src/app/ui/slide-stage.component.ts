@@ -18,6 +18,8 @@ import { StageColumnComponent } from './stage/stage-column.component';
 import { StageSettingsComponent } from './stage/stage-settings.component';
 
 const RAIL_KEY = 'ws_deck_rail';
+/** Below this a horizontal drag is a tap that wandered, not a swipe. */
+const SWIPE_MIN_PX = 48;
 
 /**
  * Deck runtime (2026-08-26-v02 "Workshop Portal" 3a): named slide list on
@@ -65,6 +67,7 @@ const RAIL_KEY = 'ws_deck_rail';
       [class.stage--fullscreen]="fullscreen()"
       [class.stage--stage]="stageOn()"
       [style.--stage-col]="stageColCss()"
+      [style.--slide-chrome-shift]="chromeShiftCss()"
     >
       <div class="stage__well">
         <div class="stage__fit" #fitEl>
@@ -404,6 +407,26 @@ const RAIL_KEY = 'ws_deck_rail';
       box-shadow: inset 0 0 0 1px #454545;
       pointer-events: none;
     }
+    /* The slide's own chrome hugs the frame instead of the 16:9 canvas: the
+       ported slides put the logos at y=20/48 and the module line at y=1028,
+       which would otherwise float a black band away from the frame's edges
+       (see chromeShiftCss). The coordinates are the porter's contract, so
+       matching on them is stable, and the leading semicolon keeps the
+       selector off margin-top / padding-top. */
+    .stage--stage .stage__canvas ::ng-deep [style*='; top:20px'],
+    .stage--stage .stage__canvas ::ng-deep [style*='; top:48px'] {
+      transform: translateY(calc(-1 * var(--slide-chrome-shift, 0px)));
+    }
+    .stage--stage .stage__canvas ::ng-deep [style*='; top:1028px'] {
+      transform: translateY(var(--slide-chrome-shift, 0px));
+    }
+    /* Reaching the frame means leaving the 1080-tall slide box, which the
+       ported sections clip inline. Nothing else in the deck is positioned
+       outside that box (checked across every slide), and the shell still
+       clips at the frame's edges, so only the chrome moves into the band. */
+    .stage--stage .stage__canvas ::ng-deep section {
+      overflow: visible !important;
+    }
     .stage__gear {
       font-size: 14px;
     }
@@ -458,6 +481,8 @@ export class SlideStageComponent {
   protected readonly railCollapsed = signal(this.initialRail());
   protected readonly settingsOpen = signal(false);
   private hudTimer: ReturnType<typeof setTimeout> | null = null;
+  private touchStart: { x: number; y: number; at: number } | null = null;
+  private swipedAt = 0;
 
   /** Stage Mode master flag; false means the deck of before this feature. */
   protected readonly stageOn = this.stage.enabled;
@@ -483,17 +508,35 @@ export class SlideStageComponent {
       : 1080 * this.scale(),
   );
 
+  /** Black band above (and below) the 16:9 canvas inside a taller frame. */
+  private readonly canvasBand = computed(() => {
+    if (!this.stageOn()) {
+      return 0;
+    }
+    const slack = this.shellHeight() - 1080 * this.scale();
+    return slack > 0 ? Math.round(slack / 2) : 0;
+  });
+
   /**
    * Vertical centring of the canvas inside a taller shell. Returns null when
    * Stage Mode is off so Angular writes no margin-top at all and the style
    * attribute stays exactly what it was before this feature.
    */
-  protected readonly canvasOffset = computed(() => {
-    if (!this.stageOn()) {
-      return null;
-    }
-    const slack = this.shellHeight() - 1080 * this.scale();
-    return slack > 0 ? Math.round(slack / 2) : null;
+  protected readonly canvasOffset = computed(() =>
+    this.canvasBand() > 0 ? this.canvasBand() : null,
+  );
+
+  /**
+   * How far the slide's own chrome moves to reach the frame's edges. The
+   * content stays centred — a 16:9 slide cannot fill the height once the
+   * column takes its width — but the logos and the module line would look
+   * adrift a band away from the top and bottom. Shifting them by the band
+   * puts them exactly as far from the frame as they sit without Stage Mode.
+   * In canvas units, because they live inside the scaled canvas.
+   */
+  protected readonly chromeShiftCss = computed(() => {
+    const band = this.canvasBand();
+    return band > 0 ? `${(band / this.scale()).toFixed(2)}px` : null;
   });
 
   protected readonly currentHtml = computed<SafeHtml>(() => {
@@ -680,12 +723,57 @@ export class SlideStageComponent {
     this.scheduleHudHide();
   }
 
+  /**
+   * Swipe navigation over the slide (tablets, with or without fullscreen):
+   * a quick, mostly-horizontal one-finger drag pages the deck. Pinches and
+   * slow drags are left alone, and the tap that a swipe sometimes produces
+   * is swallowed so it cannot page a second time.
+   */
+  @HostListener('touchstart', ['$event'])
+  protected onTouchStart(event: TouchEvent) {
+    const touch = event.touches[0];
+    const fit = this.fitEl().nativeElement;
+    this.touchStart =
+      event.touches.length === 1 && fit.contains(event.target as Node)
+        ? { x: touch.clientX, y: touch.clientY, at: Date.now() }
+        : null;
+  }
+
+  @HostListener('touchend', ['$event'])
+  protected onTouchEnd(event: TouchEvent) {
+    const start = this.touchStart;
+    this.touchStart = null;
+    if (!start || event.changedTouches.length !== 1) {
+      return;
+    }
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (
+      Date.now() - start.at > 700 ||
+      Math.abs(dx) < SWIPE_MIN_PX ||
+      Math.abs(dx) < Math.abs(dy) * 1.5
+    ) {
+      return;
+    }
+    this.swipedAt = Date.now();
+    if (dx < 0) {
+      this.next();
+    } else {
+      this.prev();
+    }
+  }
+
   // Host-level click: tap navigation + in-slide data-go jumps — but only
   // for clicks that land on the slide shell, not on the rail or controls.
   @HostListener('click', ['$event'])
   protected onStageClick(event: MouseEvent) {
     const fit = this.fitEl().nativeElement;
     if (!fit.contains(event.target as Node)) {
+      return;
+    }
+    // The click a swipe leaves behind would page the deck again.
+    if (Date.now() - this.swipedAt < 500) {
       return;
     }
     const target = (event.target as HTMLElement).closest<HTMLElement>(
