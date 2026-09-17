@@ -1,3 +1,4 @@
+import type { RenderScriptOptions } from './script/types';
 import type { Decks, DocPageDef } from './types';
 
 /**
@@ -10,11 +11,6 @@ export const SLIDES_LOADERS: Record<string, () => Promise<{ DECKS: Decks }>> =
     'sequential-fourm': () => import('./sequential-fourm/slides'),
   };
 
-export interface FlowingDoc {
-  en: string;
-  ro: string;
-}
-
 export const HANDBOOK_LOADERS: Record<
   string,
   () => Promise<{ HANDBOOK_PAGES: DocPageDef[] }>
@@ -22,10 +18,12 @@ export const HANDBOOK_LOADERS: Record<
   'sequential-fourm': () => import('./sequential-fourm/handbook'),
 };
 
+/** The presenter script is rendered per cut and language from its beats. */
+export type ScriptRenderer = (options: RenderScriptOptions) => string;
+
 export const SCRIPT_LOADERS: Record<
   string,
-  () => Promise<{ PRESENTER_SCRIPT: FlowingDoc }>
+  () => Promise<{ renderScript: ScriptRenderer }>
 > = {
-  'sequential-fourm': () =>
-    import('./sequential-fourm/docs/presenter-script'),
+  'sequential-fourm': () => import('./sequential-fourm/script'),
 };

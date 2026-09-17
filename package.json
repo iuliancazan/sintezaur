@@ -28,7 +28,8 @@
     "test": "nx run-many --target=test",
     "typecheck": "nx run-many --target=typecheck",
     "build": "nx run-many --target=build",
-    "scrub": "rm -rf dist/out-tsc dist/libs node_modules/.cache/tsc-build .nx/cache && nx reset"
+    "scrub": "rm -rf dist/out-tsc dist/libs node_modules/.cache/tsc-build .nx/cache && nx reset",
+    "workshops:check": "tsx tools/scripts/workshops-check-content.ts"
   },
   "devDependencies": {
     "@analogjs/vite-plugin-angular": "~2.1.2",

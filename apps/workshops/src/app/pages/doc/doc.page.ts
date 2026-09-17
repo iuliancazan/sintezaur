@@ -15,8 +15,13 @@ import { LanguageService } from '../../core/language.service';
 import { ThemeService } from '../../core/theme.service';
 import { TrackService } from '../../core/track.service';
 import { VariantService } from '../../core/variant.service';
-import { HANDBOOK_LOADERS, SCRIPT_LOADERS } from '../../content/registry';
-import type { DocPageDef } from '../../content/types';
+import {
+  HANDBOOK_LOADERS,
+  SLIDES_LOADERS,
+  SCRIPT_LOADERS,
+  type ScriptRenderer,
+} from '../../content/registry';
+import type { Decks, DocPageDef, SlideDef } from '../../content/types';
 import { DocPageComponent } from '../../ui/doc-page.component';
 import { LangToggleComponent } from '../../ui/lang-toggle.component';
 import { VariantToggleComponent } from '../../ui/variant-toggle.component';
@@ -407,8 +412,11 @@ export class DocViewPage {
     viewChild.required<ElementRef<HTMLDivElement>>('wellEl');
 
   private readonly handbookPages = signal<DocPageDef[] | null>(null);
-  private readonly flowingDoc = signal<{ en: string; ro: string } | null>(
-    null,
+  /** Script only: its renderer plus the deck the slide numbers come from. */
+  private readonly scriptRenderer = signal<ScriptRenderer | null>(null);
+  private readonly decks = signal<Decks | null>(null);
+  private readonly deck = computed<SlideDef[] | null>(
+    () => this.decks()?.[this.variant()] ?? null,
   );
   /** Handbook opens in the theme's face; the SCREEN|PRINT toggle overrides. */
   protected readonly lightPreview = signal(
@@ -435,7 +443,7 @@ export class DocViewPage {
   private tocTargets: HTMLElement[] = [];
 
   protected readonly loaded = computed(
-    () => this.handbookPages() !== null || this.flowingDoc() !== null,
+    () => this.handbookPages() !== null || this.flowingHtml() !== null,
   );
 
   protected readonly pages = computed<string[] | null>(() => {
@@ -447,12 +455,19 @@ export class DocViewPage {
     return pages.map((p) => (lang === 'ro' ? p.ro : p.en));
   });
 
+  /** The script is rendered on the spot: its clock and slide numbers
+   * depend on the selected cut. */
   protected readonly flowingHtml = computed<string | null>(() => {
-    const doc = this.flowingDoc();
-    if (!doc) {
+    const render = this.scriptRenderer();
+    const deck = this.deck();
+    if (!render || !deck) {
       return null;
     }
-    return this.languageService.lang() === 'ro' ? doc.ro : doc.en;
+    return render({
+      variant: this.variant(),
+      lang: this.languageService.lang(),
+      deck,
+    });
   });
 
   protected readonly crumbTitle = computed(() => {
@@ -506,8 +521,9 @@ export class DocViewPage {
       );
     } else {
       void SCRIPT_LOADERS[this.slug]?.().then((m) =>
-        this.flowingDoc.set(m.PRESENTER_SCRIPT),
+        this.scriptRenderer.set(m.renderScript),
       );
+      void SLIDES_LOADERS[this.slug]?.().then((m) => this.decks.set(m.DECKS));
     }
 
     // Re-derive the contents rail whenever the rendered document changes
