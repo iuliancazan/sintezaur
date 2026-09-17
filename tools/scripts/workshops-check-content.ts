@@ -91,7 +91,20 @@ for (const variant of COURSE_VARIANTS) {
     }
   }
 
-  // 4. Beats with something to say have both languages, and both render.
+  // 4. In-slide jumps (the course map, "← COURSE MAP") land somewhere.
+  for (const slide of deck) {
+    for (const lang of ['en', 'ro'] as const) {
+      for (const [, target] of slide[lang].matchAll(/data-go="([^"]+)"/g)) {
+        if (!index.has(target)) {
+          note(
+            `${label}: slide "${slide.id}" (${lang}) jumps to missing "${target}"`,
+          );
+        }
+      }
+    }
+  }
+
+  // 5. Beats with something to say have both languages, and both render.
   for (const beat of beats) {
     for (const field of ['title', 'say', 'demo', 'theyDo', 'room'] as const) {
       const value = beat[field];
@@ -126,7 +139,7 @@ for (const variant of COURSE_VARIANTS) {
   );
 }
 
-// 5. Beat-slide entries that no longer belong to any beat.
+// 6. Beat-slide entries that no longer belong to any beat.
 const allBeatIds = new Set(
   PRESENTER_SCRIPT.modules.flatMap((module) =>
     module.beats.map((beat) => beat.id),
@@ -138,14 +151,14 @@ for (const id of Object.keys(PRESENTER_SCRIPT.slides)) {
   }
 }
 
-// 6. Cheat-sheet rows point at beats that exist.
+// 7. Cheat-sheet rows point at beats that exist.
 for (const row of PRESENTER_SCRIPT.cheat) {
   if (!allBeatIds.has(row.beat)) {
     note(`cheat sheet row points at missing beat "${row.beat}"`);
   }
 }
 
-// 7. UI dictionaries stay in step.
+// 8. UI dictionaries stay in step.
 const dict = (lang: 'en' | 'ro') =>
   JSON.parse(
     readFileSync(
