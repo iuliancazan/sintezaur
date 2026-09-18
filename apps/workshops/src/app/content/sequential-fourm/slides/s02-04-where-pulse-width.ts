@@ -8,7 +8,7 @@ export const SLIDE_S02_04_WHERE = whereOnFourm({
   caption: 'OSC A › PULSE|PW + SELECT',
   gesture: {
     en: 'Hold PULSE|PW and turn SELECT: zero is the square, towards the edge the pulse thins to a thread.',
-    ro: 'Ține PULSE|PW apăsat și rotește SELECT: zero e pătratul, spre margine pulsul se subțiază până la un fir.',
+    ro: 'Ține PULSE|PW apăsat și rotește SELECT: zero e square-ul, spre margine pulsul se subțiază până la un fir.',
   },
   moduleTitle: {
     en: 'MODULE 02 · OSCILLATORS',
