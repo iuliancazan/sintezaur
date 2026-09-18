@@ -42,7 +42,7 @@ export const CHEAT_ROWS: CheatRow[] = [
   {
     beat: '01·06',
     module: { en: `01 · SIGNAL FLOW`, ro: `01 · SIGNAL FLOW` },
-    theyDo: { en: `A: <strong>osc a</strong> to zero → silence → back; Osc B <strong>saw</strong> on, <strong>osc b</strong> up. B: repeats; both trace the path across the panel with a finger.`, ro: `A: <strong>osc a</strong> la zero → liniște → înapoi; Osc B <strong>saw</strong> on, <strong>osc b</strong> sus. B: repetă; ambii urmăresc drumul cu degetul pe panou.` },
+    theyDo: { en: `A: <strong>osc a</strong> to zero → silence → back; Osc B <strong>saw</strong> on, <strong>osc b</strong> up. B: repeats; both trace the path across the panel with a finger.`, ro: `A: <strong>osc a</strong> la zero → liniște → înapoi; Osc B <strong>saw</strong> on, <strong>osc b</strong> sus. B: repetă; ambii urmăresc traseul cu degetul pe panou.` },
     who: { en: `A, then B`, ro: `A, apoi B` },
   },
   {

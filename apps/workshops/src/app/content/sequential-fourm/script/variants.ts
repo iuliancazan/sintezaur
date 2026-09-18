@@ -34,7 +34,7 @@ const SHORT: VariantCut = {
     '01·04': {
       say: {
         en: `&#x201C;Here&#x27;s the best part: the panel is laid out in the same order as the path. Look at your synth and put a finger on it: oscillators, mixer, filter, envelopes, main. The sections on the left — modulation, aftertouch — and the ones along the bottom — unison, glide, LFO, clock, arpeggiator: some we take one by one tonight, the rest are written up in your handbook.&#x201D;`,
-        ro: `„Partea cea mai bună: panoul e așezat în aceeași ordine ca drumul. Uitați-vă la synth-ul vostru și puneți degetul: oscilatoare, mixer, filtru, anvelope, main. Secțiunile din stânga — modulation, aftertouch — și cele de jos — unison, glide, LFO, clock, arpeggiator: pe unele le luăm pe rând în seara asta, restul sunt scrise în manualul vostru."`,
+        ro: `„Partea cea mai bună: panoul e așezat în aceeași ordine ca traseul. Uitați-vă la synth-ul vostru și puneți degetul: oscilatoare, mixer, filtru, anvelope, main. Secțiunile din stânga — modulation, aftertouch — și cele de jos — unison, glide, LFO, clock, arpeggiator: pe unele le luăm pe rând în seara asta, restul sunt scrise în manualul vostru."`,
       },
     },
     // Two minutes, without the noise step (noise is not presented).
@@ -88,7 +88,7 @@ const SHORT: VariantCut = {
     '09·01': {
       say: {
         en: `&#x201C;This is the road: oscillator, mixer, filter, envelopes, LFO and modulation, voices. Every synth you&#x27;ll meet from now on is the same road in different clothes. The two rooms we didn&#x27;t open tonight — expression and rhythm — are waiting in your handbook. If you know the road, you know where to look.&#x201D;`,
-        ro: `„Ăsta e drumul: oscilator, mixer, filtru, anvelope, LFO și modulație, voci. Orice synth pe care îl întâlnești de acum e același drum, cu alte haine. Cele două camere pe care nu le-am deschis în seara asta — expresia și ritmul — vă așteaptă în manual. Dacă știi drumul, știi unde să te uiți."`,
+        ro: `„Ăsta e traseul: oscilator, mixer, filtru, anvelope, LFO și modulație, voci. Orice synth pe care îl întâlnești de acum e același traseu, cu alte haine. Cele două camere pe care nu le-am deschis în seara asta — expresia și ritmul — vă așteaptă în manual. Dacă știi traseul, știi unde să te uiți."`,
       },
     },
     '09·04': {

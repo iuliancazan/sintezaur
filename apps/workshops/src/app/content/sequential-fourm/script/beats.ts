@@ -50,7 +50,7 @@ export const SCRIPT_MODULES: ScriptModule[] = [
       id: '01·01',
       title: { en: `COVER`, ro: `COVER` },
       minutes: 1,
-      say: { en: `&#x201C;The whole course rests on a single idea: sound follows a path. Learn the path once and no synthesizer will ever look complicated again, no matter how many knobs it has.&#x201D;`, ro: `„Tot cursul stă pe o singură idee: sunetul urmează un drum. Învață drumul o dată și niciun sintetizator nu o să ți se mai pară complicat, oricâte butoane are."` },
+      say: { en: `&#x201C;The whole course rests on a single idea: sound follows a path. Learn the path once and no synthesizer will ever look complicated again, no matter how many knobs it has.&#x201D;`, ro: `„Tot cursul stă pe o singură idee: sunetul urmează un traseu. Învață traseul o dată și niciun sintetizator nu o să ți se mai pară complicat, oricâte butoane are."` },
       room: { en: `Headphones down`, ro: `Căștile jos` },
     },
     {
@@ -71,7 +71,7 @@ export const SCRIPT_MODULES: ScriptModule[] = [
       id: '01·04',
       title: { en: `WHERE ON FOURM`, ro: `WHERE ON FOURM` },
       minutes: 1,
-      say: { en: `&#x201C;Here&#x27;s the best part: the panel is laid out in the same order as the path. Look at your synth and put a finger on it: oscillators, mixer, filter, envelopes, main. The sections on the left — modulation, aftertouch — and the ones along the bottom — unison, glide, LFO, clock, arpeggiator — we&#x27;ll take one by one, in the modules ahead.&#x201D;`, ro: `„Partea cea mai bună: panoul e așezat în aceeași ordine ca drumul. Uitați-vă la synth-ul vostru și puneți degetul: oscilatoare, mixer, filtru, anvelope, main. Secțiunile din stânga — modulation, aftertouch — și cele de jos — unison, glide, LFO, clock, arpeggiator — le luăm pe rând, în modulele următoare."` },
+      say: { en: `&#x201C;Here&#x27;s the best part: the panel is laid out in the same order as the path. Look at your synth and put a finger on it: oscillators, mixer, filter, envelopes, main. The sections on the left — modulation, aftertouch — and the ones along the bottom — unison, glide, LFO, clock, arpeggiator — we&#x27;ll take one by one, in the modules ahead.&#x201D;`, ro: `„Partea cea mai bună: panoul e așezat în aceeași ordine ca traseul. Uitați-vă la synth-ul vostru și puneți degetul: oscilatoare, mixer, filtru, anvelope, main. Secțiunile din stânga — modulation, aftertouch — și cele de jos — unison, glide, LFO, clock, arpeggiator — le luăm pe rând, în modulele următoare."` },
     },
     {
       id: '01·05',
@@ -85,8 +85,8 @@ export const SCRIPT_MODULES: ScriptModule[] = [
       id: '01·06',
       title: { en: `TRY IT`, ro: `TRY IT` },
       minutes: 2,
-      say: { en: `&#x201C;Headphones on. From Basic Program: hold a note and take OSC A in the mixer down to zero. Silence — no source, no sound. Bring it back. Press SAW on Oscillator B and raise OSC B: two oscillators, one note, already fatter. Swap: your partner does the same, and at the end, trace the path across the panel with a finger.&#x201D;`, ro: `„Căștile sus. Din Basic Program: țineți o notă și dați OSC A din mixer la zero. Liniște — fără sursă, fără sunet. Aduceți-l înapoi. Apăsați SAW la Oscillator B și ridicați OSC B: două oscilatoare, o notă, deja mai gros. Schimbați: partenerul face același lucru și, la final, urmăriți cu degetul drumul pe panou."` },
-      theyDo: { en: `(A) <strong>osc a</strong> to zero → silence → back up; Osc B <strong>saw</strong> on; <strong>osc b</strong> up. (B) repeats; both trace the path with a finger. You walk the tables.`, ro: `(A) <strong>osc a</strong> la zero → liniște → înapoi; Osc B <strong>saw</strong> on; <strong>osc b</strong> sus. (B) repetă; ambii urmăresc drumul cu degetul. Tu treci printre mese.` },
+      say: { en: `&#x201C;Headphones on. From Basic Program: hold a note and take OSC A in the mixer down to zero. Silence — no source, no sound. Bring it back. Press SAW on Oscillator B and raise OSC B: two oscillators, one note, already fatter. Swap: your partner does the same, and at the end, trace the path across the panel with a finger.&#x201D;`, ro: `„Căștile sus. Din Basic Program: țineți o notă și dați OSC A din mixer la zero. Liniște — fără sursă, fără sunet. Aduceți-l înapoi. Apăsați SAW la Oscillator B și ridicați OSC B: două oscilatoare, o notă, deja mai gros. Schimbați: partenerul face același lucru și, la final, urmăriți cu degetul traseul pe panou."` },
+      theyDo: { en: `(A) <strong>osc a</strong> to zero → silence → back up; Osc B <strong>saw</strong> on; <strong>osc b</strong> up. (B) repeats; both trace the path with a finger. You walk the tables.`, ro: `(A) <strong>osc a</strong> la zero → liniște → înapoi; Osc B <strong>saw</strong> on; <strong>osc b</strong> sus. (B) repetă; ambii urmăresc traseul cu degetul. Tu treci printre mese.` },
     },
     {
       id: '01·07',
@@ -476,7 +476,7 @@ export const SCRIPT_MODULES: ScriptModule[] = [
       id: '09·01',
       title: { en: `THE ROAD, AGAIN`, ro: `THE ROAD, AGAIN` },
       minutes: 1,
-      say: { en: `&#x201C;This is the road: oscillator, mixer, filter, envelopes, LFO and modulation, voices, expression, rhythm. Every synth you&#x27;ll meet from now on is the same road in different clothes. If you know the road, you know where to look.&#x201D;`, ro: `„Ăsta e drumul: oscilator, mixer, filtru, anvelope, LFO și modulație, voci, interpretare, ritm. Orice synth pe care o să-l întâlniți de acum e același drum cu alte haine. Dacă știți drumul, știți unde să căutați."` },
+      say: { en: `&#x201C;This is the road: oscillator, mixer, filter, envelopes, LFO and modulation, voices, expression, rhythm. Every synth you&#x27;ll meet from now on is the same road in different clothes. If you know the road, you know where to look.&#x201D;`, ro: `„Ăsta e traseul: oscilator, mixer, filtru, anvelope, LFO și modulație, voci, interpretare, ritm. Orice synth pe care o să-l întâlniți de acum e același traseu, cu alte haine. Dacă știți traseul, știți unde să căutați."` },
       room: { en: `Headphones down`, ro: `Căștile jos` },
     },
     {
