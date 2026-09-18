@@ -41,8 +41,8 @@ const WORDS = {
     ro: 'Exercițiile + challenge-ul, pe o pagină',
   },
   cheatHow: {
-    en: 'Control names are the ones on the panel (bold). “A → swap → B” = partner A drives, partner B reads the steps; halfway through they switch.',
-    ro: 'Numele controalelor sunt cele de pe panou (bold). „A → swap → B” = partenerul A conduce, partenerul B citește pașii; la jumătate schimbă.',
+    en: 'Control names are the ones on the panel (bold). “A → swap → B” = partner A is at the controls first, then they swap.',
+    ro: 'Numele controalelor sunt cele de pe panou (bold). „A → swap → B” = partenerul A e primul la controale, apoi fac schimb.',
   },
   colModule: { en: 'MODULE', ro: 'MODULUL' },
   colMinute: { en: 'MINUTE', ro: 'MINUTUL' },
