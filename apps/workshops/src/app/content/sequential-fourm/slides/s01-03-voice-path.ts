@@ -37,7 +37,7 @@ export const SLIDE_S01_03_VOICE_PATH: SlideDef = {
       <path d="M1448 340L1483 264Q1502 302 1526 312L1552 318Q1590 328 1614 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>
       <text x="1537" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="2" fill="#C6C6C6">VCA + AMP ENVELOPE</text>
       <g transform="translate(1728 240)"><path d="M0 16H22L52 -8V68L22 44H0Z" fill="none" stroke="#DBDBDB" stroke-width="4" stroke-linejoin="round"></path><path d="M70 8Q82 30 70 52" stroke="#FF8A48" stroke-width="5" fill="none" stroke-linecap="round"></path><path d="M88 -4Q106 30 88 64" stroke="#FF8A48" stroke-width="5" fill="none" stroke-linecap="round"></path></g>
-      <path d="M1248 340H1290V452H430V340H510" stroke="#FF8A48" stroke-width="4" stroke-dasharray="14 10" fill="none"></path>
+      <path d="M1682 340H1724V452H430V340H510" stroke="#FF8A48" stroke-width="4" stroke-dasharray="14 10" fill="none"></path>
       <path d="M524 340L502 329L502 351Z" fill="#FF8A48"></path>
       <text x="886" y="492" text-anchor="middle" font-family="Lato, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#FF8A48">FEEDBACK: THE OUTPUT FED BACK INTO THE MIXER</text>
     </svg>
@@ -76,7 +76,7 @@ export const SLIDE_S01_03_VOICE_PATH: SlideDef = {
       <path d="M1448 340L1483 264Q1502 302 1526 312L1552 318Q1590 328 1614 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>
       <text x="1537" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="2" fill="#C6C6C6">VCA + AMP ENVELOPE</text>
       <g transform="translate(1728 240)"><path d="M0 16H22L52 -8V68L22 44H0Z" fill="none" stroke="#DBDBDB" stroke-width="4" stroke-linejoin="round"></path><path d="M70 8Q82 30 70 52" stroke="#FF8A48" stroke-width="5" fill="none" stroke-linecap="round"></path><path d="M88 -4Q106 30 88 64" stroke="#FF8A48" stroke-width="5" fill="none" stroke-linecap="round"></path></g>
-      <path d="M1248 340H1290V452H430V340H510" stroke="#FF8A48" stroke-width="4" stroke-dasharray="14 10" fill="none"></path>
+      <path d="M1682 340H1724V452H430V340H510" stroke="#FF8A48" stroke-width="4" stroke-dasharray="14 10" fill="none"></path>
       <path d="M524 340L502 329L502 351Z" fill="#FF8A48"></path>
       <text x="886" y="492" text-anchor="middle" font-family="Lato, sans-serif" font-size="27" font-weight="700" letter-spacing="1" fill="#FF8A48">FEEDBACK: IEȘIREA, ÎNTOARSĂ ÎN MIXER</text>
     </svg>
