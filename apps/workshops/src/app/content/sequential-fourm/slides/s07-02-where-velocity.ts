@@ -8,8 +8,8 @@ export const SLIDE_S07_02_WHERE = whereOnFourm({
   sections: ['FILTER ENV', 'AMP ENV'],
   caption: 'ENVELOPES › VELOCITY',
   gesture: {
-    en: 'Each envelope has a VELOCITY button: how hard you strike scales that envelope&#x27;s amount.',
-    ro: 'Fiecare anvelopă are un buton VELOCITY: cât de tare lovești clapa scalează cantitatea acelei anvelope.',
+    en: 'Each envelope has a VELOCITY button: switch it on, and how hard you strike scales that envelope&#x27;s amount.',
+    ro: 'Fiecare anvelopă are un buton VELOCITY: îl aprinzi, și cât de tare lovești clapa scalează cantitatea acelei anvelope.',
   },
   moduleTitle: {
     en: 'MODULE 07 · EXPRESSION',
