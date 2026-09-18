@@ -26,7 +26,7 @@ const SHORT: VariantCut = {
   sayPrefix: {
     '02·02': {
       en: `&#x201C;One thing first: a note is never a single tone. It is a fundamental plus a stack of quieter harmonics, and their mix is what we call timbre — that is the whole game today.&#x201D;`,
-      ro: `„Întâi un lucru: o notă nu e niciodată un singur ton. E o fundamentală plus un turn de armonice mai slabe, iar amestecul lor e ceea ce numim timbru — despre asta e tot jocul de azi."`,
+      ro: `„Întâi un lucru: o notă nu e niciodată un singur ton. E o fundamentală plus armonice mai slabe deasupra, iar amestecul lor e ceea ce numim timbru — despre asta e tot jocul de azi."`,
     },
   },
   patch: {
