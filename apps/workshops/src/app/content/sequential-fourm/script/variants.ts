@@ -93,8 +93,8 @@ const SHORT: VariantCut = {
     },
     '09·04': {
       say: {
-        en: `&#x201C;Thank you. Zeedo, thank you for making this possible; Sequential, thank you for the instruments. The handbook on your table is yours, take it home; the English copies are by the exit: the same diagrams, all the theory, including the two modules we didn&#x27;t play tonight. You&#x27;ll find us at Sintezaur, [where], and that&#x27;s where we announce the next workshop. Until then: the synths are yours for another four minutes.&#x201D;`,
-        ro: `„Mulțumesc. Zeedo, mulțumim că ați făcut asta posibil; Sequential, mulțumim pentru instrumente. Manualul de pe masa voastră e al vostru, luați-l acasă; exemplarele în engleză sunt la ieșire: aceleași diagrame, toată teoria, inclusiv cele două module pe care nu le-am cântat în seara asta. Ne găsiți la Sintezaur, [unde], și acolo anunțăm următorul workshop. Până atunci: synth-urile sunt ale voastre încă patru minute."`,
+        en: `&#x201C;Thank you. Zeedo, thank you for making this possible; Sequential, thank you for the instruments. The student handbook is yours, in English or Romanian: the same diagrams, all the theory, including the two modules we didn&#x27;t play tonight. You&#x27;ll find us at Sintezaur, [where], and that&#x27;s where we announce the next workshop. Until then: the synths are yours for another four minutes.&#x201D;`,
+        ro: `„Mulțumesc. Zeedo, mulțumim că ați făcut asta posibil; Sequential, mulțumim pentru instrumente. Manualul cursantului e al vostru, în engleză sau română: aceleași diagrame, toată teoria, inclusiv cele două module pe care nu le-am cântat în seara asta. Ne găsiți la Sintezaur, [unde], și acolo anunțăm următorul workshop. Până atunci: synth-urile sunt ale voastre încă patru minute."`,
       },
     },
     '09·05': {
