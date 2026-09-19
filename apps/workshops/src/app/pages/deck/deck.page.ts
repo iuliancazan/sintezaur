@@ -149,6 +149,11 @@ import { ViewerBarComponent } from '../../ui/viewer-bar.component';
       overflow: hidden;
       break-after: page;
     }
+    /* Without this the break after the final slide makes an empty last page,
+     * the same fix doc-page.component.ts already applies to handbook sheets. */
+    .deck-print__page:last-child {
+      break-after: auto;
+    }
     .deck-print__page ::ng-deep section {
       position: absolute;
       inset: 0;
