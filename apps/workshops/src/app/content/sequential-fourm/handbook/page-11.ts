@@ -4,12 +4,12 @@ import type { DocPageDef } from '../../types';
 export const PAGE_11: DocPageDef = {
   id: 'p11',
   label: 'Wire It Up',
-  en: `<section class="page" id="p11" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  en: `<section class="page" id="p11" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULE 05 · LFO &amp; MODULATION</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">11</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">WIRE IT UP</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">WIRE IT UP</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <div style="margin-top:18px;">
   <div style="margin-top:12px; border-left:3px solid var(--hb-8, #2A2A2A); padding-left:14px;"><h2 style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:2.5px; color:var(--hb-2, #8F8F8F);">LEVEL 2</h2><p style="margin:5px 0 0; font-stretch:92%; font-size:12px; line-height:1.5; color:var(--hb-9, #9A9A9A);">Taken below the octaves, in LO1 or LO2, Osc B stops being a voice and becomes a second LFO, one for each note you hold. In LO1 it follows the keyboard, so high notes wobble faster than low ones. In LO2 it free-runs, at the same speed for every note. Osc B keeps modulating with its mixer level at zero: the mixer sets how loud Osc B is as a sound, while the modulation is taken separately, through the OSC B route. Down at lo1 and lo2 you want it at zero anyway, because as audio it is only a faint clicking. The filter envelope is a modulation source too: FILT ENV → FREQ A gives the “pitch blip” of synth brass; → PW A, a pulse that narrows over the note.</p></div>
@@ -20,12 +20,12 @@ export const PAGE_11: DocPageDef = {
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:10px; letter-spacing:2px; color:var(--hb-7, #8F8F8F);">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</p>
   </div>
 </section>`,
-  ro: `<section class="page" id="p11" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  ro: `<section class="page" id="p11" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULUL 05 · LFO &amp; MODULATION</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">11</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">FĂ LEGĂTURA</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">FĂ LEGĂTURA</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <div style="margin-top:18px;">
   <div style="margin-top:12px; border-left:3px solid var(--hb-8, #2A2A2A); padding-left:14px;"><h2 style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:11.5px; letter-spacing:2.5px; color:var(--hb-2, #8F8F8F);">LEVEL 2</h2><p style="margin:5px 0 0; font-stretch:92%; font-size:12px; line-height:1.5; color:var(--hb-9, #9A9A9A);">Coborât sub octave, în LO1 sau LO2, Osc B nu mai e o voce, ci un al doilea LFO, câte unul pentru fiecare notă apăsată. În LO1 urmează claviatura, deci notele înalte tremură mai repede decât cele joase. În LO2 merge liber, cu aceeași viteză pentru toate. Osc B modulează și cu nivelul lui din mixer la zero: mixerul stabilește cât de tare se aude Osc B ca sunet, iar modulația e luată separat, prin ruta OSC B din MODULATION. La lo1 și lo2 chiar vrei să fie pe zero, fiindcă drept sunet nu se aude decât ca un ticăit slab. Anvelopa de filtru e și ea sursă de modulație: FILT ENV → FREQ A dă „pitch blip"-ul alămurilor de synth; → PW A, un puls care se îngustează pe durata notei.</p></div>

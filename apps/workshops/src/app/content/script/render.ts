@@ -50,8 +50,8 @@ const WORDS = {
   colWho: { en: 'WHO DRIVES', ro: 'CINE CONDUCE' },
 } as const;
 
-const FONT_BODY = `'Aptos','Instrument Sans','Segoe UI',sans-serif`;
-const FONT_DISPLAY = `'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif`;
+const FONT_BODY = `'Instrument Sans','Segoe UI',sans-serif`;
+const FONT_DISPLAY = `'Instrument Sans','Segoe UI',sans-serif`;
 const FONT_MONO = `'Lato',sans-serif`;
 const ACCENT = '#C25010';
 

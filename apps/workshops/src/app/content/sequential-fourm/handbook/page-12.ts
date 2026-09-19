@@ -5,12 +5,12 @@ import type { DocPageDef } from '../../types';
 export const PAGE_12: DocPageDef = {
   id: 'p12',
   label: 'Voices & unison',
-  en: `<section class="page" id="p12" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  en: `<section class="page" id="p12" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULE 06 · VOICES &amp; UNISON</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">12</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">VOICES &amp; UNISON</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">VOICES &amp; UNISON</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:14px 0 0; font-stretch:92%; font-size:13.5px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Four voices, one note, and the loop that thickens everything. Fourm is polyphonic: it holds four complete voices — each with its own oscillators, filter and envelopes — so four notes can sound at once. This module is about how those voices are spent: spread across a chord, stacked on one massive note, or replayed as a stored chord from a single key. And it adds mass from a different place: the feedback loop.</p>
   <div style="margin-top:14px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:12px 16px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
@@ -26,12 +26,12 @@ export const PAGE_12: DocPageDef = {
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:10px; letter-spacing:2px; color:var(--hb-7, #8F8F8F);">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</p>
   </div>
 </section>`,
-  ro: `<section class="page" id="p12" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  ro: `<section class="page" id="p12" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULUL 06 · VOICES &amp; UNISON</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">12</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">VOICES &amp; UNISON</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">VOICES &amp; UNISON</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:14px 0 0; font-stretch:92%; font-size:13.5px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Patru voci, o notă și bucla care îngroașă tot. Fourm e polifonic: ține patru voci complete — fiecare cu oscilatoarele, filtrul și anvelopele ei — deci pot suna patru note deodată. Modulul ăsta e despre cum se cheltuiesc vocile: întinse pe un acord, suprapuse pe o singură notă uriașă sau recântate ca un acord memorat, dintr-o singură clapă. Și adaugă masă dintr-un alt loc: bucla de feedback.</p>
   <div style="margin-top:14px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:12px 16px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">

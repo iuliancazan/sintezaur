@@ -5,12 +5,12 @@ import type { DocPageDef } from '../../types';
 export const PAGE_15: DocPageDef = {
   id: 'p15',
   label: 'Arp & sequencer',
-  en: `<section class="page" id="p15" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  en: `<section class="page" id="p15" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULE 08 · ARPEGGIATOR &amp; SEQUENCER</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">15</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:38px; line-height:1.05; color:var(--hb-4, #E8E8E8);">ARPEGGIATOR &amp; SEQUENCER</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:38px; line-height:1.05; color:var(--hb-4, #E8E8E8);">ARPEGGIATOR &amp; SEQUENCER</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:14px 0 0; font-stretch:92%; font-size:13.5px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Patterns from held notes. Hold a chord and the arpeggiator plays it back one note at a time, locked to the clock. It turns sustained harmony into rhythm — and Fourm hides a full sequencer behind it. The mouse is not a musical instrument; this is why the arpeggiator lives on the panel.</p>
   <div style="margin-top:14px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:12px 16px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
@@ -26,12 +26,12 @@ export const PAGE_15: DocPageDef = {
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:10px; letter-spacing:2px; color:var(--hb-7, #8F8F8F);">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</p>
   </div>
 </section>`,
-  ro: `<section class="page" id="p15" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  ro: `<section class="page" id="p15" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULUL 08 · ARPEGGIATOR &amp; SEQUENCER</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">15</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:38px; line-height:1.05; color:var(--hb-4, #E8E8E8);">ARPEGGIATOR &amp; SEQUENCER</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:38px; line-height:1.05; color:var(--hb-4, #E8E8E8);">ARPEGGIATOR &amp; SEQUENCER</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:14px 0 0; font-stretch:92%; font-size:13.5px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Tipare din note ținute. Ții un acord și arpeggiator-ul îl redă notă cu notă, blocat pe clock. Transformă armonia susținută în ritm — iar Fourm ascunde un sequencer întreg în spatele lui. Mouse-ul nu e instrument muzical; de aceea arpeggiator-ul stă pe panou.</p>
   <div style="margin-top:14px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:12px 16px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">

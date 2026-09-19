@@ -33,9 +33,9 @@ export const SLIDE_S01_01_COVER: SlideDef = {
     <text x="895" y="200" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="4" fill="#A7A7A7">AMP</text>
     <text x="1138" y="200" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="4" fill="#A7A7A7">OUT</text>
   </svg>
-  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">SIGNAL FLOW</h1>
+  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">SIGNAL FLOW</h1>
   <svg style="position:absolute; left:650px; top:232px; width:620px; height:18px;" viewBox="0 0 860 24" fill="none"><path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3" stroke="#E97132" stroke-width="6.5" stroke-linecap="round"></path></svg>
-  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">How sound travels through a subtractive synthesizer</p>
+  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">How sound travels through a subtractive synthesizer</p>
 </section>`,
   ro: `<section data-label="01·01 RO Copertă" style="background:#000000; overflow:hidden;">
   <img src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="position:absolute; left:48px; top:20px; height:84px; width:auto; opacity:0.85;">
@@ -63,8 +63,8 @@ export const SLIDE_S01_01_COVER: SlideDef = {
     <text x="895" y="200" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="4" fill="#A7A7A7">AMP</text>
     <text x="1138" y="200" text-anchor="middle" font-family="Lato, sans-serif" font-size="24" letter-spacing="4" fill="#A7A7A7">OUT</text>
   </svg>
-  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">SIGNAL FLOW</h1>
+  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">SIGNAL FLOW</h1>
   <svg style="position:absolute; left:650px; top:232px; width:620px; height:18px;" viewBox="0 0 860 24" fill="none"><path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3" stroke="#E97132" stroke-width="6.5" stroke-linecap="round"></path></svg>
-  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">Cum călătorește sunetul printr-un subtractive synthesizer (sintetizator subtractiv)</p>
+  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">Cum călătorește sunetul printr-un subtractive synthesizer (sintetizator subtractiv)</p>
 </section>`,
 };

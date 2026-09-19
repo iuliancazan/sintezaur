@@ -5,14 +5,14 @@ import type { DocPageDef } from '../../types';
 export const PAGE_01: DocPageDef = {
   id: 'p1',
   label: 'Cover',
-  en: `<section class="page" id="p1" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  en: `<section class="page" id="p1" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <img class="hb-only-dark" src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="height:46px; width:auto;"><img class="hb-only-light" src="/course/logo-sintezaur-dark.png" alt="Sintezaur" style="height:46px; width:auto;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:3px; color:#8F8F8F;">A SINTEZAUR WORKSHOP · EN</p>
   </div>
   <div style="margin-top:96px;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:13px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">STUDENT HANDBOOK</p>
-    <h1 style="margin:10px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:64px; line-height:1.02; color:var(--hb-4, #E8E8E8);">INTRO TO<br>SYNTHESIS</h1>
+    <h1 style="margin:10px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:64px; line-height:1.02; color:var(--hb-4, #E8E8E8);">INTRO TO<br>SYNTHESIS</h1>
     <svg style="display:block; margin-top:14px; width:430px; height:14px;" viewBox="0 0 430 14" fill="none"><path d="M3 7.5C60 5.5 130 8.5 200 7S320 5.5 370 8 415 6.5 427 7.2" stroke="#E97132" stroke-width="4" stroke-linecap="round"></path></svg>
     <p style="margin:20px 0 0; font-stretch:92%; font-size:16px; line-height:1.6; color:var(--hb-3, #C6C6C6); max-width:520px;">A crash course in subtractive synthesis, on the Sequential Fourm. Everything from the workshop in one place: the theory, the diagrams, and the words.</p>
     <p style="margin:16px 0 0; font-family:'Lato',sans-serif; font-weight:700; font-size:11px; letter-spacing:2.5px; color:var(--hb-2, #8F8F8F);">A COMPANION HANDBOOK · WRITTEN BY IULIAN CAZAN</p>
@@ -26,14 +26,14 @@ export const PAGE_01: DocPageDef = {
     <div style="display:flex; align-items:center; gap:18px;"><img class="hb-only-dark" src="/course/logo-zeedo-white.svg" alt="Zeedo" style="height:15px; width:auto; opacity:0.85;"><img class="hb-only-light" src="/course/logo-zeedo-dark.svg" alt="Zeedo" style="height:15px; width:auto; opacity:0.85;"><span style="display:block; width:1px; height:18px; background:var(--hb-8, #3A3A3A);"></span><img class="hb-only-dark" src="/course/logo-sequential.png" alt="Sequential" style="height:15px; width:auto; opacity:0.85;"><img class="hb-only-light" src="/course/logo-sequential-dark.png" alt="Sequential" style="height:15px; width:auto; opacity:0.85;"></div>
   </div>
 </section>`,
-  ro: `<section class="page" id="p1" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  ro: `<section class="page" id="p1" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:center;">
     <img class="hb-only-dark" src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="height:46px; width:auto;"><img class="hb-only-light" src="/course/logo-sintezaur-dark.png" alt="Sintezaur" style="height:46px; width:auto;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:3px; color:#8F8F8F;">UN WORKSHOP SINTEZAUR · RO</p>
   </div>
   <div style="margin-top:96px;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:13px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MANUALUL CURSANTULUI</p>
-    <h1 style="margin:10px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:64px; line-height:1.02; color:var(--hb-4, #E8E8E8);">INTRO TO<br>SYNTHESIS</h1>
+    <h1 style="margin:10px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:64px; line-height:1.02; color:var(--hb-4, #E8E8E8);">INTRO TO<br>SYNTHESIS</h1>
     <svg style="display:block; margin-top:14px; width:430px; height:14px;" viewBox="0 0 430 14" fill="none"><path d="M3 7.5C60 5.5 130 8.5 200 7S320 5.5 370 8 415 6.5 427 7.2" stroke="#E97132" stroke-width="4" stroke-linecap="round"></path></svg>
     <p style="margin:20px 0 0; font-stretch:92%; font-size:16px; line-height:1.6; color:var(--hb-3, #C6C6C6); max-width:520px;">Un crash course de sinteză subtractivă, pe Sequential Fourm. Tot ce am parcurs în workshop, într-un singur loc: teoria, diagramele și termenii.</p>
     <p style="margin:16px 0 0; font-family:'Lato',sans-serif; font-weight:700; font-size:11px; letter-spacing:2.5px; color:var(--hb-2, #8F8F8F);">MANUAL COMPLEMENTAR · SCRIS DE IULIAN CAZAN</p>

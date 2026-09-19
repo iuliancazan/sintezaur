@@ -22,9 +22,9 @@ export const SLIDE_S01_06_KEY_TERMS: SlideDef = {
       <div><p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:30px; letter-spacing:2px; color:#FF8A48;">VCF · VCA</p><p style="margin:4px 0 0; font-family:'Lato',sans-serif; font-size:26px; line-height:1.3; color:#C6C6C6;">Voltage-controlled filter and amplifier: the tone and loudness stages.</p></div>
     <div><p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:30px; letter-spacing:2px; color:#FF8A48;">HARMONICS</p><p style="margin:4px 0 0; font-family:'Lato',sans-serif; font-size:26px; line-height:1.3; color:#C6C6C6;">Whole-number multiples of the fundamental, stacked above it and usually fainter; their mix is timbre.</p></div></div>
   </div>
-  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">KEY TERMS</h1>
+  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">KEY TERMS</h1>
   <svg style="position:absolute; left:650px; top:232px; width:620px; height:18px;" viewBox="0 0 860 24" fill="none"><path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3" stroke="#E97132" stroke-width="6.5" stroke-linecap="round"></path></svg>
-  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">New words from this module</p>
+  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">New words from this module</p>
 </section>`,
   ro: `<section data-label="01·06 RO Termeni" style="background:#000000; overflow:hidden;">
   <img src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="position:absolute; left:48px; top:20px; height:84px; width:auto; opacity:0.85;">
@@ -41,8 +41,8 @@ export const SLIDE_S01_06_KEY_TERMS: SlideDef = {
       <div><p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:30px; letter-spacing:2px; color:#FF8A48;">VCF · VCA</p><p style="margin:4px 0 0; font-family:'Lato',sans-serif; font-size:26px; line-height:1.3; color:#C6C6C6;">Filtrul și amplificatorul controlate în tensiune: etajele de ton și volum.</p></div>
     <div><p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:30px; letter-spacing:2px; color:#FF8A48;">HARMONICS</p><p style="margin:4px 0 0; font-family:'Lato',sans-serif; font-size:26px; line-height:1.3; color:#C6C6C6;">Armonice: multiplii întregi ai fundamentalei, stivuiți deasupra ei și de obicei mai slabi; amestecul lor e timbrul.</p></div></div>
   </div>
-  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">TERMENI-CHEIE</h1>
+  <h1 style="position:absolute; left:0; width:1920px; top:110px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:92px; line-height:1; color:#E8E8E8;">TERMENI-CHEIE</h1>
   <svg style="position:absolute; left:650px; top:232px; width:620px; height:18px;" viewBox="0 0 860 24" fill="none"><path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3" stroke="#E97132" stroke-width="6.5" stroke-linecap="round"></path></svg>
-  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">Cuvintele noi din acest modul</p>
+  <p style="position:absolute; left:0; width:1920px; top:280px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.15; color:#B4B4B4;">Cuvintele noi din acest modul</p>
 </section>`,
 };

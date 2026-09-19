@@ -5,12 +5,12 @@ import type { DocPageDef } from '../../types';
 export const PAGE_03: DocPageDef = {
   id: 'p3',
   label: 'Signal flow',
-  en: `<section class="page" id="p3" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  en: `<section class="page" id="p3" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULE 01 · SIGNAL FLOW</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">03</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:16px 0 0; font-stretch:92%; font-size:14px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Every sound a subtractive synthesizer makes travels the same road: an oscillator generates a raw, harmonically rich tone, the mixer balances the sources, the filter sculpts the brightness, and the amplifier shapes the loudness over time. Learn this path and any knob you touch has an obvious home: you know which stage it belongs to, so you know what it does. Fourm is our instrument for the journey.</p>
   <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
@@ -50,12 +50,12 @@ export const PAGE_03: DocPageDef = {
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:10px; letter-spacing:2px; color:var(--hb-7, #8F8F8F);">SINTEZAUR × ZEEDO · POWERED BY SEQUENTIAL</p>
   </div>
 </section>`,
-  ro: `<section class="page" id="p3" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
+  ro: `<section class="page" id="p3" style="background:var(--hb-6, #000000); box-sizing:border-box; padding:52px 64px 44px; font-family:'Instrument Sans','Segoe UI',sans-serif; display:flex; flex-direction:column;">
   <div style="display:flex; justify-content:space-between; align-items:baseline;">
     <p style="margin:0; font-family:'Lato',sans-serif; font-weight:700; font-size:12px; letter-spacing:3px; color:var(--hb-5, #FF8A48);">MODULUL 01 · SIGNAL FLOW</p>
     <p style="margin:0; font-family:'Lato',sans-serif; font-size:11px; letter-spacing:2px; color:var(--hb-2, #8F8F8F);">03</p>
   </div>
-  <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
+  <h1 style="margin:26px 0 0; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:16px 0 0; font-stretch:92%; font-size:14px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Orice sunet dintr-un sintetizator subtractiv parcurge același traseu: oscilatorul generează un ton brut, bogat în armonice, mixerul echilibrează sursele, filtrul sculptează strălucirea, iar amplificatorul modelează volumul în timp. Învață traseul ăsta și orice knob atingi își are locul lui: știi din ce etapă face parte, deci știi ce face. Fourm e instrumentul nostru pentru călătorie.</p>
   <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">

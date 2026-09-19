@@ -102,9 +102,9 @@ function section(
   <img src="/course/logo-sintezaur-white.png" alt="Sintezaur" style="position:absolute; left:48px; top:20px; height:84px; width:auto; opacity:0.85;">
   <div style="position:absolute; right:48px; top:48px; display:flex; align-items:center; gap:26px;"><img src="/course/logo-zeedo-white.svg" alt="Zeedo" style="height:26px; width:auto; opacity:0.6;"><img src="/course/logo-sequential.png" alt="Sequential" style="height:24px; width:auto; opacity:0.55;"></div>
   <p style="position:absolute; left:0; width:1920px; top:118px; margin:0; text-align:center; font-family:'Lato',sans-serif; font-size:24px; letter-spacing:5px; color:#A7A7A7;">${kicker}</p>
-  <h1 style="position:absolute; left:0; width:1920px; top:162px; margin:0; text-align:center; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:84px; line-height:1; color:#FF8A48;">${def.caption}</h1>
+  <h1 style="position:absolute; left:0; width:1920px; top:162px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:84px; line-height:1; color:#FF8A48;">${def.caption}</h1>
   <svg style="position:absolute; left:650px; top:270px; width:620px; height:18px;" viewBox="0 0 860 24" fill="none"><path d="M6 12.5C120 10 260 14.5 400 12S640 10.5 740 13 830 11.5 854 12.3" stroke="#E97132" stroke-width="6.5" stroke-linecap="round"></path></svg>
-  <p style="position:absolute; left:160px; width:1600px; top:316px; margin:0; text-align:center; font-family:'Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.2; color:#E8E8E8;">${def.gesture[lang]}</p>
+  <p style="position:absolute; left:160px; width:1600px; top:316px; margin:0; text-align:center; font-family:'Instrument Sans','Segoe UI',sans-serif; font-stretch:92%; font-weight:400; font-size:36px; line-height:1.2; color:#E8E8E8;">${def.gesture[lang]}</p>
   <div style="position:absolute; left:75px; top:414px; width:1770px; height:580px;">
     ${map}
   </div>
