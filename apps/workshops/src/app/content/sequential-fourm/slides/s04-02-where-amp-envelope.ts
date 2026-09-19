@@ -7,8 +7,8 @@ export const SLIDE_S04_02_WHERE = whereOnFourm({
   sections: ['AMP ENV'],
   caption: 'AMP ENVELOPE › ATTACK · DECAY · SUSTAIN · RELEASE',
   gesture: {
-    en: 'Four knobs, one shape. Hold a note and turn ATTACK up, then RELEASE — the note learns to breathe.',
-    ro: 'Patru butoane, o singură formă. Ține o notă și ridică ATTACK, apoi RELEASE — nota învață să respire.',
+    en: 'Four knobs, one shape. Play a note, turn ATTACK up, play it again; then let go and hear RELEASE. The note learns to breathe.',
+    ro: 'Patru knob-uri, o singură formă. Cântă o notă, ridică ATTACK, cântă din nou; apoi ia degetul și ascultă RELEASE. Nota învață să respire.',
   },
   moduleTitle: {
     en: 'MODULE 04 · ENVELOPES',

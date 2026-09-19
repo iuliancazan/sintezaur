@@ -8,8 +8,8 @@ export const SLIDE_S08_02_WHERE = whereOnFourm({
   sections: ['ARP', 'CLOCK'],
   caption: 'ARPEGGIATOR › ON · HOLD + CLOCK',
   gesture: {
-    en: 'ARP on and hold a chord. HOLD latches it after your hands leave; the CLOCK section sets the tempo.',
-    ro: 'ARP pornit și ține un acord. HOLD îl reține după ce ridici mâinile; secțiunea CLOCK dă tempoul.',
+    en: 'ARP on and hold a chord. HOLD: in the UNISON section, latches it after your hands leave; the CLOCK section sets the tempo.',
+    ro: 'ARP pornit și ține un acord. HOLD: din secțiunea UNISON, îl reține după ce ridici mâinile; secțiunea CLOCK dă tempoul.',
   },
   moduleTitle: {
     en: 'MODULE 08 · ARPEGGIATOR &amp; SEQUENCER',

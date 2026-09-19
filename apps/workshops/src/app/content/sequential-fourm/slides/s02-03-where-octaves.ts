@@ -7,8 +7,8 @@ export const SLIDE_S02_03_WHERE = whereOnFourm({
   sections: ['OSC B'],
   caption: 'OSC B › OCTAVE · FREQUENCY',
   gesture: {
-    en: 'OCTAVE is the encoder. Turn FREQUENCY slowly off centre: slow beats, chorus, two notes — then back.',
-    ro: 'OCTAVE e encoderul. Rotește FREQUENCY încet dincolo de centru: bătăi lente, chorus, două note — apoi înapoi.',
+    en: 'OCTAVE is the encoder. Turn FREQUENCY slowly off centre: slow beats, chorus, two notes, then back.',
+    ro: 'OCTAVE e encoderul. Rotește FREQUENCY încet dincolo de centru: bătăi lente, chorus, două note, apoi înapoi.',
   },
   moduleTitle: {
     en: 'MODULE 02 · OSCILLATORS',
