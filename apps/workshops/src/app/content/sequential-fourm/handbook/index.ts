@@ -12,6 +12,7 @@ import { PAGE_10 } from './page-10';
 import { PAGE_11 } from './page-11';
 import { PAGE_12 } from './page-12';
 import { PAGE_13 } from './page-13';
+import { PAGE_14 } from './page-14';
 
 /** Handbook page order — delete a line (and its file) to drop a page. */
 export const HANDBOOK_PAGES: DocPageDef[] = [
@@ -28,4 +29,5 @@ export const HANDBOOK_PAGES: DocPageDef[] = [
   PAGE_11,
   PAGE_12,
   PAGE_13,
+  PAGE_14,
 ];
