@@ -7,8 +7,8 @@ export const SLIDE_S05_03_WHERE = whereOnFourm({
   sections: ['MODULATION'],
   caption: 'MODULATION › SOURCE · DESTINATION · AMOUNT',
   gesture: {
-    en: 'Three slots. Pick a source and a destination, then AMOUNT: red is negative, blue is positive.',
-    ro: 'Trei sloturi. Alegi o sursă și o destinație, apoi AMOUNT: roșu e negativ, albastru e pozitiv.',
+    en: 'Three sources. Press a ROUTE, then a destination, then AMOUNT: zero at 12 o&#x27;clock.<br>· red = the direct bus, always on&nbsp;&nbsp;· blue = the mod-wheel bus&nbsp;&nbsp;· purple = both',
+    ro: 'Trei surse. Apeși un ROUTE, apoi o destinație, apoi AMOUNT: zero la ora douăsprezece.<br>· roșu = bus-ul direct, mereu pornit&nbsp;&nbsp;· albastru = bus-ul mod wheel&nbsp;&nbsp;· mov = amândouă',
   },
   moduleTitle: {
     en: 'MODULE 05 · LFO &amp; MODULATION',
