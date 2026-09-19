@@ -13,24 +13,24 @@ export const PAGE_03: DocPageDef = {
   <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:16px 0 0; font-stretch:92%; font-size:14px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Every sound a subtractive synthesizer makes travels the same road: an oscillator generates a raw, harmonically rich tone, the mixer balances the sources, the filter sculpts the brightness, and the amplifier shapes the loudness over time. Learn this path and any knob you touch has an obvious home: you know which stage it belongs to, so you know what it does. Fourm is our instrument for the journey.</p>
-  <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid #2A2A2A; border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
-      <defs><linearGradient id="hv1_m01en" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset="0.25" stop-color="#EDEDED" stop-opacity="0.5"></stop><stop offset="0.62" stop-color="#FF8A48" stop-opacity="0.8"></stop><stop offset="1" stop-color="#FF8A48" stop-opacity="0"></stop></linearGradient></defs>
+  <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
+      <defs><linearGradient id="hv1_m01en" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset="0.25" stop-color="var(--hb-4, #E8E8E8)" stop-opacity="0.5"></stop><stop offset="0.62" stop-color="var(--hb-5, #FF8A48)" stop-opacity="0.8"></stop><stop offset="1" stop-color="var(--hb-5, #FF8A48)" stop-opacity="0"></stop></linearGradient></defs>
       <rect x="4" y="4" width="1858" height="550" rx="30" fill="rgba(255,255,255,0.02)" stroke="#454545" stroke-width="2.5"></rect>
-      <rect x="90" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
-      <text x="235" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">OSCILLATORS</text>
-      <path d="M145 320L190 262L190 320L235 262L235 320L280 262L280 320L322 268" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-      <text x="235" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">TWO ANALOG VCOs</text>
-      <svg x="396" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <rect x="90" y="170" width="290" height="200" rx="14" fill="none" stroke="var(--hb-9, #9A9A9A)" stroke-width="2.5"></rect>
+      <text x="235" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="var(--hb-4, #E8E8E8)">OSCILLATORS</text>
+      <path d="M145 320L190 262L190 320L235 262L235 320L280 262L280 320L322 268" stroke="var(--hb-5, #FF8A48)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+      <text x="235" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="var(--hb-3, #C6C6C6)">TWO ANALOG VCOs</text>
+      <svg x="396" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="524" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="669" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">MIXER</text>
       <path d="M580 262H640M580 292H628M580 322H646M660 262L716 292L660 322M716 292H758" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
       <text x="669" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">A + B + NOISE + FEEDBACK</text>
-      <svg x="830" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <svg x="830" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="958" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="1103" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">FILTER</text>
       <path d="M1014 268L1140 268C1166 268.5 1178 276 1191 302Q1204 330 1214 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>
       <text x="1103" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">LOW-PASS, RESONANT</text>
-      <svg x="1264" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <svg x="1264" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="1392" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="1537" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">AMPLIFIER</text>
       <path d="M1448 340L1483 264Q1502 302 1526 312L1552 318Q1590 328 1614 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>
@@ -58,24 +58,24 @@ export const PAGE_03: DocPageDef = {
   <h1 style="margin:26px 0 0; font-family:'Aptos Display','Aptos','Instrument Sans','Segoe UI',sans-serif; font-stretch:88%; font-weight:400; font-size:42px; line-height:1.05; color:var(--hb-4, #E8E8E8);">SIGNAL FLOW</h1>
   <svg style="display:block; margin-top:10px; width:320px; height:12px;" viewBox="0 0 320 12" fill="none"><path d="M3 6.5C45 5 95 8 150 6S240 5 285 7 310 6 317 6.3" stroke="#E97132" stroke-width="3.5" stroke-linecap="round"></path></svg>
   <p style="margin:16px 0 0; font-stretch:92%; font-size:14px; line-height:1.6; color:var(--hb-3, #C6C6C6);">Orice sunet dintr-un sintetizator subtractiv parcurge același traseu: oscilatorul generează un ton brut, bogat în armonice, mixerul echilibrează sursele, filtrul sculptează strălucirea, iar amplificatorul modelează volumul în timp. Învață traseul ăsta și orice knob atingi își are locul lui: știi din ce etapă face parte, deci știi ce face. Fourm e instrumentul nostru pentru călătorie.</p>
-  <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid #2A2A2A; border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
-      <defs><linearGradient id="hv2_m01ro" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset="0.25" stop-color="#EDEDED" stop-opacity="0.5"></stop><stop offset="0.62" stop-color="#FF8A48" stop-opacity="0.8"></stop><stop offset="1" stop-color="#FF8A48" stop-opacity="0"></stop></linearGradient></defs>
+  <div style="margin-top:16px; background:var(--hb-1, #0A0A0A); border:1px solid var(--hb-8, #2A2A2A); border-radius:14px; padding:14px 18px;"><svg viewBox="0 0 1866 558" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">
+      <defs><linearGradient id="hv2_m01ro" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop><stop offset="0.25" stop-color="var(--hb-4, #E8E8E8)" stop-opacity="0.5"></stop><stop offset="0.62" stop-color="var(--hb-5, #FF8A48)" stop-opacity="0.8"></stop><stop offset="1" stop-color="var(--hb-5, #FF8A48)" stop-opacity="0"></stop></linearGradient></defs>
       <rect x="4" y="4" width="1858" height="550" rx="30" fill="rgba(255,255,255,0.02)" stroke="#454545" stroke-width="2.5"></rect>
-      <rect x="90" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
-      <text x="235" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">OSCILLATORS</text>
-      <path d="M145 320L190 262L190 320L235 262L235 320L280 262L280 320L322 268" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
-      <text x="235" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">DOUĂ VCO-URI ANALOGICE</text>
-      <svg x="396" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <rect x="90" y="170" width="290" height="200" rx="14" fill="none" stroke="var(--hb-9, #9A9A9A)" stroke-width="2.5"></rect>
+      <text x="235" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="var(--hb-4, #E8E8E8)">OSCILLATORS</text>
+      <path d="M145 320L190 262L190 320L235 262L235 320L280 262L280 320L322 268" stroke="var(--hb-5, #FF8A48)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+      <text x="235" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="var(--hb-3, #C6C6C6)">DOUĂ VCO-URI ANALOGICE</text>
+      <svg x="396" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="524" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="669" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">MIXER</text>
       <path d="M580 262H640M580 292H628M580 322H646M660 262L716 292L660 322M716 292H758" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
       <text x="669" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">A + B + NOISE + FEEDBACK</text>
-      <svg x="830" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <svg x="830" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="958" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="1103" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">FILTER</text>
       <path d="M1014 268L1140 268C1166 268.5 1178 276 1191 302Q1204 330 1214 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>
       <text x="1103" y="420" text-anchor="middle" font-family="Lato, sans-serif" font-size="26" letter-spacing="2" fill="#C6C6C6">LOW-PASS, REZONANT</text>
-      <svg x="1264" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="#FF8A48" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="#FF8A48"></path></svg>
+      <svg x="1264" y="240" width="112" height="60" viewBox="0 0 112 60"><path d="M12 30H74" stroke="var(--hb-5, #FF8A48)" stroke-width="6" stroke-linecap="round"></path><path d="M98 30L70 16L70 44Z" fill="var(--hb-5, #FF8A48)"></path></svg>
       <rect x="1392" y="170" width="290" height="200" rx="14" fill="none" stroke="#C9C9C9" stroke-width="2.5"></rect>
       <text x="1537" y="225" text-anchor="middle" font-family="Lato, sans-serif" font-size="33" letter-spacing="3" fill="#DBDBDB">AMPLIFIER</text>
       <path d="M1448 340L1483 264Q1502 302 1526 312L1552 318Q1590 328 1614 340" stroke="#FF8A48" stroke-width="6" fill="none" stroke-linecap="round"></path>

@@ -2,7 +2,7 @@
  * the inline fallbacks in the content; these are the print/light values,
  * derived positionally from the v02.1 Print variant. */
 @mixin hb-light-values {
-  --hb-1: #000000; /* screen #0A0A0A */
+  --hb-1: #FFFFFF; /* screen #0A0A0A — figure panels print white, not black */
   --hb-2: #8A8A8A; /* screen #8F8F8F */
   --hb-3: #333333; /* screen #C6C6C6 */
   --hb-4: #111111; /* screen #E8E8E8 */

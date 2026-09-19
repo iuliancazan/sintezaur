@@ -310,7 +310,7 @@ export const SCRIPT_MODULES: ScriptModule[] = [
       id: '06·01',
       title: { en: `COVER`, ro: `COVER` },
       minutes: 1,
-      say: { en: `&#x201C;So far we&#x27;ve built one voice. The Fourm has four — each with its own oscillators, filter and envelopes. This module is about how we spend them: spread across a chord, stacked onto one huge note, or replayed as a memorized chord from a single key. And about the loop that fattens everything.&#x201D;`, ro: `„Până acum am construit o voce. Fourm are patru — fiecare cu oscilatoarele, filtrul și anvelopele ei. Modulul ăsta e despre cum le cheltuim: întinse pe un acord, stivuite pe o singură notă uriașă, sau recântate ca un acord memorat dintr-o singură clapă. Și despre bucla care îngroașă tot."` },
+      say: { en: `&#x201C;So far we&#x27;ve built one voice. The Fourm has four — each with its own oscillators, filter and envelopes. This module is about how we spend them: spread across a chord, stacked onto one huge note, or replayed as a memorized chord from a single key. And about the loop that fattens everything.&#x201D;`, ro: `„Până acum am construit o voce. Fourm are patru — fiecare cu oscilatoarele, filtrul și anvelopele ei. Modulul ăsta e despre cum le cheltuim: întinse pe un acord, suprapuse pe o singură notă uriașă, sau recântate ca un acord memorat dintr-o singură clapă. Și despre bucla care îngroașă tot."` },
       room: { en: `Headphones down`, ro: `Căștile jos` },
     },
     {
