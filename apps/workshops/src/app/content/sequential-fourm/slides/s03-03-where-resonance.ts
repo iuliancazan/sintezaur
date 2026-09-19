@@ -7,8 +7,8 @@ export const SLIDE_S03_03_WHERE = whereOnFourm({
   sections: ['FILTER'],
   caption: 'FILTER › RESONANCE',
   gesture: {
-    en: 'RESONANCE up while you sweep CUTOFF: a peak that whistles along; all the way up, the filter sings on its own.',
-    ro: 'RESONANCE sus în timp ce miști CUTOFF: un vârf care fluieră odată cu el; la maximum, filtrul cântă singur.',
+    en: 'RESONANCE up while you sweep CUTOFF: a peak that whistles along; all the way up the filter self-oscillates — it sounds on its own.',
+    ro: 'RESONANCE sus în timp ce miști CUTOFF: un vârf care fluieră odată cu el; la maximum filtrul intră în auto-oscilație — sună singur.',
   },
   moduleTitle: {
     en: 'MODULE 03 · FILTER',
